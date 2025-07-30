@@ -38,8 +38,8 @@ class gateway_client {
      */
     public function checkInstructions($instructions) {
         $requestData = [
-            'action' => 'check_instructions',
-            'instructions' => $instructions
+                'action' => 'check_instructions',
+                'instructions' => $instructions
         ];
 
         return $this->makeRequestWithCache('check_instructions', $requestData);
@@ -54,9 +54,9 @@ class gateway_client {
      */
     public function generateQuestions($instructions, $questionCount = 5) {
         $requestData = [
-            'action' => 'generate_questions',
-            'instructions' => $instructions,
-            'question_count' => $questionCount
+                'action' => 'generate_questions',
+                'instructions' => $instructions,
+                'question_count' => $questionCount
         ];
 
         return $this->makeRequestWithCache('generate_questions', $requestData);
@@ -73,11 +73,11 @@ class gateway_client {
      */
     public function generateSubmissionQuestions($submissionText, $instructions = '', $questionCount = 3, $files = []) {
         $requestData = [
-            'action' => 'generate_submission_questions',
-            'submission_text' => $submissionText,
-            'instructions' => $instructions,
-            'question_count' => $questionCount,
-            'files' => $files
+                'action' => 'generate_submission_questions',
+                'submission_text' => $submissionText,
+                'instructions' => $instructions,
+                'question_count' => $questionCount,
+                'files' => $files
         ];
 
         return $this->makeRequestWithCache('generate_submission_questions', $requestData);
@@ -100,8 +100,8 @@ class gateway_client {
                 $cachedResponse['cache_source'] = 'debug_cache';
 
                 return [
-                    'success' => true,
-                    'data' => $cachedResponse
+                        'success' => true,
+                        'data' => $cachedResponse
                 ];
             }
         }
@@ -135,11 +135,11 @@ class gateway_client {
 
             // Use debug_cache to store the response
             debug_cache::save_debug_data(
-                $requestType,
-                $requestData,
-                json_encode($response), // Raw response
-                $responseData, // Parsed response for caching
-                0 // No specific cmid for Gateway requests
+                    $requestType,
+                    $requestData,
+                    json_encode($response), // Raw response
+                    $responseData, // Parsed response for caching
+                    0 // No specific cmid for Gateway requests
             );
 
         } catch (\Exception $e) {
@@ -158,19 +158,20 @@ class gateway_client {
         $curl = curl_init();
 
         curl_setopt_array($curl, [
-            CURLOPT_URL => $this->endpoint,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => json_encode($data),
-            CURLOPT_HTTPHEADER => [
-                'Authorization: Bearer ' . $this->token,
-                'Content-Type: application/json',
-                'User-Agent: Moodle TrustGrade Plugin'
-            ],
-            CURLOPT_TIMEOUT => $this->timeout,
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 3
+                CURLOPT_URL => $this->endpoint,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($data),
+                CURLOPT_HTTPHEADER => [
+                        'Authorization: Bearer ' . $this->token,
+                        'Auth: Bearer ' . $this->token, // Cloudflare compatibility
+                        'Content-Type: application/json',
+                        'User-Agent: Moodle TrustGrade Plugin'
+                ],
+                CURLOPT_TIMEOUT => $this->timeout,
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_MAXREDIRS => 3
         ]);
 
         $response = curl_exec($curl);
@@ -180,29 +181,29 @@ class gateway_client {
 
         if ($error) {
             return [
-                'success' => false,
-                'error' => 'Gateway connection error: ' . $error . '. Please check your Gateway endpoint configuration.'
+                    'success' => false,
+                    'error' => 'Gateway connection error: ' . $error . '. Please check your Gateway endpoint configuration.'
             ];
         }
 
         if ($httpCode === 401) {
             return [
-                'success' => false,
-                'error' => 'Gateway authentication failed. Please check your Gateway token configuration.'
+                    'success' => false,
+                    'error' => 'Gateway authentication failed. Please check your Gateway token configuration.'
             ];
         }
 
         if ($httpCode === 404) {
             return [
-                'success' => false,
-                'error' => 'Gateway endpoint not found. Please verify your Gateway endpoint URL.'
+                    'success' => false,
+                    'error' => 'Gateway endpoint not found. Please verify your Gateway endpoint URL.'
             ];
         }
 
         if ($httpCode !== 200) {
             return [
-                'success' => false,
-                'error' => 'Gateway HTTP error: ' . $httpCode . '. Response: ' . substr($response, 0, 200)
+                    'success' => false,
+                    'error' => 'Gateway HTTP error: ' . $httpCode . '. Response: ' . substr($response, 0, 200)
             ];
         }
 
@@ -210,28 +211,28 @@ class gateway_client {
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             return [
-                'success' => false,
-                'error' => 'Invalid Gateway response format. Please check Gateway configuration.'
+                    'success' => false,
+                    'error' => 'Invalid Gateway response format. Please check Gateway configuration.'
             ];
         }
 
         if (!isset($decoded['success'])) {
             return [
-                'success' => false,
-                'error' => 'Invalid Gateway response structure.'
+                    'success' => false,
+                    'error' => 'Invalid Gateway response structure.'
             ];
         }
 
         if (!$decoded['success']) {
             return [
-                'success' => false,
-                'error' => $decoded['error'] ?? 'Unknown Gateway error'
+                    'success' => false,
+                    'error' => $decoded['error'] ?? 'Unknown Gateway error'
             ];
         }
 
         return [
-            'success' => true,
-            'data' => $decoded['data']
+                'success' => true,
+                'data' => $decoded['data']
         ];
     }
 
@@ -243,8 +244,8 @@ class gateway_client {
     public function testConnection() {
         try {
             $testData = [
-                'action' => 'check_instructions',
-                'instructions' => 'Test connection to Gateway'
+                    'action' => 'check_instructions',
+                    'instructions' => 'Test connection to Gateway'
             ];
 
             // Always bypass cache for connection tests
@@ -252,20 +253,20 @@ class gateway_client {
 
             if ($result['success']) {
                 return [
-                    'success' => true,
-                    'message' => 'Gateway connection successful'
+                        'success' => true,
+                        'message' => 'Gateway connection successful'
                 ];
             } else {
                 return [
-                    'success' => false,
-                    'error' => $result['error']
+                        'success' => false,
+                        'error' => $result['error']
                 ];
             }
 
         } catch (\Exception $e) {
             return [
-                'success' => false,
-                'error' => 'Connection test failed: ' . $e->getMessage()
+                    'success' => false,
+                    'error' => 'Connection test failed: ' . $e->getMessage()
             ];
         }
     }
