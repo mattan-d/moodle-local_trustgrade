@@ -168,8 +168,7 @@ class gateway_client {
                 'User-Agent: Moodle TrustGrade Plugin'
             ],
             CURLOPT_TIMEOUT => $this->timeout,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_MAXREDIRS => 3
         ]);
