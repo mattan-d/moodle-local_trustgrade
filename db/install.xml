@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/trustgrade/db" VERSION="20240123" COMMENT="XMLDB file for Moodle local/trustgrade plugin"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="local_trustgrade_logs" COMMENT="Logs TrustGrade requests">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="instructions" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="recommendation" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="cmid" UNIQUE="false" FIELDS="cmid"/>
+        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_trustgrade_questions" COMMENT="Stores AI generated questions for assignments">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="question_data" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="cmid" TYPE="foreign" FIELDS="cmid" REFTABLE="course_modules" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="cmid" UNIQUE="false" FIELDS="cmid"/>
+        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_trustgd_sub_questions" COMMENT="Stores AI generated questions based on student submissions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="submission_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="question_data" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="submission_id" TYPE="foreign" FIELDS="submission_id" REFTABLE="assign_submission" REFFIELDS="id"/>
+        <KEY NAME="cmid" TYPE="foreign" FIELDS="cmid" REFTABLE="course_modules" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="submission_cmid" UNIQUE="false" FIELDS="submission_id,cmid"/>
+        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_trustgrade_debug" COMMENT="Debug cache for AI API responses">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="request_type" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="request_data" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="raw_response" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="parsed_response" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="request_type" UNIQUE="false" FIELDS="request_type"/>
+        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
+        <INDEX NAME="cmid" UNIQUE="false" FIELDS="cmid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_trustgd_quiz_settings" COMMENT="Quiz configuration settings for assignments">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="questions_to_generate" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="5" SEQUENCE="false"/>
+        <FIELD NAME="total_quiz_questions" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="5" SEQUENCE="false"/>
+        <FIELD NAME="instructor_questions" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="3" SEQUENCE="false"/>
+        <FIELD NAME="submission_questions" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="2" SEQUENCE="false"/>
+        <FIELD NAME="randomize_answers" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="time_per_question" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="15" SEQUENCE="false"/>
+        <FIELD NAME="show_countdown" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="cmid" TYPE="foreign" FIELDS="cmid" REFTABLE="course_modules" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="cmid" UNIQUE="true" FIELDS="cmid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="local_trustgd_quiz_sessions" COMMENT="Quiz session state for maintaining progress across page refreshes">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="submissionid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="questions_data" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="settings_data" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="current_question" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="answers_data" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="time_remaining" TYPE="int" LENGTH="3" NOTNULL="true" DEFAULT="15" SEQUENCE="false"/>
+        <FIELD NAME="window_blur_count" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="attempt_started" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="attempt_completed" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="integrity_violations" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="final_score" TYPE="int" LENGTH="3" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="timecompleted" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="cmid" TYPE="foreign" FIELDS="cmid" REFTABLE="course_modules" REFFIELDS="id"/>
+        <KEY NAME="submissionid" TYPE="foreign" FIELDS="submissionid" REFTABLE="assign_submission" REFFIELDS="id"/>
+        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="cmid_submission_user" UNIQUE="true" FIELDS="cmid,submissionid,userid"/>
+        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
+        <INDEX NAME="attempt_completed" UNIQUE="false" FIELDS="attempt_completed"/>
+      </INDEXES>
+    </TABLE>
+  </TABLES>
+</XMLDB>

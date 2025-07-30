@@ -1,0 +1,493 @@
+/* TrustGrade Plugin Styles */
+
+#id_trustgrade_fieldset {
+  margin-top: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+#id_trustgrade_fieldset legend {
+  background-color: #f5f5f5;
+  padding: 10px 15px;
+  margin: 0;
+  border-bottom: 1px solid #ddd;
+  width: 100%;
+}
+
+#id_trustgrade_fieldset legend a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+}
+
+#id_trustgrade_fieldset legend a:hover {
+  color: #0073aa;
+}
+
+#check-instructions-btn {
+  background-color: #0073aa;
+  border-color: #0073aa;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#check-instructions-btn:hover {
+  background-color: #005a87;
+  border-color: #005a87;
+}
+
+#check-instructions-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #ccc;
+  border-color: #ccc;
+}
+
+#ai-loading {
+  color: #666;
+  font-style: italic;
+  margin-top: 10px;
+}
+
+#ai-loading i {
+  margin-right: 5px;
+}
+
+#ai-recommendation-container {
+  margin-top: 15px;
+}
+
+#ai-recommendation {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  max-height: 400px;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.5;
+  padding: 15px;
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+  border-radius: 4px;
+  color: #0c5460;
+}
+
+/* Ensure proper spacing in form */
+.fitem #ai-loading,
+.fitem #ai-recommendation-container {
+  margin-left: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  #ai-recommendation {
+    font-size: 13px;
+    padding: 10px;
+  }
+
+  #check-instructions-btn {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}
+
+/* Integration with Moodle's form styling */
+.fitem .felement #check-instructions-btn {
+  margin: 0;
+}
+
+.fitem .felement #ai-loading {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+.fitem .felement #ai-recommendation-container {
+  margin-top: 10px;
+  width: 100%;
+}
+
+/* Question generation styles */
+#generate-questions-btn {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#generate-questions-btn:hover {
+  background-color: #218838;
+  border-color: #1e7e34;
+}
+
+#generate-questions-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #ccc;
+  border-color: #ccc;
+}
+
+#ai-question-loading {
+  color: #666;
+  font-style: italic;
+  margin-top: 10px;
+}
+
+#ai-questions-container {
+  margin-top: 15px;
+}
+
+#ai-questions {
+  background-color: #d4edda;
+  border: 1px solid #c3e6cb;
+  border-radius: 4px;
+  color: #155724;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.question-item {
+  background-color: #f8f9fa;
+  margin-bottom: 15px;
+  padding: 15px;
+  border-radius: 5px;
+  border: 1px solid #dee2e6;
+}
+
+.question-item h5 {
+  color: #495057;
+  margin-bottom: 10px;
+}
+
+.question-item ul {
+  margin-left: 20px;
+}
+
+.question-item li {
+  margin-bottom: 5px;
+}
+
+/* Question Bank Editor Styles */
+.question-bank-container {
+  margin-top: 20px;
+}
+
+.editable-question-item {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 10px;
+}
+
+.question-controls {
+  display: flex;
+  gap: 10px;
+}
+
+.question-edit-form .form-group {
+  margin-bottom: 15px;
+}
+
+.question-edit-form label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.multiple-choice-options .option-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.multiple-choice-options .form-check {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.multiple-choice-options .form-check-input {
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.multiple-choice-options .option-text-input {
+  flex: 1;
+}
+
+.true-false-options .form-check {
+  margin-bottom: 10px;
+}
+
+.question-edit-buttons {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #dee2e6;
+}
+
+.question-edit-buttons .btn {
+  margin-right: 10px;
+}
+
+.add-question-section {
+  text-align: center;
+  margin-top: 20px;
+  padding: 20px;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+}
+
+/* Quiz Settings Styles */
+.quiz-settings-info {
+  background-color: #e9ecef;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.quiz-settings-info p {
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+/* Timer Styles */
+.question-timer {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.timer-display {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.timer-display.timer-warning {
+  background-color: #dc3545;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.timer-display i {
+  margin-right: 8px;
+}
+
+/* Cache Management Widget Styles */
+.cache-stats-widget {
+  margin: 15px 0;
+}
+
+.cache-stats-widget .row {
+  margin: 0 -5px;
+}
+
+.cache-stats-widget .col-md-3 {
+  padding: 0 5px;
+}
+
+.cache-stats-widget .card {
+  margin-bottom: 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+}
+
+.cache-stats-widget .card:hover {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.cache-stats-widget .card-body {
+  padding: 15px;
+  text-align: center;
+}
+
+.cache-stats-widget h4 {
+  margin: 0 0 5px 0;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.cache-stats-widget small {
+  color: #6c757d;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cache-quick-actions {
+  border-top: 1px solid #dee2e6;
+  padding-top: 15px;
+  margin-top: 15px;
+}
+
+.cache-quick-actions .btn-group {
+  flex-wrap: wrap;
+}
+
+.cache-quick-actions .btn {
+  margin-right: 5px;
+  margin-bottom: 5px;
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+/* Admin settings page specific styles */
+.admin .cache-stats-widget .card {
+  background: #fff;
+}
+
+.admin .cache-quick-actions .btn-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .question-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .question-controls {
+    margin-top: 10px;
+  }
+
+  .multiple-choice-options .option-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .multiple-choice-options .form-check {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .multiple-choice-options .option-text-input {
+    margin-top: 5px;
+    width: 100%;
+  }
+
+  .timer-display {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+
+  .cache-stats-widget .col-md-3 {
+    margin-bottom: 10px;
+  }
+
+  .cache-quick-actions .btn {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+
+/* AI Disclosure Styles */
+.ai-disclosure-container {
+  border-left: 4px solid #17a2b8;
+  background-color: #d1ecf1;
+  border-color: #bee5eb;
+  color: #0c5460;
+}
+
+.ai-disclosure-container h5 {
+  color: #0c5460;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.ai-disclosure-container h5 i {
+  margin-right: 8px;
+}
+
+.ai-disclosure-content {
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.ai-disclosure-toggle {
+  color: #0c5460;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.ai-disclosure-toggle:hover {
+  color: #062c33;
+  text-decoration: underline;
+}
+
+.ai-disclosure-toggle i {
+  margin-left: 5px;
+  transition: transform 0.2s ease;
+}
+
+.ai-disclosure-details ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.ai-disclosure-details li {
+  margin-bottom: 5px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Mobile responsiveness for disclosure */
+@media (max-width: 768px) {
+  .ai-disclosure-container {
+    margin: 10px 0;
+    padding: 12px;
+  }
+
+  .ai-disclosure-container h5 {
+    font-size: 16px;
+  }
+
+  .ai-disclosure-content {
+    font-size: 14px;
+  }
+
+  .ai-disclosure-details li {
+    font-size: 13px;
+  }
+}
+
+/* Animation for collapsible content */
+.ai-disclosure-details .collapse {
+  transition: all 0.3s ease;
+}
+
+.ai-disclosure-details .collapse.show {
+  display: block !important;
+}

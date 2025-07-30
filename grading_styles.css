@@ -1,0 +1,133 @@
+/* Grading interface styles */
+.grading-controls-container {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.grading-table {
+  margin-top: 1rem;
+}
+
+.grading-table th {
+  background-color: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.grading-table td {
+  vertical-align: middle;
+}
+
+.grade-input-container {
+  min-width: 120px;
+}
+
+.grade-input {
+  text-align: center;
+  font-weight: 600;
+}
+
+.grade-status-icon {
+  width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grade-status-icon::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #6c757d;
+}
+
+.grade-status-icon.saved::before {
+  background-color: #28a745;
+}
+
+.grade-status-icon.pending::before {
+  background-color: #ffc107;
+}
+
+.grade-status-icon.saving::before {
+  background-color: #17a2b8;
+  animation: pulse 1s infinite;
+}
+
+.grade-status-icon.error::before {
+  background-color: #dc3545;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.student-details-cell {
+  background-color: #f8f9fa;
+  border-left: 4px solid #007bff;
+}
+
+.pending-grades-status {
+  font-weight: 600;
+  color: #ffc107;
+}
+
+.grading-instructions {
+  font-style: italic;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .grading-table {
+    font-size: 0.875rem;
+  }
+
+  .grade-input-container {
+    min-width: 100px;
+  }
+
+  .btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Table column widths */
+.grading-table th:nth-child(1) {
+  width: 10%;
+} /* Student */
+.grading-table th:nth-child(2) {
+  width: 25%;
+} /* Quiz Score */
+.grading-table th:nth-child(3) {
+  width: 25%;
+} /* Completed Date */
+.grading-table th:nth-child(4) {
+  width: 10%;
+} /* Time Taken */
+.grading-table th:nth-child(5) {
+  width: 5%;
+} /* Final Grade */
+.grading-table th:nth-child(6) {
+  width: 10%;
+} /* Details */
+
+/* Ensure proper spacing for date/time columns */
+.grading-table td:nth-child(3),
+.grading-table td:nth-child(4) {
+  white-space: nowrap;
+  font-size: 0.9em;
+}

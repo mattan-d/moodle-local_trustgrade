@@ -1,0 +1,156 @@
+/* TrustGrade Disclosure Styles */
+
+.ai-disclosure-container {
+  border-left: 4px solid #17a2b8;
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+  color: #0c5460;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.ai-disclosure-container h5 {
+  color: #0c5460;
+  margin-bottom: 10px;
+  font-weight: bold;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.ai-disclosure-container h5 i {
+  margin-right: 8px;
+  font-size: 18px;
+}
+
+.ai-disclosure-content {
+  line-height: 1.5;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.ai-disclosure-toggle {
+  color: #0c5460;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.ai-disclosure-toggle:hover {
+  color: #062c33;
+  text-decoration: underline;
+}
+
+.ai-disclosure-toggle:focus {
+  outline: 2px solid #17a2b8;
+  outline-offset: 2px;
+}
+
+.ai-disclosure-toggle i {
+  margin-left: 5px;
+  transition: transform 0.2s ease;
+  font-size: 12px;
+}
+
+.ai-disclosure-details {
+  margin-top: 10px;
+}
+
+.ai-disclosure-details > div {
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.ai-disclosure-details ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.ai-disclosure-details li {
+  margin-bottom: 5px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #495057;
+}
+
+.ai-disclosure-details li:last-child {
+  margin-bottom: 0;
+}
+
+/* Animation for collapsible content */
+.ai-disclosure-details > div {
+  overflow: hidden;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .ai-disclosure-container {
+    margin: 10px 0;
+    padding: 12px;
+  }
+
+  .ai-disclosure-container h5 {
+    font-size: 15px;
+  }
+
+  .ai-disclosure-content {
+    font-size: 13px;
+  }
+
+  .ai-disclosure-details li {
+    font-size: 13px;
+  }
+
+  .ai-disclosure-toggle {
+    font-size: 13px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .ai-disclosure-container {
+    border-left-width: 6px;
+    border-color: #000;
+  }
+
+  .ai-disclosure-toggle {
+    font-weight: bold;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .ai-disclosure-toggle i {
+    transition: none;
+  }
+
+  .ai-disclosure-details > div {
+    transition: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .ai-disclosure-container {
+    border: 1px solid #000;
+    background-color: transparent;
+    color: #000;
+  }
+
+  .ai-disclosure-details > div {
+    display: block !important;
+  }
+
+  .ai-disclosure-toggle {
+    display: none;
+  }
+}
