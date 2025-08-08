@@ -223,3 +223,13 @@ $string['final_score'] = 'Final Score: {$a->score}/{$a->total} ({$a->percentage}
 $string['window_focus_lost'] = 'Window focus was lost {$a} time(s) during the quiz.';
 $string['exceeded_window_switches'] = 'You have exceeded the maximum allowed window switches ({$a}). The quiz has been terminated.';
 $string['setting_updated_success'] = 'Setting "{$a}" updated successfully.';
+
+// New strings for structured response display
+$string['evaluation_criteria'] = 'Evaluation Criteria';
+$string['evaluation_summary'] = 'Evaluation Summary';
+$string['suggested_improvements'] = 'Suggested Improvements';
+$string['copy_improved_text'] = 'Copy Improved Text';
+$string['copied_to_clipboard'] = 'Copied to clipboard!';
+$string['criterion_met'] = 'Met';
+$string['criterion_not_met'] = 'Needs Improvement';
+$string['suggestions'] = 'Suggestions';

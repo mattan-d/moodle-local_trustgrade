@@ -32,10 +32,25 @@ class api {
             $result = $gateway->checkInstructions($instructions);
             
             if ($result['success']) {
-                return [
-                    'success' => true,
-                    'recommendation' => $result['data']
-                ];
+                // The new API returns structured data
+                $responseData = $result['data'];
+                
+                // Check if we have the new structured format
+                if (isset($responseData['table']) || isset($responseData['EvaluationText']) || isset($responseData['ImprovedAssignment'])) {
+                    // Return the structured data as JSON string for the frontend
+                    return [
+                        'success' => true,
+                        'recommendation' => json_encode($responseData),
+                        'from_cache' => $responseData['from_cache'] ?? false
+                    ];
+                } else {
+                    // Fallback to old format if structure is not as expected
+                    return [
+                        'success' => true,
+                        'recommendation' => $responseData['recommendation'] ?? $responseData['content'] ?? 'No recommendation available',
+                        'from_cache' => $responseData['from_cache'] ?? false
+                    ];
+                }
             } else {
                 return ['error' => $result['error']];
             }
