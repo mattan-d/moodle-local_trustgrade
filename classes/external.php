@@ -197,7 +197,7 @@ class external extends \external_api {
         }
 
         $response = api::check_instructions($instructions);
-        if ($response['error']) {
+        if (isset($response['error'])) {
             return ['success' => false, 'error' => $response['error']];
         }
 

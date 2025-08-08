@@ -32,10 +32,17 @@ class api {
             $result = $gateway->checkInstructions($instructions);
             
             if ($result['success']) {
-                return [
+                // The new structure is expected in $result['data']
+                $response = [
                     'success' => true,
-                    'recommendation' => $result['data']['recommendation'] ?? $result['data']['content']
+                    // The external function expects a 'recommendation' key.
+                    // The data from gateway is now the recommendation payload.
+                    'recommendation' => $result['data']
                 ];
+                if (isset($result['data']['from_cache'])) {
+                    $response['from_cache'] = $result['data']['from_cache'];
+                }
+                return $response;
             } else {
                 return ['error' => $result['error']];
             }

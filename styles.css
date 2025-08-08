@@ -491,3 +491,24 @@
 .ai-disclosure-details .collapse.show {
   display: block !important;
 }
+
+#ai-recommendation h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 5px;
+}
+
+.trustgrade-evaluation-text,
+.trustgrade-improved-assignment {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  white-space: pre-wrap; /* To respect newlines from the response */
+}
+
+#ai-recommendation .generictable {
+    margin-top: 15px;
+}
