@@ -183,7 +183,23 @@ class external extends \external_api {
     public static function check_instructions_returns() {
         return new \external_single_structure([
                 'success' => new \external_value(PARAM_BOOL, 'True if successful'),
-                'recommendation' => new \external_value(PARAM_RAW, 'AI recommendation text', VALUE_OPTIONAL),
+                'recommendation' => new \external_value(PARAM_RAW, 'AI recommendation text (legacy format)', VALUE_OPTIONAL),
+                'table' => new \external_single_structure([
+                    'title' => new \external_value(PARAM_TEXT, 'Table title', VALUE_OPTIONAL),
+                    'rows' => new \external_multiple_structure(
+                        new \external_single_structure([
+                            'Criterion' => new \external_value(PARAM_TEXT, 'Criterion name'),
+                            'Met (y/n)' => new \external_value(PARAM_TEXT, 'Whether criterion is met'),
+                            'Suggestions' => new \external_value(PARAM_TEXT, 'Suggestions for improvement')
+                        ])
+                    )
+                ], 'Structured criteria table', VALUE_OPTIONAL),
+                'evaluation_text' => new \external_single_structure([
+                    'content' => new \external_value(PARAM_RAW, 'Evaluation summary text')
+                ], 'Evaluation text content', VALUE_OPTIONAL),
+                'improved_assignment' => new \external_single_structure([
+                    'content' => new \external_value(PARAM_RAW, 'Improved assignment text')
+                ], 'Improved assignment content', VALUE_OPTIONAL),
                 'from_cache' => new \external_value(PARAM_BOOL, 'Whether the response was from cache', VALUE_OPTIONAL),
                 'error' => new \external_value(PARAM_TEXT, 'Error message', VALUE_OPTIONAL),
         ]);
@@ -197,7 +213,7 @@ class external extends \external_api {
         }
 
         $response = api::check_instructions($instructions);
-        if ($response['error']) {
+        if (isset($response['error'])) {
             return ['success' => false, 'error' => $response['error']];
         }
 

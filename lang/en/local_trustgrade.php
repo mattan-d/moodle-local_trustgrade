@@ -223,3 +223,15 @@ $string['final_score'] = 'Final Score: {$a->score}/{$a->total} ({$a->percentage}
 $string['window_focus_lost'] = 'Window focus was lost {$a} time(s) during the quiz.';
 $string['exceeded_window_switches'] = 'You have exceeded the maximum allowed window switches ({$a}). The quiz has been terminated.';
 $string['setting_updated_success'] = 'Setting "{$a}" updated successfully.';
+
+// Instructions Analysis - New Structured Format
+$string['criteria_analysis'] = 'Assignment Criteria Analysis';
+$string['evaluation_summary'] = 'Evaluation Summary';
+$string['suggested_improved_assignment'] = 'Suggested Improved Assignment';
+$string['copy_improved_text'] = 'Copy Improved Text';
+$string['text_copied'] = 'Text copied to clipboard!';
+$string['criterion'] = 'Criterion';
+$string['met'] = 'Met';
+$string['suggestions'] = 'Suggestions';
+$string['analysis_results'] = 'AI Analysis Results';
+$string['response_from_cache'] = 'Response from cache';
