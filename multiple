@@ -1,0 +1,182 @@
+<?php
+// classes/question_bank_renderer.php
+class QuestionBankRenderer {
+    public static function render_question_edit_form($question, $index) {
+        $types = ['multiple_choice' => 'Multiple Choice'];
+
+        $html = '<div class="question-edit-form">';
+        $html .= '<div class="question-type-section">';
+        $html .= '<label for="question-type-' . $index . '">Type:</label>';
+        $html .= '<select id="question-type-' . $index . '" class="question-type-input">';
+        foreach ($types as $type => $label) {
+            $html .= '<option value="' . $type . '">' . $label . '</option>';
+        }
+        $html .= '</select>';
+        $html .= '</div>';
+
+        // Options section
+        $html .= '<div class="question-options-section">';
+        $html .= self::render_multiple_choice_options($question, $index);
+        $html .= '</div>';
+
+        $html .= '</div>';
+        return $html;
+    }
+
+    private static function render_multiple_choice_options($question, $index) {
+        $html = '<div class="multiple-choice-options">';
+        $html .= '<label for="option-text-' . $index . '">Option Text:</label>';
+        $html .= '<input type="text" id="option-text-' . $index . '" class="option-text-input">';
+        $html .= '<label for="is-correct-' . $index . '">Is Correct:</label>';
+        $html .= '<input type="checkbox" id="is-correct-' . $index . '" class="is-correct-input">';
+        $html .= '</div>';
+        return $html;
+    }
+}
+
+// amd/src/question_editor.js
+define(['jquery', 'core/str', 'core/notification'], function($, Str, Notification) {
+    var QuestionEditor = {
+        saveQuestion: function(questionItem) {
+            const questionType = questionItem.find(".question-type-input").val();
+            if (String(questionType) !== "multiple_choice") {
+                Str.get_string("unsupported_question_type", "local_trustgrade").then((message) =>
+                    Notification.addNotification({ message: message || "Only multiple choice questions are supported.", type: "error" }),
+                );
+                return;
+            }
+
+            // Existing multiple_choice options builder branch
+            const questionText = questionItem.find(".question-text-input").val();
+            const options = [];
+            questionItem.find(".option-text-input").each(function(index) {
+                const optionText = $(this).val();
+                const isCorrect = questionItem.find(".is-correct-input").eq(index).is(":checked");
+                options.push({ id: index, text: optionText, is_correct: isCorrect });
+            });
+
+            const questionData = {
+                type: questionType,
+                text: questionText,
+                options: options
+            };
+
+            // Save question logic here
+            console.log(questionData);
+        },
+
+        updateOptionsSection: function(questionType, questionIndex) {
+            var optionsSection = $(`.editable-question-item[data-question-index="${questionIndex}"] .question-options-section`);
+            optionsSection.html(QuestionEditor.generateMultipleChoiceOptions(questionIndex));
+        },
+
+        generateMultipleChoiceOptions: function(questionIndex) {
+            var optionsHtml = '<div class="multiple-choice-options">';
+            optionsHtml += '<label for="option-text-' + questionIndex + '">Option Text:</label>';
+            optionsHtml += '<input type="text" id="option-text-' + questionIndex + '" class="option-text-input">';
+            optionsHtml += '<label for="is-correct-' + questionIndex + '">Is Correct:</label>';
+            optionsHtml += '<input type="checkbox" id="is-correct-' + questionIndex + '" class="is-correct-input">';
+            optionsHtml += '</div>';
+            return optionsHtml;
+        }
+    };
+
+    return QuestionEditor;
+});
+
+// classes/question_editor.php
+class QuestionEditor {
+    private static function validate_question_data($question_data) {
+        // Allow receiving a JSON string; decode to array.
+        if (is_string($question_data)) {
+            $decoded = json_decode($question_data, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return ['valid' => false, 'error' => 'Invalid JSON: ' . json_last_error_msg()];
+            }
+            $question_data = $decoded;
+        }
+
+        if (!is_array($question_data)) {
+            return ['valid' => false, 'error' => 'Question data must be an associative array'];
+        }
+
+        // Require type to be multiple_choice only
+        if (empty($question_data['type']) || $question_data['type'] !== 'multiple_choice') {
+            return ['valid' => false, 'error' => 'Only multiple_choice type is supported'];
+        }
+
+        // Require text
+        if (!isset($question_data['text']) || !is_string($question_data['text']) || trim($question_data['text']) === '') {
+            return ['valid' => false, 'error' => 'Question text (field "text") is required'];
+        }
+
+        // Options validation (per-option explanations)
+        if (!isset($question_data['options']) || !is_array($question_data['options'])) {
+            return ['valid' => false, 'error' => 'Options must be provided as an array'];
+        }
+        if (count($question_data['options']) < 2) {
+            return ['valid' => false, 'error' => 'At least 2 options are required'];
+        }
+
+        $correctCount = 0;
+
+        foreach ($question_data['options'] as $index => $opt) {
+            if (!is_array($opt)) {
+                return ['valid' => false, 'error' => 'Each option must be an object'];
+            }
+
+            if (isset($opt['id']) && !is_numeric($opt['id'])) {
+                return ['valid' => false, 'error' => "Option at index {$index} has non-numeric id"];
+            }
+
+            if (!isset($opt['text']) || !is_string($opt['text']) || trim($opt['text']) === '') {
+                return ['valid' => false, 'error' => "Option at index {$index} must include non-empty 'text'" ];
+            }
+
+            if (!array_key_exists('is_correct', $opt)) {
+                return ['valid' => false, 'error' => "Option at index {$index} must include 'is_correct'"];
+            }
+            $isCorrectRaw = $opt['is_correct'];
+            $isCorrect = null;
+            if (is_bool($isCorrectRaw)) {
+                $isCorrect = $isCorrectRaw;
+            } elseif ($isCorrectRaw === 1 || $isCorrectRaw === 0 || $isCorrectRaw === '1' || $isCorrectRaw === '0') {
+                $isCorrect = (bool)((int)$isCorrectRaw);
+            } elseif (is_string($isCorrectRaw) && in_array(strtolower($isCorrectRaw), ['true','false'], true)) {
+                $isCorrect = strtolower($isCorrectRaw) === 'true';
+            }
+            if ($isCorrect === null) {
+                return ['valid' => false, 'error' => "Option at index {$index} has invalid 'is_correct' (must be boolean)"];
+            }
+            if ($isCorrect) {
+                $correctCount++;
+            }
+
+            if (isset($opt['explanation']) && !is_string($opt['explanation'])) {
+                return ['valid' => false, 'error' => "Option at index {$index} has invalid 'explanation' (must be string)"];
+            }
+        }
+
+        if ($correctCount < 1) {
+            return ['valid' => false, 'error' => 'Multiple choice questions must have at least one correct option'];
+        }
+
+        // Optional metadata
+        if (isset($question_data['metadata'])) {
+            if (!is_array($question_data['metadata'])) {
+                return ['valid' => false, 'error' => 'Metadata must be an object'];
+            }
+            if (isset($question_data['metadata']['points'])) {
+                $points = (int)$question_data['metadata']['points'];
+                if ($points < 1 || $points > 100) {
+                    return ['valid' => false, 'error' => 'Points must be between 1 and 100'];
+                }
+            }
+            if (isset($question_data['metadata']['blooms_level']) && !is_string($question_data['metadata']['blooms_level'])) {
+                return ['valid' => false, 'error' => "Metadata 'blooms_level' must be a string"];
+            }
+        }
+
+        return ['valid' => true];
+    }
+}
