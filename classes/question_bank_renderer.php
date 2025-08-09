@@ -7,14 +7,16 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Question bank renderer for displaying and editing questions
- * Updated to support new JSON pattern:
- * {
- *   "id": 1,
- *   "type": "multiple_choice",
- *   "text": "Question text",
- *   "options": [{ "id": 1, "text": "A", "is_correct": true, "explanation": "..." }, ...],
- *   "metadata": { "blooms_level": "Understand", "points": 10 }
- * }
+ * Supports new JSON pattern:
+ * [
+ *   {
+ *     "id": 1,
+ *     "type": "multiple_choice",
+ *     "text": "Question text",
+ *     "options": [{ "id": 1, "text": "A", "is_correct": true, "explanation": "..." }, ...],
+ *     "metadata": { "blooms_level": "Understand", "points": 10 }
+ *   }
+ * ]
  */
 class question_bank_renderer {
 
@@ -35,9 +37,9 @@ class question_bank_renderer {
         }
 
         // Add new question button
-        $html .= '<div class="add-question-section">';
+        $html .= '<div class="add-question-section mt-3">';
         $html .= '<button type="button" id="add-new-question-btn" class="btn btn-outline-primary">';
-        $html .= '<i class="fa fa-plus"></i> ' . get_string('add_new_question', 'local_trustgrade');
+        $html .= '<i class="fa fa-plus" aria-hidden="true"></i> ' . get_string('add_new_question', 'local_trustgrade');
         $html .= '</button>';
         $html .= '</div>';
 
@@ -58,20 +60,23 @@ class question_bank_renderer {
         $html = '';
 
         $qid = isset($question['id']) ? intval($question['id']) : 0;
-        $html .= '<div class="editable-question-item" data-question-index="' . $index . '" data-cmid="' . $cmid . '" data-question-id="' . $qid . '">';
+        $html .= '<div class="editable-question-item card mb-4" data-question-index="' . $index . '" data-cmid="' . $cmid . '" data-question-id="' . $qid . '">';
 
-        // Question header with controls
-        $html .= '<div class="question-header">';
-        $html .= '<h5>' . get_string('question', 'local_trustgrade') . ' ' . ($index + 1) . '</h5>';
-        $html .= '<div class="question-controls">';
+        // Header
+        $html .= '<div class="card-header d-flex align-items-center justify-content-between">';
+        $html .= '<h5 class="mb-0">' . get_string('question', 'local_trustgrade') . ' ' . ($index + 1) . '</h5>';
+        $html .= '<div class="question-controls d-flex gap-2">';
         $html .= '<button type="button" class="btn btn-sm btn-outline-secondary edit-question-btn">';
-        $html .= '<i class="fa fa-edit"></i> ' . get_string('edit', 'local_trustgrade');
+        $html .= '<i class="fa fa-edit" aria-hidden="true"></i> ' . get_string('edit', 'local_trustgrade');
         $html .= '</button>';
         $html .= '<button type="button" class="btn btn-sm btn-outline-danger delete-question-btn">';
-        $html .= '<i class="fa fa-trash"></i> ' . get_string('delete', 'local_trustgrade');
+        $html .= '<i class="fa fa-trash" aria-hidden="true"></i> ' . get_string('delete', 'local_trustgrade');
         $html .= '</button>';
         $html .= '</div>';
         $html .= '</div>';
+
+        // Body
+        $html .= '<div class="card-body">';
 
         // Question display mode
         $html .= '<div class="question-display-mode">';
@@ -83,7 +88,8 @@ class question_bank_renderer {
         $html .= self::render_question_edit_form($question, $index);
         $html .= '</div>';
 
-        $html .= '</div>';
+        $html .= '</div>'; // card-body
+        $html .= '</div>'; // card
 
         return $html;
     }
@@ -104,7 +110,7 @@ class question_bank_renderer {
         $blooms = isset($metadata['blooms_level']) ? $metadata['blooms_level'] : null;
 
         $html .= '<div class="question-content">';
-        $html .= '<p><strong>Type:</strong> ' . htmlspecialchars(ucfirst(str_replace('_', ' ', $type))) . '</p>';
+        $html .= '<p class="mb-1"><strong>' . get_string('type', 'local_trustgrade') . ':</strong> ' . htmlspecialchars(ucfirst(str_replace('_', ' ', $type))) . '</p>';
 
         $metaBits = [];
         if ($points !== null) {
@@ -114,27 +120,29 @@ class question_bank_renderer {
             $metaBits[] = 'Bloom\'s: ' . htmlspecialchars($blooms);
         }
         if (!empty($metaBits)) {
-            $html .= '<p>' . implode(' | ', $metaBits) . '</p>';
+            $html .= '<p class="text-muted mb-2">' . implode(' | ', $metaBits) . '</p>';
         }
 
         $html .= '<p><strong>' . get_string('question', 'local_trustgrade') . ':</strong> ' . htmlspecialchars($text) . '</p>';
 
         if (isset($question['options']) && is_array($question['options'])) {
-            $html .= '<p><strong>Options:</strong></p>';
-            $html .= '<ul>';
+            $html .= '<div class="mt-3">';
+            $html .= '<p class="mb-2"><strong>' . get_string('options', 'local_trustgrade') . ':</strong></p>';
+            $html .= '<ul class="mb-0">';
             foreach ($question['options'] as $opt) {
                 $optText = isset($opt['text']) ? $opt['text'] : '';
                 $isCorrect = !empty($opt['is_correct']);
                 $explanation = isset($opt['explanation']) ? $opt['explanation'] : '';
 
                 $correctIndicator = $isCorrect ? ' <strong>(' . get_string('correct', 'local_trustgrade') . ')</strong>' : '';
-                $html .= '<li>' . htmlspecialchars($optText) . $correctIndicator;
+                $html .= '<li class="mb-1">' . htmlspecialchars($optText) . $correctIndicator;
                 if (!empty($explanation)) {
-                    $html .= '<div class="option-explanation"><em>' . get_string('explanation', 'local_trustgrade') . ':</em> ' . htmlspecialchars($explanation) . '</div>';
+                    $html .= '<div class="option-explanation text-muted small mt-1"><em>' . get_string('explanation', 'local_trustgrade') . ':</em> ' . htmlspecialchars($explanation) . '</div>';
                 }
                 $html .= '</li>';
             }
             $html .= '</ul>';
+            $html .= '</div>';
         }
 
         $html .= '</div>';
@@ -144,6 +152,7 @@ class question_bank_renderer {
 
     /**
      * Render question edit form using new JSON pattern
+     * Aligned using a responsive grid for clarity.
      *
      * @param array $question Question data
      * @param int $index Question index
@@ -158,50 +167,72 @@ class question_bank_renderer {
         $points = isset($metadata['points']) ? intval($metadata['points']) : 10;
         $blooms = isset($metadata['blooms_level']) ? $metadata['blooms_level'] : '';
 
-        $html .= '<div class="question-edit-form">';
+        $html .= '<div class="question-edit-form container-fluid px-0">';
 
-        // Question text
-        $html .= '<div class="form-group">';
-        $html .= '<label for="question_text_' . $index . '">' . get_string('question', 'local_trustgrade') . ' Text:</label>';
-        $html .= '<textarea class="form-control question-text-input" id="question_text_' . $index . '" rows="3">';
-        $html .= htmlspecialchars($text);
-        $html .= '</textarea>';
+        // Question text (full width)
+        $html .= '<div class="form-group mb-3">';
+        $html .= '  <label for="question_text_' . $index . '" class="form-label">' . get_string('question', 'local_trustgrade') . ' ' . get_string('text', 'local_trustgrade') . ':</label>';
+        $html .= '  <textarea class="form-control question-text-input" id="question_text_' . $index . '" rows="3" placeholder="' . get_string('entertext', 'local_trustgrade') . '">' . htmlspecialchars($text) . '</textarea>';
         $html .= '</div>';
 
-        // Question type
-        $html .= '<div class="form-group">';
-        $html .= '<label for="question_type_' . $index . '">Question Type:</label>';
-        $html .= '<select class="form-control question-type-input" id="question_type_' . $index . '">';
+        // Row: Type | Points | Bloom's
+        $html .= '<div class="row g-3">';
+
+        // Type
+        $html .= '  <div class="col-12 col-md-4">';
+        $html .= '    <div class="form-group">';
+        $html .= '      <label for="question_type_' . $index . '" class="form-label">' . get_string('type', 'local_trustgrade') . ':</label>';
+        $html .= '      <select class="form-control question-type-input" id="question_type_' . $index . '">';
         $types = ['multiple_choice' => 'Multiple Choice', 'true_false' => 'True/False', 'short_answer' => 'Short Answer'];
         foreach ($types as $value => $label) {
             $selected = ($type == $value) ? 'selected' : '';
-            $html .= '<option value="' . $value . '" ' . $selected . '>' . $label . '</option>';
+            $html .= '        <option value="' . $value . '" ' . $selected . '>' . $label . '</option>';
         }
-        $html .= '</select>';
-        $html .= '</div>';
+        $html .= '      </select>';
+        $html .= '    </div>';
+        $html .= '  </div>';
 
         // Points
-        $html .= '<div class="form-group">';
-        $html .= '<label for="question_points_' . $index . '">' . get_string('points', 'local_trustgrade') . ':</label>';
-        $html .= '<input type="number" class="form-control question-points-input" id="question_points_' . $index . '" ';
-        $html .= 'value="' . $points . '" min="0" max="100">';
-        $html .= '</div>';
+        $html .= '  <div class="col-12 col-md-4">';
+        $html .= '    <div class="form-group">';
+        $html .= '      <label for="question_points_' . $index . '" class="form-label">' . get_string('points', 'local_trustgrade') . ':</label>';
+        $html .= '      <input type="number" class="form-control question-points-input" id="question_points_' . $index . '" value="' . $points . '" min="0" max="100" />';
+        $html .= '      <small class="form-text text-muted">' . get_string('points_help', 'local_trustgrade') . '</small>';
+        $html .= '    </div>';
+        $html .= '  </div>';
 
-        // Bloom's Level (optional)
-        $html .= '<div class="form-group">';
-        $html .= '<label for="question_blooms_' . $index . '">Bloom\'s Level:</label>';
-        $html .= '<select class="form-control question-blooms-input" id="question_blooms_' . $index . '">';
+        // Bloom's Level
+        $html .= '  <div class="col-12 col-md-4">';
+        $html .= '    <div class="form-group">';
+        $html .= '      <label for="question_blooms_' . $index . '" class="form-label">Bloom\'s ' . get_string('level', 'local_trustgrade') . ':</label>';
+        $html .= '      <select class="form-control question-blooms-input" id="question_blooms_' . $index . '">';
         $levels = ['', 'Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
         foreach ($levels as $level) {
             $sel = ($blooms === $level) ? 'selected' : '';
             $label = $level === '' ? '-' : $level;
-            $html .= '<option value="' . htmlspecialchars($level) . '" ' . $sel . '>' . htmlspecialchars($label) . '</option>';
+            $html .= '        <option value="' . htmlspecialchars($level) . '" ' . $sel . '>' . htmlspecialchars($label) . '</option>';
         }
-        $html .= '</select>';
-        $html .= '</div>';
+        $html .= '      </select>';
+        $html .= '    </div>';
+        $html .= '  </div>';
 
-        // Options section
-        $html .= '<div class="question-options-section">';
+        $html .= '</div>'; // row
+
+        // Options section (full width)
+        $html .= '<div class="question-options-section mt-4">';
+
+        // Section header
+        $html .= '  <div class="d-flex align-items-center justify-content-between mb-2">';
+        $html .= '    <h6 class="mb-0">' . get_string('options', 'local_trustgrade') . '</h6>';
+        $html .= '  </div>';
+
+        // Column headers for alignment (visually subtle)
+        $html .= '  <div class="row text-muted small fw-semibold mb-1" role="presentation">';
+        $html .= '    <div class="col-12 col-md-1">' . get_string('correct', 'local_trustgrade') . '</div>';
+        $html .= '    <div class="col-12 col-md-5">' . get_string('optiontext', 'local_trustgrade') . '</div>';
+        $html .= '    <div class="col-12 col-md-6">' . get_string('explanation', 'local_trustgrade') . '</div>';
+        $html .= '  </div>';
+
         if ($type === 'multiple_choice') {
             $html .= self::render_multiple_choice_options($question, $index);
         } elseif ($type === 'true_false') {
@@ -210,18 +241,18 @@ class question_bank_renderer {
         $html .= '</div>';
 
         // Save/Cancel buttons
-        $html .= '<div class="question-edit-buttons">';
-        $html .= '<button type="button" class="btn btn-primary save-question-btn">' . get_string('savechanges') . '</button>';
-        $html .= '<button type="button" class="btn btn-secondary cancel-edit-btn">' . get_string('cancel') . '</button>';
+        $html .= '<div class="question-edit-buttons mt-4 d-flex gap-2">';
+        $html .= '  <button type="button" class="btn btn-primary save-question-btn">' . get_string('savechanges') . '</button>';
+        $html .= '  <button type="button" class="btn btn-secondary cancel-edit-btn">' . get_string('cancel') . '</button>';
         $html .= '</div>';
 
-        $html .= '</div>';
+        $html .= '</div>'; // question-edit-form
 
         return $html;
     }
 
     /**
-     * Render multiple choice options editor with per-option explanations
+     * Render multiple choice options editor with aligned grid and per-option explanations
      *
      * @param array $question Question data
      * @param int $index Question index
@@ -236,34 +267,37 @@ class question_bank_renderer {
             $options[] = ['text' => '', 'is_correct' => ($i === 0), 'explanation' => ''];
         }
 
-        $html .= '<div class="multiple-choice-options">';
-        $html .= '<label>Options:</label>';
-
         foreach ($options as $i => $opt) {
             $optText = isset($opt['text']) ? $opt['text'] : '';
             $isCorrect = !empty($opt['is_correct']);
             $explanation = isset($opt['explanation']) ? $opt['explanation'] : '';
 
-            $html .= '<div class="option-row">';
-            $html .= '  <div class="form-check">';
+            $html .= '<div class="row align-items-start gy-2 gx-3 mb-2 option-row">';
+
+            // Correct radio
+            $html .= '  <div class="col-12 col-md-1 d-flex align-items-start pt-2">';
             $checked = $isCorrect ? 'checked' : '';
-            $html .= '    <input class="form-check-input correct-answer-radio" type="radio" name="correct_answer_' . $index . '" value="' . $i . '" ' . $checked . '>';
-            $html .= '    <input type="text" class="form-control option-text-input" placeholder="Option ' . chr(65 + $i) . '" value="' . htmlspecialchars($optText) . '">';
+            $html .= '    <input class="form-check-input mt-0 correct-answer-radio" type="radio" aria-label="' . get_string('correct', 'local_trustgrade') . '" name="correct_answer_' . $index . '" value="' . $i . '" ' . $checked . '>';
             $html .= '  </div>';
-            $html .= '  <div class="form-group mt-2">';
-            $html .= '    <label class="form-label">' . get_string('explanation', 'local_trustgrade') . '</label>';
+
+            // Option text
+            $html .= '  <div class="col-12 col-md-5">';
+            $html .= '    <input type="text" class="form-control option-text-input" placeholder="' . get_string('option_placeholder', 'local_trustgrade', chr(65 + $i)) . '" value="' . htmlspecialchars($optText) . '">';
+            $html .= '  </div>';
+
+            // Explanation
+            $html .= '  <div class="col-12 col-md-6">';
             $html .= '    <textarea class="form-control option-explanation-input" rows="2" placeholder="' . get_string('explanation', 'local_trustgrade') . '">' . htmlspecialchars($explanation) . '</textarea>';
             $html .= '  </div>';
-            $html .= '</div>';
-        }
 
-        $html .= '</div>';
+            $html .= '</div>'; // row
+        }
 
         return $html;
     }
 
     /**
-     * Render true/false options editor with per-option explanations
+     * Render true/false options editor with aligned grid and per-option explanations
      *
      * @param array $question Question data
      * @param int $index Question index
@@ -284,31 +318,36 @@ class question_bank_renderer {
             }
         }
 
-        $html .= '<div class="true-false-options">';
-        $html .= '  <label>' . get_string('correct_answer', 'local_trustgrade') . ':</label>';
-
         // True row
-        $html .= '  <div class="tf-row" data-value="true">';
-        $html .= '    <div class="form-check">';
-        $html .= '      <input class="form-check-input" type="radio" name="tf_answer_' . $index . '" value="true" ' . (!empty($trueOpt['is_correct']) ? 'checked' : '') . '>';
-        $html .= '      <label class="form-check-label tf-label">' . get_string('true', 'local_trustgrade') . '</label>';
-        $html .= '    </div>';
-        $html .= '    <div class="form-group mt-2">';
-        $html .= '      <label class="form-label">' . get_string('explanation', 'local_trustgrade') . '</label>';
-        $html .= '      <textarea class="form-control option-explanation-input" rows="2" placeholder="' . get_string('explanation', 'local_trustgrade') . '">' . htmlspecialchars(isset($trueOpt['explanation']) ? $trueOpt['explanation'] : '') . '</textarea>';
-        $html .= '    </div>';
+        $html .= '<div class="row align-items-start gy-2 gx-3 mb-2 tf-row" data-value="true">';
+
+        $html .= '  <div class="col-12 col-md-1 d-flex align-items-start pt-2">';
+        $html .= '    <input class="form-check-input mt-0" type="radio" name="tf_answer_' . $index . '" value="true" ' . (!empty($trueOpt['is_correct']) ? 'checked' : '') . ' aria-label="' . get_string('true', 'local_trustgrade') . '">';
         $html .= '  </div>';
 
+        $html .= '  <div class="col-12 col-md-5 d-flex align-items-center">';
+        $html .= '    <label class="mb-0 fw-semibold">' . get_string('true', 'local_trustgrade') . '</label>';
+        $html .= '  </div>';
+
+        $html .= '  <div class="col-12 col-md-6">';
+        $html .= '    <textarea class="form-control option-explanation-input" rows="2" placeholder="' . get_string('explanation', 'local_trustgrade') . '">' . htmlspecialchars(isset($trueOpt['explanation']) ? $trueOpt['explanation'] : '') . '</textarea>';
+        $html .= '  </div>';
+
+        $html .= '</div>';
+
         // False row
-        $html .= '  <div class="tf-row mt-3" data-value="false">';
-        $html .= '    <div class="form-check">';
-        $html .= '      <input class="form-check-input" type="radio" name="tf_answer_' . $index . '" value="false" ' . (!empty($falseOpt['is_correct']) ? 'checked' : '') . '>';
-        $html .= '      <label class="form-check-label tf-label">' . get_string('false', 'local_trustgrade') . '</label>';
-        $html .= '    </div>';
-        $html .= '    <div class="form-group mt-2">';
-        $html .= '      <label class="form-label">' . get_string('explanation', 'local_trustgrade') . '</label>';
-        $html .= '      <textarea class="form-control option-explanation-input" rows="2" placeholder="' . get_string('explanation', 'local_trustgrade') . '">' . htmlspecialchars(isset($falseOpt['explanation']) ? $falseOpt['explanation'] : '') . '</textarea>';
-        $html .= '    </div>';
+        $html .= '<div class="row align-items-start gy-2 gx-3 mb-2 tf-row" data-value="false">';
+
+        $html .= '  <div class="col-12 col-md-1 d-flex align-items-start pt-2">';
+        $html .= '    <input class="form-check-input mt-0" type="radio" name="tf_answer_' . $index . '" value="false" ' . (!empty($falseOpt['is_correct']) ? 'checked' : '') . ' aria-label="' . get_string('false', 'local_trustgrade') . '">';
+        $html .= '  </div>';
+
+        $html .= '  <div class="col-12 col-md-5 d-flex align-items-center">';
+        $html .= '    <label class="mb-0 fw-semibold">' . get_string('false', 'local_trustgrade') . '</label>';
+        $html .= '  </div>';
+
+        $html .= '  <div class="col-12 col-md-6">';
+        $html .= '    <textarea class="form-control option-explanation-input" rows="2" placeholder="' . get_string('explanation', 'local_trustgrade') . '">' . htmlspecialchars(isset($falseOpt['explanation']) ? $falseOpt['explanation'] : '') . '</textarea>';
         $html .= '  </div>';
 
         $html .= '</div>';
