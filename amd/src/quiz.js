@@ -124,6 +124,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     },
 
     showIntegrityWarning: function () {
+      
       Promise.all([
         Str.get_string("important_formal_assessment", "local_trustgrade"),
         Str.get_string("read_carefully", "local_trustgrade"),
@@ -166,6 +167,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     },
 
     bindStartEvent: function () {
+      
       $(document)
         .off("click.quizstart")
         .on("click.quizstart", "#start-quiz-btn", () => {
@@ -174,6 +176,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     },
 
     startQuizAttempt: function () {
+      
       var promise = Ajax.call([
         {
           methodname: "local_trustgrade_start_quiz_attempt",
@@ -202,6 +205,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     },
 
     startAutoSave: function () {
+      
       this.autoSaveInterval = setInterval(() => {
         this.saveSessionState()
       }, 10000)
@@ -232,6 +236,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     },
 
     bindEvents: function () {
+      
       $(document).off("click.quiz")
       $(document).on("click.quiz", "#next-btn", () => {
         if (this.validateCurrentAnswer()) {
@@ -256,6 +261,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     },
 
     bindIntegrityEvents: function () {
+      
       $(window).on("blur.quiz", () => {
         if (this.attemptStarted && !this.attemptCompleted) {
           this.windowBlurCount++
@@ -301,7 +307,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       })
     },
 
-    logIntegrityViolation: function (violationType, violationData = {}) {
+    logIntegrityViolation: function (violationType, violationData) {
       Ajax.call([
         {
           methodname: "local_trustgrade_log_integrity_violation",
@@ -325,6 +331,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     },
 
     showQuestion: function (index) {
+      
       var question = this.questions[index]
       Promise.all([
         Str.get_string(
@@ -409,6 +416,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       }
       this.updateTimerDisplay()
       $(".question-timer").show()
+      
       this.timer = setInterval(() => {
         this.timeRemaining--
         this.updateTimerDisplay()
@@ -431,6 +439,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       var minutes = Math.floor(this.timeRemaining / 60)
       var seconds = this.timeRemaining % 60
       var timeString = minutes + ":" + (seconds < 10 ? "0" : "") + seconds
+      
       Str.get_string("time_remaining", "local_trustgrade", timeString).then((message) => {
         var timerClass = this.timeRemaining <= 5 ? "timer-warning" : ""
         var timerHtml = `<div class="timer-display ${timerClass}">
@@ -452,6 +461,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     updateCounter: function () {
       var total = this.questions.length
       var current = this.currentQuestion + 1
+      
       Str.get_string("question_x_of_y", "local_trustgrade", { current: current, total: total }).then((message) => {
         $(".question-counter").html(message)
       })
@@ -459,6 +469,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
 
     updateNavigationButtons: function () {
       $("#prev-btn").hide()
+      
       Promise.all([
         Str.get_string("next_question", "local_trustgrade"),
         Str.get_string("submit_final_answers", "local_trustgrade"),
@@ -482,6 +493,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         hasAnswer = $('textarea[name="answer"]').val().trim().length > 0
       }
       if (!hasAnswer) {
+        
         Str.get_string("provide_answer_warning", "local_trustgrade").then((message) => {
           Notification.addNotification({ message: message, type: "warning" })
         })
@@ -514,6 +526,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       $(window).off(".quiz")
       $(document).off(".quiz")
       var score = this.calculateScore()
+      
       var promise = Ajax.call([
         {
           methodname: "local_trustgrade_complete_quiz_session",
@@ -548,6 +561,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     calculateScore: function () {
       var score = 0
       var totalPoints = 0
+      
       this.questions.forEach((question, index) => {
         var userAnswer = this.answers[index]
         var isCorrect = false
@@ -564,6 +578,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     showResults: function () {
       var score = 0
       var totalPoints = 0
+      
       Promise.all([
         Str.get_string("quiz_completed_header", "local_trustgrade"),
         Str.get_string("quiz_completed_message", "local_trustgrade"),
@@ -626,19 +641,38 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
           }
 
           {
-            const explanation =
-              question.explanation ||
-              (question.option_explanations &&
-                typeof question.correct_answer === "number" &&
-                question.option_explanations[question.correct_answer]) ||
-              ""
+            const correctIdx = typeof question.correct_answer === "number" ? question.correct_answer : null
+            const chosenIdx = typeof userAnswer === "number" ? userAnswer : null
 
-            if (explanation) {
-              resultsHtml += `<div class="explanation"><strong>${strings[7].replace(
-                "{$a}",
-                explanation,
-              )}</strong></div>`
+            let explanation = ""
+            if (question.explanation && String(question.explanation).trim() !== "") {
+              explanation = String(question.explanation)
+            } else if (
+              Array.isArray(question.option_explanations) &&
+              correctIdx !== null &&
+              question.option_explanations[correctIdx]
+            ) {
+              explanation = String(question.option_explanations[correctIdx])
+            } else if (
+              Array.isArray(question.option_explanations) &&
+              chosenIdx !== null &&
+              question.option_explanations[chosenIdx]
+            ) {
+              explanation = String(question.option_explanations[chosenIdx])
             }
+
+            // Fallback: never leave explanation empty
+            if (!explanation || String(explanation).trim() === "") {
+              explanation = "No explanation provided."
+            }
+
+            const isEmpty = explanation === "No explanation provided."
+            const explanationHtml = `<div class="explanation ${isEmpty ? "text-muted" : ""}"><strong>${strings[7].replace(
+              "{$a}",
+              explanation,
+            )}</strong></div>`
+
+            resultsHtml += explanationHtml
           }
 
           resultsHtml += `</div>`
@@ -688,6 +722,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       this.attemptCompleted = true
       this.stopTimer()
       if (this.autoSaveInterval) clearInterval(this.autoSaveInterval)
+      
       Promise.all([
         Str.get_string("integrity_violation_header", "local_trustgrade"),
         Str.get_string("quiz_flagged", "local_trustgrade"),
