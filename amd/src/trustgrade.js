@@ -110,7 +110,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
 
       // Expecting structure:
       // {
-      //   "table": { "title": "", "rows": [{ "Criterion": "", "Met (y/n)": "", "Suggestions": "" }] },
+      //   "table": { "title": "", "rows": [{ "Criterion": "", "Met": "", "Suggestions": "" }] },
       //   "EvaluationText": { "content": "" },
       //   "ImprovedAssignment": { "content": "" }
       // }
@@ -142,7 +142,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
             <thead>
               <tr>
                 <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${this.escapeHtml("Criterion")}</th>
-                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${this.escapeHtml("Met (y/n)")}</th>
+                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${this.escapeHtml("Met")}</th>
                 <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${this.escapeHtml("Suggestions")}</th>
               </tr>
             </thead>
@@ -151,7 +151,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       if (rows.length > 0) {
         rows.forEach((r) => {
           const c = this.escapeHtml(r["Criterion"] ?? "")
-          const m = this.escapeHtml(r["Met (y/n)"] ?? "")
+          const m = this.escapeHtml(r["Met"] ?? "")
           const s = this.escapeHtml(r["Suggestions"] ?? "")
           html += `
               <tr>
