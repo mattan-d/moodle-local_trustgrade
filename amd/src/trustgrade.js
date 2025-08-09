@@ -1,109 +1,303 @@
-// amd/src/trustgrade.js
+// This file is part of Moodle - http://moodle.org/
 
-function checkInstructions() {
-  var promise = getRecommendation() // Assume this function fetches the recommendation
-  var $resultContainer = $("#result-container") // Assume this is the container for displaying results
+var define = window.define // Declare define variable
+var M = window.M // Declare M variable
+var tinyMCE = window.tinyMCE // Declare tinyMCE variable
 
-  promise
-    .done((response) => {
-      if (response.success) {
-        var recommendationData
-        try {
-          // Try to parse the recommendation as JSON
-          recommendationData = JSON.parse(response.recommendation)
-        } catch (e) {
-          // If it fails, it's likely plain text
-          recommendationData = null
-        }
+define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_factory"], (
+  $,
+  Ajax,
+  Notification,
+  Str,
+  ModalFactory,
+) => {
+  var trustgrade = {
+    init: function () {
+      this.bindEvents()
+      this.loadQuestionBank() // Load existing questions on page load
+    },
 
-        var content = ""
-        if (recommendationData && typeof recommendationData === "object") {
-          // Handle structured JSON response
-          content += "<h4>AI Recommendation</h4>"
+    bindEvents: () => {
+      $(document).on("click", "#check-instructions-btn", (e) => {
+        e.preventDefault()
+        trustgrade.checkInstructions()
+      })
+      $(document).on("click", "#generate-questions-btn", (e) => {
+        e.preventDefault()
+        trustgrade.generateQuestions()
+      })
+      $(document).on("change", "#id_trustgrade_questions_to_generate", (e) => {
+        e.preventDefault()
+        trustgrade.updateSingleQuizSetting("questions_to_generate", $(e.target).val())
+      })
+    },
 
-          // 1. Render Table
-          if (recommendationData.table && recommendationData.table.rows && recommendationData.table.rows.length > 0) {
-            if (recommendationData.table.title) {
-              content += "<h5>" + $("<div>").text(recommendationData.table.title).html() + "</h5>"
-            }
-            content += '<table class="table table-striped table-bordered generictable">'
-            content += "<thead><tr>"
-            content += "<th>Criterion</th>"
-            content += "<th>Met (y/n)</th>"
-            content += "<th>Suggestions</th>"
-            content += "</tr></thead>"
-            content += "<tbody>"
-            recommendationData.table.rows.forEach((row) => {
-              content += "<tr>"
-              content +=
-                "<td>" +
-                $("<div>")
-                  .text(row.Criterion || "")
-                  .html() +
-                "</td>"
-              content +=
-                "<td>" +
-                $("<div>")
-                  .text(row["Met (y/n)"] || "")
-                  .html() +
-                "</td>"
-              content +=
-                "<td>" +
-                $("<div>")
-                  .text(row.Suggestions || "")
-                  .html() +
-                "</td>"
-              content += "</tr>"
+    showErrorModal: (title, message) => {
+      ModalFactory.create({
+        type: ModalFactory.types.ALERT,
+        title: title,
+        body: message,
+      }).then((modal) => modal.show())
+    },
+
+    showSuccessNotification: (message) => {
+      Notification.addNotification({ message: message, type: "success" })
+    },
+
+    updateSingleQuizSetting: function (settingName, settingValue) {
+      var cmid = this.getCourseModuleId()
+      if (cmid <= 0) return
+
+      var promises = Ajax.call([
+        {
+          methodname: "local_trustgrade_update_quiz_setting",
+          args: {
+            cmid: cmid,
+            setting_name: settingName,
+            setting_value: settingValue,
+          },
+        },
+      ])
+
+      promises[0]
+        .done((response) => {
+          if (response.success) {
+            Str.get_string("setting_updated_success", "local_trustgrade", {
+              setting: settingName.replace(/_/g, " "),
+            }).then((message) => {
+              trustgrade.showSuccessNotification(message)
             })
-            content += "</tbody></table>"
+          } else {
+            Str.get_string("setting_update_error", "local_trustgrade").then((title) => {
+              trustgrade.showErrorModal(title, response.error || "An error occurred while updating the setting.")
+            })
           }
+        })
+        .fail(Notification.exception)
+    },
 
-          // 2. Render Evaluation Text
-          if (recommendationData.EvaluationText && recommendationData.EvaluationText.content) {
-            content += "<h5>Evaluation Summary</h5>"
-            var evalText = $("<div>").text(recommendationData.EvaluationText.content).html()
-            content += '<div class="recommendation-content">' + evalText.replace(/\n/g, "<br>") + "</div>"
-          }
-
-          // 3. Render Improved Assignment
-          if (recommendationData.ImprovedAssignment && recommendationData.ImprovedAssignment.content) {
-            content += "<h5>Improved Assignment Instructions</h5>"
-            var improvedText = $("<div>").text(recommendationData.ImprovedAssignment.content).html()
-            content += '<pre class="p-2 bg-light border rounded">' + improvedText + "</pre>"
-          }
-        } else {
-          // Fallback to plain text for backward compatibility or if JSON parsing fails
-          content =
-            '<p class="mb-1"><strong>AI Recommendation:</strong></p>' +
-            '<div class="recommendation-content">' +
-            response.recommendation.replace(/\n/g, "<br>") +
-            "</div>"
-        }
-
-        if (response.from_cache) {
-          content += '<div class="text-muted small mt-1"><em>(This response was retrieved from cache)</em></div>'
-        }
-        $resultContainer.html(content).addClass("alert-success").removeClass("hidden")
-      } else {
-        $resultContainer
-          .html("<strong>Error:</strong> " + response.error)
-          .addClass("alert-danger")
-          .removeClass("hidden")
+    checkInstructions: function () {
+      var instructions = this.getInstructions()
+      if (!instructions || instructions.trim().length === 0) {
+        Str.get_string("no_instructions_error", "local_trustgrade").then((message) => {
+          Str.get_string("input_validation_error", "local_trustgrade").then((title) => {
+            trustgrade.showErrorModal(title, message)
+          })
+        })
+        return
       }
-    })
-    .fail((error) => {
-      $resultContainer
-        .html("<strong>Error:</strong> Failed to fetch recommendation")
-        .addClass("alert-danger")
-        .removeClass("hidden")
-    })
-}
 
-// Assume this function fetches the recommendation
-function getRecommendation() {
-  return $.ajax({
-    url: "/api/recommendation",
-    method: "GET",
-    dataType: "json",
-  })
-}
+      $("#check-instructions-btn").prop("disabled", true)
+      $("#ai-loading").show()
+      $("#ai-recommendation-container").hide()
+
+      var cmid = this.getCourseModuleId()
+
+      var promises = Ajax.call([
+        {
+          methodname: "local_trustgrade_check_instructions",
+          args: { cmid: cmid, instructions: instructions },
+        },
+      ])
+
+      promises[0]
+        .done((response) => {
+          if (response.success) {
+            var recommendationHtml = response.recommendation.replace(/\n/g, "<br>")
+            if (response.from_cache) {
+              Str.get_string("cache_hit", "local_trustgrade").then((cacheMessage) => {
+                recommendationHtml =
+                  '<div class="alert alert-info mb-2"><i class="fa fa-clock-o"></i> <small>' +
+                  cacheMessage +
+                  " (Debug mode)</small></div>" +
+                  recommendationHtml
+                $("#ai-recommendation").html(recommendationHtml)
+              })
+            } else {
+              $("#ai-recommendation").html(recommendationHtml)
+            }
+            $("#ai-recommendation-container").show()
+          } else {
+            Str.get_string("gateway_error", "local_trustgrade").then((title) => {
+              trustgrade.showErrorModal(title, response.error || "An error occurred.")
+            })
+          }
+        })
+        .fail(Notification.exception)
+        .always(() => {
+          $("#check-instructions-btn").prop("disabled", false)
+          $("#ai-loading").hide()
+        })
+    },
+
+    generateQuestions: function () {
+      var instructions = this.getInstructions()
+      if (!instructions || instructions.trim().length === 0) {
+        Str.get_string("no_instructions_questions_error", "local_trustgrade").then((message) => {
+          Str.get_string("input_validation_error", "local_trustgrade").then((title) => {
+            trustgrade.showErrorModal(title, message)
+          })
+        })
+        return
+      }
+
+      $("#generate-questions-btn").prop("disabled", true)
+      $("#ai-question-loading").show()
+      $("#ai-questions-container").hide()
+
+      var cmid = this.getCourseModuleId()
+
+      var promises = Ajax.call([
+        {
+          methodname: "local_trustgrade_generate_questions",
+          args: { cmid: cmid, instructions: instructions },
+        },
+      ])
+
+      promises[0]
+        .done((response) => {
+          if (response.success) {
+            var questions = JSON.parse(response.questions)
+            trustgrade.formatQuestionsDisplay(questions).then((questionsHtml) => {
+              if (response.from_cache) {
+                Str.get_string("cache_hit", "local_trustgrade").then((cacheMessage) => {
+                  questionsHtml =
+                    '<div class="alert alert-info mb-2"><i class="fa fa-clock-o"></i> <small>' +
+                    cacheMessage +
+                    " (Debug mode)</small></div>" +
+                    questionsHtml
+                  $("#ai-questions").html(questionsHtml)
+                })
+              } else {
+                $("#ai-questions").html(questionsHtml)
+              }
+              $("#ai-questions-container").show()
+            })
+
+            if (response.message) {
+              trustgrade.showSuccessNotification(response.message)
+            }
+            trustgrade.loadQuestionBank()
+          } else {
+            Str.get_string("gateway_error", "local_trustgrade").then((title) => {
+              trustgrade.showErrorModal(title, response.error || "An error occurred.")
+            })
+          }
+        })
+        .fail(Notification.exception)
+        .always(() => {
+          $("#generate-questions-btn").prop("disabled", false)
+          $("#ai-question-loading").hide()
+        })
+    },
+
+    formatQuestionsDisplay: (questions) =>
+      new Promise((resolve) => {
+        Promise.all([
+          Str.get_string("generated_questions", "local_trustgrade"),
+          Str.get_string("question", "local_trustgrade"),
+          Str.get_string("points", "local_trustgrade"),
+          Str.get_string("correct", "local_trustgrade"),
+          Str.get_string("explanation", "local_trustgrade"),
+        ]).then((strings) => {
+          var html = "<h4>" + strings[0] + ":</h4>"
+          questions.forEach((question, index) => {
+            html += `<div class="question-item" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">`
+            html += `<h5>${strings[1]} ${index + 1} (${question.difficulty || "medium"} - ${
+              question.points || 10
+            } ${strings[2]})</h5>`
+            html += `<p><strong>Type:</strong> ${question.type}</p>`
+            html += `<p><strong>${strings[1]}:</strong> ${question.question}</p>`
+            if (question.options && question.options.length > 0) {
+              html += `<p><strong>Options:</strong></p><ul>`
+              question.options.forEach((option, optIndex) => {
+                var isCorrect = question.correct_answer === optIndex ? ` <strong>(${strings[3]})</strong>` : ""
+                html += `<li>${option}${isCorrect}</li>`
+              })
+              html += `</ul>`
+            }
+            if (question.explanation) {
+              html += `<p><strong>${strings[4]}:</strong> ${question.explanation}</p>`
+            }
+            html += `</div>`
+          })
+          resolve(html)
+        })
+      }),
+
+    getInstructions: () => {
+      var instructions = ""
+      var instructionSelectors = ["#id_introeditor_ifr", "#id_intro", 'textarea[name="intro"]']
+      for (var i = 0; i < instructionSelectors.length; i++) {
+        var $element = $(instructionSelectors[i])
+        if ($element.length > 0) {
+          if ($element.is("iframe")) {
+            try {
+              var iframeDoc = $element[0].contentDocument || $element[0].contentWindow.document
+              instructions = $("<div>").html(iframeDoc.body.innerHTML).text()
+            } catch (e) {
+              if (typeof tinyMCE !== "undefined" && tinyMCE.get("id_introeditor")) {
+                instructions = tinyMCE.get("id_introeditor").getContent({ format: "text" })
+              }
+            }
+          } else {
+            instructions = $element.val() || ""
+          }
+          if (instructions && instructions.trim().length > 0) break
+        }
+      }
+      return typeof instructions === "string" ? instructions.trim() : ""
+    },
+
+    getCourseModuleId: () => {
+      var urlParams = new URLSearchParams(window.location.search)
+      var cmid = urlParams.get("update")
+      if (!cmid) {
+        cmid = $('input[name="coursemodule"]').val() || 0
+      }
+      return Number.parseInt(cmid) || 0
+    },
+
+    loadQuestionBank: function () {
+      var cmid = this.getCourseModuleId()
+      if (cmid <= 0) return
+
+      $("#question-bank-loading").show()
+
+      var promises = Ajax.call([
+        {
+          methodname: "local_trustgrade_get_question_bank",
+          args: { cmid: cmid },
+        },
+      ])
+
+      promises[0]
+        .done((response) => {
+          if (response.success) {
+            var questions = JSON.parse(response.questions)
+            if (questions && questions.length > 0) {
+              Str.get_string("question_bank_title", "local_trustgrade").then((title) => {
+                var questionBankHtml = "<h4>" + title + "</h4>" + response.html
+                $("#question-bank-container").html(questionBankHtml)
+                if (typeof require !== "undefined") {
+                  require(["local_trustgrade/question_editor"], (QuestionEditor) => {
+                    QuestionEditor.reinitialize(cmid)
+                  })
+                }
+              })
+            } else {
+              $("#question-bank-container").html("")
+            }
+          } else {
+            Notification.addNotification({ message: response.error || "Failed to load question bank", type: "warning" })
+          }
+        })
+        .fail(Notification.exception)
+        .always(() => {
+          $("#question-bank-loading").hide()
+        })
+    },
+  }
+
+  return trustgrade
+})
