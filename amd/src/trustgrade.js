@@ -76,6 +76,120 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
         .fail(Notification.exception)
     },
 
+    /**
+     * Basic HTML escape to avoid XSS in rendered content.
+     */
+    escapeHtml: (value) => {
+      if (value === null || value === undefined) return ""
+      return String(value).replace(/[&<>"']/g, (s) => {
+        const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }
+        return map[s] || s
+      })
+    },
+
+    /**
+     * Render the recommendation which may be either:
+     * - a JSON object in the format provided by the backend, or
+     * - a string (legacy), which we render as paragraph lines with <br>.
+     */
+    renderRecommendation: function (recommendation) {
+      // Legacy string fallback
+      if (typeof recommendation === "string") {
+        return recommendation.replace(/\n/g, "<br>")
+      }
+
+      // If it's not an object, stringify and fallback to legacy behavior
+      if (!recommendation || typeof recommendation !== "object") {
+        try {
+          const txt = JSON.stringify(recommendation, null, 2)
+          return this.escapeHtml(txt).replace(/\n/g, "<br>")
+        } catch (e) {
+          return ""
+        }
+      }
+
+      // Expecting structure:
+      // {
+      //   "table": { "title": "", "rows": [{ "Criterion": "", "Met (y/n)": "", "Suggestions": "" }] },
+      //   "EvaluationText": { "content": "" },
+      //   "ImprovedAssignment": { "content": "" }
+      // }
+
+      const table = recommendation.table || {}
+      const rows = Array.isArray(table.rows) ? table.rows : []
+      const tableTitle = table.title || "Criteria Evaluation"
+
+      const evalText =
+        recommendation.EvaluationText && recommendation.EvaluationText.content
+          ? String(recommendation.EvaluationText.content)
+          : ""
+      const improved =
+        recommendation.ImprovedAssignment && recommendation.ImprovedAssignment.content
+          ? String(recommendation.ImprovedAssignment.content)
+          : ""
+
+      // Build HTML safely
+      let html = ""
+
+      // Table section
+      html += `<div class="tg-section tg-table-section" style="margin-bottom:16px;">`
+      if (tableTitle) {
+        html += `<h4 style="margin:0 0 8px 0;">${this.escapeHtml(tableTitle)}</h4>`
+      }
+      html += `
+        <div class="table-responsive">
+          <table class="generaltable boxaligncenter" style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr>
+                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${this.escapeHtml("Criterion")}</th>
+                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${this.escapeHtml("Met (y/n)")}</th>
+                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${this.escapeHtml("Suggestions")}</th>
+              </tr>
+            </thead>
+            <tbody>
+      `
+      if (rows.length > 0) {
+        rows.forEach((r) => {
+          const c = this.escapeHtml(r["Criterion"] ?? "")
+          const m = this.escapeHtml(r["Met (y/n)"] ?? "")
+          const s = this.escapeHtml(r["Suggestions"] ?? "")
+          html += `
+              <tr>
+                <td style="vertical-align:top; border-bottom:1px solid #eee; padding:8px;">${c}</td>
+                <td style="vertical-align:top; border-bottom:1px solid #eee; padding:8px;">${m}</td>
+                <td style="vertical-align:top; border-bottom:1px solid #eee; padding:8px;">${s}</td>
+              </tr>
+          `
+        })
+      } else {
+        html += `
+              <tr>
+                <td colspan="3" style="padding:8px; color:#666;">${this.escapeHtml("No criteria provided.")}</td>
+              </tr>
+        `
+      }
+      html += `
+            </tbody>
+          </table>
+        </div>
+      </div>
+      `
+
+      // Evaluation Text section
+      html += `<div class="tg-section tg-eval-text" style="margin-bottom:16px;">`
+      html += `<h4 style="margin:0 0 8px 0;">${this.escapeHtml("Evaluation")}</h4>`
+      html += `<div>${this.escapeHtml(evalText).replace(/\n/g, "<br>")}</div>`
+      html += `</div>`
+
+      // Improved Assignment section
+      html += `<div class="tg-section tg-improved" style="margin-bottom:8px;">`
+      html += `<h4 style="margin:0 0 8px 0;">${this.escapeHtml("Improved Assignment")}</h4>`
+      html += `<div>${this.escapeHtml(improved).replace(/\n/g, "<br>")}</div>`
+      html += `</div>`
+
+      return html
+    },
+
     checkInstructions: function () {
       var instructions = this.getInstructions()
       if (!instructions || instructions.trim().length === 0) {
@@ -103,7 +217,19 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       promises[0]
         .done((response) => {
           if (response.success) {
-            var recommendationHtml = response.recommendation.replace(/\n/g, "<br>")
+            var recommendationHtml = ""
+            try {
+              var recObj =
+                typeof response.recommendation === "string"
+                  ? JSON.parse(response.recommendation)
+                  : response.recommendation
+
+              recommendationHtml = trustgrade.renderRecommendation(recObj)
+            } catch (e) {
+              // Fallback to legacy plaintext if JSON parsing fails
+              recommendationHtml = String(response.recommendation || "").replace(/\n/g, "<br>")
+            }
+
             if (response.from_cache) {
               Str.get_string("cache_hit", "local_trustgrade").then((cacheMessage) => {
                 recommendationHtml =
