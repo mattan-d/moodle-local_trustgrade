@@ -34,7 +34,7 @@ class api {
             if ($result['success']) {
                 return [
                     'success' => true,
-                    'recommendation' => $result['data']['recommendation'] ?? $result['data']['content']
+                    'recommendation' => json_encode($result['data']['recommendation']) ?? json_encode($result['data']['content'])
                 ];
             } else {
                 return ['error' => $result['error']];
