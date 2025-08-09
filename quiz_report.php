@@ -4,6 +4,95 @@
 require_once('../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 
+/**
+ * Normalize question objects to the legacy structure expected by the report renderer.
+ * - Ensure $q->question is populated (from $q->text if necessary)
+ * - For multiple_choice:
+ *     - Convert $q->options from array of objects to array of strings (using ->text if present)
+ *     - Infer $q->correct_answer from the first option with truthy ->correct or ->isCorrect when not provided
+ *
+ * This function does not remove any fields; it only adds/derives legacy-compatible ones.
+ *
+ * @param array|\stdClass[] $questions
+ * @return array normalized questions
+ */
+if (!function_exists('local_trustgrade_normalize_questions_for_report')) {
+    function local_trustgrade_normalize_questions_for_report($questions) {
+        if (!is_array($questions)) {
+            $questions = (array)$questions;
+        }
+
+        $normalized = [];
+        foreach ($questions as $q) {
+            if (is_array($q)) {
+                $q = (object)$q;
+            }
+            if (!$q instanceof stdClass) {
+                // Skip invalid entries gracefully
+                continue;
+            }
+
+            // Map new JSON field 'text' to legacy 'question' if needed
+            if (!isset($q->question) && isset($q->text)) {
+                $q->question = $q->text;
+            }
+
+            // Handle multiple choice options normalization
+            if (isset($q->type) && $q->type === 'multiple_choice' && isset($q->options) && is_array($q->options)) {
+                $options = $q->options;
+
+                // If options are objects with { text, explanation, correct }, convert to array of strings for renderer
+                $first = $options[0] ?? null;
+                $areobjects = is_object($first);
+
+                if ($areobjects) {
+                    // Extract visible option text for the renderer
+                    $flatOptions = [];
+                    foreach ($options as $idx => $opt) {
+                        if (is_object($opt)) {
+                            // Use ->text if available, otherwise stringify
+                            $flatOptions[$idx] = isset($opt->text) ? (string)$opt->text : (string)json_encode($opt);
+                        } else {
+                            $flatOptions[$idx] = (string)$opt;
+                        }
+                    }
+                    $q->options = array_values($flatOptions);
+
+                    // Infer correct_answer if missing and any option marks correct/isCorrect
+                    if (!isset($q->correct_answer)) {
+                        $correctIndex = null;
+                        foreach ($options as $idx => $opt) {
+                            $isCorrect = false;
+                            if (is_object($opt)) {
+                                if ((isset($opt->correct) && $opt->correct) || (isset($opt->isCorrect) && $opt->isCorrect)) {
+                                    $isCorrect = true;
+                                }
+                            }
+                            if ($isCorrect) {
+                                $correctIndex = $idx;
+                                break;
+                            }
+                        }
+                        if ($correctIndex !== null) {
+                            $q->correct_answer = (int)$correctIndex;
+                        }
+                    }
+                } else {
+                    // Keep as-is, but ensure correct_answer is an int if present
+                    if (isset($q->correct_answer)) {
+                        $q->correct_answer = (int)$q->correct_answer;
+                    }
+                }
+            }
+
+            // Push normalized question
+            $normalized[] = $q;
+        }
+
+        return $normalized;
+    }
+}
+
 // Get parameters
 $cmid = optional_param('cmid', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);
@@ -52,6 +141,26 @@ try {
     } else {
         // Get all completed sessions
         $sessions = \local_trustgrade\quiz_session::get_all_completed_sessions();
+    }
+
+    // Normalize questions in each session to support new JSON shape.
+    foreach ($sessions as $s) {
+        // questions_data may be a JSON string or already an array/object; ensure array of objects
+        if (isset($s->questions_data)) {
+            $qdata = $s->questions_data;
+
+            // If it's a JSON string, decode
+            if (is_string($qdata)) {
+                $decoded = json_decode($qdata);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $qdata = $decoded;
+                }
+            }
+
+            // Now normalize structure for the renderer
+            $normalized = local_trustgrade_normalize_questions_for_report($qdata ?? []);
+            $s->questions_data = $normalized;
+        }
     }
 } catch (Exception $e) {
     debugging('Error loading quiz sessions: ' . $e->getMessage(), DEBUG_DEVELOPER);
