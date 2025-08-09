@@ -4,139 +4,6 @@
 require_once('../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 
-/**
- * Decode a value if it is a JSON string, otherwise return as-is.
- *
- * @param mixed $value
- * @return mixed
- */
-function local_trustgrade_decode_if_json($value) {
-    if (is_string($value)) {
-        $decoded = json_decode($value);
-        if (json_last_error() === JSON_ERROR_NONE) {
-            return $decoded;
-        }
-    }
-    return $value;
-}
-
-/**
- * Normalize questions data into the legacy shape expected by the report renderer:
- * - Ensure each question has ->question (fallback to ->text).
- * - Convert options array of objects to a flat array of strings, preserving order.
- * - Derive ->correct_answer from either existing ->correct_answer or per-option ->correct.
- * - Preserve existing fields like ->points and ->source.
- *
- * This function does NOT change the order of options, so randomized answer order remains intact.
- *
- * @param mixed $questions Raw questions data (array/object/JSON string)
- * @return array Array of stdClass questions
- */
-function local_trustgrade_normalize_questions_for_report($questions) {
-    $questions = local_trustgrade_decode_if_json($questions);
-
-    // Coerce to a list.
-    if (is_object($questions)) {
-        // If it's an object that represents an indexed list (decoded JSON), cast then take values.
-        $questions = array_values((array)$questions);
-    } else if (!is_array($questions)) {
-        $questions = [];
-    }
-
-    $normalized = [];
-
-    foreach ($questions as $q) {
-        // Coerce each question to object.
-        if (is_array($q)) {
-            $q = (object)$q;
-        } else if (!is_object($q)) {
-            // Skip invalid entries.
-            continue;
-        }
-
-        $nq = new stdClass();
-
-        // Question text: prefer ->question, fallback to ->text.
-        $nq->question = '';
-        if (property_exists($q, 'question') && is_string($q->question)) {
-            $nq->question = $q->question;
-        } else if (property_exists($q, 'text') && is_string($q->text)) {
-            $nq->question = $q->text;
-        }
-
-        // Type (default to multiple_choice if missing).
-        if (property_exists($q, 'type') && is_string($q->type)) {
-            $nq->type = $q->type;
-        } else {
-            $nq->type = 'multiple_choice';
-        }
-
-        // Preserve optional fields if present.
-        if (property_exists($q, 'points')) {
-            $nq->points = $q->points;
-        }
-        if (property_exists($q, 'source')) {
-            $nq->source = $q->source;
-        }
-
-        // Normalize options: keep order exactly as provided (important for randomized results).
-        $options = [];
-        $derivedCorrect = null;
-
-        if (property_exists($q, 'options') && (is_array($q->options) || is_object($q->options))) {
-            $optlist = is_object($q->options) ? array_values((array)$q->options) : $q->options;
-
-            foreach ($optlist as $idx => $opt) {
-                // Accept both strings and objects for options.
-                if (is_array($opt)) {
-                    $opt = (object)$opt;
-                }
-
-                if (is_object($opt)) {
-                    // Pull visible label from known fields, fallback to string cast.
-                    $label = '';
-                    if (property_exists($opt, 'text') && is_string($opt->text)) {
-                        $label = $opt->text;
-                    } else if (property_exists($opt, 'label') && is_string($opt->label)) {
-                        $label = $opt->label;
-                    } else if (property_exists($opt, 'value') && (is_string($opt->value) || is_numeric($opt->value))) {
-                        $label = (string)$opt->value;
-                    } else {
-                        $label = (string)json_encode($opt);
-                    }
-                    $options[] = $label;
-
-                    // If correct not already known, derive from per-option correct flag if present.
-                    if ($derivedCorrect === null && property_exists($opt, 'correct')) {
-                        $isCorrect = $opt->correct;
-                        // Accept truthy variants (bool true, "true", 1, "1").
-                        if ($isCorrect === true || $isCorrect === 1 || $isCorrect === '1' || $isCorrect === 'true') {
-                            $derivedCorrect = $idx;
-                        }
-                    }
-                } else {
-                    // Scalar option
-                    $options[] = (string)$opt;
-                }
-            }
-        }
-
-        $nq->options = $options;
-
-        // Determine correct_answer priority:
-        // 1) Existing numeric correct_answer; 2) Derived from per-option correct; otherwise leave unset.
-        if (property_exists($q, 'correct_answer') && $q->correct_answer !== null && $q->correct_answer !== '') {
-            $nq->correct_answer = (int)$q->correct_answer;
-        } else if ($derivedCorrect !== null) {
-            $nq->correct_answer = (int)$derivedCorrect;
-        }
-
-        $normalized[] = $nq;
-    }
-
-    return $normalized;
-}
-
 // Get parameters
 $cmid = optional_param('cmid', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);
@@ -173,6 +40,197 @@ $PAGE->set_pagelayout('admin');
 // Add CSS for grading interface
 $PAGE->requires->css('/local/trustgrade/grading_styles.css');
 
+// Helper: Convert mixed array/stdClass to array (shallow).
+function tg_to_array($value) {
+    if (is_array($value)) {
+        return $value;
+    }
+    if (is_object($value)) {
+        return (array)$value;
+    }
+    return $value;
+}
+
+// Helper: Deeply ensure an array of stdClass for renderer compatibility.
+function tg_to_object($arr) {
+    if (is_array($arr)) {
+        $obj = new stdClass();
+        foreach ($arr as $k => $v) {
+            $obj->{$k} = is_array($v) ? tg_array_to_objects($v) : $v;
+        }
+        return $obj;
+    } else if (is_object($arr)) {
+        return $arr;
+    }
+    return $arr;
+}
+function tg_array_to_objects($arr) {
+    $out = [];
+    foreach ($arr as $k => $v) {
+        if (is_array($v)) {
+            // If this is a list, keep as list of scalars/objects; if associative, make stdClass.
+            $islist = array_keys($v) === range(0, count($v) - 1);
+            if ($islist) {
+                $out[$k] = array_map(function($item) {
+                    if (is_array($item)) {
+                        // If item is associative array, make object; if list, recurse.
+                        $islist2 = array_keys($item) === range(0, count($item) - 1);
+                        return $islist2 ? tg_array_to_objects($item) : tg_to_object($item);
+                    }
+                    return $item;
+                }, $v);
+            } else {
+                $out[$k] = tg_to_object($v);
+            }
+        } else {
+            $out[$k] = $v;
+        }
+    }
+    return $out;
+}
+
+// Helper: Normalize a question structure from new/old JSON into a consistent array.
+// - Returns array with keys: question (string), type (string), options (string[]), correct_answer (?int),
+//   points (int), source (?string)
+function tg_normalize_session_question($sq_raw) {
+    $sq = tg_to_array($sq_raw);
+
+    // Type
+    $type = isset($sq['type']) ? (string)$sq['type'] : (isset($sq['questiontype']) ? (string)$sq['questiontype'] : 'multiple_choice');
+
+    // Question text can be under 'text' (new) or 'question' (old).
+    $qtext = '';
+    if (!empty($sq['text'])) {
+        $qtext = (string)$sq['text'];
+    } else if (!empty($sq['question'])) {
+        $qtext = (string)$sq['question'];
+    }
+
+    // Points (default 10)
+    $points = isset($sq['points']) && is_numeric($sq['points']) ? (int)$sq['points'] : 10;
+
+    // Source (optional)
+    $source = isset($sq['source']) ? (string)$sq['source'] : null;
+
+    // Options: support strings or objects { text, explanation, correct }
+    $optionsText = [];
+    $correctIndexFromFlags = null;
+    if (isset($sq['options']) && is_array($sq['options'])) {
+        foreach ($sq['options'] as $idx => $opt) {
+            if (is_array($opt) || is_object($opt)) {
+                $optArr = tg_to_array($opt);
+                $text = isset($optArr['text']) ? (string)$optArr['text'] : (isset($optArr['label']) ? (string)$optArr['label'] : '');
+                $optionsText[] = $text;
+                if ($correctIndexFromFlags === null && isset($optArr['correct']) && ($optArr['correct'] === true || $optArr['correct'] === 1 || $optArr['correct'] === '1')) {
+                    $correctIndexFromFlags = $idx;
+                }
+            } else {
+                // Scalar string
+                $optionsText[] = (string)$opt;
+            }
+        }
+    }
+
+    // correct_answer may exist as index; otherwise derive from flags.
+    $correctIdx = null;
+    if (isset($sq['correct_answer']) && ($sq['correct_answer'] === 0 || !empty($sq['correct_answer'])) && is_numeric($sq['correct_answer'])) {
+        $correctIdx = (int)$sq['correct_answer'];
+    } else if ($correctIndexFromFlags !== null) {
+        $correctIdx = (int)$correctIndexFromFlags;
+    }
+
+    return [
+        'type' => $type,
+        'question' => $qtext,
+        'options' => $optionsText,
+        'correct_answer' => $correctIdx,
+        'points' => $points,
+        'source' => $source,
+    ];
+}
+
+// Helper: Normalize an original bank question (instructor) similarly.
+function tg_normalize_original_question($oq_raw) {
+    $oq = tg_to_array($oq_raw);
+    $type = isset($oq['type']) ? (string)$oq['type'] : (isset($oq['questiontype']) ? (string)$oq['questiontype'] : 'multiple_choice');
+    $qtext = '';
+    if (!empty($oq['text'])) {
+        $qtext = (string)$oq['text'];
+    } else if (!empty($oq['question'])) {
+        $qtext = (string)$oq['question'];
+    }
+    $points = isset($oq['points']) && is_numeric($oq['points']) ? (int)$oq['points'] : 10;
+    $optionsText = [];
+    if (isset($oq['options']) && is_array($oq['options'])) {
+        foreach ($oq['options'] as $opt) {
+            if (is_array($opt) || is_object($opt)) {
+                $optArr = tg_to_array($opt);
+                $optionsText[] = isset($optArr['text']) ? (string)$optArr['text'] : (isset($optArr['label']) ? (string)$optArr['label'] : '');
+            } else {
+                $optionsText[] = (string)$opt;
+            }
+        }
+    }
+    $correctIdx = null;
+    if (isset($oq['correct_answer']) && ($oq['correct_answer'] === 0 || !empty($oq['correct_answer'])) && is_numeric($oq['correct_answer'])) {
+        $correctIdx = (int)$oq['correct_answer'];
+    } else if (isset($oq['options']) && is_array($oq['options'])) {
+        foreach ($oq['options'] as $idx => $opt) {
+            if ((is_array($opt) || is_object($opt))) {
+                $optArr = tg_to_array($opt);
+                if (isset($optArr['correct']) && ($optArr['correct'] === true || $optArr['correct'] === 1 || $optArr['correct'] === '1')) {
+                    $correctIdx = $idx; break;
+                }
+            }
+        }
+    }
+
+    return [
+        'type' => $type,
+        'question' => $qtext,
+        'options' => $optionsText,
+        'correct_answer' => $correctIdx,
+        'points' => $points,
+    ];
+}
+
+// Build a cache of original questions by cmid for quick lookup (keyed by normalized question text).
+$tg_original_cache = [];
+
+/**
+ * Get original questions map for a given cmid.
+ * Returns ['bytext' => [lowercased_text => questionArray], 'list' => [questionArray, ...]]
+ */
+function tg_get_original_questions_for_cmid($cmid) {
+    static $cache = [];
+    if (isset($cache[$cmid])) {
+        return $cache[$cmid];
+    }
+    $bytext = [];
+    $list = [];
+    try {
+        $originals = \local_trustgrade\question_generator::get_questions($cmid);
+        if (is_array($originals)) {
+            foreach ($originals as $oq) {
+                $n = tg_normalize_original_question($oq);
+                $list[] = $n;
+                $key = trim(mb_strtolower((string)($n['question'] ?? '')));
+                if ($key !== '') {
+                    // If duplicates, keep the first one—can be extended if needed.
+                    if (!isset($bytext[$key])) {
+                        $bytext[$key] = $n;
+                    }
+                }
+            }
+        }
+    } catch (Exception $e) {
+        // If original questions are not available, we silently continue.
+        debugging('Warning: unable to load original questions for cmid '.$cmid.': '.$e->getMessage(), DEBUG_DEVELOPER);
+    }
+    $cache[$cmid] = ['bytext' => $bytext, 'list' => $list];
+    return $cache[$cmid];
+}
+
 // Get completed quiz sessions
 $sessions = [];
 try {
@@ -191,26 +249,70 @@ try {
     $sessions = [];
 }
 
-// Normalize questions/answers for the report renderer while preserving randomized answer order.
-if (!empty($sessions)) {
-    foreach ($sessions as &$session) {
-        // Normalize questions_data to legacy shape
-        if (isset($session->questions_data)) {
-            $session->questions_data = local_trustgrade_normalize_questions_for_report($session->questions_data);
+/**
+ * Normalize questions for reporting:
+ * - Base question text and points on the original bank question (when available).
+ * - Preserve session-specific options order and correct_answer index (so randomization is respected).
+ * - Convert to the structure expected by the existing renderer: question, options as strings, correct_answer index.
+ */
+foreach ($sessions as $sid => $session) {
+    // Determine cmid for this session (may differ when viewing by course or all).
+    $sessioncmid = isset($session->cmid) ? (int)$session->cmid : (int)$cmid;
+
+    // Load and cache original questions for this cmid.
+    $origPack = tg_get_original_questions_for_cmid($sessioncmid);
+    $origByText = $origPack['bytext'];
+
+    // Ensure session questions_data is an array.
+    $sessionQuestions = isset($session->questions_data) ? (array)$session->questions_data : [];
+    $normalizedQuestions = [];
+
+    foreach ($sessionQuestions as $sq_raw) {
+        $sqN = tg_normalize_session_question($sq_raw);
+
+        // Try to find original by normalized question text.
+        $textKey = trim(mb_strtolower((string)$sqN['question']));
+        $orig = $textKey !== '' && isset($origByText[$textKey]) ? $origByText[$textKey] : null;
+
+        // Build final question for report:
+        // - question: prefer original text when available to "base on the original question"
+        // - points: prefer original points when available
+        // - options: keep session order (respects randomization)
+        // - correct_answer: keep session index if present; otherwise derive from flags
+        $final = [
+            'type' => $sqN['type'],
+            'question' => $orig && !empty($orig['question']) ? $orig['question'] : $sqN['question'],
+            'options' => $sqN['options'], // session order preserved
+            'correct_answer' => $sqN['correct_answer'],
+            'points' => $orig && isset($orig['points']) ? (int)$orig['points'] : (int)$sqN['points'],
+            'source' => isset($sqN['source']) ? $sqN['source'] : null,
+        ];
+
+        // Ensure options are strings (renderer expects string list).
+        $final['options'] = array_map(function($opt) {
+            return (string)$opt;
+        }, is_array($final['options']) ? $final['options'] : []);
+
+        // Ensure correct_answer is null or a valid integer within options bounds.
+        if ($final['correct_answer'] !== null && is_numeric($final['correct_answer'])) {
+            $idx = (int)$final['correct_answer'];
+            if ($idx < 0 || $idx >= count($final['options'])) {
+                // Out of bounds, nullify to avoid misleading marking.
+                $final['correct_answer'] = null;
+            } else {
+                $final['correct_answer'] = $idx;
+            }
+        } else {
+            $final['correct_answer'] = null;
         }
 
-        // Decode answers_data if stored as JSON string or object; keep as a simple indexed array.
-        if (isset($session->answers_data)) {
-            $answers = local_trustgrade_decode_if_json($session->answers_data);
-            if (is_object($answers)) {
-                $answers = array_values((array)$answers);
-            } else if (!is_array($answers)) {
-                $answers = (array)$answers; // Fallback cast
-            }
-            $session->answers_data = $answers;
-        }
+        $normalizedQuestions[] = tg_to_object($final);
     }
-    unset($session);
+
+    // Replace questions_data with normalized array of stdClass for the renderer.
+    $session->questions_data = $normalizedQuestions;
+
+    // Keep answers_data and all other fields untouched.
 }
 
 // Output page
