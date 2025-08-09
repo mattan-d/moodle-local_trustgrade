@@ -4,6 +4,304 @@
 require_once('../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 
+/**
+ * Helper: safely convert mixed value into array.
+ *
+ * @param mixed $val
+ * @return array
+ */
+function ltg_to_array($val): array {
+    if (is_array($val)) {
+        return $val;
+    }
+    if (is_object($val)) {
+        return (array)$val;
+    }
+    if (is_string($val)) {
+        $trim = trim($val);
+        if ($trim !== '' && ($trim[0] === '{' || $trim[0] === '[')) {
+            $decoded = json_decode($trim, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+        }
+    }
+    return [];
+}
+
+/**
+ * Helper: safely access property from array|object.
+ *
+ * @param array|object $container
+ * @param string $key
+ * @param mixed $default
+ * @return mixed
+ */
+function ltg_get($container, string $key, $default = null) {
+    if (is_array($container)) {
+        return array_key_exists($key, $container) ? $container[$key] : $default;
+    }
+    if (is_object($container)) {
+        return property_exists($container, $key) ? $container->$key : $default;
+    }
+    return $default;
+}
+
+/**
+ * Normalize a question object to the shape expected by the report renderer
+ * while supporting the new JSON pattern:
+ * - question text may be at "question" or "text"
+ * - options may be strings or objects { text, explanation?, correct? }
+ * - correct answer may be "correct_answer" (index) or per-option "correct": true
+ *
+ * Returns stdClass: {
+ *   type: string,
+ *   question: string,
+ *   options: string[],
+ *   correct_answer: int,
+ *   points?: number,
+ *   source?: string
+ * }
+ *
+ * @param array|object $q
+ * @return stdClass
+ */
+function ltg_normalize_question($q): stdClass {
+    $type = (string)ltg_get($q, 'type', 'multiple_choice');
+
+    // Question text field support: prefer "question", fall back to "text".
+    $questiontext = ltg_get($q, 'question');
+    if ($questiontext === null || $questiontext === '') {
+        $questiontext = ltg_get($q, 'text', '');
+    }
+    // Renderers expect HTML-ready string; keep as provided.
+    $questiontext = (string)$questiontext;
+
+    $rawoptions = ltg_to_array(ltg_get($q, 'options', []));
+    $optiontexts = [];
+    $derivedCorrectIndex = null;
+
+    foreach ($rawoptions as $idx => $opt) {
+        if (is_array($opt) || is_object($opt)) {
+            $text = ltg_get($opt, 'text', '');
+            $optiontexts[] = (string)$text;
+            $isCorrect = ltg_get($opt, 'correct', null);
+            if ($isCorrect === true && $derivedCorrectIndex === null) {
+                $derivedCorrectIndex = $idx;
+            }
+        } else {
+            // Primitive (string) option
+            $optiontexts[] = (string)$opt;
+        }
+    }
+
+    // Determine correct index: prefer explicit "correct_answer" if numeric; otherwise from per-option "correct".
+    $correctAnswer = ltg_get($q, 'correct_answer', null);
+    if (is_numeric($correctAnswer)) {
+        $correctIndex = (int)$correctAnswer;
+    } else if ($derivedCorrectIndex !== null) {
+            $correctIndex = (int)$derivedCorrectIndex;
+    } else {
+        // Fallback to 0 if none specified and options exist.
+        $correctIndex = !empty($optiontexts) ? 0 : -1;
+    }
+
+    $out = new stdClass();
+    $out->type = $type;
+    $out->question = $questiontext;
+    $out->options = $optiontexts;
+    $out->correct_answer = $correctIndex;
+
+    // Pass through optional metadata if present
+    $points = ltg_get($q, 'points', null);
+    if ($points !== null) {
+        $out->points = is_numeric($points) ? 0 + $points : $points;
+    }
+    $source = ltg_get($q, 'source', null);
+    if ($source !== null) {
+        $out->source = (string)$source;
+    }
+
+    return $out;
+}
+
+/**
+ * Extract option text from a session question options array given an answer value.
+ * The answer may be a numeric index or a literal string; options may be strings or objects with "text".
+ *
+ * @param array|object $sessionQuestion
+ * @param mixed $answer
+ * @return string|null
+ */
+function ltg_get_selected_option_text($sessionQuestion, $answer): ?string {
+    $opts = ltg_to_array(ltg_get($sessionQuestion, 'options', []));
+    // If $answer is numeric index and within range, extract text.
+    if (is_numeric($answer)) {
+        $ai = (int)$answer;
+        if ($ai >= 0 && $ai < count($opts)) {
+            $opt = $opts[$ai];
+            if (is_array($opt) || is_object($opt)) {
+                $text = ltg_get($opt, 'text', '');
+                return $text !== '' ? (string)$text : null;
+            } else {
+                return (string)$opt;
+            }
+        }
+        return null;
+    }
+
+    // If the answer is a string, it may already be the text value.
+    if (is_string($answer) && $answer !== '') {
+        return $answer;
+    }
+
+    return null;
+}
+
+/**
+ * Map the student's selected answer (from the potentially randomized session question)
+ * to the index in the original question's options array by comparing option text.
+ *
+ * @param array|object $sessionQuestion
+ * @param mixed $sessionAnswer
+ * @param stdClass $normalizedOriginalQuestion from ltg_normalize_question
+ * @return int|null Index in original options, or null if not resolvable
+ */
+function ltg_map_answer_to_original_index($sessionQuestion, $sessionAnswer, stdClass $normalizedOriginalQuestion): ?int {
+    $selectedText = ltg_get_selected_option_text($sessionQuestion, $sessionAnswer);
+    $originalOptions = isset($normalizedOriginalQuestion->options) && is_array($normalizedOriginalQuestion->options)
+        ? $normalizedOriginalQuestion->options
+        : [];
+
+    if ($selectedText !== null && !empty($originalOptions)) {
+        $needle = trim(mb_strtolower((string)$selectedText));
+        foreach ($originalOptions as $i => $optText) {
+            $cand = trim(mb_strtolower((string)$optText));
+            if ($needle === $cand) {
+                return $i;
+            }
+        }
+    }
+
+    // Fallback: if numeric and within bounds, pass through (best effort)
+    if (is_numeric($sessionAnswer)) {
+        $ai = (int)$sessionAnswer;
+        if ($ai >= 0 && $ai < count($originalOptions)) {
+            return $ai;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Attempt to obtain the original (non-randomized) questions list.
+ * Strategy:
+ * 1) If sessions include "original_questions_data", use the first available.
+ * 2) Otherwise, fall back to the first session's "questions_data" as a best-effort baseline.
+ *
+ * @param array $sessions
+ * @return array Original questions as array (possibly empty)
+ */
+function ltg_get_original_questions_from_sessions(array $sessions): array {
+    // Search for an explicit original_questions_data payload.
+    foreach ($sessions as $sess) {
+        $maybe = ltg_get($sess, 'original_questions_data', null);
+        if ($maybe !== null) {
+            $arr = ltg_to_array($maybe);
+            if (!empty($arr)) {
+                return $arr;
+            }
+        }
+    }
+
+    // Fallback: use the first session's questions_data (best-effort)
+    foreach ($sessions as $sess) {
+        $arr = ltg_to_array(ltg_get($sess, 'questions_data', []));
+        if (!empty($arr)) {
+            return $arr;
+        }
+    }
+
+    return [];
+}
+
+/**
+ * Normalize sessions for reporting:
+ * - Replace displayed question objects with normalized originals (ensures Correct Answer comes from original data).
+ * - Remap student's answers to indices in the original options array (handles randomized delivery).
+ * - Preserve points if present in session question or original.
+ *
+ * @param array $sessions
+ * @return array normalized sessions
+ */
+function ltg_normalize_sessions_for_report(array $sessions): array {
+    $originalQuestions = ltg_get_original_questions_from_sessions($sessions);
+    $normalizedOriginals = array_map('ltg_normalize_question', $originalQuestions);
+
+    $normalizedSessions = [];
+
+    foreach ($sessions as $sess) {
+        // Clone-like behavior: we will modify questions_data and answers_data fields only.
+        $nsess = clone($sess);
+
+        $sessionQuestions = ltg_to_array(ltg_get($sess, 'questions_data', []));
+        $answers = ltg_to_array(ltg_get($sess, 'answers_data', []));
+
+        $displayQuestions = [];
+        $remappedAnswers = [];
+
+        $qCount = max(count($sessionQuestions), count($normalizedOriginals));
+
+        for ($i = 0; $i < $qCount; $i++) {
+            $sessionQ = $sessionQuestions[$i] ?? null;
+            $originalNormalized = $normalizedOriginals[$i] ?? null;
+
+            // If we don't have an original for this index, fall back to normalizing the session question itself.
+            if ($originalNormalized === null && $sessionQ !== null) {
+                $originalNormalized = ltg_normalize_question($sessionQ);
+            } else if ($originalNormalized === null) {
+                // Construct an empty placeholder to keep indexing stable.
+                $originalNormalized = (object)[
+                    'type' => 'multiple_choice',
+                    'question' => get_string('not_available', 'local_trustgrade'),
+                    'options' => [],
+                    'correct_answer' => -1,
+                ];
+            }
+
+            // Preserve points from either session question or original
+            $sessionPoints = $sessionQ ? ltg_get($sessionQ, 'points', null) : null;
+            if ($sessionPoints !== null) {
+                $originalNormalized->points = is_numeric($sessionPoints) ? 0 + $sessionPoints : $sessionPoints;
+            }
+
+            // Preserve source if present in session (useful in table badge)
+            $sessionSource = $sessionQ ? ltg_get($sessionQ, 'source', null) : null;
+            if ($sessionSource !== null) {
+                $originalNormalized->source = (string)$sessionSource;
+            }
+
+            $displayQuestions[$i] = $originalNormalized;
+
+            // Remap student's selected answer to the original options index space
+            $sessionAnswer = $answers[$i] ?? null;
+            $remapped = ltg_map_answer_to_original_index($sessionQ, $sessionAnswer, $originalNormalized);
+
+            // If remapping failed, keep original answer for traceability
+            $remappedAnswers[$i] = $remapped !== null ? $remapped : $sessionAnswer;
+        }
+
+        // Replace on the session object for the renderer
+        $nsess->questions_data = $displayQuestions;
+        $nsess->answers_data = $remappedAnswers;
+
+        $normalizedSessions[] = $nsess;
+    }
+
+    return $normalizedSessions;
+}
+
 // Get parameters
 $cmid = optional_param('cmid', 0, PARAM_INT);
 $courseid = optional_param('courseid', 0, PARAM_INT);
@@ -40,197 +338,6 @@ $PAGE->set_pagelayout('admin');
 // Add CSS for grading interface
 $PAGE->requires->css('/local/trustgrade/grading_styles.css');
 
-// Helper: Convert mixed array/stdClass to array (shallow).
-function tg_to_array($value) {
-    if (is_array($value)) {
-        return $value;
-    }
-    if (is_object($value)) {
-        return (array)$value;
-    }
-    return $value;
-}
-
-// Helper: Deeply ensure an array of stdClass for renderer compatibility.
-function tg_to_object($arr) {
-    if (is_array($arr)) {
-        $obj = new stdClass();
-        foreach ($arr as $k => $v) {
-            $obj->{$k} = is_array($v) ? tg_array_to_objects($v) : $v;
-        }
-        return $obj;
-    } else if (is_object($arr)) {
-        return $arr;
-    }
-    return $arr;
-}
-function tg_array_to_objects($arr) {
-    $out = [];
-    foreach ($arr as $k => $v) {
-        if (is_array($v)) {
-            // If this is a list, keep as list of scalars/objects; if associative, make stdClass.
-            $islist = array_keys($v) === range(0, count($v) - 1);
-            if ($islist) {
-                $out[$k] = array_map(function($item) {
-                    if (is_array($item)) {
-                        // If item is associative array, make object; if list, recurse.
-                        $islist2 = array_keys($item) === range(0, count($item) - 1);
-                        return $islist2 ? tg_array_to_objects($item) : tg_to_object($item);
-                    }
-                    return $item;
-                }, $v);
-            } else {
-                $out[$k] = tg_to_object($v);
-            }
-        } else {
-            $out[$k] = $v;
-        }
-    }
-    return $out;
-}
-
-// Helper: Normalize a question structure from new/old JSON into a consistent array.
-// - Returns array with keys: question (string), type (string), options (string[]), correct_answer (?int),
-//   points (int), source (?string)
-function tg_normalize_session_question($sq_raw) {
-    $sq = tg_to_array($sq_raw);
-
-    // Type
-    $type = isset($sq['type']) ? (string)$sq['type'] : (isset($sq['questiontype']) ? (string)$sq['questiontype'] : 'multiple_choice');
-
-    // Question text can be under 'text' (new) or 'question' (old).
-    $qtext = '';
-    if (!empty($sq['text'])) {
-        $qtext = (string)$sq['text'];
-    } else if (!empty($sq['question'])) {
-        $qtext = (string)$sq['question'];
-    }
-
-    // Points (default 10)
-    $points = isset($sq['points']) && is_numeric($sq['points']) ? (int)$sq['points'] : 10;
-
-    // Source (optional)
-    $source = isset($sq['source']) ? (string)$sq['source'] : null;
-
-    // Options: support strings or objects { text, explanation, correct }
-    $optionsText = [];
-    $correctIndexFromFlags = null;
-    if (isset($sq['options']) && is_array($sq['options'])) {
-        foreach ($sq['options'] as $idx => $opt) {
-            if (is_array($opt) || is_object($opt)) {
-                $optArr = tg_to_array($opt);
-                $text = isset($optArr['text']) ? (string)$optArr['text'] : (isset($optArr['label']) ? (string)$optArr['label'] : '');
-                $optionsText[] = $text;
-                if ($correctIndexFromFlags === null && isset($optArr['correct']) && ($optArr['correct'] === true || $optArr['correct'] === 1 || $optArr['correct'] === '1')) {
-                    $correctIndexFromFlags = $idx;
-                }
-            } else {
-                // Scalar string
-                $optionsText[] = (string)$opt;
-            }
-        }
-    }
-
-    // correct_answer may exist as index; otherwise derive from flags.
-    $correctIdx = null;
-    if (isset($sq['correct_answer']) && ($sq['correct_answer'] === 0 || !empty($sq['correct_answer'])) && is_numeric($sq['correct_answer'])) {
-        $correctIdx = (int)$sq['correct_answer'];
-    } else if ($correctIndexFromFlags !== null) {
-        $correctIdx = (int)$correctIndexFromFlags;
-    }
-
-    return [
-        'type' => $type,
-        'question' => $qtext,
-        'options' => $optionsText,
-        'correct_answer' => $correctIdx,
-        'points' => $points,
-        'source' => $source,
-    ];
-}
-
-// Helper: Normalize an original bank question (instructor) similarly.
-function tg_normalize_original_question($oq_raw) {
-    $oq = tg_to_array($oq_raw);
-    $type = isset($oq['type']) ? (string)$oq['type'] : (isset($oq['questiontype']) ? (string)$oq['questiontype'] : 'multiple_choice');
-    $qtext = '';
-    if (!empty($oq['text'])) {
-        $qtext = (string)$oq['text'];
-    } else if (!empty($oq['question'])) {
-        $qtext = (string)$oq['question'];
-    }
-    $points = isset($oq['points']) && is_numeric($oq['points']) ? (int)$oq['points'] : 10;
-    $optionsText = [];
-    if (isset($oq['options']) && is_array($oq['options'])) {
-        foreach ($oq['options'] as $opt) {
-            if (is_array($opt) || is_object($opt)) {
-                $optArr = tg_to_array($opt);
-                $optionsText[] = isset($optArr['text']) ? (string)$optArr['text'] : (isset($optArr['label']) ? (string)$optArr['label'] : '');
-            } else {
-                $optionsText[] = (string)$opt;
-            }
-        }
-    }
-    $correctIdx = null;
-    if (isset($oq['correct_answer']) && ($oq['correct_answer'] === 0 || !empty($oq['correct_answer'])) && is_numeric($oq['correct_answer'])) {
-        $correctIdx = (int)$oq['correct_answer'];
-    } else if (isset($oq['options']) && is_array($oq['options'])) {
-        foreach ($oq['options'] as $idx => $opt) {
-            if ((is_array($opt) || is_object($opt))) {
-                $optArr = tg_to_array($opt);
-                if (isset($optArr['correct']) && ($optArr['correct'] === true || $optArr['correct'] === 1 || $optArr['correct'] === '1')) {
-                    $correctIdx = $idx; break;
-                }
-            }
-        }
-    }
-
-    return [
-        'type' => $type,
-        'question' => $qtext,
-        'options' => $optionsText,
-        'correct_answer' => $correctIdx,
-        'points' => $points,
-    ];
-}
-
-// Build a cache of original questions by cmid for quick lookup (keyed by normalized question text).
-$tg_original_cache = [];
-
-/**
- * Get original questions map for a given cmid.
- * Returns ['bytext' => [lowercased_text => questionArray], 'list' => [questionArray, ...]]
- */
-function tg_get_original_questions_for_cmid($cmid) {
-    static $cache = [];
-    if (isset($cache[$cmid])) {
-        return $cache[$cmid];
-    }
-    $bytext = [];
-    $list = [];
-    try {
-        $originals = \local_trustgrade\question_generator::get_questions($cmid);
-        if (is_array($originals)) {
-            foreach ($originals as $oq) {
-                $n = tg_normalize_original_question($oq);
-                $list[] = $n;
-                $key = trim(mb_strtolower((string)($n['question'] ?? '')));
-                if ($key !== '') {
-                    // If duplicates, keep the first one—can be extended if needed.
-                    if (!isset($bytext[$key])) {
-                        $bytext[$key] = $n;
-                    }
-                }
-            }
-        }
-    } catch (Exception $e) {
-        // If original questions are not available, we silently continue.
-        debugging('Warning: unable to load original questions for cmid '.$cmid.': '.$e->getMessage(), DEBUG_DEVELOPER);
-    }
-    $cache[$cmid] = ['bytext' => $bytext, 'list' => $list];
-    return $cache[$cmid];
-}
-
 // Get completed quiz sessions
 $sessions = [];
 try {
@@ -249,71 +356,10 @@ try {
     $sessions = [];
 }
 
-/**
- * Normalize questions for reporting:
- * - Base question text and points on the original bank question (when available).
- * - Preserve session-specific options order and correct_answer index (so randomization is respected).
- * - Convert to the structure expected by the existing renderer: question, options as strings, correct_answer index.
- */
-foreach ($sessions as $sid => $session) {
-    // Determine cmid for this session (may differ when viewing by course or all).
-    $sessioncmid = isset($session->cmid) ? (int)$session->cmid : (int)$cmid;
-
-    // Load and cache original questions for this cmid.
-    $origPack = tg_get_original_questions_for_cmid($sessioncmid);
-    $origByText = $origPack['bytext'];
-
-    // Ensure session questions_data is an array.
-    $sessionQuestions = isset($session->questions_data) ? (array)$session->questions_data : [];
-    $normalizedQuestions = [];
-
-    foreach ($sessionQuestions as $sq_raw) {
-        $sqN = tg_normalize_session_question($sq_raw);
-
-        // Try to find original by normalized question text.
-        $textKey = trim(mb_strtolower((string)$sqN['question']));
-        $orig = $textKey !== '' && isset($origByText[$textKey]) ? $origByText[$textKey] : null;
-
-        // Build final question for report:
-        // - question: prefer original text when available to "base on the original question"
-        // - points: prefer original points when available
-        // - options: keep session order (respects randomization)
-        // - correct_answer: keep session index if present; otherwise derive from flags
-        $final = [
-            'type' => $sqN['type'],
-            'question' => $orig && !empty($orig['question']) ? $orig['question'] : $sqN['question'],
-            'options' => $sqN['options'], // session order preserved
-            'correct_answer' => $sqN['correct_answer'],
-            'points' => $orig && isset($orig['points']) ? (int)$orig['points'] : (int)$sqN['points'],
-            'source' => isset($sqN['source']) ? $sqN['source'] : null,
-        ];
-
-        // Ensure options are strings (renderer expects string list).
-        $final['options'] = array_map(function($opt) {
-            return (string)$opt;
-        }, is_array($final['options']) ? $final['options'] : []);
-
-        // Ensure correct_answer is null or a valid integer within options bounds.
-        if ($final['correct_answer'] !== null && is_numeric($final['correct_answer'])) {
-            $idx = (int)$final['correct_answer'];
-            if ($idx < 0 || $idx >= count($final['options'])) {
-                // Out of bounds, nullify to avoid misleading marking.
-                $final['correct_answer'] = null;
-            } else {
-                $final['correct_answer'] = $idx;
-            }
-        } else {
-            $final['correct_answer'] = null;
-        }
-
-        $normalizedQuestions[] = tg_to_object($final);
-    }
-
-    // Replace questions_data with normalized array of stdClass for the renderer.
-    $session->questions_data = $normalizedQuestions;
-
-    // Keep answers_data and all other fields untouched.
-}
+// Normalize sessions to support new JSON format and randomized answer order mapping.
+// - Ensures Correct Answer comes from original question data.
+// - Ensures student's selected answer is correctly mapped to original indices for scoring.
+$normalized_sessions = ltg_normalize_sessions_for_report($sessions);
 
 // Output page
 echo $OUTPUT->header();
@@ -338,9 +384,9 @@ if ($cmid) {
     );
 }
 
-// Render the report
+// Render the report using normalized sessions
 $renderer = $PAGE->get_renderer('local_trustgrade', 'report');
-echo $renderer->render_quiz_report($sessions, $cmid);
+echo $renderer->render_quiz_report($normalized_sessions, $cmid);
 
 // Back navigation
 if ($cmid) {
