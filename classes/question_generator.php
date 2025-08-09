@@ -57,9 +57,15 @@ class question_generator {
             $result = $gateway->generateQuestions($instructions, $questions_count);
             
             if ($result['success']) {
+                $rawquestions = isset($result['data']['questions']) && is_array($result['data']['questions'])
+                    ? $result['data']['questions']
+                    : [];
+
+                $normalized = self::normalize_questions($rawquestions);
+
                 return [
                     'success' => true,
-                    'questions' => $result['data']['questions']
+                    'questions' => $normalized
                 ];
             } else {
                 return ['error' => $result['error']];
@@ -122,5 +128,94 @@ class question_generator {
         }
         
         return $questions;
+    }
+
+    private static function normalize_questions($rawquestions) {
+        $out = [];
+
+        if (!is_array($rawquestions)) {
+            return $out;
+        }
+
+        foreach ($rawquestions as $q) {
+            // If already in the internal shape, pass through unchanged.
+            if (is_array($q) && isset($q['question'])) {
+                $out[] = $q;
+                continue;
+            }
+
+            if (!is_array($q)) {
+                continue;
+            }
+
+            $type = isset($q['type']) ? (string)$q['type'] : 'multiple_choice';
+            $metadata = isset($q['metadata']) && is_array($q['metadata']) ? $q['metadata'] : [];
+
+            $normalized = [
+                'question' => isset($q['text']) ? (string)$q['text'] : '',
+                'type' => $type,
+                'difficulty' => isset($metadata['blooms_level']) ? (string)$metadata['blooms_level'] : '',
+                'points' => isset($metadata['points']) ? (int)$metadata['points'] : 1,
+                'explanation' => '',
+            ];
+
+            if ($type === 'multiple_choice') {
+                $options = [];
+                $correctIndex = 0;
+
+                if (isset($q['options']) && is_array($q['options'])) {
+                    $idx = 0;
+                    foreach ($q['options'] as $opt) {
+                        $text = isset($opt['text']) ? (string)$opt['text'] : '';
+                        $options[] = $text;
+
+                        $isCorrect = !empty($opt['is_correct']);
+                        if ($isCorrect) {
+                            $correctIndex = $idx;
+                            if (!empty($opt['explanation'])) {
+                                $normalized['explanation'] = trim((string)$opt['explanation']);
+                            }
+                        }
+                        $idx++;
+                    }
+                }
+
+                if (empty($options)) {
+                    // Ensure at least 4 options exist to keep editor stable.
+                    $options = ['Option A', 'Option B', 'Option C', 'Option D'];
+                    $correctIndex = 0;
+                }
+
+                $normalized['options'] = $options;
+                $normalized['correct_answer'] = $correctIndex;
+
+            } else if ($type === 'true_false') {
+                // Derive boolean from options list if provided
+                $correctBool = null;
+                if (isset($q['options']) && is_array($q['options'])) {
+                    foreach ($q['options'] as $opt) {
+                        if (!empty($opt['is_correct'])) {
+                            $text = strtolower(isset($opt['text']) ? (string)$opt['text'] : '');
+                            $correctBool = ($text === 'true');
+                            if (!empty($opt['explanation'])) {
+                                $normalized['explanation'] = trim((string)$opt['explanation']);
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (is_null($correctBool)) {
+                    $correctBool = false;
+                }
+                $normalized['correct_answer'] = $correctBool ? true : false;
+            } else {
+                // For other types, keep minimal fields. The editor can be extended later.
+                $normalized['correct_answer'] = null;
+            }
+
+            $out[] = $normalized;
+        }
+
+        return $out;
     }
 }
