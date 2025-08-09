@@ -630,7 +630,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
             // Show the explanation corresponding to the selected answer (per-answer explanation)
             var explanationText = this.getOptionExplanation(question, Number(userAnswer))
             if (explanationText) {
-              resultsHtml += `<div class="explanation"><strong>${strings[7].replace("{$a}", explanationText)}</strong></div>`
+              resultsHtml += `<div class="explanation"><strong>${strings[7]}:</strong> ${explanationText}</div>`
             }
           } else if (question.type === "true_false") {
             var userAnswerText = userAnswer !== undefined ? (userAnswer ? strings[9] : strings[10]) : strings[6]
@@ -658,7 +658,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
               }
             }
             if (tfExplanation) {
-              resultsHtml += `<div class="explanation"><strong>${strings[7].replace("{$a}", tfExplanation)}</strong></div>`
+              resultsHtml += `<div class="explanation"><strong>${strings[7]}:</strong> ${tfExplanation}</div>`
             }
           } else if (question.type === "short_answer") {
             resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswer || strings[6])}</strong></p>`
