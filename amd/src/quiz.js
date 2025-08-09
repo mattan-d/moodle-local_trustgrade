@@ -1,5 +1,7 @@
 // This file is part of Moodle - http://moodle.org/
 
+const define = window.define // Declare the define variable
+
 define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notification, Str) => {
   var Quiz = {
     session: null,
@@ -17,70 +19,46 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     maxWindowBlurs: 3,
     autoSaveInterval: null,
 
-    // Helper: get question text with backward compatibility
-    getQuestionText: (question) =>
-      typeof question?.text === "string" && question.text.trim() !== "" ? question.text : question?.question || "",
+    // Helpers to support new JSON pattern while keeping backward compatibility
+    getQuestionText: (q) => (typeof q.text === "string" && q.text.length ? q.text : q.question || ""),
 
-    // Helper: get points with new metadata support + fallback
-    getQuestionPoints: (question) => {
-      if (question && question.metadata && typeof question.metadata.points === "number") {
-        return question.metadata.points
-      }
-      if (typeof question?.points === "number") {
-        return question.points
-      }
+    getQuestionPoints: (q) => {
+      if (q && q.metadata && typeof q.metadata.points === "number") return q.metadata.points
+      if (typeof q.points === "number") return q.points
       return 10
     },
 
-    // Helper: get difficulty with bloom's level fallback
-    getQuestionDifficulty: (question) => {
-      if (typeof question?.difficulty === "string" && question.difficulty.trim() !== "") {
-        return question.difficulty
+    getOptions: (q) => {
+      // Normalize options to objects: { id, text, is_correct, explanation }
+      if (!q || !Array.isArray(q.options)) return []
+      const opts = q.options
+
+      // New format: array of objects
+      if (opts.length > 0 && typeof opts[0] === "object" && opts[0] !== null) {
+        return opts.map((o, idx) => ({
+          id: typeof o.id !== "undefined" ? o.id : idx + 1,
+          text: typeof o.text !== "undefined" ? o.text : String(o),
+          is_correct: !!o.is_correct,
+          explanation: typeof o.explanation !== "undefined" ? o.explanation : "",
+        }))
       }
-      if (question && question.metadata && typeof question.metadata.blooms_level === "string") {
-        return question.metadata.blooms_level
-      }
-      return "medium"
+
+      // Legacy format: array of strings + question.correct_answer index
+      return opts.map((text, idx) => ({
+        id: idx + 1,
+        text: text,
+        is_correct: typeof q.correct_answer !== "undefined" ? idx === q.correct_answer : false,
+        explanation: "",
+      }))
     },
 
-    // Helper: return text for an option that might be string or object { text }
-    getOptionText: (option) => {
-      if (option && typeof option === "object" && typeof option.text === "string") {
-        return option.text
-      }
-      // Back-compat: option is just a string
-      return String(option)
+    getCorrectOption: function (q) {
+      return this.getOptions(q).find((o) => o.is_correct) || null
     },
 
-    // Helper: find correct option index for new JSON (by is_correct) or fallback to correct_answer index
-    getCorrectOptionIndex: (question) => {
-      if (!question || !Array.isArray(question.options)) return -1
-
-      // New pattern: detect by is_correct
-      const idxByFlag = question.options.findIndex((opt) => {
-        return opt && typeof opt === "object" && opt.is_correct === true
-      })
-      if (idxByFlag !== -1) return idxByFlag
-
-      // Back-compat: fallback to numeric correct_answer index
-      if (typeof question.correct_answer === "number") {
-        return question.correct_answer
-      }
-
-      return -1
-    },
-
-    // Helper: get option explanation if exists (new JSON pattern)
-    getOptionExplanation: (option) => {
-      if (
-        option &&
-        typeof option === "object" &&
-        typeof option.explanation === "string" &&
-        option.explanation.trim() !== ""
-      ) {
-        return option.explanation
-      }
-      return ""
+    getOptionById: function (q, id) {
+      const sid = String(id)
+      return this.getOptions(q).find((o) => String(o.id) === sid) || null
     },
 
     init: function (session) {
@@ -121,21 +99,19 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     },
 
     showIntegrityWarning: function () {
-      var strings = [
-        "important_formal_assessment",
-        "read_carefully",
-        "one_attempt_only",
-        "no_going_back",
-        "no_restarts",
-        "time_limits",
-        "no_cheating",
-        "final_grade",
-        "stay_focused",
-        "cannot_restart_notice",
-        "understand_start_quiz",
-      ].map((str) => Str.get_string(str, "local_trustgrade"))
-
-      Promise.all(strings).then((strings) => {
+      Promise.all([
+        Str.get_string("important_formal_assessment", "local_trustgrade"),
+        Str.get_string("read_carefully", "local_trustgrade"),
+        Str.get_string("one_attempt_only", "local_trustgrade"),
+        Str.get_string("no_going_back", "local_trustgrade"),
+        Str.get_string("no_restarts", "local_trustgrade"),
+        Str.get_string("time_limits", "local_trustgrade"),
+        Str.get_string("no_cheating", "local_trustgrade"),
+        Str.get_string("final_grade", "local_trustgrade"),
+        Str.get_string("stay_focused", "local_trustgrade"),
+        Str.get_string("cannot_restart_notice", "local_trustgrade"),
+        Str.get_string("understand_start_quiz", "local_trustgrade"),
+      ]).then((strings) => {
         var warningHtml = `
           <div class="quiz-integrity-warning alert alert-warning">
             <h4><i class="fa fa-exclamation-triangle"></i> ${strings[0]}</h4>
@@ -325,6 +301,8 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
 
     showQuestion: function (index) {
       var question = this.questions[index]
+      const questionText = this.getQuestionText(question)
+      const points = this.getQuestionPoints(question)
       Promise.all([
         Str.get_string(
           "quiz_progress_complete",
@@ -340,10 +318,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         Str.get_string("enter_answer_placeholder", "local_trustgrade"),
       ]).then((strings) => {
         var progress = Math.round(((index + 1) / this.questions.length) * 100)
-        var qText = this.getQuestionText(question)
-        var points = this.getQuestionPoints(question)
-        var difficulty = this.getQuestionDifficulty(question)
-
         var html = `<div class="quiz-progress mb-3">
           <div class="progress">
             <div class="progress-bar bg-primary" style="width: ${progress}%"></div>
@@ -352,26 +326,27 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         </div>
         <div class="question-container">
           <div class="question-header">
-            <span class="question-source badge ${question.source === "instructor" ? "badge-primary" : "badge-success"}">
-              ${question.source === "instructor" ? strings[2] : strings[3]}
+            <span class="question-source badge ${question.source === "submission" ? "badge-success" : "badge-primary"}">
+              ${question.source === "submission" ? strings[3] : strings[2]}
             </span>
-            <span class="question-difficulty badge badge-secondary">${difficulty}</span>
+            <span class="question-difficulty badge badge-secondary">${question.difficulty || "medium"}</span>
             <span class="question-points">${points} points</span>
           </div>
           <div class="alert alert-info">
             <i class="fa fa-info-circle"></i> 
             <small>${strings[4]}</small>
           </div>
-          <h3 class="question-text">${qText}</h3>`
+          <h3 class="question-text">${questionText}</h3>`
 
         if (question.type === "multiple_choice" && Array.isArray(question.options)) {
+          const options = this.getOptions(question)
           html += `<div class="question-options">`
-          question.options.forEach((option, optIndex) => {
-            var labelText = this.getOptionText(option)
-            var checked = this.answers[index] === optIndex ? "checked" : ""
+          options.forEach((opt, optIndex) => {
+            var checked = String(this.answers[index]) === String(opt.id) ? "checked" : ""
+            const inputId = `option_${String(opt.id).replace(/[^a-zA-Z0-9_-]/g, "")}`
             html += `<div class="form-check">
-              <input class="form-check-input" type="radio" name="answer" value="${optIndex}" id="option_${optIndex}" ${checked}>
-              <label class="form-check-label" for="option_${optIndex}">${labelText}</label>
+              <input class="form-check-input" type="radio" name="answer" value="${opt.id}" id="${inputId}" ${checked}>
+              <label class="form-check-label" for="${inputId}">${String.fromCharCode(65 + optIndex)}. ${opt.text}</label>
             </div>`
           })
           html += `</div>`
@@ -499,7 +474,12 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       var answer = null
       if (question.type === "multiple_choice") {
         answer = $('input[name="answer"]:checked').val()
-        if (answer !== undefined) this.answers[this.currentQuestion] = Number.parseInt(answer)
+        if (typeof answer !== "undefined") {
+          // store option id (string or number); keep as-is
+          this.answers[this.currentQuestion] = isNaN(Number.parseInt(answer, 10))
+            ? String(answer)
+            : Number.parseInt(answer, 10)
+        }
       } else if (question.type === "true_false") {
         answer = $('input[name="answer"]:checked').val()
         if (answer !== undefined) this.answers[this.currentQuestion] = answer === "true"
@@ -555,14 +535,13 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         var userAnswer = this.answers[index]
         var isCorrect = false
         var points = this.getQuestionPoints(question)
-
-        if (question.type === "multiple_choice" && Array.isArray(question.options)) {
-          // New JSON: detect correct by is_correct, fallback to question.correct_answer
-          var correctIndex = this.getCorrectOptionIndex(question)
-          isCorrect = typeof userAnswer === "number" && userAnswer === correctIndex
+        if (question.type === "multiple_choice") {
+          const selected = this.getOptionById(question, userAnswer)
+          isCorrect = !!(selected && selected.is_correct)
         } else if (question.type === "true_false") {
-          // Back-compat: boolean compare against question.correct_answer
           isCorrect = userAnswer === question.correct_answer
+        } else if (question.type === "short_answer") {
+          isCorrect = false // short answers are not auto-scored here
         }
         if (isCorrect) score += points
       })
@@ -597,87 +576,76 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
           var points = this.getQuestionPoints(question)
           totalPoints += points
 
-          var correctIndex = -1
+          if (question.type === "multiple_choice") {
+            const selected = this.getOptionById(question, userAnswer)
+            const correctOpt = this.getCorrectOption(question)
+            isCorrect = !!(selected && selected.is_correct)
+            if (isCorrect) score += points
 
-          if (question.type === "multiple_choice" && Array.isArray(question.options)) {
-            correctIndex = this.getCorrectOptionIndex(question)
-            isCorrect = typeof userAnswer === "number" && userAnswer === correctIndex
+            const userAnswerText = selected && typeof selected.text === "string" ? selected.text : strings[6]
+            resultsHtml += `<div class="result-item ${isCorrect ? "correct" : "incorrect"}">
+              <div class="result-header">
+                <span class="question-number">Question ${index + 1}</span>
+                <span class="result-status ${isCorrect ? "text-success" : "text-danger"}">
+                  ${isCorrect ? `✓ ${strings[2]}` : `✗ ${strings[3]}`}
+                </span>
+                <span class="result-points">${isCorrect ? points : 0}/${points} points</span>
+              </div>
+              <p class="question-text">${this.getQuestionText(question)}</p>`
+
+            resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswerText)}</strong></p>`
+
+            // Show the explanation for the selected answer (per-option explanation)
+            if (selected && selected.explanation) {
+              resultsHtml += `<div class="explanation"><strong>${strings[7].replace(
+                "{$a}",
+                selected.explanation,
+              )}</strong></div>`
+            }
+
+            if (!isCorrect && correctOpt) {
+              resultsHtml += `<p><strong>${strings[5].replace("{$a}", correctOpt.text)}</strong></p>`
+            }
+
+            resultsHtml += `</div>`
           } else if (question.type === "true_false") {
             isCorrect = userAnswer === question.correct_answer
-          }
+            if (isCorrect) score += points
 
-          if (isCorrect) score += points
-
-          resultsHtml += `<div class="result-item ${isCorrect ? "correct" : "incorrect"}">
-            <div class="result-header">
-              <span class="question-number">Question ${index + 1}</span>
-              <span class="result-status ${isCorrect ? "text-success" : "text-danger"}">
-                ${isCorrect ? `✓ ${strings[2]}` : `✗ ${strings[3]}`}
-              </span>
-              <span class="result-points">${isCorrect ? points : 0}/${points} points</span>
-            </div>
-            <p class="question-text">${this.getQuestionText(question)}</p>`
-
-          if (question.type === "multiple_choice") {
-            var userAnswerText =
-              typeof userAnswer === "number" && question.options[userAnswer] !== undefined
-                ? this.getOptionText(question.options[userAnswer])
-                : strings[6]
-
-            resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswerText)}</strong></p>`
-
-            // Show the correct answer if user was incorrect and we know the correct index
-            if (!isCorrect && correctIndex !== -1 && question.options[correctIndex] !== undefined) {
-              var correctText = this.getOptionText(question.options[correctIndex])
-              resultsHtml += `<p><strong>${strings[5].replace("{$a}", correctText)}</strong></p>`
-            }
-
-            // Explanations: from selected option and from correct option (new JSON pattern)
-            if (typeof userAnswer === "number" && question.options[userAnswer] !== undefined) {
-              var selectedExplanation = this.getOptionExplanation(question.options[userAnswer])
-              if (selectedExplanation) {
-                resultsHtml += `<div class="explanation"><strong>${strings[7].replace(
-                  "{$a}",
-                  selectedExplanation,
-                )}</strong></div>`
-              }
-            }
-            if (!isCorrect && correctIndex !== -1 && question.options[correctIndex] !== undefined) {
-              var correctExplanation = this.getOptionExplanation(question.options[correctIndex])
-              if (correctExplanation) {
-                resultsHtml += `<div class="explanation"><strong>${strings[7].replace(
-                  "{$a}",
-                  correctExplanation,
-                )}</strong></div>`
-              }
-            }
-          } else if (question.type === "true_false") {
             var userAnswerText = userAnswer !== undefined ? (userAnswer ? strings[9] : strings[10]) : strings[6]
-            resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswerText)}</strong></p>`
-            if (!isCorrect && question.correct_answer !== undefined) {
+
+            resultsHtml += `<div class="result-item ${isCorrect ? "correct" : "incorrect"}">
+              <div class="result-header">
+                <span class="question-number">Question ${index + 1}</span>
+                <span class="result-status ${isCorrect ? "text-success" : "text-danger"}">
+                  ${isCorrect ? `✓ ${strings[2]}` : `✗ ${strings[3]}`}
+                </span>
+                <span class="result-points">${isCorrect ? points : 0}/${points} points</span>
+              </div>
+              <p class="question-text">${this.getQuestionText(question)}</p>
+              <p><strong>${strings[4].replace("{$a}", userAnswerText)}</strong></p>`
+
+            if (!isCorrect && typeof question.correct_answer !== "undefined") {
               resultsHtml += `<p><strong>${strings[5].replace(
                 "{$a}",
                 question.correct_answer ? strings[9] : strings[10],
               )}</strong></p>`
             }
-            // Back-compat: if a question-level explanation exists
-            if (question.explanation) {
-              resultsHtml += `<div class="explanation"><strong>${strings[7].replace(
-                "{$a}",
-                question.explanation,
-              )}</strong></div>`
-            }
-          } else if (question.type === "short_answer") {
-            resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswer || strings[6])}</strong></p>`
-            if (question.explanation) {
-              resultsHtml += `<div class="explanation"><strong>${strings[7].replace(
-                "{$a}",
-                question.explanation,
-              )}</strong></div>`
-            }
-          }
 
-          resultsHtml += `</div>`
+            resultsHtml += `</div>`
+          } else if (question.type === "short_answer") {
+            // Short answer is not auto-scored; award 0 by default here.
+            const ans = userAnswer || strings[6]
+            resultsHtml += `<div class="result-item incorrect">
+              <div class="result-header">
+                <span class="question-number">Question ${index + 1}</span>
+                <span class="result-status text-danger">✗ ${strings[3]}</span>
+                <span class="result-points">0/${points} points</span>
+              </div>
+              <p class="question-text">${this.getQuestionText(question)}</p>
+              <p><strong>${strings[4].replace("{$a}", ans)}</strong></p>
+            </div>`
+          }
         })
 
         var percentage = totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0
