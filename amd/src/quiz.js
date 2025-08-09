@@ -1,6 +1,89 @@
 // This file is part of Moodle - http://moodle.org/
 
+const define = window.define // Declare the define variable to fix lint error
+
 define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notification, Str) => {
+  /**
+   * Normalize incoming question objects to a stable internal shape.
+   * Supported type: "multiple_choice" (aliases mapped).
+   * Internal shape:
+   * - type: "multiple_choice"
+   * - text: string
+   * - options: string[]
+   * - correct_answer: number (index into options) or undefined
+   * - points: number
+   * - difficulty: string
+   * - explanation: string
+   * - source: string ("instructor" | "submission" | undefined)
+   */
+  function normalizeQuestion(q) {
+    const raw = q || {}
+
+    // Derive type and map common aliases to "multiple_choice"
+    const type =
+      raw.type ||
+      raw.question_type ||
+      raw.kind ||
+      (typeof raw.isTrueFalse === "boolean" ? "true_false" : undefined) ||
+      ""
+    const t = String(type).toLowerCase().replace(/\s+/g, "_")
+    const isMCQ =
+      t === "multiple_choice" ||
+      t === "multiple-choice" ||
+      t === "mcq" ||
+      t === "single_choice" ||
+      t === "single-choice" ||
+      t === "choice"
+    const normalizedType = isMCQ ? "multiple_choice" : t
+
+    // Prefer "text" (new schema); fall back to older fields
+    const text = (raw.text ?? raw.question ?? raw.prompt ?? "").toString()
+
+    // Options: prefer "options", then "choices"
+    let options = []
+    if (Array.isArray(raw.options)) options = raw.options.slice()
+    else if (Array.isArray(raw.choices)) options = raw.choices.slice()
+    else options = []
+
+    // Correct answer index: prefer numeric fields, else try mapping from string value
+    let correctIdx = undefined
+    if (typeof raw.correct_answer === "number") {
+      correctIdx = raw.correct_answer
+    } else if (typeof raw.correctIndex === "number") {
+      correctIdx = raw.correctIndex
+    } else if (typeof raw.answerIndex === "number") {
+      correctIdx = raw.answerIndex
+    } else if (typeof raw.answer === "number") {
+      correctIdx = raw.answer
+    } else if (typeof raw.correct === "number") {
+      correctIdx = raw.correct
+    } else if (typeof raw.correct_answer === "string" && options.length) {
+      const idx = options.indexOf(raw.correct_answer)
+      correctIdx = idx >= 0 ? idx : undefined
+    } else if (typeof raw.answer === "string" && options.length) {
+      const idx = options.indexOf(raw.answer)
+      correctIdx = idx >= 0 ? idx : undefined
+    }
+
+    // Metadata
+    const points = Number.isFinite(raw.points) ? Number(raw.points) : Number(raw.score) || 10
+    const difficulty = (raw.difficulty ?? raw.level ?? "medium").toString()
+    const explanation = (raw.explanation ?? raw.rationale ?? "").toString()
+    const source = raw.source
+
+    return {
+      ...raw, // preserve unknown fields
+      type: normalizedType,
+      text,
+      options,
+      correct_answer: typeof correctIdx === "number" ? correctIdx : undefined,
+      points,
+      difficulty,
+      explanation,
+      source,
+    }
+  }
+
   var Quiz = {
     session: null,
     questions: [],
@@ -22,17 +105,18 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         return
       }
 
+      // Normalize all incoming questions to the new schema
       this.session = session
-      this.questions = session.questions
-      this.settings = session.settings
+      this.questions = (session.questions || []).map(normalizeQuestion)
+      this.settings = session.settings || {}
       this.cmid = session.cmid
       this.submissionid = session.submissionid
-      this.currentQuestion = session.current_question
-      this.answers = session.answers
-      this.attemptStarted = session.attempt_started
-      this.attemptCompleted = session.attempt_completed
-      this.windowBlurCount = session.window_blur_count
-      this.timeRemaining = session.time_remaining
+      this.currentQuestion = session.current_question || 0
+      this.answers = session.answers || {}
+      this.attemptStarted = !!session.attempt_started
+      this.attemptCompleted = !!session.attempt_completed
+      this.windowBlurCount = session.window_blur_count || 0
+      this.timeRemaining = session.time_remaining || 0
 
       if (this.attemptCompleted) {
         this.showResults()
@@ -257,6 +341,40 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
 
     showQuestion: function (index) {
       var question = this.questions[index]
+
+      // Only support multiple_choice; if not, show a fallback warning
+      if (question.type !== "multiple_choice") {
+        Promise.all([
+          Str.get_string(
+            "quiz_progress_complete",
+            "local_trustgrade",
+            Math.round(((index + 1) / this.questions.length) * 100),
+          ),
+          Str.get_string("question_x_of_y", "local_trustgrade", { current: index + 1, total: this.questions.length }),
+          Str.get_string("unsupported_question_type", "local_trustgrade"),
+        ]).then((strings) => {
+          var progress = Math.round(((index + 1) / this.questions.length) * 100)
+          var html = `
+            <div class="quiz-progress mb-3">
+              <div class="progress">
+                <div class="progress-bar bg-primary" style="width: ${progress}%"></div>
+              </div>
+              <small class="text-muted">${strings[1]} (${strings[0]})</small>
+            </div>
+            <div class="question-container">
+              <div class="alert alert-warning">
+                ${strings[2]}
+              </div>
+            </div>
+          `
+          $(".quiz-content").html(html)
+          $(".question-counter").show()
+          $(".quiz-navigation").show()
+          this.updateNavigationButtons()
+        })
+        return
+      }
+
       Promise.all([
         Str.get_string(
           "quiz_progress_complete",
@@ -267,11 +385,11 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         Str.get_string("instructor_question", "local_trustgrade"),
         Str.get_string("based_on_submission", "local_trustgrade"),
         Str.get_string("progress_auto_saved", "local_trustgrade"),
-        Str.get_string("true", "local_trustgrade"),
-        Str.get_string("false", "local_trustgrade"),
-        Str.get_string("enter_answer_placeholder", "local_trustgrade"),
       ]).then((strings) => {
         var progress = Math.round(((index + 1) / this.questions.length) * 100)
+        var sourceBadgeClass = question.source === "instructor" ? "badge-primary" : "badge-success"
+        var sourceLabel = question.source === "instructor" ? strings[2] : strings[3]
+
         var html = `<div class="quiz-progress mb-3">
           <div class="progress">
             <div class="progress-bar bg-primary" style="width: ${progress}%"></div>
@@ -280,52 +398,41 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         </div>
         <div class="question-container">
           <div class="question-header">
-            <span class="question-source badge ${question.source === "instructor" ? "badge-primary" : "badge-success"}">
-              ${question.source === "instructor" ? strings[2] : strings[3]}
+            <span class="question-source badge ${sourceBadgeClass}">
+              ${sourceLabel}
             </span>
             <span class="question-difficulty badge badge-secondary">${question.difficulty || "medium"}</span>
-            <span class="question-points">${question.points || 10} points</span>
+            <span class="question-points">${Number.isFinite(question.points) ? question.points : 10} points</span>
           </div>
           <div class="alert alert-info">
             <i class="fa fa-info-circle"></i> 
             <small>${strings[4]}</small>
           </div>
-          <h3 class="question-text">${question.question}</h3>`
+          <h3 class="question-text">${question.text}</h3>`
 
-        if (question.type === "multiple_choice" && question.options) {
+        // Render multiple choice options
+        const options = Array.isArray(question.options) ? question.options : []
+        if (options.length) {
           html += `<div class="question-options">`
-          question.options.forEach((option, optIndex) => {
+          options.forEach((option, optIndex) => {
             var checked = this.answers[index] === optIndex ? "checked" : ""
+            var id = `option_${index}_${optIndex}`
             html += `<div class="form-check">
-              <input class="form-check-input" type="radio" name="answer" value="${optIndex}" id="option_${optIndex}" ${checked}>
-              <label class="form-check-label" for="option_${optIndex}">${option}</label>
+              <input class="form-check-input" type="radio" name="answer" value="${optIndex}" id="${id}" ${checked}>
+              <label class="form-check-label" for="${id}">${option}</label>
             </div>`
           })
           html += `</div>`
-        } else if (question.type === "true_false") {
-          var trueChecked = this.answers[index] === true ? "checked" : ""
-          var falseChecked = this.answers[index] === false ? "checked" : ""
-          html += `<div class="question-options">
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="answer" value="true" id="true_option" ${trueChecked}>
-              <label class="form-check-label" for="true_option">${strings[5]}</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="answer" value="false" id="false_option" ${falseChecked}>
-              <label class="form-check-label" for="false_option">${strings[6]}</label>
-            </div>
-          </div>`
-        } else if (question.type === "short_answer") {
-          var savedAnswer = this.answers[index] || ""
-          html += `<div class="question-options">
-            <textarea class="form-control" name="answer" rows="4" placeholder="${strings[7]}">${savedAnswer}</textarea>
-          </div>`
+        } else {
+          html += `<div class="alert alert-warning"><small>No options provided.</small></div>`
         }
+
         html += `</div>`
         $(".quiz-content").html(html)
         $(".question-counter").show()
         $(".quiz-navigation").show()
         this.updateNavigationButtons()
+
         if (this.settings.show_countdown) {
           this.startTimer()
         }
@@ -406,12 +513,17 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
 
     validateCurrentAnswer: function () {
       var question = this.questions[this.currentQuestion]
-      var hasAnswer = false
-      if (question.type === "multiple_choice" || question.type === "true_false") {
-        hasAnswer = $('input[name="answer"]:checked').length > 0
-      } else if (question.type === "short_answer") {
-        hasAnswer = $('textarea[name="answer"]').val().trim().length > 0
+
+      // Only MCQ is supported now
+      if (question.type !== "multiple_choice") {
+        // Non-supported type: allow progression but warn once
+        Str.get_string("unsupported_question_type", "local_trustgrade").then((message) => {
+          Notification.addNotification({ message: message, type: "warning" })
+        })
+        return true
       }
+
+      var hasAnswer = $('input[name="answer"]:checked').length > 0
       if (!hasAnswer) {
         Str.get_string("provide_answer_warning", "local_trustgrade").then((message) => {
           Notification.addNotification({ message: message, type: "warning" })
@@ -424,17 +536,18 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     saveCurrentAnswer: function () {
       var question = this.questions[this.currentQuestion]
       var answer = null
+
       if (question.type === "multiple_choice") {
         answer = $('input[name="answer"]:checked').val()
-        if (answer !== undefined) this.answers[this.currentQuestion] = Number.parseInt(answer)
-      } else if (question.type === "true_false") {
-        answer = $('input[name="answer"]:checked').val()
-        if (answer !== undefined) this.answers[this.currentQuestion] = answer === "true"
-      } else if (question.type === "short_answer") {
-        answer = $('textarea[name="answer"]').val().trim()
-        this.answers[this.currentQuestion] = answer
+        if (answer !== undefined) this.answers[this.currentQuestion] = Number.parseInt(answer, 10)
+      } else {
+        // Non-supported types: no-op
       }
-      this.timeRemaining = this.settings.time_per_question
+
+      // Reset time remaining per question (if using countdown)
+      if (this.settings && Number.isFinite(this.settings.time_per_question)) {
+        this.timeRemaining = this.settings.time_per_question
+      }
     },
 
     finishQuiz: function () {
@@ -444,6 +557,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       if (this.autoSaveInterval) clearInterval(this.autoSaveInterval)
       $(window).off(".quiz")
       $(document).off(".quiz")
+
       var score = this.calculateScore()
       var promise = Ajax.call([
         {
@@ -478,13 +592,19 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
 
     calculateScore: function () {
       var score = 0
+      var totalPoints = 0
       this.questions.forEach((question, index) => {
         var userAnswer = this.answers[index]
         var isCorrect = false
-        var points = question.points || 10
-        if (question.type === "multiple_choice" || question.type === "true_false") {
-          isCorrect = userAnswer === question.correct_answer
+        var points = Number.isFinite(question.points) ? question.points : 10
+        totalPoints += points
+
+        if (question.type === "multiple_choice") {
+          if (typeof question.correct_answer === "number") {
+            isCorrect = userAnswer === question.correct_answer
+          }
         }
+
         if (isCorrect) score += points
       })
       return score
@@ -503,8 +623,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         Str.get_string("no_answer", "local_trustgrade"),
         Str.get_string("explanation", "local_trustgrade"),
         Str.get_string("final_grade_notice", "local_trustgrade"),
-        Str.get_string("true", "local_trustgrade"),
-        Str.get_string("false", "local_trustgrade"),
+        Str.get_string("final_score", "local_trustgrade", { score: 0, total: 0, percentage: 0 }), // placeholder to warm cache
       ]).then((strings) => {
         var resultsHtml = `<div class="quiz-completion-header alert alert-success">
           <h2><i class="fa fa-check-circle"></i> ${strings[0]}</h2>
@@ -515,11 +634,15 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         this.questions.forEach((question, index) => {
           var userAnswer = this.answers[index]
           var isCorrect = false
-          var points = question.points || 10
+          var points = Number.isFinite(question.points) ? question.points : 10
           totalPoints += points
-          if (question.type === "multiple_choice" || question.type === "true_false") {
-            isCorrect = userAnswer === question.correct_answer
+
+          if (question.type === "multiple_choice") {
+            if (typeof question.correct_answer === "number") {
+              isCorrect = userAnswer === question.correct_answer
+            }
           }
+
           if (isCorrect) score += points
 
           resultsHtml += `<div class="result-item ${isCorrect ? "correct" : "incorrect"}">
@@ -530,29 +653,22 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
               </span>
               <span class="result-points">${isCorrect ? points : 0}/${points} points</span>
             </div>
-            <p class="question-text">${question.question}</p>`
+            <p class="question-text">${question.text}</p>`
 
           if (question.type === "multiple_choice") {
-            var userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : strings[6]
+            const options = Array.isArray(question.options) ? question.options : []
+            const userAnswerText =
+              typeof userAnswer === "number" && options[userAnswer] !== undefined ? options[userAnswer] : strings[6]
             resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswerText)}</strong></p>`
-            if (!isCorrect && question.correct_answer !== undefined) {
-              resultsHtml += `<p><strong>${strings[5].replace(
-                "{$a}",
-                question.options[question.correct_answer],
-              )}</strong></p>`
+            if (
+              !isCorrect &&
+              typeof question.correct_answer === "number" &&
+              options[question.correct_answer] !== undefined
+            ) {
+              resultsHtml += `<p><strong>${strings[5].replace("{$a}", options[question.correct_answer])}</strong></p>`
             }
-          } else if (question.type === "true_false") {
-            var userAnswerText = userAnswer !== undefined ? (userAnswer ? strings[9] : strings[10]) : strings[6]
-            resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswerText)}</strong></p>`
-            if (!isCorrect && question.correct_answer !== undefined) {
-              resultsHtml += `<p><strong>${strings[5].replace(
-                "{$a}",
-                question.correct_answer ? strings[9] : strings[10],
-              )}</strong></p>`
-            }
-          } else if (question.type === "short_answer") {
-            resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswer || strings[6])}</strong></p>`
           }
+
           if (question.explanation) {
             resultsHtml += `<div class="explanation"><strong>${strings[7].replace(
               "{$a}",
@@ -574,6 +690,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
               <p><strong>${strings[8]}</strong></p>
             </div>` + resultsHtml
           resultsHtml += `</div>`
+
           if (this.windowBlurCount > 0) {
             Promise.all([
               Str.get_string("integrity_report_header", "local_trustgrade"),
