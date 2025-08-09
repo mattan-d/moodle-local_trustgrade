@@ -92,7 +92,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
      * - a JSON object in the format provided by the backend, or
      * - a string (legacy), which we render as paragraph lines with <br>.
      */
-    renderRecommendation: function (recommendation) {
+    renderRecommendation: (recommendation) => {
       // Legacy string fallback
       if (typeof recommendation === "string") {
         return recommendation.replace(/\n/g, "<br>")
@@ -102,13 +102,13 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       if (!recommendation || typeof recommendation !== "object") {
         try {
           const txt = JSON.stringify(recommendation, null, 2)
-          return this.escapeHtml(txt).replace(/\n/g, "<br>")
+          return trustgrade.escapeHtml(txt).replace(/\n/g, "<br>")
         } catch (e) {
           return ""
         }
       }
 
-      // Expecting structure:
+      // Expected structure:
       // {
       //   "table": { "title": "", "rows": [{ "Criterion": "", "Met": "", "Suggestions": "" }] },
       //   "EvaluationText": { "content": "" },
@@ -128,31 +128,36 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           ? String(recommendation.ImprovedAssignment.content)
           : ""
 
-      // Build HTML safely
       let html = ""
 
       // Table section
       html += `<div class="tg-section tg-table-section" style="margin-bottom:16px;">`
       if (tableTitle) {
-        html += `<h4 style="margin:0 0 8px 0;">${this.escapeHtml(tableTitle)}</h4>`
+        html += `<h4 style="margin:0 0 8px 0;">${trustgrade.escapeHtml(tableTitle)}</h4>`
       }
       html += `
         <div class="table-responsive">
           <table class="generaltable boxaligncenter" style="width:100%; border-collapse:collapse;">
             <thead>
               <tr>
-                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${this.escapeHtml("Criterion")}</th>
-                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${this.escapeHtml("Met")}</th>
-                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${this.escapeHtml("Suggestions")}</th>
+                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${trustgrade.escapeHtml(
+                  "Criterion",
+                )}</th>
+                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${trustgrade.escapeHtml(
+                  "Met",
+                )}</th>
+                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${trustgrade.escapeHtml(
+                  "Suggestions",
+                )}</th>
               </tr>
             </thead>
             <tbody>
       `
       if (rows.length > 0) {
         rows.forEach((r) => {
-          const c = this.escapeHtml(r["Criterion"] ?? "")
-          const m = this.escapeHtml(r["Met"] ?? "")
-          const s = this.escapeHtml(r["Suggestions"] ?? "")
+          const c = trustgrade.escapeHtml(r["Criterion"] ?? "")
+          const m = trustgrade.escapeHtml(r["Met"] ?? r["Met (y/n)"] ?? "")
+          const s = trustgrade.escapeHtml(r["Suggestions"] ?? "")
           html += `
               <tr>
                 <td style="vertical-align:top; border-bottom:1px solid #eee; padding:8px;">${c}</td>
@@ -164,7 +169,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       } else {
         html += `
               <tr>
-                <td colspan="3" style="padding:8px; color:#666;">${this.escapeHtml("No criteria provided.")}</td>
+                <td colspan="3" style="padding:8px; color:#666;">${trustgrade.escapeHtml("No criteria provided.")}</td>
               </tr>
         `
       }
@@ -177,14 +182,14 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
 
       // Evaluation Text section
       html += `<div class="tg-section tg-eval-text" style="margin-bottom:16px;">`
-      html += `<h4 style="margin:0 0 8px 0;">${this.escapeHtml("Evaluation")}</h4>`
-      html += `<div>${this.escapeHtml(evalText).replace(/\n/g, "<br>")}</div>`
+      html += `<h4 style="margin:0 0 8px 0;">${trustgrade.escapeHtml("Evaluation")}</h4>`
+      html += `<div>${trustgrade.escapeHtml(evalText).replace(/\n/g, "<br>")}</div>`
       html += `</div>`
 
       // Improved Assignment section
       html += `<div class="tg-section tg-improved" style="margin-bottom:8px;">`
-      html += `<h4 style="margin:0 0 8px 0;">${this.escapeHtml("Improved Assignment")}</h4>`
-      html += `<div>${this.escapeHtml(improved).replace(/\n/g, "<br>")}</div>`
+      html += `<h4 style="margin:0 0 8px 0;">${trustgrade.escapeHtml("Improved Assignment")}</h4>`
+      html += `<div>${trustgrade.escapeHtml(improved).replace(/\n/g, "<br>")}</div>`
       html += `</div>`
 
       return html
@@ -283,7 +288,16 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       promises[0]
         .done((response) => {
           if (response.success) {
-            var questions = JSON.parse(response.questions)
+            // response.questions is expected to be a JSON string representing the NEW pattern:
+            // [
+            //   {
+            //     id, type, text,
+            //     options: [{ id, text, is_correct, explanation }],
+            //     metadata: { blooms_level, points }
+            //   }
+            // ]
+            var questions = typeof response.questions === "string" ? JSON.parse(response.questions) : response.questions
+
             trustgrade.formatQuestionsDisplay(questions).then((questionsHtml) => {
               if (response.from_cache) {
                 Str.get_string("cache_hit", "local_trustgrade").then((cacheMessage) => {
@@ -317,6 +331,12 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
         })
     },
 
+    /**
+     * Format the AI-generated questions for display (NEW JSON PATTERN ONLY).
+     * - No difficulty field.
+     * - Per-option explanations.
+     * - Points are in question.metadata.points.
+     */
     formatQuestionsDisplay: (questions) =>
       new Promise((resolve) => {
         Promise.all([
@@ -326,27 +346,76 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           Str.get_string("correct", "local_trustgrade"),
           Str.get_string("explanation", "local_trustgrade"),
         ]).then((strings) => {
-          var html = "<h4>" + strings[0] + ":</h4>"
-          questions.forEach((question, index) => {
+          const [sGeneratedQuestions, sQuestion, sPoints, sCorrect, sExplanation] = strings
+
+          let html = "<h4>" + sGeneratedQuestions + ":</h4>"
+
+          if (!Array.isArray(questions) || questions.length === 0) {
+            html += `<div style="color:#666;">${trustgrade.escapeHtml("No questions generated.")}</div>`
+            resolve(html)
+            return
+          }
+
+          questions.forEach((q, index) => {
+            const qType = q && q.type ? String(q.type) : ""
+            const qText = q && q.text ? String(q.text) : ""
+            const points =
+              q && q.metadata && (typeof q.metadata.points === "number" || typeof q.metadata.points === "string")
+                ? String(q.metadata.points)
+                : ""
+            const blooms = q && q.metadata && q.metadata.blooms_level ? String(q.metadata.blooms_level) : ""
+
             html += `<div class="question-item" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">`
-            html += `<h5>${strings[1]} ${index + 1} (${question.difficulty || "medium"} - ${
-              question.points || 10
-            } ${strings[2]})</h5>`
-            html += `<p><strong>Type:</strong> ${question.type}</p>`
-            html += `<p><strong>${strings[1]}:</strong> ${question.question}</p>`
-            if (question.options && question.options.length > 0) {
-              html += `<p><strong>Options:</strong></p><ul>`
-              question.options.forEach((option, optIndex) => {
-                var isCorrect = question.correct_answer === optIndex ? ` <strong>(${strings[3]})</strong>` : ""
-                html += `<li>${option}${isCorrect}</li>`
+
+            // Header line: "Question X (Y points)" if points exist
+            let header = `${sQuestion} ${index + 1}`
+            if (points !== "") {
+              header += ` (${trustgrade.escapeHtml(points)} ${sPoints})`
+            }
+            html += `<h5>${trustgrade.escapeHtml(header)}</h5>`
+
+            if (qType) {
+              html += `<p><strong>Type:</strong> ${trustgrade.escapeHtml(qType)}</p>`
+            }
+
+            html += `<p><strong>${trustgrade.escapeHtml(sQuestion)}:</strong> ${trustgrade.escapeHtml(qText)}</p>`
+
+            if (blooms) {
+              html += `<p><strong>${trustgrade.escapeHtml("Bloom's level")}:</strong> ${trustgrade.escapeHtml(
+                blooms,
+              )}</p>`
+            }
+
+            // Options with per-option explanation
+            if (Array.isArray(q.options) && q.options.length > 0) {
+              html += `<div><strong>Options:</strong></div><ul style="margin:6px 0 0 20px;">`
+              q.options.forEach((opt, optIndex) => {
+                const label = String.fromCharCode(65 + optIndex) + "."
+                const optText = opt && opt.text ? String(opt.text) : ""
+                const isCorrect = !!(opt && opt.is_correct)
+                const explanation = opt && opt.explanation ? String(opt.explanation) : ""
+
+                const correctBadge = isCorrect
+                  ? ` <span class="badge badge-success" style="display:inline-block; padding:2px 6px; background:#16a34a; color:#fff; border-radius:4px; font-size:12px;">${trustgrade.escapeHtml(
+                      sCorrect,
+                    )}</span>`
+                  : ""
+
+                html += `<li style="margin:6px 0;">`
+                html += `<div>${trustgrade.escapeHtml(label)} ${trustgrade.escapeHtml(optText)}${correctBadge}</div>`
+                if (explanation) {
+                  html += `<div style="margin-left:20px; color:#555;"><em>${trustgrade.escapeHtml(
+                    sExplanation,
+                  )}:</em> ${trustgrade.escapeHtml(explanation)}</div>`
+                }
+                html += `</li>`
               })
               html += `</ul>`
             }
-            if (question.explanation) {
-              html += `<p><strong>${strings[4]}:</strong> ${question.explanation}</p>`
-            }
+
             html += `</div>`
           })
+
           resolve(html)
         })
       }),
