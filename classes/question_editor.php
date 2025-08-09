@@ -113,53 +113,114 @@ class question_editor {
      * @return array Validation result
      */
     private static function validate_question_data($question_data) {
-        // Check required fields
-        if (empty($question_data['question'])) {
-            return ['valid' => false, 'error' => 'Question text is required'];
+        // Allow receiving a JSON string; decode to array.
+        if (is_string($question_data)) {
+            $decoded = json_decode($question_data, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return ['valid' => false, 'error' => 'Invalid JSON: ' . json_last_error_msg()];
+            }
+            $question_data = $decoded;
         }
-        
-        if (empty($question_data['type'])) {
+
+        if (!is_array($question_data)) {
+            return ['valid' => false, 'error' => 'Question data must be an associative array'];
+        }
+
+        // Required: type
+        if (empty($question_data['type']) || !is_string($question_data['type'])) {
             return ['valid' => false, 'error' => 'Question type is required'];
         }
-        
-        // Validate question type
+        $type = $question_data['type'];
         $valid_types = ['multiple_choice', 'true_false', 'short_answer'];
-        if (!in_array($question_data['type'], $valid_types)) {
+        if (!in_array($type, $valid_types, true)) {
             return ['valid' => false, 'error' => 'Invalid question type'];
         }
-        
-        // Validate multiple choice options
-        if ($question_data['type'] === 'multiple_choice') {
+
+        // Required: text (new schema replaces "question")
+        if (!isset($question_data['text']) || !is_string($question_data['text']) || trim($question_data['text']) === '') {
+            return ['valid' => false, 'error' => 'Question text (field "text") is required'];
+        }
+
+        // Options validation for choice-based types (per-option explanations in new schema)
+        if (in_array($type, ['multiple_choice', 'true_false'], true)) {
             if (!isset($question_data['options']) || !is_array($question_data['options'])) {
-                return ['valid' => false, 'error' => 'Multiple choice questions must have options'];
+                return ['valid' => false, 'error' => 'Options must be provided as an array'];
             }
-            
             if (count($question_data['options']) < 2) {
-                return ['valid' => false, 'error' => 'Multiple choice questions must have at least 2 options'];
+                return ['valid' => false, 'error' => 'At least 2 options are required'];
             }
-            
-            foreach ($question_data['options'] as $option) {
-                if (empty(trim($option))) {
-                    return ['valid' => false, 'error' => 'All options must be filled'];
+
+            $correctCount = 0;
+
+            foreach ($question_data['options'] as $index => $opt) {
+                if (!is_array($opt)) {
+                    return ['valid' => false, 'error' => 'Each option must be an object'];
+                }
+
+                // id is recommended numeric; allow missing but if present must be numeric
+                if (isset($opt['id']) && !is_numeric($opt['id'])) {
+                    return ['valid' => false, 'error' => "Option at index {$index} has non-numeric id"];
+                }
+
+                // text is required and non-empty
+                if (!isset($opt['text']) || !is_string($opt['text']) || trim($opt['text']) === '') {
+                    return ['valid' => false, 'error' => "Option at index {$index} must include non-empty 'text'"];
+                }
+
+                // is_correct is required and boolean-like
+                if (!array_key_exists('is_correct', $opt)) {
+                    return ['valid' => false, 'error' => "Option at index {$index} must include 'is_correct'"];
+                }
+                $isCorrectRaw = $opt['is_correct'];
+                // Accept true/false, 'true'/'false', 1/0
+                $isCorrect = null;
+                if (is_bool($isCorrectRaw)) {
+                    $isCorrect = $isCorrectRaw;
+                } elseif ($isCorrectRaw === 1 || $isCorrectRaw === 0 || $isCorrectRaw === '1' || $isCorrectRaw === '0') {
+                    $isCorrect = (bool)((int)$isCorrectRaw);
+                } elseif (is_string($isCorrectRaw) && in_array(strtolower($isCorrectRaw), ['true', 'false'], true)) {
+                    $isCorrect = strtolower($isCorrectRaw) === 'true';
+                }
+                if ($isCorrect === null) {
+                    return ['valid' => false, 'error' => "Option at index {$index} has invalid 'is_correct' (must be boolean)"];
+                }
+                if ($isCorrect) {
+                    $correctCount++;
+                }
+
+                // explanation is per-option; optional but must be string if present
+                if (isset($opt['explanation']) && !is_string($opt['explanation'])) {
+                    return ['valid' => false, 'error' => "Option at index {$index} has invalid 'explanation' (must be string)"];
                 }
             }
-            
-            if (!isset($question_data['correct_answer']) || 
-                $question_data['correct_answer'] < 0 || 
-                $question_data['correct_answer'] >= count($question_data['options'])) {
-                return ['valid' => false, 'error' => 'Invalid correct answer selection'];
+
+            if ($type === 'true_false' && $correctCount !== 1) {
+                return ['valid' => false, 'error' => 'True/False questions must have exactly one correct option'];
+            }
+            if ($type === 'multiple_choice' && $correctCount < 1) {
+                return ['valid' => false, 'error' => 'Multiple choice questions must have at least one correct option'];
             }
         }
-        
-        // Validate points
-        if (isset($question_data['points'])) {
-            $points = intval($question_data['points']);
-            if ($points < 1 || $points > 100) {
-                return ['valid' => false, 'error' => 'Points must be between 1 and 100'];
+
+        // Metadata (optional) with points moved under metadata in new schema
+        if (isset($question_data['metadata'])) {
+            if (!is_array($question_data['metadata'])) {
+                return ['valid' => false, 'error' => 'Metadata must be an object'];
             }
-            $question_data['points'] = $points;
+            if (isset($question_data['metadata']['points'])) {
+                $points = (int)$question_data['metadata']['points'];
+                if ($points < 1 || $points > 100) {
+                    return ['valid' => false, 'error' => 'Points must be between 1 and 100'];
+                }
+            }
+            if (isset($question_data['metadata']['blooms_level']) && !is_string($question_data['metadata']['blooms_level'])) {
+                return ['valid' => false, 'error' => "Metadata 'blooms_level' must be a string"];
+            }
         }
-        
+
+        // Ignore legacy fields if sent; new schema no longer uses these.
+        // do not fail if 'difficulty' or 'correct_answer' appear; we simply do not rely on them.
+
         return ['valid' => true];
     }
 }
