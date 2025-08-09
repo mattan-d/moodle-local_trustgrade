@@ -19,48 +19,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     maxWindowBlurs: 3,
     autoSaveInterval: null,
 
-    // Helpers to support new JSON pattern while keeping backward compatibility
-    getQuestionText: (q) => (typeof q.text === "string" && q.text.length ? q.text : q.question || ""),
-
-    getQuestionPoints: (q) => {
-      if (q && q.metadata && typeof q.metadata.points === "number") return q.metadata.points
-      if (typeof q.points === "number") return q.points
-      return 10
-    },
-
-    getOptions: (q) => {
-      // Normalize options to objects: { id, text, is_correct, explanation }
-      if (!q || !Array.isArray(q.options)) return []
-      const opts = q.options
-
-      // New format: array of objects
-      if (opts.length > 0 && typeof opts[0] === "object" && opts[0] !== null) {
-        return opts.map((o, idx) => ({
-          id: typeof o.id !== "undefined" ? o.id : idx + 1,
-          text: typeof o.text !== "undefined" ? o.text : String(o),
-          is_correct: !!o.is_correct,
-          explanation: typeof o.explanation !== "undefined" ? o.explanation : "",
-        }))
-      }
-
-      // Legacy format: array of strings + question.correct_answer index
-      return opts.map((text, idx) => ({
-        id: idx + 1,
-        text: text,
-        is_correct: typeof q.correct_answer !== "undefined" ? idx === q.correct_answer : false,
-        explanation: "",
-      }))
-    },
-
-    getCorrectOption: function (q) {
-      return this.getOptions(q).find((o) => o.is_correct) || null
-    },
-
-    getOptionById: function (q, id) {
-      const sid = String(id)
-      return this.getOptions(q).find((o) => String(o.id) === sid) || null
-    },
-
     init: function (session) {
       if (!session || !session.questions || session.questions.length === 0) {
         return
@@ -290,6 +248,34 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       ])
     },
 
+    // Helper: does this question use the new options object structure?
+    usesObjectOptions: (question) =>
+      question &&
+      Array.isArray(question.options) &&
+      question.options.length > 0 &&
+      typeof question.options[0] === "object" &&
+      question.options[0] !== null &&
+      ("text" in question.options[0] || "id" in question.options[0]),
+
+    // Helper: get question text (new .text or legacy .question)
+    getQuestionText: (question) => (question && (question.text || question.question)) || "",
+
+    // Helper: get points (metadata.points, legacy points, default 10)
+    getQuestionPoints: (question) => {
+      if (question && question.metadata && typeof question.metadata.points === "number") {
+        return question.metadata.points
+      }
+      return typeof question.points === "number" ? question.points : 10
+    },
+
+    // Helper: get label for difficulty/bloom's level
+    getQuestionLevelLabel: (question) => {
+      if (question && question.metadata && question.metadata.blooms_level) {
+        return question.metadata.blooms_level
+      }
+      return question && question.difficulty ? question.difficulty : "medium"
+    },
+
     advanceToNextQuestion: function () {
       if (this.currentQuestion < this.questions.length - 1) {
         this.currentQuestion++
@@ -301,8 +287,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
 
     showQuestion: function (index) {
       var question = this.questions[index]
-      const questionText = this.getQuestionText(question)
-      const points = this.getQuestionPoints(question)
       Promise.all([
         Str.get_string(
           "quiz_progress_complete",
@@ -313,9 +297,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         Str.get_string("instructor_question", "local_trustgrade"),
         Str.get_string("based_on_submission", "local_trustgrade"),
         Str.get_string("progress_auto_saved", "local_trustgrade"),
-        Str.get_string("true", "local_trustgrade"),
-        Str.get_string("false", "local_trustgrade"),
-        Str.get_string("enter_answer_placeholder", "local_trustgrade"),
       ]).then((strings) => {
         var progress = Math.round(((index + 1) / this.questions.length) * 100)
         var html = `<div class="quiz-progress mb-3">
@@ -326,49 +307,49 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         </div>
         <div class="question-container">
           <div class="question-header">
-            <span class="question-source badge ${question.source === "submission" ? "badge-success" : "badge-primary"}">
-              ${question.source === "submission" ? strings[3] : strings[2]}
+            <span class="question-source badge ${question.source === "instructor" ? "badge-primary" : "badge-success"}">
+              ${question.source === "instructor" ? strings[2] : strings[3]}
             </span>
-            <span class="question-difficulty badge badge-secondary">${question.difficulty || "medium"}</span>
-            <span class="question-points">${points} points</span>
+            <span class="question-difficulty badge badge-secondary">${this.getQuestionLevelLabel(question)}</span>
+            <span class="question-points">${this.getQuestionPoints(question)} points</span>
           </div>
           <div class="alert alert-info">
             <i class="fa fa-info-circle"></i> 
             <small>${strings[4]}</small>
           </div>
-          <h3 class="question-text">${questionText}</h3>`
+          <h3 class="question-text">${this.getQuestionText(question)}</h3>`
 
-        if (question.type === "multiple_choice" && Array.isArray(question.options)) {
-          const options = this.getOptions(question)
+        if (question.type === "multiple_choice" && question.options) {
           html += `<div class="question-options">`
-          options.forEach((opt, optIndex) => {
-            var checked = String(this.answers[index]) === String(opt.id) ? "checked" : ""
-            const inputId = `option_${String(opt.id).replace(/[^a-zA-Z0-9_-]/g, "")}`
-            html += `<div class="form-check">
-              <input class="form-check-input" type="radio" name="answer" value="${opt.id}" id="${inputId}" ${checked}>
-              <label class="form-check-label" for="${inputId}">${String.fromCharCode(65 + optIndex)}. ${opt.text}</label>
-            </div>`
-          })
+          if (this.usesObjectOptions(question)) {
+            // New JSON pattern: options are objects
+            question.options.forEach((opt) => {
+              var checked = this.answers[index] === opt.id ? "checked" : ""
+              var optionId = `option_${String(opt.id).replace(/[^a-zA-Z0-9_-]/g, "")}`
+              html += `<div class="form-check">
+                <input class="form-check-input" type="radio" name="answer" value="${opt.id}" id="${optionId}" ${checked}>
+                <label class="form-check-label" for="${optionId}">${opt.text}</label>
+              </div>`
+            })
+          } else {
+            // Legacy pattern: options are strings, value is index
+            question.options.forEach((option, optIndex) => {
+              var checked = this.answers[index] === optIndex ? "checked" : ""
+              var optionId = `option_${optIndex}`
+              html += `<div class="form-check">
+                <input class="form-check-input" type="radio" name="answer" value="${optIndex}" id="${optionId}" ${checked}>
+                <label class="form-check-label" for="${optionId}">${option}</label>
+              </div>`
+            })
+          }
           html += `</div>`
-        } else if (question.type === "true_false") {
-          var trueChecked = this.answers[index] === true ? "checked" : ""
-          var falseChecked = this.answers[index] === false ? "checked" : ""
-          html += `<div class="question-options">
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="answer" value="true" id="true_option" ${trueChecked}>
-              <label class="form-check-label" for="true_option">${strings[5]}</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="answer" value="false" id="false_option" ${falseChecked}>
-              <label class="form-check-label" for="false_option">${strings[6]}</label>
-            </div>
-          </div>`
-        } else if (question.type === "short_answer") {
-          var savedAnswer = this.answers[index] || ""
-          html += `<div class="question-options">
-            <textarea class="form-control" name="answer" rows="4" placeholder="${strings[7]}">${savedAnswer}</textarea>
+        } else {
+          // Unsupported types are not rendered (we no longer support true/false or short_answer)
+          html += `<div class="alert alert-warning mt-3">
+            ${"This question type is no longer supported."}
           </div>`
         }
+
         html += `</div>`
         $(".quiz-content").html(html)
         $(".question-counter").show()
@@ -455,10 +436,8 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     validateCurrentAnswer: function () {
       var question = this.questions[this.currentQuestion]
       var hasAnswer = false
-      if (question.type === "multiple_choice" || question.type === "true_false") {
+      if (question.type === "multiple_choice") {
         hasAnswer = $('input[name="answer"]:checked').length > 0
-      } else if (question.type === "short_answer") {
-        hasAnswer = $('textarea[name="answer"]').val().trim().length > 0
       }
       if (!hasAnswer) {
         Str.get_string("provide_answer_warning", "local_trustgrade").then((message) => {
@@ -473,60 +452,15 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       var question = this.questions[this.currentQuestion]
       var answer = null
       if (question.type === "multiple_choice") {
-        answer = $('input[name="answer"]:checked').val()
-        if (typeof answer !== "undefined") {
-          // store option id (string or number); keep as-is
-          this.answers[this.currentQuestion] = isNaN(Number.parseInt(answer, 10))
-            ? String(answer)
-            : Number.parseInt(answer, 10)
+        var val = $('input[name="answer"]:checked').val()
+        if (val !== undefined) {
+          // For new structure, answers store option.id (numeric if provided)
+          // For legacy structure, answers store index (numeric)
+          var parsed = isNaN(Number(val)) ? val : Number(val)
+          this.answers[this.currentQuestion] = parsed
         }
-      } else if (question.type === "true_false") {
-        answer = $('input[name="answer"]:checked').val()
-        if (answer !== undefined) this.answers[this.currentQuestion] = answer === "true"
-      } else if (question.type === "short_answer") {
-        answer = $('textarea[name="answer"]').val().trim()
-        this.answers[this.currentQuestion] = answer
       }
       this.timeRemaining = this.settings.time_per_question
-    },
-
-    finishQuiz: function () {
-      if (this.attemptCompleted) return
-      this.attemptCompleted = true
-      this.stopTimer()
-      if (this.autoSaveInterval) clearInterval(this.autoSaveInterval)
-      $(window).off(".quiz")
-      $(document).off(".quiz")
-      var score = this.calculateScore()
-      var promise = Ajax.call([
-        {
-          methodname: "local_trustgrade_complete_quiz_session",
-          args: {
-            cmid: this.cmid,
-            submissionid: this.submissionid,
-            final_answers: JSON.stringify(this.answers),
-            final_score: score,
-          },
-        },
-      ])[0]
-
-      promise
-        .done((response) => {
-          if (!response.success) {
-            Str.get_string("failed_save_results", "local_trustgrade", response.error || "Unknown error").then(
-              (message) => {
-                Notification.addNotification({ message: message, type: "error" })
-              },
-            )
-          }
-          this.showResults()
-        })
-        .fail(() => {
-          Str.get_string("failed_save_contact_instructor", "local_trustgrade").then((message) => {
-            Notification.addNotification({ message: message, type: "error" })
-          })
-          this.showResults()
-        })
     },
 
     calculateScore: function () {
@@ -535,14 +469,18 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         var userAnswer = this.answers[index]
         var isCorrect = false
         var points = this.getQuestionPoints(question)
+
         if (question.type === "multiple_choice") {
-          const selected = this.getOptionById(question, userAnswer)
-          isCorrect = !!(selected && selected.is_correct)
-        } else if (question.type === "true_false") {
-          isCorrect = userAnswer === question.correct_answer
-        } else if (question.type === "short_answer") {
-          isCorrect = false // short answers are not auto-scored here
+          if (this.usesObjectOptions(question)) {
+            // New structure: find selected option by id and use is_correct
+            var selected = question.options.find((opt) => String(opt.id) === String(userAnswer))
+            isCorrect = !!(selected && selected.is_correct === true)
+          } else if (Array.isArray(question.options)) {
+            // Legacy structure: userAnswer is index, compare to correct_answer
+            isCorrect = Number(userAnswer) === Number(question.correct_answer)
+          }
         }
+
         if (isCorrect) score += points
       })
       return score
@@ -551,22 +489,31 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     showResults: function () {
       var score = 0
       var totalPoints = 0
+
       Promise.all([
         Str.get_string("quiz_completed_header", "local_trustgrade"),
         Str.get_string("quiz_completed_message", "local_trustgrade"),
         Str.get_string("correct", "local_trustgrade"),
         Str.get_string("incorrect", "local_trustgrade"),
         Str.get_string("your_answer", "local_trustgrade"),
-        Str.get_string("correct_answer_was", "local_trustgrade"),
         Str.get_string("no_answer", "local_trustgrade"),
         Str.get_string("explanation", "local_trustgrade"),
         Str.get_string("final_grade_notice", "local_trustgrade"),
-        Str.get_string("true", "local_trustgrade"),
-        Str.get_string("false", "local_trustgrade"),
       ]).then((strings) => {
+        const [
+          completedHeader,
+          completedMsg,
+          correctStr,
+          incorrectStr,
+          yourAnswerStr,
+          noAnswerStr,
+          explanationStr,
+          finalGradeNotice,
+        ] = strings
+
         var resultsHtml = `<div class="quiz-completion-header alert alert-success">
-          <h2><i class="fa fa-check-circle"></i> ${strings[0]}</h2>
-          <p>${strings[1]}</p>
+          <h2><i class="fa fa-check-circle"></i> ${completedHeader}</h2>
+          <p>${completedMsg}</p>
         </div>
         <div class="results-summary">`
 
@@ -576,76 +523,53 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
           var points = this.getQuestionPoints(question)
           totalPoints += points
 
+          var userAnswerText = noAnswerStr
+          var explanationForSelection = ""
+
           if (question.type === "multiple_choice") {
-            const selected = this.getOptionById(question, userAnswer)
-            const correctOpt = this.getCorrectOption(question)
-            isCorrect = !!(selected && selected.is_correct)
-            if (isCorrect) score += points
-
-            const userAnswerText = selected && typeof selected.text === "string" ? selected.text : strings[6]
-            resultsHtml += `<div class="result-item ${isCorrect ? "correct" : "incorrect"}">
-              <div class="result-header">
-                <span class="question-number">Question ${index + 1}</span>
-                <span class="result-status ${isCorrect ? "text-success" : "text-danger"}">
-                  ${isCorrect ? `✓ ${strings[2]}` : `✗ ${strings[3]}`}
-                </span>
-                <span class="result-points">${isCorrect ? points : 0}/${points} points</span>
-              </div>
-              <p class="question-text">${this.getQuestionText(question)}</p>`
-
-            resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswerText)}</strong></p>`
-
-            // Show the explanation for the selected answer (per-option explanation)
-            if (selected && selected.explanation) {
-              resultsHtml += `<div class="explanation"><strong>${strings[7].replace(
-                "{$a}",
-                selected.explanation,
-              )}</strong></div>`
+            if (this.usesObjectOptions(question)) {
+              var selected = question.options.find((opt) => String(opt.id) === String(userAnswer))
+              if (selected) {
+                userAnswerText = selected.text
+                isCorrect = !!selected.is_correct
+                explanationForSelection = selected.explanation || ""
+              }
+            } else if (Array.isArray(question.options)) {
+              var idx = Number(userAnswer)
+              if (!isNaN(idx) && question.options[idx] !== undefined) {
+                userAnswerText = question.options[idx]
+                isCorrect = Number(userAnswer) === Number(question.correct_answer)
+                // Legacy structure did not have per-option explanation; keep empty
+              }
             }
-
-            if (!isCorrect && correctOpt) {
-              resultsHtml += `<p><strong>${strings[5].replace("{$a}", correctOpt.text)}</strong></p>`
-            }
-
-            resultsHtml += `</div>`
-          } else if (question.type === "true_false") {
-            isCorrect = userAnswer === question.correct_answer
-            if (isCorrect) score += points
-
-            var userAnswerText = userAnswer !== undefined ? (userAnswer ? strings[9] : strings[10]) : strings[6]
-
-            resultsHtml += `<div class="result-item ${isCorrect ? "correct" : "incorrect"}">
-              <div class="result-header">
-                <span class="question-number">Question ${index + 1}</span>
-                <span class="result-status ${isCorrect ? "text-success" : "text-danger"}">
-                  ${isCorrect ? `✓ ${strings[2]}` : `✗ ${strings[3]}`}
-                </span>
-                <span class="result-points">${isCorrect ? points : 0}/${points} points</span>
-              </div>
-              <p class="question-text">${this.getQuestionText(question)}</p>
-              <p><strong>${strings[4].replace("{$a}", userAnswerText)}</strong></p>`
-
-            if (!isCorrect && typeof question.correct_answer !== "undefined") {
-              resultsHtml += `<p><strong>${strings[5].replace(
-                "{$a}",
-                question.correct_answer ? strings[9] : strings[10],
-              )}</strong></p>`
-            }
-
-            resultsHtml += `</div>`
-          } else if (question.type === "short_answer") {
-            // Short answer is not auto-scored; award 0 by default here.
-            const ans = userAnswer || strings[6]
-            resultsHtml += `<div class="result-item incorrect">
-              <div class="result-header">
-                <span class="question-number">Question ${index + 1}</span>
-                <span class="result-status text-danger">✗ ${strings[3]}</span>
-                <span class="result-points">0/${points} points</span>
-              </div>
-              <p class="question-text">${this.getQuestionText(question)}</p>
-              <p><strong>${strings[4].replace("{$a}", ans)}</strong></p>
-            </div>`
           }
+
+          if (isCorrect) score += points
+
+          resultsHtml += `<div class="result-item ${isCorrect ? "correct" : "incorrect"}">
+            <div class="result-header">
+              <span class="question-number">Question ${index + 1}</span>
+              <span class="result-status ${isCorrect ? "text-success" : "text-danger"}">
+                ${isCorrect ? `✓ ${correctStr}` : `✗ ${incorrectStr}`}
+              </span>
+              <span class="result-points">${isCorrect ? points : 0}/${points} points</span>
+            </div>
+            <p class="question-text">${this.getQuestionText(question)}</p>`
+
+          // Show user's answer
+          resultsHtml += `<p><strong>${yourAnswerStr.replace("{$a}", userAnswerText)}</strong></p>`
+
+          // DO NOT display the correct answer (per requirement)
+
+          // Display explanation corresponding to the user's selected answer (if available)
+          if (explanationForSelection) {
+            resultsHtml += `<div class="explanation"><strong>${explanationStr.replace(
+              "{$a}",
+              explanationForSelection,
+            )}</strong></div>`
+          }
+
+          resultsHtml += `</div>`
         })
 
         var percentage = totalPoints > 0 ? Math.round((score / totalPoints) * 100) : 0
@@ -657,9 +581,10 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
           resultsHtml =
             `<div class="score-summary alert alert-info">
               <h3>${scoreString}</h3>
-              <p><strong>${strings[8]}</strong></p>
+              <p><strong>${finalGradeNotice}</strong></p>
             </div>` + resultsHtml
           resultsHtml += `</div>`
+
           if (this.windowBlurCount > 0) {
             Promise.all([
               Str.get_string("integrity_report_header", "local_trustgrade"),
