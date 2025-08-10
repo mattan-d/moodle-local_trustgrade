@@ -286,7 +286,12 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       var promises = Ajax.call([
         {
           methodname: "local_trustgrade_generate_questions",
-          args: { cmid: cmid, instructions: instructions },
+          args: {
+            cmid: cmid,
+            instructions: instructions,
+            intro_itemid: trustgrade.getIntroEditorItemId(),
+            intro_attachments_itemid: trustgrade.getIntroAttachmentsItemId(),
+          },
         },
       ])
 
