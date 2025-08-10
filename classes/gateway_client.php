@@ -34,13 +34,25 @@ class gateway_client {
      * Check instructions via Gateway with caching support
      *
      * @param string $instructions Assignment instructions
+     * @param array $files Optional list of files: [{ filename, mimetype?, content(base64) }]
      * @return array Response from Gateway or cache
      */
-    public function checkInstructions($instructions) {
+    public function checkInstructions($instructions, $files = []) {
         $requestData = [
-                'action' => 'check_instructions',
-                'instructions' => $instructions
+            'action' => 'check_instructions',
+            'instructions' => $instructions
         ];
+
+        if (!empty($files) && is_array($files)) {
+            // Normalize minimal shape for transport.
+            $requestData['files'] = array_values(array_map(function($f) {
+                return [
+                    'filename' => isset($f['filename']) ? (string) $f['filename'] : '',
+                    'mimetype' => isset($f['mimetype']) ? (string) $f['mimetype'] : '',
+                    'content'  => isset($f['content']) ? (string) $f['content'] : '',
+                ];
+            }, $files));
+        }
 
         return $this->makeRequestWithCache('check_instructions', $requestData);
     }

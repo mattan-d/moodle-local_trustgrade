@@ -175,8 +175,18 @@ class external extends \external_api {
 
     public static function check_instructions_parameters() {
         return new \external_function_parameters([
-                'cmid' => new \external_value(PARAM_INT, 'Course module ID'),
-                'instructions' => new \external_value(PARAM_RAW, 'Assignment instructions'),
+            'cmid' => new \external_value(PARAM_INT, 'Course module ID'),
+            'instructions' => new \external_value(PARAM_RAW, 'Assignment instructions'),
+            'files' => new \external_multiple_structure(
+                new \external_single_structure([
+                    'filename' => new \external_value(PARAM_TEXT, 'Original filename'),
+                    'mimetype' => new \external_value(PARAM_TEXT, 'MIME type', VALUE_OPTIONAL),
+                    'content' => new \external_value(PARAM_RAW, 'Base64-encoded file content'),
+                ]),
+                'Optional list of files (each with filename, optional mimetype, base64 content) to analyze along with the instructions.',
+                VALUE_DEFAULT,
+                []
+            ),
         ]);
     }
 
@@ -189,14 +199,43 @@ class external extends \external_api {
         ]);
     }
 
-    public static function check_instructions($cmid, $instructions) {
+    public static function check_instructions($cmid, $instructions, $files = []) {
         self::validate_editing_context($cmid);
+
+        // Sanitize and validate instructions.
         $instructions = strip_tags(trim((string) $instructions));
         if (empty($instructions)) {
             return ['success' => false, 'error' => get_string('no_instructions', 'local_trustgrade')];
         }
 
-        $response = api::check_instructions($instructions);
+        // Normalize $files: allow either array input or JSON string.
+        if (!is_array($files)) {
+            $decoded = json_decode((string) $files, true);
+            $files = is_array($decoded) ? $decoded : [];
+        }
+
+        // Keep only valid items with filename and content; mimetype optional.
+        $normalizedfiles = [];
+        foreach ($files as $f) {
+            if (!is_array($f)) {
+                continue;
+            }
+            $filename = isset($f['filename']) ? clean_param($f['filename'], PARAM_FILE) : null;
+            $mimetype = isset($f['mimetype']) ? clean_param($f['mimetype'], PARAM_TEXT) : '';
+            $content = isset($f['content']) ? (string) $f['content'] : '';
+
+            if ($filename && $content !== '') {
+                $normalizedfiles[] = [
+                    'filename' => $filename,
+                    'mimetype' => $mimetype,
+                    'content' => $content,
+                ];
+            }
+        }
+
+        $response = \local_trustgrade\api::check_instructions($instructions, $normalizedfiles);
+
+        // Preserve existing behavior.
         if ($response['error']) {
             return ['success' => false, 'error' => $response['error']];
         }
