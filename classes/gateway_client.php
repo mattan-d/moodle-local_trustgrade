@@ -54,12 +54,11 @@ class gateway_client {
      * @param int $questionCount Number of questions to generate
      * @return array Response from Gateway or cache
      */
-    public function generateQuestions($instructions, $questionCount = 5, array $files = []) {
+    public function generateQuestions($instructions, $questionCount = 5) {
         $requestData = [
             'action' => 'generate_questions',
             'instructions' => $instructions,
-            'question_count' => $questionCount,
-            'files' => $files,
+            'question_count' => $questionCount
         ];
 
         return $this->makeRequestWithCache('generate_questions', $requestData);

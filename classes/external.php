@@ -327,13 +327,11 @@ class external extends \external_api {
    }
 
    public static function generate_questions_parameters() {
-        return new \external_function_parameters([
-                'cmid' => new \external_value(PARAM_INT, 'Course module ID'),
-                'instructions' => new \external_value(PARAM_RAW, 'Assignment instructions'),
-                'intro_itemid' => new \external_value(PARAM_INT, 'Draft itemid for intro editor files', VALUE_DEFAULT, 0),
-                'intro_attachments_itemid' => new \external_value(PARAM_INT, 'Draft itemid for intro attachments filemanager', VALUE_DEFAULT, 0),
-        ]);
-    }
+       return new \external_function_parameters([
+               'cmid' => new \external_value(PARAM_INT, 'Course module ID'),
+               'instructions' => new \external_value(PARAM_RAW, 'Assignment instructions'),
+       ]);
+   }
 
    public static function generate_questions_returns() {
        return new \external_single_structure([
@@ -345,37 +343,30 @@ class external extends \external_api {
        ]);
    }
 
-   public static function generate_questions($cmid, $instructions, $intro_itemid = 0, $intro_attachments_itemid = 0) {
-        self::validate_editing_context($cmid);
-        $instructions = strip_tags(trim((string) $instructions));
-        if (empty($instructions)) {
-            return ['success' => false, 'error' => get_string('no_instructions', 'local_trustgrade')];
-        }
-
-        $quiz_settings = quiz_settings::get_settings($cmid);
-        $questions_to_generate = $quiz_settings['questions_to_generate'];
-
-        // Collect files from the same draft areas used by the intro editor/filemanager.
-        $files = self::collect_intro_files((int)$intro_itemid, (int)$intro_attachments_itemid);
-
-        // Use a question_generator helper that includes files in the Gateway payload.
-        $result = question_generator::generate_questions_with_count_and_files($instructions, $questions_to_generate, $files);
-
-        if ($result['success']) {
-            $save_success = question_generator::save_questions($cmid, $result['questions']);
-            if ($save_success) {
-                $result['message'] = get_string('questions_generated_success', 'local_trustgrade');
-                $result['questions'] = json_encode($result['questions']);
-            } else {
-                $result['error'] = get_string('error_saving_questions', 'local_trustgrade');
-                $result['success'] = false;
-            }
-        } else {
-            $result['error'] = $result['error'];
-            $result['success'] = false;
-        }
-        return $result;
-    }
+   public static function generate_questions($cmid, $instructions) {
+       self::validate_editing_context($cmid);
+       $instructions = strip_tags(trim((string) $instructions));
+       if (empty($instructions)) {
+           return ['success' => false, 'error' => get_string('no_instructions', 'local_trustgrade')];
+       }
+       $quiz_settings = quiz_settings::get_settings($cmid);
+       $questions_to_generate = $quiz_settings['questions_to_generate'];
+       $result = question_generator::generate_questions_with_count($instructions, $questions_to_generate);
+       if ($result['success']) {
+           $save_success = question_generator::save_questions($cmid, $result['questions']);
+           if ($save_success) {
+               $result['message'] = get_string('questions_generated_success', 'local_trustgrade');
+               $result['questions'] = json_encode($result['questions']);
+           } else {
+               $result['error'] = get_string('error_saving_questions', 'local_trustgrade');
+               $result['success'] = false;
+           }
+       } else {
+           $result['error'] = $result['error'];
+           $result['success'] = false;
+       }
+       return $result;
+   }
 
    public static function save_question_parameters() {
        return new \external_function_parameters([
