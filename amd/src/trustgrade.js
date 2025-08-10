@@ -195,68 +195,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       return html
     },
 
-    readFileAsBase64: (file) =>
-      new Promise((resolve, reject) => {
-        try {
-          const reader = new FileReader()
-          reader.onload = () => {
-            const result = reader.result
-            let base64 = ""
-            if (typeof result === "string") {
-              const idx = result.indexOf(",")
-              base64 = idx >= 0 ? result.slice(idx + 1) : result
-            }
-            resolve({
-              name: file.name || "attachment",
-              type: file.type || "application/octet-stream",
-              size: typeof file.size === "number" ? file.size : 0,
-              content_base64: base64,
-            })
-          }
-          reader.onerror = (e) => reject(e)
-          reader.readAsDataURL(file)
-        } catch (e) {
-          reject(e)
-        }
-      }),
-
-    collectAttachments: () =>
-      new Promise((resolve) => {
-        try {
-          const selectors = [
-            "#trustgrade-attachments",
-            'input[type="file"][data-trustgrade-attachments]',
-            'input[name="trustgrade_attachments[]"]',
-            'input[name="trustgrade_attachments"]',
-          ]
-          const files = []
-          selectors.forEach((sel) => {
-            const $inputs = $(sel)
-            if ($inputs && $inputs.length) {
-              $inputs.each((_, el) => {
-                const input = el
-                if (input && input.files && input.files.length) {
-                  for (let i = 0; i < input.files.length; i++) {
-                    files.push(input.files[i])
-                  }
-                }
-              })
-            }
-          })
-
-          if (!files.length) {
-            resolve([])
-            return
-          }
-
-          Promise.all(files.map((f) => trustgrade.readFileAsBase64(f)))
-            .then((encoded) => resolve(encoded))
-            .catch(() => resolve([]))
-        } catch (e) {
-          resolve([])
-        }
-      }),
-
     checkInstructions: function () {
       var instructions = this.getInstructions()
       if (!instructions || instructions.trim().length === 0) {
@@ -274,111 +212,57 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
 
       var cmid = this.getCourseModuleId()
 
-      // Collect optional attachments before sending the request
-      trustgrade
-        .collectAttachments()
-        .then((files) => {
-          var args = { cmid: cmid, instructions: instructions }
-          if (Array.isArray(files) && files.length > 0) {
-            args.files = files
+      var promises = Ajax.call([
+        {
+          methodname: "local_trustgrade_check_instructions",
+          args: {
+            cmid: cmid,
+            instructions: instructions,
+            intro_itemid: trustgrade.getIntroEditorItemId(),
+            intro_attachments_itemid: trustgrade.getIntroAttachmentsItemId(),
+          },
+        },
+      ])
+
+      promises[0]
+        .done((response) => {
+          if (response.success) {
+            var recommendationHtml = ""
+            try {
+              var recObj =
+                typeof response.recommendation === "string"
+                  ? JSON.parse(response.recommendation)
+                  : response.recommendation
+
+              recommendationHtml = trustgrade.renderRecommendation(recObj)
+            } catch (e) {
+              // Fallback to legacy plaintext if JSON parsing fails
+              recommendationHtml = String(response.recommendation || "").replace(/\n/g, "<br>")
+            }
+
+            if (response.from_cache) {
+              Str.get_string("cache_hit", "local_trustgrade").then((cacheMessage) => {
+                recommendationHtml =
+                  '<div class="alert alert-info mb-2"><i class="fa fa-clock-o"></i> <small>' +
+                  cacheMessage +
+                  " (Debug mode)</small></div>" +
+                  recommendationHtml
+                $("#ai-recommendation").html(recommendationHtml)
+              })
+            } else {
+              $("#ai-recommendation").html(recommendationHtml)
+            }
+            $("#ai-recommendation-container").show()
+          } else {
+            Str.get_string("gateway_error", "local_trustgrade").then((title) => {
+              trustgrade.showErrorModal(title, response.error || "An error occurred.")
+            })
           }
-
-          var promises = Ajax.call([
-            {
-              methodname: "local_trustgrade_check_instructions",
-              args: args,
-            },
-          ])
-
-          promises[0]
-            .done((response) => {
-              if (response.success) {
-                var recommendationHtml = ""
-                try {
-                  var recObj =
-                    typeof response.recommendation === "string"
-                      ? JSON.parse(response.recommendation)
-                      : response.recommendation
-
-                  recommendationHtml = trustgrade.renderRecommendation(recObj)
-                } catch (e) {
-                  // Fallback to legacy plaintext if JSON parsing fails
-                  recommendationHtml = String(response.recommendation || "").replace(/\n/g, "<br>")
-                }
-
-                if (response.from_cache) {
-                  Str.get_string("cache_hit", "local_trustgrade").then((cacheMessage) => {
-                    recommendationHtml =
-                      '<div class="alert alert-info mb-2"><i class="fa fa-clock-o"></i> <small>' +
-                      cacheMessage +
-                      " (Debug mode)</small></div>" +
-                      recommendationHtml
-                    $("#ai-recommendation").html(recommendationHtml)
-                  })
-                } else {
-                  $("#ai-recommendation").html(recommendationHtml)
-                }
-                $("#ai-recommendation-container").show()
-              } else {
-                Str.get_string("gateway_error", "local_trustgrade").then((title) => {
-                  trustgrade.showErrorModal(title, response.error || "An error occurred.")
-                })
-              }
-            })
-            .fail(Notification.exception)
-            .always(() => {
-              $("#check-instructions-btn").prop("disabled", false)
-              $("#ai-loading").hide()
-            })
         })
-        .catch(() => {
-          // If attachments failed to read, proceed without them to avoid blocking the flow
-          var promises = Ajax.call([
-            {
-              methodname: "local_trustgrade_check_instructions",
-              args: { cmid: cmid, instructions: instructions },
-            },
-          ])
-
-          promises[0]
-            .done((response) => {
-              if (response.success) {
-                var recommendationHtml = ""
-                try {
-                  var recObj =
-                    typeof response.recommendation === "string"
-                      ? JSON.parse(response.recommendation)
-                      : response.recommendation
-
-                  recommendationHtml = trustgrade.renderRecommendation(recObj)
-                } catch (e) {
-                  recommendationHtml = String(response.recommendation || "").replace(/\n/g, "<br>")
-                }
-
-                if (response.from_cache) {
-                  Str.get_string("cache_hit", "local_trustgrade").then((cacheMessage) => {
-                    recommendationHtml =
-                      '<div class="alert alert-info mb-2"><i class="fa fa-clock-o"></i> <small>' +
-                      cacheMessage +
-                      " (Debug mode)</small></div>" +
-                      recommendationHtml
-                    $("#ai-recommendation").html(recommendationHtml)
-                  })
-                } else {
-                  $("#ai-recommendation").html(recommendationHtml)
-                }
-                $("#ai-recommendation-container").show()
-              } else {
-                Str.get_string("gateway_error", "local_trustgrade").then((title) => {
-                  trustgrade.showErrorModal(title, response.error || "An error occurred.")
-                })
-              }
-            })
-            .fail(Notification.exception)
-            .always(() => {
-              $("#check-instructions-btn").prop("disabled", false)
-              $("#ai-loading").hide()
-            })
+        .fail(Notification.exception)
+        .always(() => {
+          $("#check-instructions-btn").prop("disabled", false)
+          $("#ai-loading").hide()
         })
     },
 
@@ -572,6 +456,30 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
         cmid = $('input[name="coursemodule"]').val() || 0
       }
       return Number.parseInt(cmid) || 0
+    },
+
+    getIntroEditorItemId: () => {
+      var $input = $('input[name="introeditor[itemid]"]')
+      var val = $input.length ? $input.val() : ""
+      var n = Number.parseInt(val || "0", 10)
+      return isNaN(n) ? 0 : n
+    },
+
+    getIntroAttachmentsItemId: () => {
+      // Try a few common names used by Moodle forms for a filemanager attached to "intro"
+      var candidates = [
+        'input[name="introattachments"]',
+        'input[name="introattachments_filemanager"]',
+        'input[name="introattachments[itemid]"]',
+      ]
+      for (var i = 0; i < candidates.length; i++) {
+        var $el = $(candidates[i])
+        if ($el.length) {
+          var v = Number.parseInt($el.val() || "0", 10)
+          if (!isNaN(v) && v > 0) return v
+        }
+      }
+      return 0
     },
 
     loadQuestionBank: function () {

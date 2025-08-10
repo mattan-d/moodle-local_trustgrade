@@ -11,13 +11,12 @@ defined('MOODLE_INTERNAL') || die();
 class api {
     
     /**
-     * Send instructions (and optional attachments) to AI for analysis via Gateway
-     *
+     * Send instructions to AI for analysis via Gateway
+     * 
      * @param string $instructions The assignment instructions
-     * @param array $files Optional list of files: [{ filename, mimetype?, content(base64) }]
      * @return array Response from Gateway or error
      */
-    public static function check_instructions($instructions, $files = []) {
+    public static function check_instructions($instructions) {
         // Ensure instructions is a string
         if (!is_string($instructions)) {
             return ['error' => 'Instructions must be a string'];
@@ -28,14 +27,9 @@ class api {
             return ['error' => get_string('no_instructions', 'local_trustgrade')];
         }
         
-        // Files validation (basic shape check)
-        if (!is_array($files)) {
-            return ['error' => 'Files must be an array'];
-        }
-        
         try {
             $gateway = new gateway_client();
-            $result = $gateway->checkInstructions($instructions, $files);
+            $result = $gateway->checkInstructions($instructions);
             
             if ($result['success']) {
                 return [

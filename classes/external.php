@@ -55,6 +55,74 @@ class external extends \external_api {
         require_capability('mod/assign:submit', $context);
     }
 
+    private static function collect_intro_attachments_text(int $intro_itemid, int $intro_attachments_itemid): string {
+        global $USER;
+        $parts = [];
+
+        // Helper to read files from a draft area itemid
+        $readDraft = function(int $itemid) use ($USER) {
+            if ($itemid <= 0) {
+                return [];
+            }
+            $fs = get_file_storage();
+            $userctx = \context_user::instance($USER->id);
+            // Draft area is stored under component 'user', filearea 'draft'
+            $files = $fs->get_area_files($userctx->id, 'user', 'draft', $itemid, 'sortorder, id', false);
+            return $files ?: [];
+        };
+
+        $maxFiles = 10; // safety cap
+        $maxPreviewBytes = 8192; // ~8KB snippet for text-like files
+
+        $all = [];
+        foreach ([$intro_itemid, $intro_attachments_itemid] as $did) {
+            $all = array_merge($all, $readDraft($did));
+        }
+
+        if (empty($all)) {
+            return '';
+        }
+
+        $count = 0;
+        foreach ($all as $file) {
+            if ($count >= $maxFiles) {
+                $parts[] = '- ...';
+                break;
+            }
+            if ($file->is_directory()) {
+                continue;
+            }
+            $count++;
+            $filename = $file->get_filename();
+            $mimetype = $file->get_mimetype();
+            $size = $file->get_filesize();
+            $parts[] = '- ' . $filename . ' (' . $mimetype . ', ' . display_size($size) . ')';
+
+            // Provide a short preview for text-like files
+            $isTextLike = (
+                strpos($mimetype, 'text/') === 0
+                || in_array($mimetype, ['application/json', 'application/xml'])
+            );
+
+            if ($isTextLike) {
+                try {
+                    $content = $file->get_content();
+                    if (is_string($content) && $content !== '') {
+                        // Trim to a reasonable preview size, strip binary noise
+                        $snippet = mb_substr($content, 0, $maxPreviewBytes);
+                        // Normalize line endings for readability
+                        $snippet = preg_replace("/\r\n|\r/", "\n", $snippet);
+                        $parts[] = "--- " . $filename . " preview ---\n" . $snippet . (mb_strlen($content) > $maxPreviewBytes ? "\n...[truncated]..." : "") . "\n--- end preview ---";
+                    }
+                } catch (\Throwable $e) {
+                    // Ignore preview errors, still list the file
+                }
+            }
+        }
+
+        return implode("\n", $parts);
+    }
+
     /********************************************************************
      * Grading Service Functions
      ********************************************************************/
@@ -175,18 +243,10 @@ class external extends \external_api {
 
     public static function check_instructions_parameters() {
         return new \external_function_parameters([
-            'cmid' => new \external_value(PARAM_INT, 'Course module ID'),
-            'instructions' => new \external_value(PARAM_RAW, 'Assignment instructions'),
-            'files' => new \external_multiple_structure(
-                new \external_single_structure([
-                    'filename' => new \external_value(PARAM_TEXT, 'Original filename'),
-                    'mimetype' => new \external_value(PARAM_TEXT, 'MIME type', VALUE_OPTIONAL),
-                    'content' => new \external_value(PARAM_RAW, 'Base64-encoded file content'),
-                ]),
-                'Optional list of files (each with filename, optional mimetype, base64 content) to analyze along with the instructions.',
-                VALUE_DEFAULT,
-                []
-            ),
+                'cmid' => new \external_value(PARAM_INT, 'Course module ID'),
+                'instructions' => new \external_value(PARAM_RAW, 'Assignment instructions'),
+                'intro_itemid' => new \external_value(PARAM_INT, 'Draft itemid for intro editor files', VALUE_DEFAULT, 0),
+                'intro_attachments_itemid' => new \external_value(PARAM_INT, 'Draft itemid for intro attachments filemanager', VALUE_DEFAULT, 0),
         ]);
     }
 
@@ -199,44 +259,22 @@ class external extends \external_api {
         ]);
     }
 
-    public static function check_instructions($cmid, $instructions, $files = []) {
+    public static function check_instructions($cmid, $instructions, $intro_itemid = 0, $intro_attachments_itemid = 0) {
         self::validate_editing_context($cmid);
-
-        // Sanitize and validate instructions.
         $instructions = strip_tags(trim((string) $instructions));
         if (empty($instructions)) {
             return ['success' => false, 'error' => get_string('no_instructions', 'local_trustgrade')];
         }
 
-        // Normalize $files: allow either array input or JSON string.
-        if (!is_array($files)) {
-            $decoded = json_decode((string) $files, true);
-            $files = is_array($decoded) ? $decoded : [];
+        // Build combined instructions including a concise summary of any intro attachments found in the draft areas.
+        $attachmentSummary = self::collect_intro_attachments_text((int)$intro_itemid, (int)$intro_attachments_itemid);
+        $combinedInstructions = $instructions;
+        if (!empty($attachmentSummary)) {
+            $combinedInstructions .= "\n\n[Attachments]\n" . $attachmentSummary;
         }
 
-        // Keep only valid items with filename and content; mimetype optional.
-        $normalizedfiles = [];
-        foreach ($files as $f) {
-            if (!is_array($f)) {
-                continue;
-            }
-            $filename = isset($f['filename']) ? clean_param($f['filename'], PARAM_FILE) : null;
-            $mimetype = isset($f['mimetype']) ? clean_param($f['mimetype'], PARAM_TEXT) : '';
-            $content = isset($f['content']) ? (string) $f['content'] : '';
-
-            if ($filename && $content !== '') {
-                $normalizedfiles[] = [
-                    'filename' => $filename,
-                    'mimetype' => $mimetype,
-                    'content' => $content,
-                ];
-            }
-        }
-
-        $response = \local_trustgrade\api::check_instructions($instructions, $normalizedfiles);
-
-        // Preserve existing behavior.
-        if ($response['error']) {
+        $response = api::check_instructions($combinedInstructions);
+        if (!empty($response['error'])) {
             return ['success' => false, 'error' => $response['error']];
         }
 
