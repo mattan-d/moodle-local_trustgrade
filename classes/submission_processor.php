@@ -12,41 +12,56 @@ class submission_processor {
     
     /**
      * Generate questions based on student submission with custom count
-     * 
+     *
      * @param array $submission_content The student's submission content (text and files)
      * @param string $assignment_instructions The original assignment instructions
      * @param int $questions_count Number of questions to generate
+     * @param int $intro_itemid Draft itemid for intro editor files (optional)
+     * @param int $intro_attachments_itemid Draft itemid for intro attachments filemanager (optional)
      * @return array Response from Gateway or error
      */
-    public static function generate_submission_questions_with_count($submission_content, $assignment_instructions = '', $questions_count = 3) {
+    public static function generate_submission_questions_with_count(
+        $submission_content,
+        $assignment_instructions = '',
+        $questions_count = 3,
+        $intro_itemid = 0,
+        $intro_attachments_itemid = 0
+    ) {
         // Ensure submission_content is an array with expected keys
         if (!is_array($submission_content) || (!isset($submission_content['text']) && !isset($submission_content['files']))) {
             return ['error' => 'Submission content must be a structured array'];
         }
-        
+
         $submission_text = trim($submission_content['text'] ?? '');
-        $submission_files = $submission_content['files'] ?? [];
-        
+
+        // Prefer files collected from the draft intro editors if provided; otherwise use files in $submission_content.
+        $hasDraftIds = (intval($intro_itemid) > 0) || (intval($intro_attachments_itemid) > 0);
+        if ($hasDraftIds) {
+            $submission_files = self::collect_intro_files((int)$intro_itemid, (int)$intro_attachments_itemid);
+        } else {
+            $submission_files = $submission_content['files'] ?? [];
+        }
+
         if (empty($submission_text) && empty($submission_files)) {
             return ['error' => 'No submission content found to analyze'];
         }
-        
+
         // Validate questions count
         $questions_count = max(1, min(10, intval($questions_count)));
-        
+
         try {
             $gateway = new gateway_client();
             $result = $gateway->generateSubmissionQuestions($submission_text, $assignment_instructions, $questions_count, $submission_files);
-            
-            if ($result['success']) {
+
+            if (!empty($result['success'])) {
                 return [
                     'success' => true,
-                    'questions' => $result['data']['questions']
+                    'questions' => $result['data']['questions'] ?? []
                 ];
             } else {
-                return ['error' => $result['error']];
+                return ['error' => $result['error'] ?? 'Gateway error'];
             }
-            
+
         } catch (\Exception $e) {
             return ['error' => 'Gateway error: ' . $e->getMessage()];
         }
@@ -297,5 +312,60 @@ class submission_processor {
         
         $content['text'] = trim($content['text']);
         return $content;
+    }
+
+    /**
+     * Collect intro attachments as an array of files for the Gateway payload.
+     * Each entry contains: filename, mimetype, size, and base64-encoded content.
+     *
+     * @param int $intro_itemid Draft itemid for intro editor files
+     * @param int $intro_attachments_itemid Draft itemid for intro attachments filemanager
+     * @return array
+     */
+    private static function collect_intro_files(int $intro_itemid, int $intro_attachments_itemid): array {
+        global $USER;
+
+        $filesOut = [];
+
+        $readDraft = function(int $itemid) use ($USER) {
+            if ($itemid <= 0) {
+                return [];
+            }
+            $fs = get_file_storage();
+            $userctx = \context_user::instance($USER->id);
+            return $fs->get_area_files($userctx->id, 'user', 'draft', $itemid, 'sortorder, id', false) ?: [];
+        };
+
+        $all = [];
+        foreach ([$intro_itemid, $intro_attachments_itemid] as $did) {
+            $all = array_merge($all, $readDraft($did));
+        }
+
+        if (empty($all)) {
+            return $filesOut;
+        }
+
+        foreach ($all as $file) {
+            if ($file->is_directory()) {
+                continue;
+            }
+            try {
+                $content = $file->get_content();
+                if ($content === false) {
+                    continue;
+                }
+                $filesOut[] = [
+                    'filename' => $file->get_filename(),
+                    'mimetype' => $file->get_mimetype(),
+                    'size' => (int)$file->get_filesize(),
+                    'content' => base64_encode($content),
+                ];
+            } catch (\Throwable $e) {
+                // Skip file on error
+                continue;
+            }
+        }
+
+        return $filesOut;
     }
 }
