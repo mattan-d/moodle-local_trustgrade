@@ -359,6 +359,12 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         Str.get_string("enter_answer_placeholder", "local_trustgrade"),
       ]).then((strings) => {
         var progress = Math.round(((index + 1) / this.questions.length) * 100)
+        var bloomsLevel =
+          (question &&
+            question.metadata &&
+            (question.metadata.blooms_level || question.metadata.blooms || question.metadata.bloomsLevel)) ||
+          question.difficulty ||
+          "medium"
         var html = `<div class="quiz-progress mb-3">
           <div class="progress">
             <div class="progress-bar bg-primary" style="width: ${progress}%"></div>
@@ -370,7 +376,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
             <span class="question-source badge ${question.source === "instructor" ? "badge-primary" : "badge-success"}">
               ${question.source === "instructor" ? strings[2] : strings[3]}
             </span>
-            <span class="question-difficulty badge badge-secondary">${question.difficulty || "medium"}</span>
+            <span class="question-difficulty badge badge-secondary">${bloomsLevel}</span>
             <span class="question-points">${question.points || 10} points</span>
           </div>
           <div class="alert alert-info">
