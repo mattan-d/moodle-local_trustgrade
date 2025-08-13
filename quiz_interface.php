@@ -35,15 +35,15 @@ if ($session && $session['attempt_completed']) {
     $PAGE->set_title(get_string('ai_quiz_title', 'local_trustgrade'));
     $PAGE->set_heading($course->fullname);
     $PAGE->set_context($context);
-    
+
     echo $OUTPUT->header();
     echo html_writer::tag('h2', get_string('ai_quiz_title', 'local_trustgrade'));
-    
+
     \core\notification::add(
         'You have already completed this assessment. Only one attempt is allowed per assignment.',
         \core\notification::INFO
     );
-    
+
     echo html_writer::div(
         html_writer::link(
             new moodle_url('/mod/assign/view.php', ['id' => $cmid]),
@@ -52,7 +52,7 @@ if ($session && $session['attempt_completed']) {
         ),
         'text-center mt-3'
     );
-    
+
     echo $OUTPUT->footer();
     exit;
 }
@@ -77,14 +77,14 @@ echo html_writer::tag('h2', get_string('ai_quiz_title', 'local_trustgrade'));
 // The main quiz container will be populated by JavaScript.
 echo html_writer::start_div('ai-quiz-container');
 
-// Placeholder for quiz content.
-echo html_writer::div('', 'quiz-content');
-
 // Question counter (populated by JS).
 echo html_writer::div('', 'question-counter');
 
 // Timer display (populated by JS if enabled).
 echo html_writer::div('', 'question-timer', ['style' => 'display: none;']);
+
+// Placeholder for quiz content.
+echo html_writer::div('', 'quiz-content');
 
 // Navigation buttons (managed by JS).
 echo html_writer::start_div('quiz-navigation');
