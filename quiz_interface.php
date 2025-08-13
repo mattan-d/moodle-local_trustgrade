@@ -83,7 +83,7 @@ echo html_writer::div('', 'quiz-content');
 // Question counter (populated by JS).
 echo html_writer::div('', 'question-counter');
 
-// Timer display (populated by JS if enabled).
+// Timer display (populated by JS if enabled) - moved to be under quiz-progress.
 echo html_writer::div('', 'question-timer', ['style' => 'display: none;']);
 
 // Navigation buttons (managed by JS).
