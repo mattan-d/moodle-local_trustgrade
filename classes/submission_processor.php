@@ -269,36 +269,30 @@ class submission_processor {
             }
         }
         
-        // Handle file submissions - get correct itemid from assignsubmission_file table
-        $file_submissions = $DB->get_records('assignsubmission_file', 
-            ['submission' => $submission->id]);
-        
+        // Handle file submissions
         $fs = get_file_storage();
+        $files = $fs->get_area_files(
+            $context->id,
+            'assignsubmission_file',
+            'submission_files',
+            $submission->id,
+            'timemodified',
+            false
+        );
         
-        foreach ($file_submissions as $file_submission) {
-            $files = $fs->get_area_files(
-                $context->id,
-                'assignsubmission_file',
-                'submission_files',
-                $file_submission->id, // Use the correct itemid from assignsubmission_file table
-                'timemodified',
-                false
-            );
+        foreach ($files as $file) {
+            if ($file->is_directory()) {
+                continue;
+            }
             
-            foreach ($files as $file) {
-                if ($file->is_directory()) {
-                    continue;
-                }
-                
-                $file_content = $file->get_content();
-                if (!empty($file_content)) {
-                    $content['files'][] = [
-                        'filename' => $file->get_filename(),
-                        'mimetype' => $file->get_mimetype(),
-                        'size' => $file->get_filesize(),
-                        'content' => base64_encode($file_content)
-                    ];
-                }
+            $file_content = $file->get_content();
+            if (!empty($file_content)) {
+                $content['files'][] = [
+                    'filename' => $file->get_filename(),
+                    'mimetype' => $file->get_mimetype(),
+                    'size' => $file->get_filesize(),
+                    'content' => base64_encode($file_content)
+                ];
             }
         }
         
