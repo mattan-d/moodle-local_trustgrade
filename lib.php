@@ -91,9 +91,7 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addGroup($buttonarray, 'trustgrade_buttons', get_string('ai_recommendation', 'local_trustgrade'), ' ', false);
 
         // Add recommendation display area (hidden by default)
-        $mform->addElement('static', 'trustgrade_recommendation',
-                '<div id="ai-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
-                get_string('processing', 'local_trustgrade') . '</div>',
+        $mform->addElement('static', 'trustgrade_recommendation', '',
                 '<div id="ai-recommendation-container" style="display: none;">' .
                 '<div id="ai-recommendation" class="alert alert-info"></div></div>');
 
@@ -109,17 +107,10 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
                 '<div id="ai-question-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
                 get_string('generating_questions', 'local_trustgrade') . '</div>');
 
-        // Add generated questions display area (hidden by default)
-        $mform->addElement('static', 'trustgrade_questions',
-                get_string('generated_questions', 'local_trustgrade'),
-                '<div id="ai-questions-container" style="display: none;">' .
-                '<div id="ai-questions" class="alert alert-success"></div></div>');
-
-        // Add separator for question bank section
-        $mform->addElement('static', 'trustgrade_separator2', '', '<hr style="margin: 20px 0;">');
-
         // Add question bank section placeholder (will be loaded via AJAX)
-        $mform->addElement('static', 'trustgrade_question_bank_placeholder', '',
+        $mform->addElement('static', 'trustgrade_question_bank_placeholder', get_string('generated_questions', 'local_trustgrade'),
+                '<div id="ai-questions-container" style="display: none;">' .
+                '<div id="ai-questions" class="alert alert-success"></div></div>' .
                 '<div id="question-bank-section">' .
                 '<div id="question-bank-loading" style="display: none;">' .
                 '<i class="fa fa-spinner fa-spin"></i> ' . get_string('loading_question_bank', 'local_trustgrade') .
