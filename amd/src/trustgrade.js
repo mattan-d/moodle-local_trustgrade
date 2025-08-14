@@ -89,35 +89,11 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
     },
 
     /**
-     * Render the recommendation which may be either:
-     * - a JSON object in the format provided by the backend, or
-     * - a string (legacy), which we render as paragraph lines with <br>.
+     * Render the recommendation using Mustache templates and localized strings.
+     * Supports both legacy string format and structured JSON objects.
      */
     renderRecommendation: (recommendation) => {
-      // Legacy string fallback
-      if (typeof recommendation === "string") {
-        return recommendation.replace(/\n/g, "<br>")
-      }
-
-      // If it's not an object, stringify and fallback to legacy behavior
-      if (!recommendation || typeof recommendation !== "object") {
-        try {
-          const txt = JSON.stringify(recommendation, null, 2)
-          return trustgrade.escapeHtml(txt).replace(/\n/g, "<br>")
-        } catch (e) {
-          return ""
-        }
-      }
-
-      return trustgrade.renderRecommendationWithTemplates(recommendation)
-    },
-
-    /**
-     * Render recommendation using Mustache templates and localized strings
-     */
-    renderRecommendationWithTemplates: (recommendation) => {
       return new Promise((resolve) => {
-        // Get all required language strings
         Promise.all([
           Str.get_string("criteria_evaluation", "local_trustgrade"),
           Str.get_string("criterion", "local_trustgrade"),
@@ -126,91 +102,141 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           Str.get_string("evaluation", "local_trustgrade"),
           Str.get_string("improved_assignment", "local_trustgrade"),
           Str.get_string("no_criteria_provided", "local_trustgrade"),
+          Str.get_string("recommendation_error", "local_trustgrade"),
         ]).then((strings) => {
-          const [criteriaEvaluation, criterion, met, suggestions, evaluation, improvedAssignment, noCriteriaProvided] =
-            strings
+          const [
+            criteriaEvaluation,
+            criterion,
+            met,
+            suggestions,
+            evaluation,
+            improvedAssignment,
+            noCriteriaProvided,
+            recommendationError,
+          ] = strings
 
-          const table = recommendation.table || {}
-          const rows = Array.isArray(table.rows) ? table.rows : []
-          const tableTitle = table.title || criteriaEvaluation
+          const localizedStrings = {
+            criteria_evaluation: criteriaEvaluation,
+            criterion: criterion,
+            met: met,
+            suggestions: suggestions,
+            evaluation: evaluation,
+            improved_assignment: improvedAssignment,
+            no_criteria_provided: noCriteriaProvided,
+            recommendation_error: recommendationError,
+          }
 
-          const evalText =
-            recommendation.EvaluationText && recommendation.EvaluationText.content
-              ? String(recommendation.EvaluationText.content)
-              : ""
-          const improved =
-            recommendation.ImprovedAssignment && recommendation.ImprovedAssignment.content
-              ? String(recommendation.ImprovedAssignment.content)
-              : ""
+          try {
+            // Legacy string fallback
+            if (typeof recommendation === "string") {
+              const content = recommendation.replace(/\n/g, "<br>")
+              resolve(content)
+              return
+            }
 
-          let html = ""
-
-          if (typeof require !== "undefined") {
-            require(["core/templates"], (Templates) => {
-              // Prepare table context
-              const tableContext = {
-                title: trustgrade.escapeHtml(tableTitle),
-                criterion_header: trustgrade.escapeHtml(criterion),
-                met_header: trustgrade.escapeHtml(met),
-                suggestions_header: trustgrade.escapeHtml(suggestions),
-                has_rows: rows.length > 0,
-                no_criteria_message: trustgrade.escapeHtml(noCriteriaProvided),
-                rows: rows.map((r) => {
-                  const metValue = r["Met"] ?? r["Met (y/n)"] ?? ""
-                  return {
-                    criterion: trustgrade.escapeHtml(r["Criterion"] ?? ""),
-                    met: trustgrade.escapeHtml(metValue),
-                    met_yes: metValue.toLowerCase().includes("yes") || metValue.toLowerCase().includes("y"),
-                    met_no: metValue.toLowerCase().includes("no") || metValue.toLowerCase().includes("n"),
-                    suggestions: trustgrade.escapeHtml(r["Suggestions"] ?? ""),
-                  }
-                }),
+            // If it's not an object, stringify and fallback to legacy behavior
+            if (!recommendation || typeof recommendation !== "object") {
+              try {
+                const txt = JSON.stringify(recommendation, null, 2)
+                resolve(trustgrade.escapeHtml(txt).replace(/\n/g, "<br>"))
+                return
+              } catch (e) {
+                resolve("")
+                return
               }
+            }
 
-              // Render table template
-              Templates.render("local_trustgrade/recommendation_table", tableContext).then((tableHtml) => {
+            const table = recommendation.table || {}
+            const rows = Array.isArray(table.rows) ? table.rows : []
+            const tableTitle = table.title || criteriaEvaluation
+
+            const processedRows = rows.map((row) => {
+              const metValue = (row["Met"] || row["Met (y/n)"] || "").toLowerCase()
+              return {
+                Criterion: row["Criterion"] || "",
+                Met: row["Met"] || row["Met (y/n)"] || "",
+                Suggestions: row["Suggestions"] || "",
+                isMetYes: metValue === "yes" || metValue === "y" || metValue === "true",
+                isMetNo: metValue === "no" || metValue === "n" || metValue === "false",
+                isMetPartial: metValue === "partial" || metValue === "partially" || metValue === "maybe",
+              }
+            })
+
+            let html = ""
+
+            // Render table section
+            const tableContext = {
+              title: tableTitle,
+              rows: processedRows,
+              strings: localizedStrings,
+            }
+
+            Templates.render("local_trustgrade/recommendation_table", tableContext)
+              .then((tableHtml) => {
                 html += tableHtml
 
-                const evalContext = {
-                  title: trustgrade.escapeHtml(evaluation),
-                  content: trustgrade.escapeHtml(evalText).replace(/\n/g, "<br>"),
-                  has_content: evalText.trim().length > 0,
-                }
+                // Render evaluation section
+                const evalText =
+                  recommendation.EvaluationText && recommendation.EvaluationText.content
+                    ? String(recommendation.EvaluationText.content).replace(/\n/g, "<br>")
+                    : ""
 
-                Templates.render("local_trustgrade/recommendation_section", evalContext).then((evalHtml) => {
-                  html += evalHtml
-
-                  const improvedContext = {
-                    title: trustgrade.escapeHtml(improvedAssignment),
-                    content: trustgrade.escapeHtml(improved).replace(/\n/g, "<br>"),
-                    has_content: improved.trim().length > 0,
+                if (evalText) {
+                  const evalContext = {
+                    title: evaluation,
+                    content: evalText,
+                    icon: "fa fa-clipboard-check",
+                    sectionClass: "tg-eval-text",
                   }
 
-                  Templates.render("local_trustgrade/recommendation_section", improvedContext).then((improvedHtml) => {
-                    html += improvedHtml
-                    resolve(html)
-                  })
-                })
+                  return Templates.render("local_trustgrade/recommendation_section", evalContext)
+                }
+                return ""
               })
-            })
-          } else {
-            // Fallback to legacy rendering if Templates module not available
-            resolve(trustgrade.renderRecommendationLegacy(recommendation, strings))
+              .then((evalHtml) => {
+                html += evalHtml
+
+                // Render improved assignment section
+                const improved =
+                  recommendation.ImprovedAssignment && recommendation.ImprovedAssignment.content
+                    ? String(recommendation.ImprovedAssignment.content).replace(/\n/g, "<br>")
+                    : ""
+
+                if (improved) {
+                  const improvedContext = {
+                    title: improvedAssignment,
+                    content: improved,
+                    icon: "fa fa-lightbulb",
+                    sectionClass: "tg-improved",
+                  }
+
+                  return Templates.render("local_trustgrade/recommendation_section", improvedContext)
+                }
+                return ""
+              })
+              .then((improvedHtml) => {
+                html += improvedHtml
+                resolve(html)
+              })
+              .catch((error) => {
+                console.error("Template rendering error:", error)
+                resolve(trustgrade.renderRecommendationLegacy(recommendation, localizedStrings))
+              })
+          } catch (error) {
+            console.error("Recommendation rendering error:", error)
+            resolve(`<div class="alert alert-danger">${recommendationError}</div>`)
           }
         })
       })
     },
 
     /**
-     * Legacy fallback rendering method
+     * Legacy fallback rendering method with localized strings
      */
     renderRecommendationLegacy: (recommendation, strings) => {
-      const [criteriaEvaluation, criterion, met, suggestions, evaluation, improvedAssignment, noCriteriaProvided] =
-        strings
-
       const table = recommendation.table || {}
       const rows = Array.isArray(table.rows) ? table.rows : []
-      const tableTitle = table.title || criteriaEvaluation
+      const tableTitle = table.title || strings.criteria_evaluation
 
       const evalText =
         recommendation.EvaluationText && recommendation.EvaluationText.content
@@ -224,24 +250,18 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       let html = ""
 
       // Table section with modern styling
-      html += `<div class="tg-section tg-table-section" style="margin-bottom:16px;">`
+      html += `<div class="tg-section tg-table-section mb-4">`
       if (tableTitle) {
-        html += `<h4 style="margin:0 0 8px 0;">${trustgrade.escapeHtml(tableTitle)}</h4>`
+        html += `<h4 class="mb-3 text-primary fw-semibold">${trustgrade.escapeHtml(tableTitle)}</h4>`
       }
       html += `
-        <div class="table-responsive">
-          <table class="table table-striped table-hover" style="width:100%; border-collapse:collapse; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
-            <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div class="table-responsive shadow-sm rounded">
+          <table class="table table-hover table-striped mb-0 modern-criteria-table">
+            <thead class="table-dark">
               <tr>
-                <th style="text-align:left; padding:16px 12px; font-weight: 600; border: none;">${trustgrade.escapeHtml(
-                  criterion,
-                )}</th>
-                <th style="text-align:left; padding:16px 12px; font-weight: 600; border: none;">${trustgrade.escapeHtml(
-                  met,
-                )}</th>
-                <th style="text-align:left; padding:16px 12px; font-weight: 600; border: none;">${trustgrade.escapeHtml(
-                  suggestions,
-                )}</th>
+                <th scope="col" class="fw-semibold">${trustgrade.escapeHtml(strings.criterion)}</th>
+                <th scope="col" class="fw-semibold text-center" style="width: 100px;">${trustgrade.escapeHtml(strings.met)}</th>
+                <th scope="col" class="fw-semibold">${trustgrade.escapeHtml(strings.suggestions)}</th>
               </tr>
             </thead>
             <tbody>
@@ -251,27 +271,31 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           const c = trustgrade.escapeHtml(r["Criterion"] ?? "")
           const m = trustgrade.escapeHtml(r["Met"] ?? r["Met (y/n)"] ?? "")
           const s = trustgrade.escapeHtml(r["Suggestions"] ?? "")
+          const metValue = m.toLowerCase()
 
-          // Enhanced styling for Met column with badges
-          let metDisplay = m
-          if (m.toLowerCase().includes("yes") || m.toLowerCase().includes("y")) {
-            metDisplay = `<span class="badge badge-success" style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size:12px;">${m}</span>`
-          } else if (m.toLowerCase().includes("no") || m.toLowerCase().includes("n")) {
-            metDisplay = `<span class="badge badge-warning" style="background: #ffc107; color: #212529; padding: 4px 8px; border-radius: 4px;">${m}</span>`
+          let metBadge = `<span class="badge bg-secondary rounded-pill">${m}</span>`
+          if (metValue === "yes" || metValue === "y" || metValue === "true") {
+            metBadge = `<span class="badge bg-success rounded-pill"><i class="fa fa-check me-1"></i>${m}</span>`
+          } else if (metValue === "no" || metValue === "n" || metValue === "false") {
+            metBadge = `<span class="badge bg-danger rounded-pill"><i class="fa fa-times me-1"></i>${m}</span>`
+          } else if (metValue === "partial" || metValue === "partially" || metValue === "maybe") {
+            metBadge = `<span class="badge bg-warning rounded-pill"><i class="fa fa-minus me-1"></i>${m}</span>`
           }
 
           html += `
-              <tr style="transition: background-color 0.2s ease;">
-                <td style="vertical-align:top; padding:12px; border-bottom:1px solid #e9ecef; background: #fff;">${c}</td>
-                <td style="vertical-align:top; padding:12px; border-bottom:1px solid #e9ecef; background: #fff;">${metDisplay}</td>
-                <td style="vertical-align:top; padding:12px; border-bottom:1px solid #e9ecef; background: #fff;">${s}</td>
+              <tr class="criteria-row">
+                <td class="criterion-cell"><div class="fw-medium text-dark">${c}</div></td>
+                <td class="met-cell text-center">${metBadge}</td>
+                <td class="suggestions-cell"><div class="text-muted small">${s}</div></td>
               </tr>
           `
         })
       } else {
         html += `
               <tr>
-                <td colspan="3" style="padding:16px; color:#6c757d; text-align: center; font-style: italic; background: #f8f9fa;">${trustgrade.escapeHtml(noCriteriaProvided)}</td>
+                <td colspan="3" class="text-center text-muted py-4">
+                  <i class="fa fa-info-circle me-2"></i>${trustgrade.escapeHtml(strings.no_criteria_provided)}
+                </td>
               </tr>
         `
       }
@@ -282,25 +306,39 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       </div>
       `
 
-      // Evaluation Text section with card styling
-      html += `<div class="tg-section tg-text-section" style="margin-bottom:16px;">`
-      html += `<div class="card" style="border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">`
-      html += `<div class="card-header" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-bottom: 1px solid #dee2e6; padding: 12px 16px; border-radius: 8px 8px 0 0;">`
-      html += `<h4 style="margin:0; color: #495057; font-weight: 600;">${trustgrade.escapeHtml(evaluation)}</h4>`
-      html += `</div>`
-      html += `<div class="card-body" style="padding: 16px; background: #fff; border-radius: 0 0 8px 8px;">`
-      html += `<div style="line-height: 1.6; color: #495057;">${trustgrade.escapeHtml(evalText).replace(/\n/g, "<br>")}</div>`
-      html += `</div></div></div>`
+      // Evaluation Text section
+      if (evalText) {
+        html += `<div class="tg-section tg-eval-text mb-4">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light border-0 py-3">
+              <h4 class="card-title mb-0 d-flex align-items-center">
+                <i class="fa fa-clipboard-check me-2 text-primary"></i>
+                ${trustgrade.escapeHtml(strings.evaluation)}
+              </h4>
+            </div>
+            <div class="card-body">
+              <div class="recommendation-content">${trustgrade.escapeHtml(evalText).replace(/\n/g, "<br>")}</div>
+            </div>
+          </div>
+        </div>`
+      }
 
-      // Improved Assignment section with card styling
-      html += `<div class="tg-section tg-text-section" style="margin-bottom:8px;">`
-      html += `<div class="card" style="border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">`
-      html += `<div class="card-header" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-bottom: 1px solid #dee2e6; padding: 12px 16px; border-radius: 8px 8px 0 0;">`
-      html += `<h4 style="margin:0; color: #495057; font-weight: 600;">${trustgrade.escapeHtml(improvedAssignment)}</h4>`
-      html += `</div>`
-      html += `<div class="card-body" style="padding: 16px; background: #fff; border-radius: 0 0 8px 8px;">`
-      html += `<div style="line-height: 1.6; color: #495057;">${trustgrade.escapeHtml(improved).replace(/\n/g, "<br>")}</div>`
-      html += `</div></div></div>`
+      // Improved Assignment section
+      if (improved) {
+        html += `<div class="tg-section tg-improved mb-4">
+          <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light border-0 py-3">
+              <h4 class="card-title mb-0 d-flex align-items-center">
+                <i class="fa fa-lightbulb me-2 text-primary"></i>
+                ${trustgrade.escapeHtml(strings.improved_assignment)}
+              </h4>
+            </div>
+            <div class="card-body">
+              <div class="recommendation-content">${trustgrade.escapeHtml(improved).replace(/\n/g, "<br>")}</div>
+            </div>
+          </div>
+        </div>`
+      }
 
       return html
     },
@@ -343,20 +381,26 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
                   ? JSON.parse(response.recommendation)
                   : response.recommendation
 
-              const renderPromise = trustgrade.renderRecommendation(recObj)
-
-              // Handle both Promise and direct string returns for backward compatibility
-              if (renderPromise && typeof renderPromise.then === "function") {
-                renderPromise.then((recommendationHtml) => {
-                  trustgrade.displayRecommendation(recommendationHtml, response.from_cache)
-                })
-              } else {
-                trustgrade.displayRecommendation(renderPromise, response.from_cache)
-              }
+              trustgrade.renderRecommendation(recObj).then((recommendationHtml) => {
+                if (response.from_cache) {
+                  Str.get_string("cache_hit", "local_trustgrade").then((cacheMessage) => {
+                    recommendationHtml =
+                      '<div class="alert alert-info mb-2"><i class="fa fa-clock-o"></i> <small>' +
+                      cacheMessage +
+                      " (Debug mode)</small></div>" +
+                      recommendationHtml
+                    $("#ai-recommendation").html(recommendationHtml)
+                  })
+                } else {
+                  $("#ai-recommendation").html(recommendationHtml)
+                }
+                $("#ai-recommendation-container").show()
+              })
             } catch (e) {
               // Fallback to legacy plaintext if JSON parsing fails
               const recommendationHtml = String(response.recommendation || "").replace(/\n/g, "<br>")
-              trustgrade.displayRecommendation(recommendationHtml, response.from_cache)
+              $("#ai-recommendation").html(recommendationHtml)
+              $("#ai-recommendation-container").show()
             }
           } else {
             Str.get_string("gateway_error", "local_trustgrade").then((title) => {
@@ -369,25 +413,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           $("#check-instructions-btn").prop("disabled", false)
           $("#ai-loading").hide()
         })
-    },
-
-    /**
-     * Display recommendation HTML with cache notification if applicable
-     */
-    displayRecommendation: (recommendationHtml, fromCache) => {
-      if (fromCache) {
-        Str.get_string("cache_hit", "local_trustgrade").then((cacheMessage) => {
-          const finalHtml =
-            '<div class="alert alert-info mb-2"><i class="fa fa-clock-o"></i> <small>' +
-            cacheMessage +
-            " (Debug mode)</small></div>" +
-            recommendationHtml
-          $("#ai-recommendation").html(finalHtml)
-        })
-      } else {
-        $("#ai-recommendation").html(recommendationHtml)
-      }
-      $("#ai-recommendation-container").show()
     },
 
     generateQuestions: function () {
@@ -479,15 +504,13 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           Str.get_string("points", "local_trustgrade"),
           Str.get_string("correct", "local_trustgrade"),
           Str.get_string("explanation", "local_trustgrade"),
-          Str.get_string("no_questions_generated", "local_trustgrade"), // Using localized string
-          Str.get_string("blooms_level", "local_trustgrade"), // Using localized string
         ]).then((strings) => {
-          const [sGeneratedQuestions, sQuestion, sPoints, sCorrect, sExplanation, sNoQuestions, sBlooms] = strings
+          const [sGeneratedQuestions, sQuestion, sPoints, sCorrect, sExplanation] = strings
 
           let html = "<h4>" + sGeneratedQuestions + ":</h4>"
 
           if (!Array.isArray(questions) || questions.length === 0) {
-            html += `<div style="color:#666;">${trustgrade.escapeHtml(sNoQuestions)}</div>` // Using localized string
+            html += `<div style="color:#666;">${trustgrade.escapeHtml("No questions generated.")}</div>`
             resolve(html)
             return
           }
@@ -517,8 +540,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
             html += `<p><strong>${trustgrade.escapeHtml(sQuestion)}:</strong> ${trustgrade.escapeHtml(qText)}</p>`
 
             if (blooms) {
-              html += `<p><strong>${trustgrade.escapeHtml(sBlooms)}:</strong> ${trustgrade.escapeHtml(
-                // Using localized string
+              html += `<p><strong>${trustgrade.escapeHtml("Bloom's level")}:</strong> ${trustgrade.escapeHtml(
                 blooms,
               )}</p>`
             }
