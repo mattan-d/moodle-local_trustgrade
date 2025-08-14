@@ -4,12 +4,13 @@ var define = window.define // Declare define variable
 var M = window.M // Declare M variable
 var tinyMCE = window.tinyMCE // Declare tinyMCE variable
 
-define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_factory"], (
+define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_factory", "core/templates"], (
   $,
   Ajax,
   Notification,
   Str,
   ModalFactory,
+  Templates,
 ) => {
   var trustgrade = {
     init: function () {
@@ -108,16 +109,108 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
         }
       }
 
-      // Expected structure:
-      // {
-      //   "table": { "title": "", "rows": [{ "Criterion": "", "Met": "", "Suggestions": "" }] },
-      //   "EvaluationText": { "content": "" },
-      //   "ImprovedAssignment": { "content": "" }
-      // }
+      return trustgrade.renderRecommendationWithTemplates(recommendation)
+    },
+
+    /**
+     * Render recommendation using Mustache templates and localized strings
+     */
+    renderRecommendationWithTemplates: (recommendation) => {
+      return new Promise((resolve) => {
+        // Get all required language strings
+        Promise.all([
+          Str.get_string("criteria_evaluation", "local_trustgrade"),
+          Str.get_string("criterion", "local_trustgrade"),
+          Str.get_string("met", "local_trustgrade"),
+          Str.get_string("suggestions", "local_trustgrade"),
+          Str.get_string("evaluation", "local_trustgrade"),
+          Str.get_string("improved_assignment", "local_trustgrade"),
+          Str.get_string("no_criteria_provided", "local_trustgrade"),
+        ]).then((strings) => {
+          const [criteriaEvaluation, criterion, met, suggestions, evaluation, improvedAssignment, noCriteriaProvided] =
+            strings
+
+          const table = recommendation.table || {}
+          const rows = Array.isArray(table.rows) ? table.rows : []
+          const tableTitle = table.title || criteriaEvaluation
+
+          const evalText =
+            recommendation.EvaluationText && recommendation.EvaluationText.content
+              ? String(recommendation.EvaluationText.content)
+              : ""
+          const improved =
+            recommendation.ImprovedAssignment && recommendation.ImprovedAssignment.content
+              ? String(recommendation.ImprovedAssignment.content)
+              : ""
+
+          let html = ""
+
+          if (typeof require !== "undefined") {
+            require(["core/templates"], (Templates) => {
+              // Prepare table context
+              const tableContext = {
+                title: trustgrade.escapeHtml(tableTitle),
+                criterion_header: trustgrade.escapeHtml(criterion),
+                met_header: trustgrade.escapeHtml(met),
+                suggestions_header: trustgrade.escapeHtml(suggestions),
+                has_rows: rows.length > 0,
+                no_criteria_message: trustgrade.escapeHtml(noCriteriaProvided),
+                rows: rows.map((r) => {
+                  const metValue = r["Met"] ?? r["Met (y/n)"] ?? ""
+                  return {
+                    criterion: trustgrade.escapeHtml(r["Criterion"] ?? ""),
+                    met: trustgrade.escapeHtml(metValue),
+                    met_yes: metValue.toLowerCase().includes("yes") || metValue.toLowerCase().includes("y"),
+                    met_no: metValue.toLowerCase().includes("no") || metValue.toLowerCase().includes("n"),
+                    suggestions: trustgrade.escapeHtml(r["Suggestions"] ?? ""),
+                  }
+                }),
+              }
+
+              // Render table template
+              Templates.render("local_trustgrade/recommendation_table", tableContext).then((tableHtml) => {
+                html += tableHtml
+
+                const evalContext = {
+                  title: trustgrade.escapeHtml(evaluation),
+                  content: trustgrade.escapeHtml(evalText).replace(/\n/g, "<br>"),
+                  has_content: evalText.trim().length > 0,
+                }
+
+                Templates.render("local_trustgrade/recommendation_section", evalContext).then((evalHtml) => {
+                  html += evalHtml
+
+                  const improvedContext = {
+                    title: trustgrade.escapeHtml(improvedAssignment),
+                    content: trustgrade.escapeHtml(improved).replace(/\n/g, "<br>"),
+                    has_content: improved.trim().length > 0,
+                  }
+
+                  Templates.render("local_trustgrade/recommendation_section", improvedContext).then((improvedHtml) => {
+                    html += improvedHtml
+                    resolve(html)
+                  })
+                })
+              })
+            })
+          } else {
+            // Fallback to legacy rendering if Templates module not available
+            resolve(trustgrade.renderRecommendationLegacy(recommendation, strings))
+          }
+        })
+      })
+    },
+
+    /**
+     * Legacy fallback rendering method
+     */
+    renderRecommendationLegacy: (recommendation, strings) => {
+      const [criteriaEvaluation, criterion, met, suggestions, evaluation, improvedAssignment, noCriteriaProvided] =
+        strings
 
       const table = recommendation.table || {}
       const rows = Array.isArray(table.rows) ? table.rows : []
-      const tableTitle = table.title || "Criteria Evaluation"
+      const tableTitle = table.title || criteriaEvaluation
 
       const evalText =
         recommendation.EvaluationText && recommendation.EvaluationText.content
@@ -130,24 +223,24 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
 
       let html = ""
 
-      // Table section
+      // Table section with modern styling
       html += `<div class="tg-section tg-table-section" style="margin-bottom:16px;">`
       if (tableTitle) {
         html += `<h4 style="margin:0 0 8px 0;">${trustgrade.escapeHtml(tableTitle)}</h4>`
       }
       html += `
         <div class="table-responsive">
-          <table class="generaltable boxaligncenter" style="width:100%; border-collapse:collapse;">
-            <thead>
+          <table class="table table-striped table-hover" style="width:100%; border-collapse:collapse; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
+            <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
               <tr>
-                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${trustgrade.escapeHtml(
-                  "Criterion",
+                <th style="text-align:left; padding:16px 12px; font-weight: 600; border: none;">${trustgrade.escapeHtml(
+                  criterion,
                 )}</th>
-                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${trustgrade.escapeHtml(
-                  "Met",
+                <th style="text-align:left; padding:16px 12px; font-weight: 600; border: none;">${trustgrade.escapeHtml(
+                  met,
                 )}</th>
-                <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">${trustgrade.escapeHtml(
-                  "Suggestions",
+                <th style="text-align:left; padding:16px 12px; font-weight: 600; border: none;">${trustgrade.escapeHtml(
+                  suggestions,
                 )}</th>
               </tr>
             </thead>
@@ -158,18 +251,27 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           const c = trustgrade.escapeHtml(r["Criterion"] ?? "")
           const m = trustgrade.escapeHtml(r["Met"] ?? r["Met (y/n)"] ?? "")
           const s = trustgrade.escapeHtml(r["Suggestions"] ?? "")
+
+          // Enhanced styling for Met column with badges
+          let metDisplay = m
+          if (m.toLowerCase().includes("yes") || m.toLowerCase().includes("y")) {
+            metDisplay = `<span class="badge badge-success" style="background: #28a745; color: white; padding: 4px 8px; border-radius: 4px; font-size:12px;">${m}</span>`
+          } else if (m.toLowerCase().includes("no") || m.toLowerCase().includes("n")) {
+            metDisplay = `<span class="badge badge-warning" style="background: #ffc107; color: #212529; padding: 4px 8px; border-radius: 4px;">${m}</span>`
+          }
+
           html += `
-              <tr>
-                <td style="vertical-align:top; border-bottom:1px solid #eee; padding:8px;">${c}</td>
-                <td style="vertical-align:top; border-bottom:1px solid #eee; padding:8px;">${m}</td>
-                <td style="vertical-align:top; border-bottom:1px solid #eee; padding:8px;">${s}</td>
+              <tr style="transition: background-color 0.2s ease;">
+                <td style="vertical-align:top; padding:12px; border-bottom:1px solid #e9ecef; background: #fff;">${c}</td>
+                <td style="vertical-align:top; padding:12px; border-bottom:1px solid #e9ecef; background: #fff;">${metDisplay}</td>
+                <td style="vertical-align:top; padding:12px; border-bottom:1px solid #e9ecef; background: #fff;">${s}</td>
               </tr>
           `
         })
       } else {
         html += `
               <tr>
-                <td colspan="3" style="padding:8px; color:#666;">${trustgrade.escapeHtml("No criteria provided.")}</td>
+                <td colspan="3" style="padding:16px; color:#6c757d; text-align: center; font-style: italic; background: #f8f9fa;">${trustgrade.escapeHtml(noCriteriaProvided)}</td>
               </tr>
         `
       }
@@ -180,17 +282,25 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       </div>
       `
 
-      // Evaluation Text section
-      html += `<div class="tg-section tg-eval-text" style="margin-bottom:16px;">`
-      html += `<h4 style="margin:0 0 8px 0;">${trustgrade.escapeHtml("Evaluation")}</h4>`
-      html += `<div>${trustgrade.escapeHtml(evalText).replace(/\n/g, "<br>")}</div>`
+      // Evaluation Text section with card styling
+      html += `<div class="tg-section tg-text-section" style="margin-bottom:16px;">`
+      html += `<div class="card" style="border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">`
+      html += `<div class="card-header" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-bottom: 1px solid #dee2e6; padding: 12px 16px; border-radius: 8px 8px 0 0;">`
+      html += `<h4 style="margin:0; color: #495057; font-weight: 600;">${trustgrade.escapeHtml(evaluation)}</h4>`
       html += `</div>`
+      html += `<div class="card-body" style="padding: 16px; background: #fff; border-radius: 0 0 8px 8px;">`
+      html += `<div style="line-height: 1.6; color: #495057;">${trustgrade.escapeHtml(evalText).replace(/\n/g, "<br>")}</div>`
+      html += `</div></div></div>`
 
-      // Improved Assignment section
-      html += `<div class="tg-section tg-improved" style="margin-bottom:8px;">`
-      html += `<h4 style="margin:0 0 8px 0;">${trustgrade.escapeHtml("Improved Assignment")}</h4>`
-      html += `<div>${trustgrade.escapeHtml(improved).replace(/\n/g, "<br>")}</div>`
+      // Improved Assignment section with card styling
+      html += `<div class="tg-section tg-text-section" style="margin-bottom:8px;">`
+      html += `<div class="card" style="border: 1px solid #dee2e6; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">`
+      html += `<div class="card-header" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-bottom: 1px solid #dee2e6; padding: 12px 16px; border-radius: 8px 8px 0 0;">`
+      html += `<h4 style="margin:0; color: #495057; font-weight: 600;">${trustgrade.escapeHtml(improvedAssignment)}</h4>`
       html += `</div>`
+      html += `<div class="card-body" style="padding: 16px; background: #fff; border-radius: 0 0 8px 8px;">`
+      html += `<div style="line-height: 1.6; color: #495057;">${trustgrade.escapeHtml(improved).replace(/\n/g, "<br>")}</div>`
+      html += `</div></div></div>`
 
       return html
     },
@@ -227,32 +337,27 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       promises[0]
         .done((response) => {
           if (response.success) {
-            var recommendationHtml = ""
             try {
               var recObj =
                 typeof response.recommendation === "string"
                   ? JSON.parse(response.recommendation)
                   : response.recommendation
 
-              recommendationHtml = trustgrade.renderRecommendation(recObj)
+              const renderPromise = trustgrade.renderRecommendation(recObj)
+
+              // Handle both Promise and direct string returns for backward compatibility
+              if (renderPromise && typeof renderPromise.then === "function") {
+                renderPromise.then((recommendationHtml) => {
+                  trustgrade.displayRecommendation(recommendationHtml, response.from_cache)
+                })
+              } else {
+                trustgrade.displayRecommendation(renderPromise, response.from_cache)
+              }
             } catch (e) {
               // Fallback to legacy plaintext if JSON parsing fails
-              recommendationHtml = String(response.recommendation || "").replace(/\n/g, "<br>")
+              const recommendationHtml = String(response.recommendation || "").replace(/\n/g, "<br>")
+              trustgrade.displayRecommendation(recommendationHtml, response.from_cache)
             }
-
-            if (response.from_cache) {
-              Str.get_string("cache_hit", "local_trustgrade").then((cacheMessage) => {
-                recommendationHtml =
-                  '<div class="alert alert-info mb-2"><i class="fa fa-clock-o"></i> <small>' +
-                  cacheMessage +
-                  " (Debug mode)</small></div>" +
-                  recommendationHtml
-                $("#ai-recommendation").html(recommendationHtml)
-              })
-            } else {
-              $("#ai-recommendation").html(recommendationHtml)
-            }
-            $("#ai-recommendation-container").show()
           } else {
             Str.get_string("gateway_error", "local_trustgrade").then((title) => {
               trustgrade.showErrorModal(title, response.error || "An error occurred.")
@@ -264,6 +369,25 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           $("#check-instructions-btn").prop("disabled", false)
           $("#ai-loading").hide()
         })
+    },
+
+    /**
+     * Display recommendation HTML with cache notification if applicable
+     */
+    displayRecommendation: (recommendationHtml, fromCache) => {
+      if (fromCache) {
+        Str.get_string("cache_hit", "local_trustgrade").then((cacheMessage) => {
+          const finalHtml =
+            '<div class="alert alert-info mb-2"><i class="fa fa-clock-o"></i> <small>' +
+            cacheMessage +
+            " (Debug mode)</small></div>" +
+            recommendationHtml
+          $("#ai-recommendation").html(finalHtml)
+        })
+      } else {
+        $("#ai-recommendation").html(recommendationHtml)
+      }
+      $("#ai-recommendation-container").show()
     },
 
     generateQuestions: function () {
@@ -355,13 +479,15 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           Str.get_string("points", "local_trustgrade"),
           Str.get_string("correct", "local_trustgrade"),
           Str.get_string("explanation", "local_trustgrade"),
+          Str.get_string("no_questions_generated", "local_trustgrade"), // Using localized string
+          Str.get_string("blooms_level", "local_trustgrade"), // Using localized string
         ]).then((strings) => {
-          const [sGeneratedQuestions, sQuestion, sPoints, sCorrect, sExplanation] = strings
+          const [sGeneratedQuestions, sQuestion, sPoints, sCorrect, sExplanation, sNoQuestions, sBlooms] = strings
 
           let html = "<h4>" + sGeneratedQuestions + ":</h4>"
 
           if (!Array.isArray(questions) || questions.length === 0) {
-            html += `<div style="color:#666;">${trustgrade.escapeHtml("No questions generated.")}</div>`
+            html += `<div style="color:#666;">${trustgrade.escapeHtml(sNoQuestions)}</div>` // Using localized string
             resolve(html)
             return
           }
@@ -391,7 +517,8 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
             html += `<p><strong>${trustgrade.escapeHtml(sQuestion)}:</strong> ${trustgrade.escapeHtml(qText)}</p>`
 
             if (blooms) {
-              html += `<p><strong>${trustgrade.escapeHtml("Bloom's level")}:</strong> ${trustgrade.escapeHtml(
+              html += `<p><strong>${trustgrade.escapeHtml(sBlooms)}:</strong> ${trustgrade.escapeHtml(
+                // Using localized string
                 blooms,
               )}</p>`
             }

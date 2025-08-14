@@ -223,3 +223,16 @@ $string['final_score'] = 'Final Score: {$a->score}/{$a->total} ({$a->percentage}
 $string['window_focus_lost'] = 'Window focus was lost {$a} time(s) during the quiz.';
 $string['exceeded_window_switches'] = 'You have exceeded the maximum allowed window switches ({$a}). The quiz has been terminated.';
 $string['setting_updated_success'] = 'Setting "{$a}" updated successfully.';
+
+// New strings for recommendation display
+$string['criteria_evaluation'] = 'Criteria Evaluation';
+$string['criterion'] = 'Criterion';
+$string['met'] = 'Met';
+$string['suggestions'] = 'Suggestions';
+$string['evaluation'] = 'Evaluation';
+$string['improved_assignment'] = 'Improved Assignment';
+$string['no_criteria_provided'] = 'No criteria provided.';
+$string['no_questions_generated'] = 'No questions generated.';
+$string['blooms_level'] = 'Bloom\'s level';
+
+?>
