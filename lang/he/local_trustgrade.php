@@ -229,3 +229,14 @@ $string['final_score'] = 'ציון סופי: {$a->score}/{$a->total} ({$a->perce
 $string['window_focus_lost'] = 'פוקוס החלון אבד {$a} פעמים במהלך החידון.';
 $string['exceeded_window_switches'] = 'חרגת ממספר החלפות החלונות המקסימלי המותר ({$a}). החידון הופסק.';
 $string['setting_updated_success'] = 'הגדרה "{$a}" עודכנה בהצלחה.';
+
+// Localization strings for recommendation rendering
+$string['criteria_evaluation'] = 'הערכת קריטריונים';
+$string['criterion'] = 'קריטריון';
+$string['met'] = 'הושג';
+$string['suggestions'] = 'הצעות';
+$string['evaluation'] = 'הערכה';
+$string['improved_assignment'] = 'משימה משופרת';
+$string['no_criteria_provided'] = 'לא סופקו קריטריונים.';
+$string['recommendation_error'] = 'שגיאה בהצגת ההמלצה.';
+
