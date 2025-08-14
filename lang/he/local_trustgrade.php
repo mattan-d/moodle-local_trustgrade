@@ -238,4 +238,3 @@ $string['evaluation'] = 'הערכה';
 $string['improved_assignment'] = 'משימה משופרת';
 $string['no_criteria_provided'] = 'לא סופקו קריטריונים.';
 $string['recommendation_error'] = 'שגיאה בהצגת ההמלצה.';
-

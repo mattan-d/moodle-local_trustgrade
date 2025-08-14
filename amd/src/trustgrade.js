@@ -345,14 +345,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
 
     checkInstructions: function () {
       var instructions = this.getInstructions()
-      if (!instructions || instructions.trim().length === 0) {
-        Str.get_string("no_instructions_error", "local_trustgrade").then((message) => {
-          Str.get_string("input_validation_error", "local_trustgrade").then((title) => {
-            trustgrade.showErrorModal(title, message)
-          })
-        })
-        return
-      }
+      // Allow empty instructions to proceed
 
       $("#check-instructions-btn").prop("disabled", true)
       $("#ai-loading").show()
@@ -365,7 +358,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           methodname: "local_trustgrade_check_instructions",
           args: {
             cmid: cmid,
-            instructions: instructions,
+            instructions: instructions || "", // Ensure we pass empty string instead of null/undefined
             intro_itemid: trustgrade.getIntroEditorItemId(),
             intro_attachments_itemid: trustgrade.getIntroAttachmentsItemId(),
           },
@@ -417,14 +410,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
 
     generateQuestions: function () {
       var instructions = this.getInstructions()
-      if (!instructions || instructions.trim().length === 0) {
-        Str.get_string("no_instructions_questions_error", "local_trustgrade").then((message) => {
-          Str.get_string("input_validation_error", "local_trustgrade").then((title) => {
-            trustgrade.showErrorModal(title, message)
-          })
-        })
-        return
-      }
+      // Allow empty instructions to proceed
 
       $("#generate-questions-btn").prop("disabled", true)
       $("#ai-question-loading").show()
@@ -437,7 +423,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           methodname: "local_trustgrade_generate_questions",
           args: {
             cmid: cmid,
-            instructions: instructions,
+            instructions: instructions || "", // Ensure we pass empty string instead of null/undefined
             intro_itemid: trustgrade.getIntroEditorItemId(),
             intro_attachments_itemid: trustgrade.getIntroAttachmentsItemId(),
           },
