@@ -414,7 +414,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
 
       $("#generate-questions-btn").prop("disabled", true)
       $("#ai-question-loading").show()
-      $("#ai-questions-container").hide()
 
       var cmid = this.getCourseModuleId()
 
@@ -433,32 +432,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       promises[0]
         .done((response) => {
           if (response.success) {
-            // response.questions is expected to be a JSON string representing the NEW pattern:
-            // [
-            //   {
-            //     id, type, text,
-            //     options: [{ id, text, is_correct, explanation }],
-            //     metadata: { blooms_level, points }
-            //   }
-            // ]
-            var questions = typeof response.questions === "string" ? JSON.parse(response.questions) : response.questions
-
-            trustgrade.formatQuestionsDisplay(questions).then((questionsHtml) => {
-              if (response.from_cache) {
-                Str.get_string("cache_hit", "local_trustgrade").then((cacheMessage) => {
-                  questionsHtml =
-                    '<div class="alert alert-info mb-2"><i class="fa fa-clock-o"></i> <small>' +
-                    cacheMessage +
-                    " (Debug mode)</small></div>" +
-                    questionsHtml
-                  $("#ai-questions").html(questionsHtml)
-                })
-              } else {
-                $("#ai-questions").html(questionsHtml)
-              }
-              $("#ai-questions-container").show()
-            })
-
             if (response.message) {
               trustgrade.showSuccessNotification(response.message)
             }
