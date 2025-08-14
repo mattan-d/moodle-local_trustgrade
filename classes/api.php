@@ -20,16 +20,6 @@ class api {
      * @return array Response from Gateway or error
      */
     public static function check_instructions($instructions, array $files = []) {
-        // Ensure instructions is a string
-        if (!is_string($instructions)) {
-            return ['error' => 'Instructions must be a string'];
-        }
-
-        $instructions = trim($instructions);
-        if (empty($instructions)) {
-            return ['error' => get_string('no_instructions', 'local_trustgrade')];
-        }
-
         try {
             $gateway = new gateway_client();
             $result = $gateway->checkInstructions($instructions, $files);
