@@ -83,29 +83,19 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
                 get_string('show_countdown_desc', 'local_trustgrade'));
         $mform->setDefault('trustgrade_show_countdown', $current_settings['show_countdown']);
 
-        // Add separator before instruction checking
-        $mform->addElement('static', 'trustgrade_separator_instructions', '', '<hr style="margin: 20px 0;">');
-
         // Add check button
         $buttonarray = array();
         $buttonarray[] = $mform->createElement('button', 'check_instructions_btn',
                 get_string('check_instructions', 'local_trustgrade'),
                 array('id' => 'check-instructions-btn', 'class' => ''));
-        $mform->addGroup($buttonarray, 'trustgrade_buttons', '', ' ', false);
-
-        // Add loading indicator (hidden by default)
-        $mform->addElement('static', 'trustgrade_loading', '',
-                '<div id="ai-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
-                get_string('processing', 'local_trustgrade') . '</div>');
+        $mform->addGroup($buttonarray, 'trustgrade_buttons', get_string('ai_recommendation', 'local_trustgrade'), ' ', false);
 
         // Add recommendation display area (hidden by default)
         $mform->addElement('static', 'trustgrade_recommendation',
-                get_string('ai_recommendation', 'local_trustgrade'),
+                '<div id="ai-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
+                get_string('processing', 'local_trustgrade') . '</div>',
                 '<div id="ai-recommendation-container" style="display: none;">' .
                 '<div id="ai-recommendation" class="alert alert-info"></div></div>');
-
-        // Add separator before question generation
-        $mform->addElement('static', 'trustgrade_separator', '', '<hr style="margin: 20px 0;">');
 
         // Add question generation button
         $questionbuttonarray = array();
