@@ -233,4 +233,7 @@ $string['evaluation'] = 'Evaluation';
 $string['improved_assignment'] = 'Improved Assignment';
 $string['no_criteria_provided'] = 'No criteria provided.';
 $string['recommendation_error'] = 'Error displaying recommendation.';
+
+$string['no_instructions_or_files'] = 'Either instructions or at least one file must be provided for analysis';
+
 ?>

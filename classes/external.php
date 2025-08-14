@@ -311,12 +311,12 @@ class external extends \external_api {
  public static function check_instructions($cmid, $instructions, $intro_itemid = 0, $intro_attachments_itemid = 0) {
      self::validate_editing_context($cmid);
      $instructions = strip_tags(trim((string) $instructions));
-     if (empty($instructions)) {
-         return ['success' => false, 'error' => get_string('no_instructions', 'local_trustgrade')];
-     }
-
-     // Collect files from draft areas and send them to the Gateway.
+     
      $files = self::collect_intro_files((int)$intro_itemid, (int)$intro_attachments_itemid);
+     
+     if (empty($instructions) && empty($files)) {
+         return ['success' => false, 'error' => get_string('no_instructions_or_files', 'local_trustgrade')];
+     }
 
      $response = api::check_instructions($instructions, $files);
      if (!empty($response['error'])) {
@@ -348,15 +348,15 @@ class external extends \external_api {
  public static function generate_questions($cmid, $instructions, $intro_itemid = 0, $intro_attachments_itemid = 0) {
       self::validate_editing_context($cmid);
       $instructions = strip_tags(trim((string) $instructions));
-      if (empty($instructions)) {
-          return ['success' => false, 'error' => get_string('no_instructions', 'local_trustgrade')];
+      
+      $files = self::collect_intro_files((int)$intro_itemid, (int)$intro_attachments_itemid);
+      
+      if (empty($instructions) && empty($files)) {
+          return ['success' => false, 'error' => get_string('no_instructions_or_files', 'local_trustgrade')];
       }
 
       $quiz_settings = quiz_settings::get_settings($cmid);
       $questions_to_generate = $quiz_settings['questions_to_generate'];
-
-      // Collect draft files from the intro editor/filemanager.
-      $files = self::collect_intro_files((int)$intro_itemid, (int)$intro_attachments_itemid);
 
       // If we have files, send them to the Gateway alongside the instructions.
       if (!empty($files)) {
