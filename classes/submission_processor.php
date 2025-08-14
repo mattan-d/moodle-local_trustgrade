@@ -290,6 +290,7 @@ class submission_processor {
                 $content['files'][] = [
                     'filename' => $file->get_filename(),
                     'mimetype' => $file->get_mimetype(),
+                    'size' => $file->get_filesize(),
                     'content' => base64_encode($file_content)
                 ];
             }

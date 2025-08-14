@@ -38,7 +38,7 @@ class observer {
         
         try {
             // Get event data
-            $submission_id = $event->objectid;
+            $submission_id = $event->other['submissionid'];
             $context = $event->get_context();
             $cm = get_coursemodule_from_id('assign', $context->instanceid);
             
