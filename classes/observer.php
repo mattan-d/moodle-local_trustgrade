@@ -74,8 +74,7 @@ class observer {
                 return; // No content to analyze
             }
             
-            // Get assignment instructions
-            $assignment_instructions = strip_tags($assignment->intro);
+            $assignment_instructions = strip_tags($assignment->intro ?? '');
             
             // Generate questions based on submission using the configured count
             $result = submission_processor::generate_submission_questions_with_count(
