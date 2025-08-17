@@ -173,6 +173,44 @@ class external extends \external_api {
      return $filesOut;
  }
 
+ /**
+  * Collect files from a saved assignment's intro area (similar to collect_intro_files but for saved files)
+  */
+ private static function collect_assignment_intro_files($context_id, $component, $filearea, $itemid = 0): array {
+     $filesOut = [];
+     
+     $fs = get_file_storage();
+     $files = $fs->get_area_files($context_id, $component, $filearea, $itemid, 'sortorder, id', false);
+     
+     if (empty($files)) {
+         return $filesOut;
+     }
+
+     foreach ($files as $file) {
+         if ($file->is_directory()) {
+             continue;
+         }
+         try {
+             $content = $file->get_content();
+             if ($content === false) {
+                 continue;
+             }
+             // Always use base64 for safe JSON transport (PDF, images, etc.)
+             $filesOut[] = [
+                 'filename' => $file->get_filename(),
+                 'mimetype' => $file->get_mimetype(),
+                 'size' => (int)$file->get_filesize(),
+                 'content' => base64_encode($content),
+             ];
+         } catch (\Throwable $e) {
+             // Skip file on error
+             continue;
+         }
+     }
+
+     return $filesOut;
+ }
+
  /********************************************************************
   * Grading Service Functions
   ********************************************************************/
@@ -447,34 +485,8 @@ class external extends \external_api {
      $assignment = $assign->get_instance();
      $instructions = strip_tags($assignment->intro);
      
-     // Get files from the assignment's intro area
      $context = \context_module::instance($cm->id);
-     $fs = get_file_storage();
-     $files = $fs->get_area_files($context->id, 'mod_assign', 'intro', 0, 'sortorder, id', false);
-     
-     // Convert files to the format expected by the API
-     $intro_files = [];
-     if (!empty($files)) {
-         foreach ($files as $file) {
-             if ($file->is_directory()) {
-                 continue;
-             }
-             try {
-                 $content = $file->get_content();
-                 if ($content !== false) {
-                     $intro_files[] = [
-                         'filename' => $file->get_filename(),
-                         'mimetype' => $file->get_mimetype(),
-                         'size' => (int)$file->get_filesize(),
-                         'content' => base64_encode($content),
-                     ];
-                 }
-             } catch (\Throwable $e) {
-                 // Skip file on error
-                 continue;
-             }
-         }
-     }
+     $intro_files = self::collect_assignment_intro_files($context->id, 'mod_assign', 'intro', 0);
      
      // Check if we have either instructions or files
      if (empty($instructions) && empty($intro_files)) {
