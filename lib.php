@@ -102,7 +102,9 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addGroup($buttonarray, 'trustgrade_buttons', get_string('ai_recommendation', 'local_trustgrade'), ' ', false);
 
         // Add recommendation display area (hidden by default)
-        $mform->addElement('static', 'trustgrade_recommendation', '',
+        $mform->addElement('static', 'trustgrade_recommendation',
+                '<div id="ai-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
+                get_string('processing', 'local_trustgrade') . '</div>',
                 '<div id="ai-recommendation-container" style="display: none;">' .
                 '<div id="ai-recommendation" class="alert alert-info"></div></div>');
 
