@@ -2,6 +2,10 @@
 // This file is part of Moodle - http://moodle.org/
 
 $string['pluginname'] = 'TrustGrade';
+$string['plugin_enabled'] = 'Enable TrustGrade Plugin';
+$string['plugin_enabled_desc'] = 'Enable or disable the TrustGrade plugin globally. When disabled, all TrustGrade functionality will be hidden from assignment forms and pages.';
+$string['trustgrade_enabled'] = 'Enable TrustGrade for this assignment';
+$string['trustgrade_enabled_desc'] = 'Enable TrustGrade AI features for this specific assignment. When disabled, students will not see AI quizzes or related functionality.';
 $string['trustgrade_tab'] = 'TrustGrade';
 $string['check_instructions'] = 'Check instructions with AI';
 $string['ai_recommendation'] = 'AI Recommendation';

@@ -2,6 +2,10 @@
 // This file is part of Moodle - http://moodle.org/
 
 $string['pluginname'] = 'TrustGrade';
+$string['plugin_enabled'] = 'הפעל תוסף TrustGrade';
+$string['plugin_enabled_desc'] = 'הפעל או השבת את תוסף TrustGrade באופן גלובלי. כאשר מושבת, כל הפונקציונליות של TrustGrade תוסתר מטפסי המטלות והדפים.';
+$string['trustgrade_enabled'] = 'הפעל TrustGrade למטלה זו';
+$string['trustgrade_enabled_desc'] = 'הפעל תכונות בינה מלאכותית של TrustGrade למטלה ספציפית זו. כאשר מושבת, סטודנטים לא יראו חידוני בינה מלאכותית או פונקציונליות קשורה.';
 $string['trustgrade_tab'] = 'TrustGrade';
 $string['check_instructions'] = 'בדוק הוראות עם בינה מלאכותית';
 $string['ai_recommendation'] = 'המלצת בינה מלאכותית';
