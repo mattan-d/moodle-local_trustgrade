@@ -9,7 +9,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_trustgrade';
-$plugin->version = 2024012313; // Incremented version for quiz settings
+$plugin->version = 2025081700; // Incremented version for quiz settings
 $plugin->requires = 2022112800; // Moodle 4.1
 $plugin->maturity = MATURITY_STABLE;
 $plugin->release = '1.1.0';
