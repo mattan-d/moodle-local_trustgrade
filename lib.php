@@ -51,11 +51,14 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->setDefault('trustgrade_questions_to_generate', $current_settings['questions_to_generate']);
         $mform->addHelpButton('trustgrade_questions_to_generate', 'questions_to_generate', 'local_trustgrade');
 
-        $questionbuttonarray = array();
-        $questionbuttonarray[] = $mform->createElement('button', 'generate_questions_btn',
+        $buttonarray = array();
+        $buttonarray[] = $mform->createElement('button', 'generate_questions_btn',
                 get_string('generate_questions', 'local_trustgrade'),
                 array('id' => 'generate-questions-btn', 'class' => ''));
-        $mform->addGroup($questionbuttonarray, 'trustgrade_question_buttons', '', ' ', false);
+        $buttonarray[] = $mform->createElement('button', 'check_instructions_btn',
+                get_string('check_instructions', 'local_trustgrade'),
+                array('id' => 'check-instructions-btn', 'class' => ''));
+        $mform->addGroup($buttonarray, 'trustgrade_buttons', get_string('ai_recommendation', 'local_trustgrade'), ' ', false);
 
         // Add question generation loading indicator (hidden by default)
         $mform->addElement('static', 'trustgrade_question_loading', '',
@@ -107,13 +110,6 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
                 get_string('show_countdown_desc', 'local_trustgrade'));
         $mform->setDefault('trustgrade_show_countdown', $current_settings['show_countdown']);
 
-        // Add check button
-        $buttonarray = array();
-        $buttonarray[] = $mform->createElement('button', 'check_instructions_btn',
-                get_string('check_instructions', 'local_trustgrade'),
-                array('id' => 'check-instructions-btn', 'class' => ''));
-        $mform->addGroup($buttonarray, 'trustgrade_buttons', get_string('ai_recommendation', 'local_trustgrade'), ' ', false);
-
         // Add recommendation display area (hidden by default)
         $mform->addElement('static', 'trustgrade_recommendation',
                 '<div id="ai-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
@@ -137,13 +133,12 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->setType('trustgrade_cmid', PARAM_INT);
 
         $mform->disabledIf('trustgrade_questions_to_generate', 'trustgrade_enabled');
-        $mform->disabledIf('trustgrade_question_buttons', 'trustgrade_enabled');
+        $mform->disabledIf('trustgrade_buttons', 'trustgrade_enabled');
         $mform->disabledIf('trustgrade_instructor_questions', 'trustgrade_enabled');
         $mform->disabledIf('trustgrade_submission_questions', 'trustgrade_enabled');
         $mform->disabledIf('trustgrade_randomize_answers', 'trustgrade_enabled');
         $mform->disabledIf('trustgrade_time_per_question', 'trustgrade_enabled');
         $mform->disabledIf('trustgrade_show_countdown', 'trustgrade_enabled');
-        $mform->disabledIf('trustgrade_buttons', 'trustgrade_enabled');
 
         // Add JavaScript for AJAX functionality
         $PAGE->requires->js_call_amd('local_trustgrade/trustgrade', 'init');
