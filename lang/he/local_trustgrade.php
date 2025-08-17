@@ -47,7 +47,7 @@ $string['randomize_answers_desc'] = 'ערבב באופן אקראי את סדר 
 $string['time_per_question'] = 'זמן לכל שאלה';
 $string['time_per_question_help'] = 'זמן מקסימלי המותר לכל שאלה בשניות';
 $string['show_countdown'] = 'הצג טיימר ספירה לאחור';
-$string['show_countdown_desc'] = 'הצג טיימר ספירה לאחור לכל שאלה. כאשר הזמן פג, החידון עו��ר אוטומטית לשאלה הבאה.';
+$string['show_countdown_desc'] = 'הצג טיימר ספירה לאחור לכל שאלה. כאשר הזמן פג, החידון עובר אוטומטית לשאלה הבאה.';
 
 // Disclosure Settings
 $string['disclosure_settings'] = 'הגדרות חשיפת מידע לסטודנטים';
