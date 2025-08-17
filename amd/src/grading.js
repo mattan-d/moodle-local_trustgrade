@@ -1,6 +1,3 @@
-// Declare the define variable before using it
-const define = window.define
-
 define([
   "jquery",
   "core/ajax",
