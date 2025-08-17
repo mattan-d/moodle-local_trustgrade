@@ -38,6 +38,17 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->setDefault('trustgrade_questions_to_generate', $current_settings['questions_to_generate']);
         $mform->addHelpButton('trustgrade_questions_to_generate', 'questions_to_generate', 'local_trustgrade');
 
+        $questionbuttonarray = array();
+        $questionbuttonarray[] = $mform->createElement('button', 'generate_questions_btn',
+                get_string('generate_questions', 'local_trustgrade'),
+                array('id' => 'generate-questions-btn', 'class' => ''));
+        $mform->addGroup($questionbuttonarray, 'trustgrade_question_buttons', '', ' ', false);
+
+        // Add question generation loading indicator (hidden by default)
+        $mform->addElement('static', 'trustgrade_question_loading', '',
+                '<div id="ai-question-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
+                get_string('generating_questions', 'local_trustgrade') . '</div>');
+
         // Options for number of questions (used for instructor and submission questions)
         $question_count_options = [];
         for ($i = 0; $i <= 20; $i++) {
@@ -94,18 +105,6 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addElement('static', 'trustgrade_recommendation', '',
                 '<div id="ai-recommendation-container" style="display: none;">' .
                 '<div id="ai-recommendation" class="alert alert-info"></div></div>');
-
-        // Add question generation button
-        $questionbuttonarray = array();
-        $questionbuttonarray[] = $mform->createElement('button', 'generate_questions_btn',
-                get_string('generate_questions', 'local_trustgrade'),
-                array('id' => 'generate-questions-btn', 'class' => ''));
-        $mform->addGroup($questionbuttonarray, 'trustgrade_question_buttons', '', ' ', false);
-
-        // Add question generation loading indicator (hidden by default)
-        $mform->addElement('static', 'trustgrade_question_loading', '',
-                '<div id="ai-question-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
-                get_string('generating_questions', 'local_trustgrade') . '</div>');
 
         // Add question bank section placeholder (will be loaded via AJAX)
         $mform->addElement('static', 'trustgrade_question_bank_placeholder', get_string('generated_questions', 'local_trustgrade'),
