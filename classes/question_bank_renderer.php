@@ -7,33 +7,23 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
 * Question bank renderer for displaying and editing questions
-* Supports JSON pattern:
-* {
-*   "questions": [
-*     {
-*       "id": 1,
-*       "type": "multiple_choice",
-*       "text": "Question text here",
-*       "options": [
-*         { "id": 1, "text": "Option A", "is_correct": true, "explanation": "Why A is correct" },
-*         { "id": 2, "text": "Option B", "is_correct": false, "explanation": "Why B is incorrect" },
-*         { "id": 3, "text": "Option C", "is_correct": false, "explanation": "Why C is incorrect" },
-*         { "id": 4, "text": "Option D", "is_correct": false, "explanation": "Why D is incorrect" }
-*       ],
-*       "metadata": {
-*         "blooms_level": "Understand",
-*         "points": 10
-*       }
-*     }
-*   ]
-* }
+* Supports new JSON pattern:
+* [
+*   {
+*     "id": 1,
+*     "type": "multiple_choice",
+*     "text": "Question text",
+*     "options": [{ "id": 1, "text": "A", "is_correct": true, "explanation": "..." }, ...],
+*     "metadata": { "blooms_level": "Understand", "points": 10 }
+*   }
+* ]
 */
 class question_bank_renderer {
 
   /**
    * Render editable questions for instructors
    *
-   * @param array $questions Array of questions from the "questions" key
+   * @param array $questions Array of questions
    * @param int $cmid Course module ID
    * @return string HTML for editable questions
    */
@@ -105,9 +95,9 @@ class question_bank_renderer {
   }
 
   /**
-   * Render question in display mode using the specified JSON structure
+   * Render question in display mode using new JSON pattern
    *
-   * @param array $question Question data with id, type, text, options, metadata
+   * @param array $question Question data
    * @return string HTML for question display
    */
   private static function render_question_display($question) {
@@ -140,13 +130,12 @@ class question_bank_renderer {
           $html .= '<p class="mb-2"><strong>' . get_string('options', 'local_trustgrade') . ':</strong></p>';
           $html .= '<ul class="mb-0">';
           foreach ($question['options'] as $opt) {
-              $optId = isset($opt['id']) ? intval($opt['id']) : null;
               $optText = isset($opt['text']) ? $opt['text'] : '';
               $isCorrect = !empty($opt['is_correct']);
               $explanation = isset($opt['explanation']) ? $opt['explanation'] : '';
 
               $correctIndicator = $isCorrect ? ' <strong>(' . get_string('correct', 'local_trustgrade') . ')</strong>' : '';
-              $html .= '<li class="mb-1" data-option-id="' . ($optId ?: '') . '">' . htmlspecialchars($optText) . $correctIndicator;
+              $html .= '<li class="mb-1">' . htmlspecialchars($optText) . $correctIndicator;
               if (!empty($explanation)) {
                   $html .= '<div class="option-explanation text-muted small mt-1"><em>' . get_string('explanation', 'local_trustgrade') . ':</em> ' . htmlspecialchars($explanation) . '</div>';
               }
@@ -162,8 +151,8 @@ class question_bank_renderer {
   }
 
   /**
-   * Render question edit form using the specified JSON structure
-   * Supports editing id, type, text, options (with id, text, is_correct, explanation), and metadata
+   * Render question edit form using new JSON pattern
+   * Aligned using a responsive grid for clarity.
    *
    * @param array $question Question data
    * @param int $index Question index
@@ -261,8 +250,7 @@ class question_bank_renderer {
   }
 
   /**
-   * Render multiple choice options editor with support for option IDs
-   * Handles the options array structure: [{"id": 1, "text": "...", "is_correct": true, "explanation": "..."}]
+   * Render multiple choice options editor with aligned grid and per-option explanations
    *
    * @param array $question Question data
    * @param int $index Question index
@@ -272,24 +260,17 @@ class question_bank_renderer {
       $html = '';
 
       $options = isset($question['options']) && is_array($question['options']) ? $question['options'] : [];
-      
-      // Ensure 4 rows minimum with proper ID structure
+      // Ensure 4 rows minimum
       for ($i = count($options); $i < 4; $i++) {
-          $options[] = [
-              'id' => $i + 1,
-              'text' => '', 
-              'is_correct' => ($i === 0), 
-              'explanation' => ''
-          ];
+          $options[] = ['text' => '', 'is_correct' => ($i === 0), 'explanation' => ''];
       }
 
       foreach ($options as $i => $opt) {
-          $optId = isset($opt['id']) ? intval($opt['id']) : ($i + 1);
           $optText = isset($opt['text']) ? $opt['text'] : '';
           $isCorrect = !empty($opt['is_correct']);
           $explanation = isset($opt['explanation']) ? $opt['explanation'] : '';
 
-          $html .= '<div class="row align-items-start gy-2 gx-3 mb-2 option-row" data-option-id="' . $optId . '">';
+          $html .= '<div class="row align-items-start gy-2 gx-3 mb-2 option-row">';
 
           // Correct radio
           $html .= '  <div class="col-12 col-md-1 d-flex align-items-start pt-2">';
@@ -299,48 +280,17 @@ class question_bank_renderer {
 
           // Option text
           $html .= '  <div class="col-12 col-md-5">';
-          $html .= '    <input type="text" class="form-control option-text-input" placeholder="' . get_string('option_placeholder', 'local_trustgrade', chr(65 + $i)) . '" value="' . htmlspecialchars($optText) . '" data-option-id="' . $optId . '">';
+          $html .= '    <input type="text" class="form-control option-text-input" placeholder="' . get_string('option_placeholder', 'local_trustgrade', chr(65 + $i)) . '" value="' . htmlspecialchars($optText) . '">';
           $html .= '  </div>';
 
           // Explanation
           $html .= '  <div class="col-12 col-md-6">';
-          $html .= '    <textarea class="form-control option-explanation-input" rows="2" placeholder="' . get_string('explanation', 'local_trustgrade') . '" data-option-id="' . $optId . '">' . htmlspecialchars($explanation) . '</textarea>';
+          $html .= '    <textarea class="form-control option-explanation-input" rows="2" placeholder="' . get_string('explanation', 'local_trustgrade') . '">' . htmlspecialchars($explanation) . '</textarea>';
           $html .= '  </div>';
 
           $html .= '</div>'; // row
       }
 
       return $html;
-  }
-
-  /**
-   * Helper method to create a new question structure following the JSON pattern
-   *
-   * @param string $text Question text
-   * @param string $type Question type (default: multiple_choice)
-   * @param array $options Array of options with id, text, is_correct, explanation
-   * @param array $metadata Metadata with blooms_level and points
-   * @return array Question structure
-   */
-  public static function create_question_structure($text = '', $type = 'multiple_choice', $options = [], $metadata = []) {
-      $defaultOptions = [
-          ['id' => 1, 'text' => '', 'is_correct' => true, 'explanation' => ''],
-          ['id' => 2, 'text' => '', 'is_correct' => false, 'explanation' => ''],
-          ['id' => 3, 'text' => '', 'is_correct' => false, 'explanation' => ''],
-          ['id' => 4, 'text' => '', 'is_correct' => false, 'explanation' => '']
-      ];
-
-      $defaultMetadata = [
-          'blooms_level' => 'Understand',
-          'points' => 10
-      ];
-
-      return [
-          'id' => 0, // Will be set when saved
-          'type' => $type,
-          'text' => $text,
-          'options' => !empty($options) ? $options : $defaultOptions,
-          'metadata' => array_merge($defaultMetadata, $metadata)
-      ];
   }
 }
