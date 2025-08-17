@@ -47,24 +47,8 @@ $questions = \local_trustgrade\question_generator::get_questions($cmid);
 <div class="question-bank-container">
     <div class="question-bank-header mb-4">
         <div class="row align-items-center">
-            <div class="col-md-8">
+            <div class="col-md-12">
                 <p class="mb-0"><?php echo get_string('question_bank_description', 'local_trustgrade'); ?></p>
-            </div>
-            <div class="col-md-4">
-                <div class="generate-questions-section d-flex align-items-center justify-content-end gap-2">
-                    <label for="questions-count" class="mb-0"><?php echo get_string('questions_to_generate', 'local_trustgrade'); ?>:</label>
-                    <select id="questions-count" class="form-control" style="width: 80px;">
-                        <?php for ($i = 1; $i <= 10; $i++): ?>
-                            <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
-                        <?php endfor; ?>
-                    </select>
-                    <button id="generate-new-questions" class="btn btn-primary">
-                        <i class="fa fa-plus"></i> <?php echo get_string('generate_questions', 'local_trustgrade'); ?>
-                    </button>
-                </div>
-                <div id="generation-loading" style="display: none;" class="text-center mt-2">
-                    <i class="fa fa-spinner fa-spin"></i> <?php echo get_string('generating_questions', 'local_trustgrade'); ?>
-                </div>
             </div>
         </div>
     </div>
