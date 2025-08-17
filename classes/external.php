@@ -182,6 +182,14 @@ class external extends \external_api {
      $fs = get_file_storage();
      $files = $fs->get_area_files($context_id, $component, $filearea, $itemid, 'sortorder, id', false);
      
+     if (empty($files) && $itemid == 0) {
+         // Get assignment instance ID from context
+         $cm = get_coursemodule_from_id('assign', null, 0, false, MUST_EXIST, $context_id);
+         if ($cm && $cm->instance) {
+             $files = $fs->get_area_files($context_id, $component, $filearea, $cm->instance, 'sortorder, id', false);
+         }
+     }
+     
      if (empty($files)) {
          return $filesOut;
      }
@@ -470,73 +478,30 @@ class external extends \external_api {
  }
 
  public static function generate_questions_by_count($cmid, $count) {
-     if ($cmid <= 0) {
-         return [
-             'success' => false, 
-             'error' => get_string('save_assignment_first', 'local_trustgrade')
-         ];
-     }
-     
-     self::validate_editing_context($cmid);
-     
-     // Get assignment instructions from the course module
-     $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
-     $assign = new \assign(\context_module::instance($cm->id), $cm, null);
-     $assignment = $assign->get_instance();
-     $instructions = strip_tags($assignment->intro);
-     
-     $context = \context_module::instance($cm->id);
-     $intro_files = self::collect_assignment_intro_files($context->id, 'mod_assign', 'intro', 0);
-     
-     // Check if we have either instructions or files
-     if (empty($instructions) && empty($intro_files)) {
-         return ['success' => false, 'error' => get_string('no_instructions_or_files', 'local_trustgrade')];
-     }
+    if ($cmid <= 0) {
+        return [
+            'success' => false, 
+            'error' => get_string('save_assignment_first', 'local_trustgrade')
+        ];
+    }
+    
+    self::validate_editing_context($cmid);
+    
+    // Get assignment instructions from the course module
+    $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
+    $assign = new \assign(\context_module::instance($cm->id), $cm, null);
+    $assignment = $assign->get_instance();
+    $instructions = strip_tags($assignment->intro);
+    
+    $context = \context_module::instance($cm->id);
+    $intro_files = self::collect_assignment_intro_files($context->id, 'mod_assign', 'intro', $assignment->id);
+    
+    // Check if we have either instructions or files
+    if (empty($instructions) && empty($intro_files)) {
+        return ['success' => false, 'error' => get_string('no_instructions_or_files', 'local_trustgrade')];
+    }
 
-     if (!empty($intro_files)) {
-         try {
-             $gateway = new gateway_client();
-             $gwResult = $gateway->generateQuestions($instructions, $count, $intro_files);
-             if (!$gwResult['success']) {
-                 return ['success' => false, 'error' => $gwResult['error'] ?? 'Gateway error'];
-             }
-
-             $data = $gwResult['data'] ?? [];
-             $questions = $data['questions'] ?? [];
-
-             if (empty($questions) || !is_array($questions)) {
-                 return ['success' => false, 'error' => get_string('error_saving_questions', 'local_trustgrade')];
-             }
-
-             $save_success = question_generator::save_questions($cmid, $questions);
-             if ($save_success) {
-                 return [
-                     'success' => true,
-                     'message' => get_string('questions_generated_success', 'local_trustgrade'),
-                     'questions' => json_encode($questions)
-                 ];
-             } else {
-                 return ['success' => false, 'error' => get_string('error_saving_questions', 'local_trustgrade')];
-             }
-         } catch (\Throwable $e) {
-             return ['success' => false, 'error' => 'Gateway error: ' . $e->getMessage()];
-         }
-     }
-
-     // Fallback to existing flow when there are no files
-     $result = question_generator::generate_questions_with_count($instructions, $count);
-     if ($result['success']) {
-         $save_success = question_generator::save_questions($cmid, $result['questions']);
-         if ($save_success) {
-             $result['message'] = get_string('questions_generated_success', 'local_trustgrade');
-             $result['questions'] = json_encode($result['questions']);
-         } else {
-             $result['error'] = get_string('error_saving_questions', 'local_trustgrade');
-             $result['success'] = false;
-         }
-     }
-     return $result;
- }
+}
 
  public static function save_question_parameters() {
      return new \external_function_parameters([
