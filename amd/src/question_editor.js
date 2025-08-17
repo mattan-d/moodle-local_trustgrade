@@ -223,46 +223,27 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         Str.get_string("correct", "local_trustgrade"),
         Str.get_string("explanation", "local_trustgrade"),
         Str.get_string("points", "local_trustgrade"),
-        Str.get_string("type", "local_trustgrade"),
-        Str.get_string("options", "local_trustgrade"),
       ]).then((strings) => {
-        const [qStr, correctStr, explStr, pointsStr, typeStr, optionsStr] = strings
-
-        let html = `<p class="mb-1"><strong>${typeStr}:</strong> ${$("<div>")
-          .text(String(questionData.type || "").replace("_", " "))
-          .html()}</p>`
-
-        // Display metadata if available
+        const [qStr, correctStr, explStr, pointsStr] = strings
+        let html = `<p><strong>Type:</strong> ${String(questionData.type || "").replace("_", " ")}</p>`
         if (questionData.metadata && (questionData.metadata.points != null || questionData.metadata.blooms_level)) {
-          const metaBits = []
-          if (questionData.metadata.points != null) {
-            metaBits.push(`${pointsStr}: ${questionData.metadata.points}`)
-          }
-          if (questionData.metadata.blooms_level) {
-            metaBits.push(`Bloom's: ${$("<div>").text(questionData.metadata.blooms_level).html()}`)
-          }
-          html += `<p class="text-muted mb-2">${metaBits.join(" | ")}</p>`
+          const pts = questionData.metadata.points != null ? `${pointsStr}: ${questionData.metadata.points}` : ""
+          const bloom = questionData.metadata.blooms_level ? ` | Bloom's: ${questionData.metadata.blooms_level}` : ""
+          html += `<p>${pts}${bloom}</p>`
         }
+        html += `<p><strong>${qStr}:</strong> ${questionData.text || ""}</p>`
 
-        // Display question text
-        html += `<p><strong>${qStr}:</strong> ${$("<div>")
-          .text(questionData.text || "")
-          .html()}</p>`
-
-        // Display options if available
         if (Array.isArray(questionData.options) && questionData.options.length > 0) {
-          html += `<div class="mt-3"><p class="mb-2"><strong>${optionsStr}:</strong></p><ul class="mb-0">`
+          html += "<p><strong>Options:</strong></p><ul>"
           questionData.options.forEach((opt) => {
             const correctBadge = opt.is_correct ? ` <strong>(${correctStr})</strong>` : ""
-            const safeOptText = $("<div>")
-              .text(opt.text || "")
-              .html()
+            const safeOptText = opt.text || ""
             const safeExpl = opt.explanation
-              ? ` <div class="option-explanation text-muted small mt-1"><em>${explStr}:</em> ${$("<div>").text(opt.explanation).html()}</div>`
+              ? ` <div class="option-explanation"><em>${explStr}:</em> ${opt.explanation}</div>`
               : ""
-            html += `<li class="mb-1">${safeOptText}${correctBadge}${safeExpl}</li>`
+            html += `<li>${safeOptText}${correctBadge}${safeExpl}</li>`
           })
-          html += "</ul></div>"
+          html += "</ul>"
         }
 
         displayMode.html(html)
