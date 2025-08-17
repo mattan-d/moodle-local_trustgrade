@@ -414,6 +414,56 @@ class external extends \external_api {
     return $result;
   }
 
+ public static function generate_questions_by_count_parameters() {
+     return new \external_function_parameters([
+             'cmid' => new \external_value(PARAM_INT, 'Course module ID'),
+             'count' => new \external_value(PARAM_INT, 'Number of questions to generate'),
+     ]);
+ }
+
+ public static function generate_questions_by_count_returns() {
+     return new \external_single_structure([
+             'success' => new \external_value(PARAM_BOOL, 'True if successful'),
+             'questions' => new \external_value(PARAM_RAW, 'JSON encoded array of questions', VALUE_OPTIONAL),
+             'message' => new \external_value(PARAM_TEXT, 'Success message', VALUE_OPTIONAL),
+             'error' => new \external_value(PARAM_TEXT, 'Error message', VALUE_OPTIONAL),
+     ]);
+ }
+
+ public static function generate_questions_by_count($cmid, $count) {
+     if ($cmid <= 0) {
+         return [
+             'success' => false, 
+             'error' => get_string('save_assignment_first', 'local_trustgrade')
+         ];
+     }
+     
+     self::validate_editing_context($cmid);
+     
+     // Get assignment instructions from the course module
+     $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
+     $assign = new \assign(\context_module::instance($cm->id), $cm, null);
+     $assignment = $assign->get_instance();
+     $instructions = strip_tags($assignment->intro);
+     
+     if (empty($instructions)) {
+         return ['success' => false, 'error' => get_string('no_instructions_or_files', 'local_trustgrade')];
+     }
+
+     $result = question_generator::generate_questions_with_count($instructions, $count);
+     if ($result['success']) {
+         $save_success = question_generator::save_questions($cmid, $result['questions']);
+         if ($save_success) {
+             $result['message'] = get_string('questions_generated_success', 'local_trustgrade');
+             $result['questions'] = json_encode($result['questions']);
+         } else {
+             $result['error'] = get_string('error_saving_questions', 'local_trustgrade');
+             $result['success'] = false;
+         }
+     }
+     return $result;
+ }
+
  public static function save_question_parameters() {
      return new \external_function_parameters([
              'cmid' => new \external_value(PARAM_INT, 'Course module ID'),

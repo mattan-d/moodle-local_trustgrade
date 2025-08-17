@@ -25,7 +25,7 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
 
       var promises = Ajax.call([
         {
-          methodname: "local_trustgrade_generate_questions",
+          methodname: "local_trustgrade_generate_questions_by_count",
           args: {
             cmid: this.cmid,
             count: Number.parseInt(questionsCount),

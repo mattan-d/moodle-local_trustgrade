@@ -106,6 +106,15 @@ $functions = [
         'ajax' => true,
         'capabilities' => 'mod/assign:addinstance',
     ],
+    'local_trustgrade_generate_questions_by_count' => [
+        'classname' => 'local_trustgrade\external',
+        'methodname' => 'generate_questions_by_count',
+        'classpath' => 'local/trustgrade/classes/external.php',
+        'description' => 'Generate quiz questions by count from question bank.',
+        'type' => 'write',
+        'ajax' => true,
+        'capabilities' => 'mod/assign:addinstance',
+    ],
 
     // Quiz session functions
     'local_trustgrade_start_quiz_attempt' => [
@@ -158,6 +167,7 @@ $services = [
             // Main AI functions
             'local_trustgrade_check_instructions',
             'local_trustgrade_generate_questions',
+            'local_trustgrade_generate_questions_by_count', // Added new service to the service list
             'local_trustgrade_save_question',
             'local_trustgrade_delete_question',
             'local_trustgrade_get_question_bank',
