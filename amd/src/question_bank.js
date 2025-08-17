@@ -15,18 +15,6 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
       $("#generate-new-questions").on("click", () => {
         this.generateQuestions()
       })
-
-      // Edit question buttons
-      $(".edit-question").on("click", (e) => {
-        var questionId = $(e.currentTarget).data("question-id")
-        this.editQuestion(questionId)
-      })
-
-      // Delete question buttons
-      $(".delete-question").on("click", (e) => {
-        var questionId = $(e.currentTarget).data("question-id")
-        this.deleteQuestion(questionId)
-      })
     },
 
     generateQuestions: function () {
@@ -70,60 +58,6 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
 
           Notification.addNotification({
             message: M.util.get_string("error_generating_questions", "local_trustgrade"),
-            type: "error",
-          })
-        })
-    },
-
-    editQuestion: function (questionId) {
-      window.location.href =
-        M.cfg.wwwroot + "/local/trustgrade/edit_question.php?id=" + questionId + "&cmid=" + this.cmid
-    },
-
-    deleteQuestion: function (questionId) {
-      Str.get_string("confirm_delete_question", "local_trustgrade")
-        .then((confirmText) => {
-          if (confirm(confirmText)) {
-            this.performDeleteQuestion(questionId)
-          }
-        })
-        .catch(() => {
-          if (confirm("Are you sure you want to delete this question?")) {
-            this.performDeleteQuestion(questionId)
-          }
-        })
-    },
-
-    performDeleteQuestion: function (questionId) {
-      var promises = Ajax.call([
-        {
-          methodname: "local_trustgrade_delete_question",
-          args: {
-            question_id: questionId,
-          },
-        },
-      ])
-
-      promises[0]
-        .then((response) => {
-          if (response.success) {
-            $('[data-question-id="' + questionId + '"]').fadeOut(() => {
-              $(this).remove()
-            })
-            Notification.addNotification({
-              message: M.util.get_string("question_deleted_successfully", "local_trustgrade"),
-              type: "success",
-            })
-          } else {
-            Notification.addNotification({
-              message: response.error || M.util.get_string("error_deleting_question", "local_trustgrade"),
-              type: "error",
-            })
-          }
-        })
-        .catch((error) => {
-          Notification.addNotification({
-            message: M.util.get_string("error_deleting_question", "local_trustgrade"),
             type: "error",
           })
         })
