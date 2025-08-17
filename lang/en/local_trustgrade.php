@@ -251,4 +251,6 @@ $string['optiontext'] = 'Option text';
 $string['option_placeholder'] = 'Enter option text...';
 $string['correct_answer_required'] = 'At least one correct answer is required';
 
+$string['save_assignment_first'] = 'Please save the assignment first before generating questions';
+
 ?>

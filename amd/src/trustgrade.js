@@ -151,7 +151,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
             const tableTitle = table.title || criteriaEvaluation
 
             const processedRows = rows.map((row) => {
-                const metValue = (row["Met"] || row["Met (y/n)"] || "").toLowerCase()
+              const metValue = (row["Met"] || row["Met (y/n)"] || "").toLowerCase()
               return {
                 Criterion: trustgrade.escapeHtml(row["Criterion"] || ""),
                 Met: trustgrade.escapeHtml(row["Met"] || row["Met (y/n)"] || ""),

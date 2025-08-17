@@ -346,65 +346,72 @@ class external extends \external_api {
  }
 
  public static function generate_questions($cmid, $instructions, $intro_itemid = 0, $intro_attachments_itemid = 0) {
-      self::validate_editing_context($cmid);
-      $instructions = strip_tags(trim((string) $instructions));
-      
-      $files = self::collect_intro_files((int)$intro_itemid, (int)$intro_attachments_itemid);
-      
-      if (empty($instructions) && empty($files)) {
-          return ['success' => false, 'error' => get_string('no_instructions_or_files', 'local_trustgrade')];
-      }
+    if ($cmid <= 0) {
+        return [
+            'success' => false, 
+            'error' => get_string('save_assignment_first', 'local_trustgrade')
+        ];
+    }
+    
+    self::validate_editing_context($cmid);
+    $instructions = strip_tags(trim((string) $instructions));
+    
+    $files = self::collect_intro_files((int)$intro_itemid, (int)$intro_attachments_itemid);
+    
+    if (empty($instructions) && empty($files)) {
+        return ['success' => false, 'error' => get_string('no_instructions_or_files', 'local_trustgrade')];
+    }
 
-      $quiz_settings = quiz_settings::get_settings($cmid);
-      $questions_to_generate = $quiz_settings['questions_to_generate'];
+    $quiz_settings = quiz_settings::get_settings($cmid);
+    $questions_to_generate = $quiz_settings['questions_to_generate'];
 
-      // If we have files, send them to the Gateway alongside the instructions.
-      if (!empty($files)) {
-          try {
-              $gateway = new gateway_client();
-              $gwResult = $gateway->generateQuestions($instructions, $questions_to_generate, $files);
-              if (!$gwResult['success']) {
-                  return ['success' => false, 'error' => $gwResult['error'] ?? 'Gateway error'];
-              }
+    // If we have files, send them to the Gateway alongside the instructions.
+    if (!empty($files)) {
+        try {
+            $gateway = new gateway_client();
+            $gwResult = $gateway->generateQuestions($instructions, $questions_to_generate, $files);
+            if (!$gwResult['success']) {
+                return ['success' => false, 'error' => $gwResult['error'] ?? 'Gateway error'];
+            }
 
-              $data = $gwResult['data'] ?? [];
-              $questions = $data['questions'] ?? [];
+            $data = $gwResult['data'] ?? [];
+            $questions = $data['questions'] ?? [];
 
-              if (empty($questions) || !is_array($questions)) {
-                  return ['success' => false, 'error' => get_string('error_saving_questions', 'local_trustgrade')];
-              }
+            if (empty($questions) || !is_array($questions)) {
+                return ['success' => false, 'error' => get_string('error_saving_questions', 'local_trustgrade')];
+            }
 
-              $save_success = question_generator::save_questions($cmid, $questions);
-              if ($save_success) {
-                  return [
-                      'success' => true,
-                      'message' => get_string('questions_generated_success', 'local_trustgrade'),
-                      'questions' => json_encode($questions)
-                  ];
-              } else {
-                  return ['success' => false, 'error' => get_string('error_saving_questions', 'local_trustgrade')];
-              }
-          } catch (\Throwable $e) {
-              return ['success' => false, 'error' => 'Gateway error: ' . $e->getMessage()];
-          }
-      }
+            $save_success = question_generator::save_questions($cmid, $questions);
+            if ($save_success) {
+                return [
+                    'success' => true,
+                    'message' => get_string('questions_generated_success', 'local_trustgrade'),
+                    'questions' => json_encode($questions)
+                ];
+            } else {
+                return ['success' => false, 'error' => get_string('error_saving_questions', 'local_trustgrade')];
+            }
+        } catch (\Throwable $e) {
+            return ['success' => false, 'error' => 'Gateway error: ' . $e->getMessage()];
+        }
+    }
 
-      // Fallback to existing flow when there are no files.
-      $result = question_generator::generate_questions_with_count($instructions, $questions_to_generate);
-      if ($result['success']) {
-          $save_success = question_generator::save_questions($cmid, $result['questions']);
-          if ($save_success) {
-              $result['message'] = get_string('questions_generated_success', 'local_trustgrade');
-              $result['questions'] = json_encode($result['questions']);
-          } else {
-              $result['error'] = get_string('error_saving_questions', 'local_trustgrade');
-              $result['success'] = false;
-          }
-      } else {
-          $result['error'] = $result['error'];
-          $result['success'] = false;
-      }
-      return $result;
+    // Fallback to existing flow when there are no files.
+    $result = question_generator::generate_questions_with_count($instructions, $questions_to_generate);
+    if ($result['success']) {
+        $save_success = question_generator::save_questions($cmid, $result['questions']);
+        if ($save_success) {
+            $result['message'] = get_string('questions_generated_success', 'local_trustgrade');
+            $result['questions'] = json_encode($result['questions']);
+        } else {
+            $result['error'] = get_string('error_saving_questions', 'local_trustgrade');
+            $result['success'] = false;
+        }
+    } else {
+        $result['error'] = $result['error'];
+        $result['success'] = false;
+    }
+    return $result;
   }
 
  public static function save_question_parameters() {

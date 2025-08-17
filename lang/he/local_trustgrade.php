@@ -51,9 +51,9 @@ $string['disclosure_settings_desc'] = 'הגדר איך מודיעים לסטוד
 $string['show_disclosure'] = 'הצג הודעת גילוי בינה מלאכותית';
 $string['show_disclosure_desc'] =
         'הצג הודעת גילוי לסטודנטים לפני הגשת המטלות, להודיע להם על תכונת החידון המופעלת על ידי בינה מלאכותית.';
-$string['custom_disclosure_message'] = 'הודעת גילוי מותאמת אישית';
+$string['custom_disclosure_message'] = 'הודעה גילוי מותאמת אישית';
 $string['custom_disclosure_message_desc'] =
-        'הודעה מותאמת אישית אופציונלית להצגה במקום הודעת הברירת מחדל. השאר ריק לשימוש בהודעת ברירת המחדל.';
+        'הודעה מותאמת אישית אופציונלית להצגה במקום הודעת הברירת המחדל. השאר ריק לשימוש בהודעת ברירת המחדל.';
 
 // AI Disclosure Messages
 $string['ai_disclosure_title'] = 'אנו מעמידים לרשותך טכנולוגיית AI מתקדמת שמתאימה את הלמידה לסגנון שלך!';
@@ -254,5 +254,6 @@ $string['level'] = 'רמה';
 $string['optiontext'] = 'טקסט אפשרות';
 $string['option_placeholder'] = 'הזן טקסט אפשרות...';
 $string['correct_answer_required'] = 'נדרשת לפחות תשובה נכונה אחת';
+$string['save_assignment_first'] = 'אנא שמור את המטלה תחילה לפני יצירת שאלות';
 
 ?>
