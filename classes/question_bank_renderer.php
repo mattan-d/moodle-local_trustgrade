@@ -7,17 +7,25 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
 * Question bank renderer for displaying and editing questions
-* Supports question structure:
+* Supports JSON pattern:
 * {
-*   "id": 1,
-*   "type": "multiple_choice", 
-*   "question": "Question text",
-*   "options": ["Option A", "Option B", "Option C", "Option D"],
-*   "correct_answer": 1,
-*   "explanation": "Explanation text",
-*   "difficulty": "medium",
-*   "points": 10,
-*   "metadata": { "blooms_level": " 이해", "cognitiveobjective": " הסבר, סיכום" }
+*   "questions": [
+*     {
+*       "id": 1,
+*       "type": "multiple_choice",
+*       "text": "Question text here",
+*       "options": [
+*         { "id": 1, "text": "Option A", "is_correct": true, "explanation": "Why A is correct" },
+*         { "id": 2, "text": "Option B", "is_correct": false, "explanation": "Why B is incorrect" },
+*         { "id": 3, "text": "Option C", "is_correct": false, "explanation": "Why C is incorrect" },
+*         { "id": 4, "text": "Option D", "is_correct": false, "explanation": "Why D is incorrect" }
+*       ],
+*       "metadata": {
+*         "blooms_level": "Understand",
+*         "points": 10
+*       }
+*     }
+*   ]
 * }
 */
 class question_bank_renderer {
@@ -25,7 +33,7 @@ class question_bank_renderer {
   /**
    * Render editable questions for instructors
    *
-   * @param array $questions Array of questions
+   * @param array $questions Array of questions from the "questions" key
    * @param int $cmid Course module ID
    * @return string HTML for editable questions
    */
@@ -97,24 +105,19 @@ class question_bank_renderer {
   }
 
   /**
-   * Render question in display mode using the provided question structure
+   * Render question in display mode using the specified JSON structure
    *
-   * @param array $question Question data
+   * @param array $question Question data with id, type, text, options, metadata
    * @return string HTML for question display
    */
   private static function render_question_display($question) {
       $html = '';
 
       $type = isset($question['type']) ? $question['type'] : '';
-      $questionText = isset($question['question']) ? $question['question'] : '';
-      $options = isset($question['options']) && is_array($question['options']) ? $question['options'] : [];
-      $correctAnswer = isset($question['correct_answer']) ? intval($question['correct_answer']) : 0;
-      $explanation = isset($question['explanation']) ? $question['explanation'] : '';
-      $difficulty = isset($question['difficulty']) ? $question['difficulty'] : '';
-      $points = isset($question['points']) ? intval($question['points']) : null;
+      $text = isset($question['text']) ? $question['text'] : '';
       $metadata = isset($question['metadata']) && is_array($question['metadata']) ? $question['metadata'] : [];
-      $bloomsLevel = isset($metadata['blooms_level']) ? $metadata['blooms_level'] : '';
-      $cognitiveObjective = isset($metadata['cognitiveobjective']) ? $metadata['cognitiveobjective'] : '';
+      $points = isset($metadata['points']) ? intval($metadata['points']) : null;
+      $blooms = isset($metadata['blooms_level']) ? $metadata['blooms_level'] : null;
 
       $html .= '<div class="question-content">';
       $html .= '<p class="mb-1"><strong>' . get_string('type', 'local_trustgrade') . ':</strong> ' . htmlspecialchars(ucfirst(str_replace('_', ' ', $type))) . '</p>';
@@ -123,38 +126,33 @@ class question_bank_renderer {
       if ($points !== null) {
           $metaBits[] = get_string('points', 'local_trustgrade') . ': ' . $points;
       }
-      if (!empty($difficulty)) {
-          $metaBits[] = get_string('difficulty', 'local_trustgrade') . ': ' . htmlspecialchars($difficulty);
-      }
-      if (!empty($bloomsLevel)) {
-          $metaBits[] = 'Bloom\'s: ' . htmlspecialchars($bloomsLevel);
-      }
-      if (!empty($cognitiveObjective)) {
-          $metaBits[] = get_string('cognitive_objective', 'local_trustgrade') . ': ' . htmlspecialchars($cognitiveObjective);
+      if (!empty($blooms)) {
+          $metaBits[] = 'Bloom\'s: ' . htmlspecialchars($blooms);
       }
       if (!empty($metaBits)) {
           $html .= '<p class="text-muted mb-2">' . implode(' | ', $metaBits) . '</p>';
       }
 
-      $html .= '<p><strong>' . get_string('question', 'local_trustgrade') . ':</strong> ' . htmlspecialchars($questionText) . '</p>';
+      $html .= '<p><strong>' . get_string('question', 'local_trustgrade') . ':</strong> ' . htmlspecialchars($text) . '</p>';
 
-      if (!empty($options)) {
+      if (isset($question['options']) && is_array($question['options'])) {
           $html .= '<div class="mt-3">';
           $html .= '<p class="mb-2"><strong>' . get_string('options', 'local_trustgrade') . ':</strong></p>';
           $html .= '<ul class="mb-0">';
-          foreach ($options as $index => $optionText) {
-              $isCorrect = ($index === $correctAnswer);
+          foreach ($question['options'] as $opt) {
+              $optId = isset($opt['id']) ? intval($opt['id']) : null;
+              $optText = isset($opt['text']) ? $opt['text'] : '';
+              $isCorrect = !empty($opt['is_correct']);
+              $explanation = isset($opt['explanation']) ? $opt['explanation'] : '';
+
               $correctIndicator = $isCorrect ? ' <strong>(' . get_string('correct', 'local_trustgrade') . ')</strong>' : '';
-              $html .= '<li class="mb-1">' . htmlspecialchars($optionText) . $correctIndicator . '</li>';
+              $html .= '<li class="mb-1" data-option-id="' . ($optId ?: '') . '">' . htmlspecialchars($optText) . $correctIndicator;
+              if (!empty($explanation)) {
+                  $html .= '<div class="option-explanation text-muted small mt-1"><em>' . get_string('explanation', 'local_trustgrade') . ':</em> ' . htmlspecialchars($explanation) . '</div>';
+              }
+              $html .= '</li>';
           }
           $html .= '</ul>';
-          $html .= '</div>';
-      }
-
-      if (!empty($explanation)) {
-          $html .= '<div class="mt-3">';
-          $html .= '<p class="mb-1"><strong>' . get_string('explanation', 'local_trustgrade') . ':</strong></p>';
-          $html .= '<div class="explanation-text text-muted">' . htmlspecialchars($explanation) . '</div>';
           $html .= '</div>';
       }
 
@@ -164,7 +162,8 @@ class question_bank_renderer {
   }
 
   /**
-   * Render question edit form using the provided question structure
+   * Render question edit form using the specified JSON structure
+   * Supports editing id, type, text, options (with id, text, is_correct, explanation), and metadata
    *
    * @param array $question Question data
    * @param int $index Question index
@@ -174,25 +173,20 @@ class question_bank_renderer {
       $html = '';
 
       $type = isset($question['type']) ? $question['type'] : 'multiple_choice';
-      $questionText = isset($question['question']) ? $question['question'] : '';
-      $options = isset($question['options']) && is_array($question['options']) ? $question['options'] : [];
-      $correctAnswer = isset($question['correct_answer']) ? intval($question['correct_answer']) : 0;
-      $explanation = isset($question['explanation']) ? $question['explanation'] : '';
-      $difficulty = isset($question['difficulty']) ? $question['difficulty'] : 'medium';
-      $points = isset($question['points']) ? intval($question['points']) : 10;
+      $text = isset($question['text']) ? $question['text'] : '';
       $metadata = isset($question['metadata']) && is_array($question['metadata']) ? $question['metadata'] : [];
-      $bloomsLevel = isset($metadata['blooms_level']) ? $metadata['blooms_level'] : '';
-      $cognitiveObjective = isset($metadata['cognitiveobjective']) ? $metadata['cognitiveobjective'] : '';
+      $points = isset($metadata['points']) ? intval($metadata['points']) : 10;
+      $blooms = isset($metadata['blooms_level']) ? $metadata['blooms_level'] : '';
 
       $html .= '<div class="question-edit-form container-fluid px-0">';
 
       // Question text (full width)
       $html .= '<div class="form-group mb-3">';
       $html .= '  <label for="question_text_' . $index . '" class="form-label">' . get_string('question', 'local_trustgrade') . ' ' . get_string('text', 'local_trustgrade') . ':</label>';
-      $html .= '  <textarea class="form-control question-text-input" id="question_text_' . $index . '" rows="3" placeholder="' . get_string('entertext', 'local_trustgrade') . '">' . htmlspecialchars($questionText) . '</textarea>';
+      $html .= '  <textarea class="form-control question-text-input" id="question_text_' . $index . '" rows="3" placeholder="' . get_string('entertext', 'local_trustgrade') . '">' . htmlspecialchars($text) . '</textarea>';
       $html .= '</div>';
 
-      // Row: Type | Points | Difficulty
+      // Row: Type | Points | Bloom's
       $html .= '<div class="row g-3">';
 
       // Type
@@ -214,17 +208,20 @@ class question_bank_renderer {
       $html .= '    <div class="form-group">';
       $html .= '      <label for="question_points_' . $index . '" class="form-label">' . get_string('points', 'local_trustgrade') . ':</label>';
       $html .= '      <input type="number" class="form-control question-points-input" id="question_points_' . $index . '" value="' . $points . '" min="0" max="100" />';
+      $html .= '      <small class="form-text text-muted">' . get_string('points_help', 'local_trustgrade') . '</small>';
       $html .= '    </div>';
       $html .= '  </div>';
 
+      // Bloom's Level
       $html .= '  <div class="col-12 col-md-4">';
       $html .= '    <div class="form-group">';
-      $html .= '      <label for="question_difficulty_' . $index . '" class="form-label">' . get_string('difficulty', 'local_trustgrade') . ':</label>';
-      $html .= '      <select class="form-control question-difficulty-input" id="question_difficulty_' . $index . '">';
-      $difficulties = ['easy' => 'Easy', 'medium' => 'Medium', 'hard' => 'Hard'];
-      foreach ($difficulties as $value => $label) {
-          $selected = ($difficulty == $value) ? 'selected' : '';
-          $html .= '        <option value="' . $value . '" ' . $selected . '>' . $label . '</option>';
+      $html .= '      <label for="question_blooms_' . $index . '" class="form-label">Bloom\'s ' . get_string('level', 'local_trustgrade') . ':</label>';
+      $html .= '      <select class="form-control question-blooms-input" id="question_blooms_' . $index . '">';
+      $levels = ['', 'Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
+      foreach ($levels as $level) {
+          $sel = ($blooms === $level) ? 'selected' : '';
+          $label = $level === '' ? '-' : $level;
+          $html .= '        <option value="' . htmlspecialchars($level) . '" ' . $sel . '>' . htmlspecialchars($label) . '</option>';
       }
       $html .= '      </select>';
       $html .= '    </div>';
@@ -232,38 +229,24 @@ class question_bank_renderer {
 
       $html .= '</div>'; // row
 
-      $html .= '<div class="row g-3 mt-2">';
-      
-      // Bloom's Level
-      $html .= '  <div class="col-12 col-md-6">';
-      $html .= '    <div class="form-group">';
-      $html .= '      <label for="question_blooms_' . $index . '" class="form-label">Bloom\'s ' . get_string('level', 'local_trustgrade') . ':</label>';
-      $html .= '      <input type="text" class="form-control question-blooms-input" id="question_blooms_' . $index . '" value="' . htmlspecialchars($bloomsLevel) . '" placeholder="e.g., הבנה" />';
-      $html .= '    </div>';
-      $html .= '  </div>';
-
-      // Cognitive Objective
-      $html .= '  <div class="col-12 col-md-6">';
-      $html .= '    <div class="form-group">';
-      $html .= '      <label for="question_cognitive_' . $index . '" class="form-label">' . get_string('cognitive_objective', 'local_trustgrade') . ':</label>';
-      $html .= '      <input type="text" class="form-control question-cognitive-input" id="question_cognitive_' . $index . '" value="' . htmlspecialchars($cognitiveObjective) . '" placeholder="e.g., הסבר, סיכום, פרשנות" />';
-      $html .= '    </div>';
-      $html .= '  </div>';
-
-      $html .= '</div>'; // row
-
       // Options section (full width)
       $html .= '<div class="question-options-section mt-4">';
-      $html .= '  <h6 class="mb-3">' . get_string('options', 'local_trustgrade') . '</h6>';
+
+      // Section header
+      $html .= '  <div class="d-flex align-items-center justify-content-between mb-2">';
+      $html .= '    <h6 class="mb-0">' . get_string('options', 'local_trustgrade') . '</h6>';
+      $html .= '  </div>';
+
+      // Column headers for alignment (visually subtle)
+      $html .= '  <div class="row text-muted small fw-semibold mb-1" role="presentation">';
+      $html .= '    <div class="col-12 col-md-1">' . get_string('correct', 'local_trustgrade') . '</div>';
+      $html .= '    <div class="col-12 col-md-5">' . get_string('optiontext', 'local_trustgrade') . '</div>';
+      $html .= '    <div class="col-12 col-md-6">' . get_string('explanation', 'local_trustgrade') . '</div>';
+      $html .= '  </div>';
 
       if ($type === 'multiple_choice') {
-          $html .= self::render_multiple_choice_options_new_structure($options, $correctAnswer, $index);
+          $html .= self::render_multiple_choice_options($question, $index);
       }
-      $html .= '</div>';
-
-      $html .= '<div class="form-group mt-4">';
-      $html .= '  <label for="question_explanation_' . $index . '" class="form-label">' . get_string('explanation', 'local_trustgrade') . ':</label>';
-      $html .= '  <textarea class="form-control question-explanation-input" id="question_explanation_' . $index . '" rows="3" placeholder="' . get_string('explanation_placeholder', 'local_trustgrade') . '">' . htmlspecialchars($explanation) . '</textarea>';
       $html .= '</div>';
 
       // Save/Cancel buttons
@@ -278,40 +261,86 @@ class question_bank_renderer {
   }
 
   /**
-   * Render multiple choice options editor for the new structure (array of strings with correct_answer index)
+   * Render multiple choice options editor with support for option IDs
+   * Handles the options array structure: [{"id": 1, "text": "...", "is_correct": true, "explanation": "..."}]
    *
-   * @param array $options Array of option strings
-   * @param int $correctAnswer Index of correct answer
+   * @param array $question Question data
    * @param int $index Question index
    * @return string HTML for options editor
    */
-  private static function render_multiple_choice_options_new_structure($options, $correctAnswer, $index) {
+  private static function render_multiple_choice_options($question, $index) {
       $html = '';
 
-      // Ensure 4 options minimum
+      $options = isset($question['options']) && is_array($question['options']) ? $question['options'] : [];
+      
+      // Ensure 4 rows minimum with proper ID structure
       for ($i = count($options); $i < 4; $i++) {
-          $options[] = '';
+          $options[] = [
+              'id' => $i + 1,
+              'text' => '', 
+              'is_correct' => ($i === 0), 
+              'explanation' => ''
+          ];
       }
 
-      foreach ($options as $i => $optionText) {
-          $isCorrect = ($i === $correctAnswer);
+      foreach ($options as $i => $opt) {
+          $optId = isset($opt['id']) ? intval($opt['id']) : ($i + 1);
+          $optText = isset($opt['text']) ? $opt['text'] : '';
+          $isCorrect = !empty($opt['is_correct']);
+          $explanation = isset($opt['explanation']) ? $opt['explanation'] : '';
 
-          $html .= '<div class="row align-items-center gy-2 gx-3 mb-2 option-row">';
+          $html .= '<div class="row align-items-start gy-2 gx-3 mb-2 option-row" data-option-id="' . $optId . '">';
 
           // Correct radio
-          $html .= '  <div class="col-12 col-md-1">';
+          $html .= '  <div class="col-12 col-md-1 d-flex align-items-start pt-2">';
           $checked = $isCorrect ? 'checked' : '';
-          $html .= '    <input class="form-check-input correct-answer-radio" type="radio" name="correct_answer_' . $index . '" value="' . $i . '" ' . $checked . '>';
+          $html .= '    <input class="form-check-input mt-0 correct-answer-radio" type="radio" aria-label="' . get_string('correct', 'local_trustgrade') . '" name="correct_answer_' . $index . '" value="' . $i . '" ' . $checked . '>';
           $html .= '  </div>';
 
           // Option text
-          $html .= '  <div class="col-12 col-md-11">';
-          $html .= '    <input type="text" class="form-control option-text-input" placeholder="' . get_string('option_placeholder', 'local_trustgrade', chr(65 + $i)) . '" value="' . htmlspecialchars($optionText) . '">';
+          $html .= '  <div class="col-12 col-md-5">';
+          $html .= '    <input type="text" class="form-control option-text-input" placeholder="' . get_string('option_placeholder', 'local_trustgrade', chr(65 + $i)) . '" value="' . htmlspecialchars($optText) . '" data-option-id="' . $optId . '">';
+          $html .= '  </div>';
+
+          // Explanation
+          $html .= '  <div class="col-12 col-md-6">';
+          $html .= '    <textarea class="form-control option-explanation-input" rows="2" placeholder="' . get_string('explanation', 'local_trustgrade') . '" data-option-id="' . $optId . '">' . htmlspecialchars($explanation) . '</textarea>';
           $html .= '  </div>';
 
           $html .= '</div>'; // row
       }
 
       return $html;
+  }
+
+  /**
+   * Helper method to create a new question structure following the JSON pattern
+   *
+   * @param string $text Question text
+   * @param string $type Question type (default: multiple_choice)
+   * @param array $options Array of options with id, text, is_correct, explanation
+   * @param array $metadata Metadata with blooms_level and points
+   * @return array Question structure
+   */
+  public static function create_question_structure($text = '', $type = 'multiple_choice', $options = [], $metadata = []) {
+      $defaultOptions = [
+          ['id' => 1, 'text' => '', 'is_correct' => true, 'explanation' => ''],
+          ['id' => 2, 'text' => '', 'is_correct' => false, 'explanation' => ''],
+          ['id' => 3, 'text' => '', 'is_correct' => false, 'explanation' => ''],
+          ['id' => 4, 'text' => '', 'is_correct' => false, 'explanation' => '']
+      ];
+
+      $defaultMetadata = [
+          'blooms_level' => 'Understand',
+          'points' => 10
+      ];
+
+      return [
+          'id' => 0, // Will be set when saved
+          'type' => $type,
+          'text' => $text,
+          'options' => !empty($options) ? $options : $defaultOptions,
+          'metadata' => array_merge($defaultMetadata, $metadata)
+      ];
   }
 }
