@@ -52,10 +52,9 @@ $string['custom_disclosure_message_desc'] =
         'הודעה מותאמת אישית אופציונלית להצגה במקום הודעת הברירת מחדל. השאר ריק לשימוש בהודעת ברירת המחדל.';
 
 // AI Disclosure Messages
-$string['ai_disclosure_title'] = 'חוויית למידה משופרת בבינה מלאכותית';
-$string['ai_disclosure_message'] =
-        'מטלה זו כוללת תכונת למידה מופעלת על ידי בינה מלאכותית. לאחר הגשת העבודה שלך, מערכת בינה מלאכותית תנתח את ההגשה שלך כדי ליצור שאלות חידון מותאמות אישית שעוזרות לחזק את הלמידה שלך. החידון הזה יהיה זמין מיד לאחר ההגשה ומיועד לעזור לך להרהר על העבודה שלך ולהעמיק את ההבנה שלך בנושא.';
-$string['ai_disclosure_details_toggle'] = 'למד עוד על איך זה עובד';
+$string['ai_disclosure_title'] = 'אנו מעמידים לרשותך טכנולוגיית AI מתקדמת שמתאימה את הלמידה לסגנון שלך!';
+$string['ai_disclosure_message'] = 'לאחר הגשת העבודה, מערכת הבינה המלאכותית שלנו תנתח את עבודתך בזמן אמת ותיצור עבורך חידון מותאם אישית שיעזור לך לבדוק ולחזק את ההבנה שלך.';
+$string['ai_disclosure_details_toggle'] = 'החידון יופיע מיד לאחר ההגשה.';
 $string['ai_disclosure_detail_analysis'] = 'ההגשה שלך תנותח על ידי בינה מלאכותית כדי להבין את הגישה וההיגיון שלך.';
 $string['ai_disclosure_detail_questions'] = 'הבינה המלאכותית תיצור {$a} שאלות מותאמות אישית על בסיס ההגשה הספציפית שלך.';
 $string['ai_disclosure_detail_quiz'] = 'תעבור חידון של {$a} שאלות המשלב שאלות שנוצרו על ידי המדריך ושאלות מותאמות אישית.';
@@ -197,7 +196,7 @@ $string['quiz_completed_header'] = 'החידון הושלם';
 $string['quiz_completed_message'] = 'ההערכה הפורמלית שלך הוגשה בהצלחה ולא ניתן לחזור עליה.';
 $string['your_answer'] = 'התשובה שלך: {$a}';
 $string['correct_answer_was'] = 'התשובה הנכונה: {$a}';
-$string['explanation'] = 'הסבר: {$a}';
+$string['explanation'] = 'הסבר';
 $string['final_grade_notice'] = 'זה הציון הסופי שלך להערכה זו.';
 $string['integrity_report_header'] = 'דוח יושרה';
 $string['integrity_recorded'] = 'מידע זה נרשם לבדיקה.';
@@ -229,3 +228,13 @@ $string['final_score'] = 'ציון סופי: {$a->score}/{$a->total} ({$a->perce
 $string['window_focus_lost'] = 'פוקוס החלון אבד {$a} פעמים במהלך החידון.';
 $string['exceeded_window_switches'] = 'חרגת ממספר החלפות החלונות המקסימלי המותר ({$a}). החידון הופסק.';
 $string['setting_updated_success'] = 'הגדרה "{$a}" עודכנה בהצלחה.';
+
+// Localization strings for recommendation rendering
+$string['criteria_evaluation'] = 'הערכת קריטריונים';
+$string['criterion'] = 'קריטריון';
+$string['met'] = 'הושג';
+$string['suggestions'] = 'הצעות';
+$string['evaluation'] = 'הערכה';
+$string['improved_assignment'] = 'משימה משופרת';
+$string['no_criteria_provided'] = 'לא סופקו קריטריונים.';
+$string['recommendation_error'] = 'שגיאה בהצגת ההמלצה.';

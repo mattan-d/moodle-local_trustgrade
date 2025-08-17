@@ -9,89 +9,88 @@ defined('MOODLE_INTERNAL') || die();
  * Event observer for TrustGrade plugin
  */
 class observer {
-    
+
     /**
      * Handle submission created event
-     * 
+     *
      * @param \mod_assign\event\submission_created $event
      */
     public static function submission_created(\mod_assign\event\submission_created $event) {
         self::process_submission($event);
     }
-    
+
     /**
      * Handle submission updated event
-     * 
+     *
      * @param \mod_assign\event\submission_updated $event
      */
     public static function submission_updated(\mod_assign\event\submission_updated $event) {
         self::process_submission($event);
     }
-    
+
     /**
      * Process submission and generate AI questions
-     * 
+     *
      * @param \core\event\base $event
      */
     private static function process_submission(\core\event\base $event) {
         global $DB;
-        
+
         try {
             // Get event data
-            $submission_id = $event->objectid;
+            $submission_id = $event->other['submissionid'];
             $context = $event->get_context();
             $cm = get_coursemodule_from_id('assign', $context->instanceid);
-            
+
             if (!$cm) {
                 return;
             }
-            
+
             // Get submission data
             $submission = $DB->get_record('assign_submission', ['id' => $submission_id]);
             if (!$submission) {
                 return;
             }
-            
+
             // Only process submitted submissions (not drafts)
-            if ($submission->status !== 'submitted') {
+            if ($event->other['submissionstatus'] !== 'submitted') {
                 return;
             }
-            
+
             // Get assignment data
             $assignment = $DB->get_record('assign', ['id' => $submission->assignment]);
             if (!$assignment) {
                 return;
             }
-            
+
             // Get quiz settings to determine how many submission questions to generate
             $quiz_settings = \local_trustgrade\quiz_settings::get_settings($cm->id);
             $questions_to_generate = $quiz_settings['submission_questions'];
-            
+
             // Extract submission content (text and files)
             $submission_content = submission_processor::extract_submission_content($submission, $context);
-            
+
             if (empty($submission_content['text']) && empty($submission_content['files'])) {
                 return; // No content to analyze
             }
-            
-            // Get assignment instructions
-            $assignment_instructions = strip_tags($assignment->intro);
-            
+
+            $assignment_instructions = strip_tags($assignment->intro ?? '');
+
             // Generate questions based on submission using the configured count
             $result = submission_processor::generate_submission_questions_with_count(
-                $submission_content, 
-                $assignment_instructions, 
+                $submission_content,
+                $assignment_instructions,
                 $questions_to_generate
             );
-            
+
             if ($result['success']) {
                 // Save submission-based questions
                 submission_processor::save_submission_questions($submission_id, $cm->id, $result['questions']);
-                
+
                 // Set session flag to redirect to quiz
                 self::set_quiz_redirect_flag($cm->id, $submission_id);
             }
-            
+
         } catch (\Exception $e) {
             // Log error but don't break the submission process
             error_log('TrustGrade submission processing error: ' . $e->getMessage());
@@ -100,17 +99,17 @@ class observer {
 
     /**
      * Set flag in session to redirect user to quiz
-     * 
+     *
      * @param int $cmid Course module ID
      * @param int $submission_id Submission ID
      */
     private static function set_quiz_redirect_flag($cmid, $submission_id) {
         global $SESSION;
-        
+
         if (!isset($SESSION->trustgrade_quiz_redirect)) {
             $SESSION->trustgrade_quiz_redirect = [];
         }
-        
+
         $SESSION->trustgrade_quiz_redirect[$cmid] = [
             'submission_id' => $submission_id,
             'timestamp' => time()

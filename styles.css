@@ -60,9 +60,7 @@
 }
 
 #ai-recommendation {
-  white-space: pre-wrap;
   word-wrap: break-word;
-  max-height: 400px;
   overflow-y: auto;
   font-size: 14px;
   line-height: 1.5;
