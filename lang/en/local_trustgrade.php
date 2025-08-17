@@ -165,6 +165,9 @@ $string['auto_grade_success'] = 'Successfully auto-graded {$a} students based on
 $string['auto_grade_no_grades'] = 'No grades could be applied. Check that students have completed quizzes.';
 $string['auto_grade_error'] = 'Error during auto-grading: {$a}';
 $string['auto_grade_confirmation'] = 'This will automatically set grades based on quiz scores for all students. Existing grades will be overwritten. Continue?';
+$string['auto_grading_progress'] = 'Auto-grading...';
+$string['auto_grade_button_text'] = 'Auto-grade by Quiz Score';
+$string['error_parsing_grades'] = 'Error parsing grades JSON';
 
 // Final Grade
 $string['final_grade'] = 'Final Grade';
