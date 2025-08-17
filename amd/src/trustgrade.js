@@ -153,9 +153,9 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
             const processedRows = rows.map((row) => {
               const metValue = (row["Met"] || row["Met (y/n)"] || "").toLowerCase()
               return {
-                Criterion: row["Criterion"] || "",
-                Met: row["Met"] || row["Met (y/n)"] || "",
-                Suggestions: row["Suggestions"] || "",
+                Criterion: trustgrade.escapeHtml(row["Criterion"] || ""),
+                Met: trustgrade.escapeHtml(row["Met"] || row["Met (y/n)"] || ""),
+                Suggestions: trustgrade.escapeHtml(row["Suggestions"] || ""),
                 isMetYes: metValue === "yes" || metValue === "y" || metValue === "true",
                 isMetNo: metValue === "no" || metValue === "n" || metValue === "false",
                 isMetPartial: metValue === "partial" || metValue === "partially" || metValue === "maybe",
@@ -317,7 +317,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
               </h4>
             </div>
             <div class="card-body">
-              <div class="recommendation-content">${trustgrade.escapeHtml(evalText).replace(/\n/g, "<br>")}</div>
+              <div class="recommendation-content">${evalText.replace(/\n/g, "<br>")}</div>
             </div>
           </div>
         </div>`
@@ -334,7 +334,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
               </h4>
             </div>
             <div class="card-body">
-              <div class="recommendation-content">${trustgrade.escapeHtml(improved).replace(/\n/g, "<br>")}</div>
+              <div class="recommendation-content">${improved.replace(/\n/g, "<br>")}</div>
             </div>
           </div>
         </div>`

@@ -5,7 +5,7 @@
     
     Context variables:
     * title - Section title
-    * content - Section content
+    * content - Section content (supports HTML tags)
     * icon - Optional icon class
     * sectionClass - CSS class for styling
 }}
@@ -20,7 +20,8 @@
             </h4>
         </div>
         <div class="card-body">
-            <div class="recommendation-content">{{content}}</div>
+            {{! Use triple braces to allow HTML content rendering }}
+            <div class="recommendation-content">{{{content}}}</div>
         </div>
     </div>
 </div>
