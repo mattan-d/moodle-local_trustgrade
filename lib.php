@@ -176,6 +176,9 @@ function local_trustgrade_before_standard_html_head() {
             }
 
             // Check if user should be redirected to quiz
+            \local_trustgrade\redirect_handler::check_and_handle_redirect($cmid);
+
+            // Add AI Quiz Report button for instructors
             $context = \context_module::instance($cmid);
             if (has_capability('mod/assign:grade', $context)) {
                 $PAGE->requires->js_call_amd('local_trustgrade/quiz_report_button', 'init', [$cmid]);
