@@ -1,3 +1,6 @@
+// Declare the define variable before using it
+const define = window.define
+
 define([
   "jquery",
   "core/ajax",
@@ -372,10 +375,20 @@ define([
           pendingGrades.clear()
           updatePendingGradesDisplay()
 
-          Notification.addNotification({
-            message: response.graded_count + " students auto-graded based on quiz scores",
-            type: "success",
-          })
+          Str.get_string("auto_grade_success", "local_trustgrade", response.graded_count)
+            .then((successText) => {
+              Notification.addNotification({
+                message: successText,
+                type: "success",
+              })
+            })
+            .catch(() => {
+              // Fallback if string loading fails
+              Notification.addNotification({
+                message: response.graded_count + " students auto-graded based on quiz scores",
+                type: "success",
+              })
+            })
         } else {
           Str.get_string("auto_grade_error", "local_trustgrade")
             .then((errorText) => {
