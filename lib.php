@@ -21,10 +21,15 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addElement('header', 'trustgrade_header', get_string('trustgrade_tab', 'local_trustgrade'));
         $mform->setExpanded('trustgrade_header', false);
 
+        // Get current settings
+        $current_settings = \local_trustgrade\quiz_settings::get_settings($cmid);
+
+        $default_enabled = ($cmid > 0) ? ($current_settings['enabled'] ? 1 : 0) : (get_config('local_trustgrade', 'plugin_enabled') ? 1 : 0);
+
         $mform->addElement('advcheckbox', 'trustgrade_enabled',
                 get_string('trustgrade_enabled', 'local_trustgrade'),
                 get_string('trustgrade_enabled_desc', 'local_trustgrade'));
-        $mform->setDefault('trustgrade_enabled', $current_settings['enabled'] ? 1 : 0);
+        $mform->setDefault('trustgrade_enabled', $default_enabled);
 
         // Add description
         $mform->addElement('static', 'trustgrade_description', '',
@@ -35,9 +40,6 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         // Add quiz settings section FIRST
         $mform->addElement('static', 'trustgrade_quiz_settings_title', '',
                 '<h4>' . get_string('quiz_settings_title', 'local_trustgrade') . '</h4>');
-
-        // Get current settings
-        $current_settings = \local_trustgrade\quiz_settings::get_settings($cmid);
 
         // Questions to generate
         $generate_options = [];
