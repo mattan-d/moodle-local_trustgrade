@@ -33,7 +33,7 @@ class report_renderer extends \plugin_renderer_base {
         // Render the report as a table
         $table = new \html_table();
         $table->head = [
-            get_string('student'),
+            get_string('defaultcoursestudentdescription'),
             get_string('quiz_score', 'local_trustgrade'),
             get_string('completed_on', 'local_trustgrade'),
             get_string('time_taken', 'local_trustgrade'),
@@ -104,12 +104,12 @@ class report_renderer extends \plugin_renderer_base {
                 $details_cell = new \html_table_cell($details_html);
                 $details_cell->colspan = count($table->head);
                 $details_cell->attributes['class'] = 'student-details-cell p-3';
-                
+
                 $details_row = new \html_table_row();
                 $details_row->cells[] = $details_cell;
                 $details_row->attributes['class'] = 'collapse';
                 $details_row->id = $collapse_id;
-                
+
                 $table->data[] = $details_row;
             }
         }
