@@ -24,7 +24,7 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addElement('advcheckbox', 'trustgrade_enabled',
                 get_string('trustgrade_enabled', 'local_trustgrade'),
                 get_string('trustgrade_enabled_desc', 'local_trustgrade'));
-        $mform->setDefault('trustgrade_enabled', 1);
+        $mform->setDefault('trustgrade_enabled', $current_settings['enabled'] ? 1 : 0);
 
         // Add description
         $mform->addElement('static', 'trustgrade_description', '',
