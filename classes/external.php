@@ -13,6 +13,7 @@ require_once($CFG->dirroot . '/local/trustgrade/classes/question_bank_renderer.p
 require_once($CFG->dirroot . '/local/trustgrade/classes/quiz_settings.php');
 require_once($CFG->dirroot . '/local/trustgrade/classes/quiz_session.php');
 require_once($CFG->libdir . '/externallib.php');
+require_once($CFG->dirroot . '/mod/assign/locallib.php');
 
 class external extends \external_api {
 
