@@ -33,7 +33,7 @@ class report_renderer extends \plugin_renderer_base {
         // Render the report as a table
         $table = new \html_table();
         $table->head = [
-            get_string('defaultcoursestudentdescription'),
+            get_string('defaultcoursestudent'),
             get_string('quiz_score', 'local_trustgrade'),
             get_string('completed_on', 'local_trustgrade'),
             get_string('time_taken', 'local_trustgrade'),
