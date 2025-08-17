@@ -494,7 +494,7 @@ class external extends \external_api {
     $instructions = strip_tags($assignment->intro);
     
     $context = \context_module::instance($cm->id);
-    $intro_files = self::collect_assignment_intro_files($context->id, 'mod_assign', 'intro', $assignment->id);
+    $intro_files = self::collect_assignment_intro_files($context->id, 'mod_assign', 'introattachment');
     
     // Check if we have either instructions or files
     if (empty($instructions) && empty($intro_files)) {
