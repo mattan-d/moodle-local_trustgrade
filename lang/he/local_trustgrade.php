@@ -263,4 +263,17 @@ $string['option_placeholder'] = 'הזן טקסט אפשרות...';
 $string['correct_answer_required'] = 'נדרשת לפחות תשובה נכונה אחת';
 $string['save_assignment_first'] = 'אנא שמור את המטלה תחילה לפני יצירת שאלות';
 
+// Question Bank Functionality Strings
+$string['question_bank'] = 'בנק שאלות';
+$string['question_bank_description'] = 'נהל את השאלות שנוצרו על ידי בינה מלאכותית. תוכל לצפות, לערוך, למחוק שאלות קיימות, או ליצור חדשות.';
+$string['no_questions_found'] = 'לא נמצאו שאלות. צור כמה שאלות כדי להתחיל.';
+$string['question_text'] = 'טקסט השאלה';
+$string['questions_generated_successfully'] = 'שאלות נוצרו בהצלחה';
+$string['error_generating_questions'] = 'שגיאה ביצירת שאלות';
+$string['confirm_delete_question'] = 'האם אתה בטוח שברצונך למחוק שאלה זו? פעולה זו לא ניתנת לביטול.';
+$string['question_deleted_successfully'] = 'השאלה נמחקה בהצלחה';
+$string['error_deleting_question'] = 'שגיאה במחיקת השאלה';
+$string['plugindisabled'] = 'תוסף TrustGrade מושבת';
+$string['trustgradedisabled'] = 'TrustGrade מושבת למטלה זו';
+
 ?>

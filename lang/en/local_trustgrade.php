@@ -260,4 +260,17 @@ $string['correct_answer_required'] = 'At least one correct answer is required';
 
 $string['save_assignment_first'] = 'Please save the assignment first before generating questions';
 
+// Question Bank Functionality Strings
+$string['question_bank'] = 'Question Bank';
+$string['question_bank_description'] = 'Manage your AI-generated questions. You can view, edit, delete existing questions, or generate new ones.';
+$string['no_questions_found'] = 'No questions found. Generate some questions to get started.';
+$string['question_text'] = 'Question Text';
+$string['questions_generated_successfully'] = 'Questions generated successfully';
+$string['error_generating_questions'] = 'Error generating questions';
+$string['confirm_delete_question'] = 'Are you sure you want to delete this question? This action cannot be undone.';
+$string['question_deleted_successfully'] = 'Question deleted successfully';
+$string['error_deleting_question'] = 'Error deleting question';
+$string['plugindisabled'] = 'TrustGrade plugin is disabled';
+$string['trustgradedisabled'] = 'TrustGrade is disabled for this assignment';
+
 ?>
