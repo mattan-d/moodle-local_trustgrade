@@ -31,18 +31,18 @@ $string['seconds'] = 'seconds';
 // Quiz Settings
 $string['quiz_settings_title'] = 'Quiz Settings';
 $string['questions_to_generate'] = 'Number of questions to generate';
+$string['questions_to_generate_help'] = 'Total number of questions to include in the quiz';
 $string['question_distribution'] = 'Question Source Distribution';
 $string['instructor_questions'] = 'Questions from instructor bank';
+$string['instructor_questions_help'] = 'Number of questions to select from the instructor question bank';
 $string['submission_questions'] = 'Questions based on submissions';
+$string['submission_questions_help'] = 'Number of questions to generate based on student submissions';
 $string['randomize_answers'] = 'Randomize answer order';
 $string['randomize_answers_desc'] = 'Randomly shuffle the order of answer choices for multiple choice questions.';
 $string['time_per_question'] = 'Time per question';
+$string['time_per_question_help'] = 'Maximum time allowed per question in seconds';
 $string['show_countdown'] = 'Show countdown timer';
 $string['show_countdown_desc'] = 'Display a countdown timer for each question. When time expires, the quiz automatically moves to the next question.';
-$string['questions_to_generate_help'] = 'Total number of questions to include in the AI-generated quiz. This combines both instructor questions and submission-based questions.';
-$string['instructor_questions_help'] = 'Number of questions to select from the instructor\'s pre-created question bank. These are consistent across all students.';
-$string['submission_questions_help'] = 'Number of questions to generate based on student submissions. These questions are personalized to each student\'s work.';
-$string['time_per_question_help'] = 'Maximum time allowed per question in seconds. Students must answer within this time limit or the quiz will automatically advance.';
 
 // Disclosure Settings
 $string['disclosure_settings'] = 'Student Disclosure Settings';
@@ -216,6 +216,8 @@ $string['no_cheating'] = 'No Cheating: This is a formal assessment. Any attempt 
 $string['stay_focused'] = 'Stay Focused: Switching windows or tabs excessively may be flagged as suspicious behavior.';
 $string['cannot_restart_notice'] = 'Once you click "Start Quiz", you cannot restart or retake this assessment.';
 $string['enter_answer_placeholder'] = 'Enter your answer here...';
+
+// Missing JavaScript UI Strings
 $string['window_switching_warning'] = 'Warning: You have switched windows/tabs {$a->count} times. Maximum allowed: {$a->max}. Excessive switching may result in quiz termination.';
 $string['quiz_progress_complete'] = '{$a}% Complete';
 $string['question_x_of_y'] = 'Question {$a->current} of {$a->total}';
@@ -235,12 +237,18 @@ $string['evaluation'] = 'Evaluation';
 $string['improved_assignment'] = 'Improved Assignment';
 $string['no_criteria_provided'] = 'No criteria provided.';
 $string['recommendation_error'] = 'Error displaying recommendation.';
-$string['typeoptions'] = 'Question Type Options';
-$string['textentertext'] = 'Enter text here...';
-$string['points_help'] = 'Set the point value for this question (default: 10 points)';
-$string['leveloption'] = 'Bloom\'s Taxonomy Level';
-$string['textoption_placeholder'] = 'Enter answer option...';
-$string['correct_answer_required'] = 'At least one correct answer must be selected';
+
 $string['no_instructions_or_files'] = 'Either instructions or at least one file must be provided for analysis';
+
+// Additional strings for code functionality
+$string['type'] = 'Type';
+$string['options'] = 'Options';
+$string['text'] = 'Text';
+$string['entertext'] = 'Enter text';
+$string['points_help'] = 'Points awarded for this question';
+$string['level'] = 'Level';
+$string['optiontext'] = 'Option text';
+$string['option_placeholder'] = 'Enter option text...';
+$string['correct_answer_required'] = 'At least one correct answer is required';
 
 ?>

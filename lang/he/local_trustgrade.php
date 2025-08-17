@@ -32,26 +32,26 @@ $string['seconds'] = 'שניות';
 // Quiz Settings
 $string['quiz_settings_title'] = 'הגדרות חידון';
 $string['questions_to_generate'] = 'מספר השאלות ליצירה';
+$string['questions_to_generate_help'] = 'מספר כולל של שאלות לכלול בחידון';
 $string['question_distribution'] = 'חלוקת מקורות השאלות';
 $string['instructor_questions'] = 'שאלות מבנק המדריך';
+$string['instructor_questions_help'] = 'מספר השאלות לבחירה מבנק השאלות של המדריך';
 $string['submission_questions'] = 'שאלות על בסיס הגשות';
+$string['submission_questions_help'] = 'מספר השאלות ליצירה על בסיס הגשות סטודנטים';
 $string['randomize_answers'] = 'ערבב סדר התשובות';
 $string['randomize_answers_desc'] = 'ערבב באופן אקראי את סדר אפשרויות התשובה לשאלות רב-ברירה.';
 $string['time_per_question'] = 'זמן לכל שאלה';
+$string['time_per_question_help'] = 'זמן מקסימלי המותר לכל שאלה בשניות';
 $string['show_countdown'] = 'הצג טיימר ספירה לאחור';
 $string['show_countdown_desc'] = 'הצג טיימר ספירה לאחור לכל שאלה. כאשר הזמן פג, החידון עובר אוטומטית לשאלה הבאה.';
-$string['questions_to_generate_help'] = 'מספר השאלות הכולל לכלול בחידון שנוצר על ידי בינה מלאכותית. זה משלב גם שאלות מדריך וגם שאלות מבוססות הגשה.';
-$string['submission_questions_help'] = 'מספר השאלות ליצירה על בסיס הגשות הסטודנטים. שאלות אלו מותאמות אישית לעבודה של כל סטודנט.';
-$string['instructor_questions_help'] = 'מספר השאלות לבחור מבנק השאלות שנוצר מראש על ידי המדריך. אלו עקביות בין כל הסטודנטים.';
-$string['time_per_question_help'] = 'זמן מקסימלי מותר לכל שאלה בשניות. הסטודנטים חייבים לענות בתוך מגבלת זמן זו או שהחידון יעבור אוטומטית.';
 
 // Disclosure Settings
 $string['disclosure_settings'] = 'הגדרות חשיפת מידע לסטודנטים';
-$string['disclosure_settings_desc'] = 'הגדר איך מודיעים לסטודנטים על תכונות הבינה מלאכותית במטלות.';
+$string['disclosure_settings_desc'] = 'הגדר איך מודיעים לסטודנטים על תכונות הבינה המלאכותית במטלות.';
 $string['show_disclosure'] = 'הצג הודעת גילוי בינה מלאכותית';
 $string['show_disclosure_desc'] =
         'הצג הודעת גילוי לסטודנטים לפני הגשת המטלות, להודיע להם על תכונת החידון המופעלת על ידי בינה מלאכותית.';
-$string['custom_disclosure_message'] = 'הודעה גילוי מותאמת אישית';
+$string['custom_disclosure_message'] = 'הודעת גילוי מותאמת אישית';
 $string['custom_disclosure_message_desc'] =
         'הודעה מותאמת אישית אופציונלית להצגה במקום הודעת הברירת מחדל. השאר ריק לשימוש בהודעת ברירת המחדל.';
 
@@ -132,6 +132,7 @@ $string['session_info'] = 'מידע מפגש';
 $string['completed_on'] = 'הושלם ב';
 $string['time_taken'] = 'זמן שנלקח';
 $string['points'] = 'נקודות';
+$string['points_help'] = 'נקודות המוענקות לשאלה זו';
 $string['no_answer'] = 'אין תשובה';
 $string['true'] = 'נכון';
 $string['false'] = 'לא נכון';
@@ -184,12 +185,6 @@ $string['confirm_delete_question_title'] = 'מחק שאלה';
 $string['confirm_delete_question_message'] = 'האם אתה בטוח שברצונך למחוק שאלה זו? פעולה זו לא ניתנת לביטול.';
 $string['question_deleted_success'] = 'השאלה נמחקה בהצלחה';
 $string['ai_quiz_report'] = 'דוח חידון בינה מלאכותית';
-$string['typeoptions'] = 'אפשרויות סוג שאלה';
-$string['textentertext'] = 'הזן טקסט כאן...';
-$string['points_help'] = 'קבע את ערך הנקודות לשאלה זו (ברירת מחדל: 10 נקודות)';
-$string['leveloption'] = 'רמת טקסונומיית בלום';
-$string['textoption_placeholder'] = 'הזן אפשרות תשובה...';
-$string['correct_answer_required'] = 'יש לבחור לפחות תשובה נכונה אחת';
 
 // JavaScript UI Strings
 $string['instructor_question'] = 'שאלת מדריך';
@@ -238,7 +233,6 @@ $string['final_score'] = 'ציון סופי: {$a->score}/{$a->total} ({$a->perce
 $string['window_focus_lost'] = 'פוקוס החלון אבד {$a} פעמים במהלך החידון.';
 $string['exceeded_window_switches'] = 'חרגת ממספר החלפות החלונות המקסימלי המותר ({$a}). החידון הופסק.';
 $string['setting_updated_success'] = 'הגדרה "{$a}" עודכנה בהצלחה.';
-$string['no_instructions_or_files'] = 'יש לספק הוראות או לפחות קובץ אחד לניתוח';
 
 // Localization strings for recommendation rendering
 $string['criteria_evaluation'] = 'הערכת קריטריונים';
@@ -249,5 +243,16 @@ $string['evaluation'] = 'הערכה';
 $string['improved_assignment'] = 'משימה משופרת';
 $string['no_criteria_provided'] = 'לא סופקו קריטריונים.';
 $string['recommendation_error'] = 'שגיאה בהצגת ההמלצה.';
+
+// Additional strings
+$string['no_instructions_or_files'] = 'יש לספק הוראות או לפחות קובץ אחד לניתוח';
+$string['type'] = 'סוג';
+$string['options'] = 'אפשרויות';
+$string['text'] = 'טקסט';
+$string['entertext'] = 'הזן טקסט';
+$string['level'] = 'רמה';
+$string['optiontext'] = 'טקסט אפשרות';
+$string['option_placeholder'] = 'הזן טקסט אפשרות...';
+$string['correct_answer_required'] = 'נדרשת לפחות תשובה נכונה אחת';
 
 ?>
