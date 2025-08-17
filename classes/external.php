@@ -13,6 +13,7 @@ require_once($CFG->dirroot . '/local/trustgrade/classes/question_bank_renderer.p
 require_once($CFG->dirroot . '/local/trustgrade/classes/quiz_settings.php');
 require_once($CFG->dirroot . '/local/trustgrade/classes/quiz_session.php');
 require_once($CFG->libdir . '/externallib.php');
+require_once($CFG->dirroot . '/mod/assign/locallib.php');
 
 class external extends \external_api {
 
@@ -148,6 +149,52 @@ class external extends \external_api {
      }
 
      foreach ($all as $file) {
+         if ($file->is_directory()) {
+             continue;
+         }
+         try {
+             $content = $file->get_content();
+             if ($content === false) {
+                 continue;
+             }
+             // Always use base64 for safe JSON transport (PDF, images, etc.)
+             $filesOut[] = [
+                 'filename' => $file->get_filename(),
+                 'mimetype' => $file->get_mimetype(),
+                 'size' => (int)$file->get_filesize(),
+                 'content' => base64_encode($content),
+             ];
+         } catch (\Throwable $e) {
+             // Skip file on error
+             continue;
+         }
+     }
+
+     return $filesOut;
+ }
+
+ /**
+  * Collect files from a saved assignment's intro area (similar to collect_intro_files but for saved files)
+  */
+ private static function collect_assignment_intro_files($context_id, $component, $filearea, $itemid = 0): array {
+     $filesOut = [];
+     
+     $fs = get_file_storage();
+     $files = $fs->get_area_files($context_id, $component, $filearea, $itemid, 'sortorder, id', false);
+     
+     if (empty($files) && $itemid == 0) {
+         // Get assignment instance ID from context
+         $cm = get_coursemodule_from_id('assign', null, 0, false, MUST_EXIST, $context_id);
+         if ($cm && $cm->instance) {
+             $files = $fs->get_area_files($context_id, $component, $filearea, $cm->instance, 'sortorder, id', false);
+         }
+     }
+     
+     if (empty($files)) {
+         return $filesOut;
+     }
+
+     foreach ($files as $file) {
          if ($file->is_directory()) {
              continue;
          }
@@ -362,14 +409,11 @@ class external extends \external_api {
         return ['success' => false, 'error' => get_string('no_instructions_or_files', 'local_trustgrade')];
     }
 
-    $quiz_settings = quiz_settings::get_settings($cmid);
-    $questions_to_generate = $quiz_settings['questions_to_generate'];
-
     // If we have files, send them to the Gateway alongside the instructions.
     if (!empty($files)) {
         try {
             $gateway = new gateway_client();
-            $gwResult = $gateway->generateQuestions($instructions, $questions_to_generate, $files);
+            $gwResult = $gateway->generateQuestions($instructions, $files);
             if (!$gwResult['success']) {
                 return ['success' => false, 'error' => $gwResult['error'] ?? 'Gateway error'];
             }
@@ -397,22 +441,111 @@ class external extends \external_api {
     }
 
     // Fallback to existing flow when there are no files.
-    $result = question_generator::generate_questions_with_count($instructions, $questions_to_generate);
+    $result = question_generator::generate_questions_with_count($instructions);
     if ($result['success']) {
         $save_success = question_generator::save_questions($cmid, $result['questions']);
         if ($save_success) {
-            $result['message'] = get_string('questions_generated_success', 'local_trustgrade');
-            $result['questions'] = json_encode($result['questions']);
+            return [
+                'success' => true,
+                'message' => get_string('questions_generated_success', 'local_trustgrade'),
+                'questions' => json_encode($result['questions'])
+            ];
         } else {
-            $result['error'] = get_string('error_saving_questions', 'local_trustgrade');
-            $result['success'] = false;
+            return ['success' => false, 'error' => get_string('error_saving_questions', 'local_trustgrade')];
         }
     } else {
-        $result['error'] = $result['error'];
-        $result['success'] = false;
+        return ['success' => false, 'error' => $result['error'] ?? 'Unknown error'];
     }
-    return $result;
-  }
+ }
+
+ public static function generate_questions_by_count_parameters() {
+     return new \external_function_parameters([
+             'cmid' => new \external_value(PARAM_INT, 'Course module ID'),
+             'count' => new \external_value(PARAM_INT, 'Number of questions to generate'),
+     ]);
+ }
+
+ public static function generate_questions_by_count_returns() {
+     return new \external_single_structure([
+             'success' => new \external_value(PARAM_BOOL, 'True if successful'),
+             'questions' => new \external_value(PARAM_RAW, 'JSON encoded array of questions', VALUE_OPTIONAL),
+             'message' => new \external_value(PARAM_TEXT, 'Success message', VALUE_OPTIONAL),
+             'error' => new \external_value(PARAM_TEXT, 'Error message', VALUE_OPTIONAL),
+     ]);
+ }
+
+ public static function generate_questions_by_count($cmid, $count) {
+    if ($cmid <= 0) {
+        return [
+            'success' => false, 
+            'error' => get_string('save_assignment_first', 'local_trustgrade')
+        ];
+    }
+    
+    self::validate_editing_context($cmid);
+    
+    // Get assignment instructions from the course module
+    $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
+    $assign = new \assign(\context_module::instance($cm->id), $cm, null);
+    $assignment = $assign->get_instance();
+    $instructions = strip_tags($assignment->intro);
+    
+    $context = \context_module::instance($cm->id);
+    $intro_files = self::collect_assignment_intro_files($context->id, 'mod_assign', 'introattachment');
+    
+    // Check if we have either instructions or files
+    if (empty($instructions) && empty($intro_files)) {
+        return ['success' => false, 'error' => get_string('no_instructions_or_files', 'local_trustgrade')];
+    }
+
+    // If we have files, use the Gateway API
+    if (!empty($intro_files)) {
+        try {
+            $gateway = new gateway_client();
+            $gwResult = $gateway->generateQuestions($instructions, $count, $intro_files);
+            if (!$gwResult['success']) {
+                return ['success' => false, 'error' => $gwResult['error'] ?? 'Gateway error'];
+            }
+
+            $data = $gwResult['data'] ?? [];
+            $questions = $data['questions'] ?? [];
+
+            if (empty($questions) || !is_array($questions)) {
+                return ['success' => false, 'error' => get_string('error_saving_questions', 'local_trustgrade')];
+            }
+
+            $save_success = question_generator::save_questions($cmid, $questions);
+            if ($save_success) {
+                return [
+                    'success' => true,
+                    'message' => get_string('questions_generated_success', 'local_trustgrade'),
+                    'questions' => json_encode($questions)
+                ];
+            } else {
+                return ['success' => false, 'error' => get_string('error_saving_questions', 'local_trustgrade')];
+            }
+        } catch (\Throwable $e) {
+            return ['success' => false, 'error' => 'Gateway error: ' . $e->getMessage()];
+        }
+    }
+
+    // Fallback to existing flow when there are no files
+    $result = question_generator::generate_questions_with_count($instructions, $count);
+    if ($result['success']) {
+        $save_success = question_generator::save_questions($cmid, $result['questions']);
+        if ($save_success) {
+            return [
+                'success' => true,
+                'message' => get_string('questions_generated_success', 'local_trustgrade'),
+                'questions' => json_encode($result['questions'])
+            ];
+        } else {
+            return ['success' => false, 'error' => get_string('error_saving_questions', 'local_trustgrade')];
+        }
+    } else {
+        return ['success' => false, 'error' => $result['error'] ?? 'Unknown error'];
+    }
+ }
 
  public static function save_question_parameters() {
      return new \external_function_parameters([
