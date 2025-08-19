@@ -54,12 +54,13 @@ class quiz_session {
             $record->integrity_violations = json_encode([]);
             $record->timecreated = time();
             $record->timemodified = time();
+            $record->archived = 0; // New field to indicate if the session is archived
 
             // Insert the new record into the database.
             $record->id = $DB->insert_record('local_trustgd_quiz_sessions', $record);
 
             // Return the newly created session data.
-            return self::get_session($cmid, $submissionid, $userid);
+            return self::get_session_by_id($record->id);
 
         } catch (\Exception $e) {
             error_log('Failed to get or create quiz session: ' . $e->getMessage());
@@ -68,7 +69,73 @@ class quiz_session {
     }
     
     /**
-     * Get existing quiz session
+     * Archive existing sessions for a user/assignment to allow new attempts
+     * 
+     * @param int $cmid Course module ID
+     * @param int $submissionid Submission ID
+     * @param int $userid User ID
+     * @return bool Success status
+     */
+    private static function archive_existing_sessions($cmid, $submissionid, $userid) {
+        global $DB;
+        
+        try {
+            // Mark all existing sessions as archived
+            $DB->set_field('local_trustgd_quiz_sessions', 'archived', 1, [
+                'cmid' => $cmid,
+                'submissionid' => $submissionid,
+                'userid' => $userid
+            ]);
+            
+            return true;
+        } catch (\Exception $e) {
+            error_log('Failed to archive existing sessions: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Get session by ID
+     * 
+     * @param int $session_id Session ID
+     * @return array|null Session data or null if not found
+     */
+    public static function get_session_by_id($session_id) {
+        global $DB;
+        
+        try {
+            $record = $DB->get_record('local_trustgd_quiz_sessions', ['id' => $session_id]);
+            
+            if (!$record) {
+                return null;
+            }
+            
+            return [
+                'id' => $record->id,
+                'cmid' => (int)$record->cmid,
+                'submissionid' => (int)$record->submissionid,
+                'questions' => json_decode($record->questions_data, true),
+                'settings' => json_decode($record->settings_data, true),
+                'current_question' => (int)$record->current_question,
+                'answers' => json_decode($record->answers_data, true) ?: [],
+                'time_remaining' => (int)$record->time_remaining,
+                'window_blur_count' => (int)$record->window_blur_count,
+                'attempt_started' => (bool)$record->attempt_started,
+                'attempt_completed' => (bool)$record->attempt_completed,
+                'integrity_violations' => json_decode($record->integrity_violations, true) ?: [],
+                'timecreated' => $record->timecreated,
+                'timemodified' => $record->timemodified,
+                'archived' => (bool)$record->archived
+            ];
+            
+        } catch (\Exception $e) {
+            error_log('Failed to get quiz session by ID: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Get existing quiz session (only active, non-archived sessions)
      * 
      * @param int $cmid Course module ID
      * @param int $submissionid Submission ID
@@ -82,7 +149,8 @@ class quiz_session {
             $record = $DB->get_record('local_trustgd_quiz_sessions', [
                 'cmid' => $cmid,
                 'submissionid' => $submissionid,
-                'userid' => $userid
+                'userid' => $userid,
+                'archived' => 0  // Only get non-archived sessions
             ]);
             
             if (!$record) {
@@ -128,7 +196,8 @@ class quiz_session {
             $record = $DB->get_record('local_trustgd_quiz_sessions', [
                 'cmid' => $cmid,
                 'submissionid' => $submissionid,
-                'userid' => $userid
+                'userid' => $userid,
+                'archived' => 0  // Only update non-archived sessions
             ]);
             
             if (!$record) {
@@ -190,7 +259,8 @@ class quiz_session {
             $record = $DB->get_record('local_trustgd_quiz_sessions', [
                 'cmid' => $cmid,
                 'submissionid' => $submissionid,
-                'userid' => $userid
+                'userid' => $userid,
+                'archived' => 0  // Only complete non-archived sessions
             ]);
             
             if (!$record) {
@@ -214,7 +284,7 @@ class quiz_session {
     }
     
     /**
-     * Check if user has already completed the quiz
+     * Check if user has already completed the quiz (only check non-archived sessions)
      * 
      * @param int $cmid Course module ID
      * @param int $submissionid Submission ID
@@ -228,7 +298,8 @@ class quiz_session {
             $record = $DB->get_record('local_trustgd_quiz_sessions', [
                 'cmid' => $cmid,
                 'submissionid' => $submissionid,
-                'userid' => $userid
+                'userid' => $userid,
+                'archived' => 0  // Only check non-archived sessions
             ]);
             
             return $record && $record->attempt_completed;
@@ -256,7 +327,8 @@ class quiz_session {
             $record = $DB->get_record('local_trustgd_quiz_sessions', [
                 'cmid' => $cmid,
                 'submissionid' => $submissionid,
-                'userid' => $userid
+                'userid' => $userid,
+                'archived' => 0  // Only log violations for non-archived sessions
             ]);
             
             if (!$record) {
@@ -295,7 +367,7 @@ class quiz_session {
         $sql = "SELECT s.*, u.firstname, u.lastname, u.email
                 FROM {local_trustgd_quiz_sessions} s
                 JOIN {user} u ON s.userid = u.id
-                WHERE s.cmid = :cmid AND s.attempt_completed = 1
+                WHERE s.cmid = :cmid AND s.attempt_completed = 1 AND s.archived = 0
                 ORDER BY u.lastname, u.firstname";
         
         try {
