@@ -29,7 +29,7 @@ class observer {
     }
 
     /**
-     * Process submission and generate AI questions via adhoc task
+     * Process submission and generate AI questions
      *
      * @param \core\event\base $event
      */
@@ -57,42 +57,75 @@ class observer {
                 return;
             }
 
-            self::queue_submission_processing_task($submission_id, $cm->id, $submission->userid);
+            // Get assignment data
+            $assignment = $DB->get_record('assign', ['id' => $submission->assignment]);
+            if (!$assignment) {
+                return;
+            }
+
+            // Get quiz settings to determine how many submission questions to generate
+            $quiz_settings = \local_trustgrade\quiz_settings::get_settings($cm->id);
+            $questions_to_generate = $quiz_settings['submission_questions'];
+
+            // Extract submission content (text and files)
+            $submission_content = submission_processor::extract_submission_content($submission, $context);
+
+            if (empty($submission_content['text']) && empty($submission_content['files'])) {
+                return; // No content to analyze
+            }
+
+            $assignment_instructions = strip_tags($assignment->intro ?? '');
+
+            // Generate questions based on submission using the configured count
+            $result = submission_processor::generate_submission_questions_with_count(
+                $submission_content,
+                $assignment_instructions,
+                $questions_to_generate
+            );
+
+            if ($result['success']) {
+                // Save submission-based questions
+                submission_processor::save_submission_questions($submission_id, $cm->id, $result['questions']);
+
+                self::create_quiz_session_for_submission($cm->id, $submission_id, $submission->userid);
+
+                // Set session flag to redirect to quiz
+                self::set_quiz_redirect_flag($cm->id, $submission_id);
+            }
 
         } catch (\Exception $e) {
             // Log error but don't break the submission process
-            error_log('TrustGrade submission task queuing error: ' . $e->getMessage());
+            error_log('TrustGrade submission processing error: ' . $e->getMessage());
         }
     }
 
     /**
-     * Queue adhoc task for submission processing
+     * Create quiz session specifically for submission update
      *
-     * @param int $submission_id
-     * @param int $cmid
-     * @param int $userid
+     * @param int $cmid Course module ID
+     * @param int $submission_id Submission ID
+     * @param int $userid User ID
      */
-    private static function queue_submission_processing_task($submission_id, $cmid, $userid) {
-        global $DB;
-
-        $status_record = new \stdClass();
-        $status_record->submission_id = $submission_id;
-        $status_record->cmid = $cmid;
-        $status_record->userid = $userid;
-        $status_record->status = 'queued';
-        $status_record->created_at = time();
-
-        $DB->insert_record('local_trustgrade_task_status', $status_record);
-
-        $task = new \local_trustgrade\task\process_submission_adhoc();
-        $task->set_custom_data((object)[
-            'submission_id' => $submission_id,
-            'cmid' => $cmid,
-            'userid' => $userid
-        ]);
-
-        // Queue the task to run as soon as possible
-        \core\task\manager::queue_adhoc_task($task);
+    private static function create_quiz_session_for_submission($cmid, $submission_id, $userid) {
+        quiz_session::create_session_on_submission_update($cmid, $submission_id, $userid);
     }
 
+    /**
+     * Set flag in session to redirect user to quiz
+     *
+     * @param int $cmid Course module ID
+     * @param int $submission_id Submission ID
+     */
+    private static function set_quiz_redirect_flag($cmid, $submission_id) {
+        global $SESSION;
+
+        if (!isset($SESSION->trustgrade_quiz_redirect)) {
+            $SESSION->trustgrade_quiz_redirect = [];
+        }
+
+        $SESSION->trustgrade_quiz_redirect[$cmid] = [
+            'submission_id' => $submission_id,
+            'timestamp' => time()
+        ];
+    }
 }
