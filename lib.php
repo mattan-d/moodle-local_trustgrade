@@ -177,7 +177,9 @@ function local_trustgrade_before_standard_html_head() {
 
             $PAGE->requires->js_call_amd('local_trustgrade/navigation_buttons', 'init', [$cmid]);
             
+            if (local_trustgrade_has_active_task($cmid)) {
                 $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [$cmid]);
+            }
         }
     }
 
@@ -193,6 +195,10 @@ function local_trustgrade_before_standard_html_head() {
 
             // Initialize disclosure using external files
             \local_trustgrade\disclosure_handler::init_disclosure($cmid);
+            
+            if (local_trustgrade_has_active_task($cmid)) {
+                $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [$cmid]);
+            }
         }
     }
 }
@@ -223,4 +229,16 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
     }
 
     return $data;
+}
+
+/**
+ * Check if there's an active task for the current user and assignment
+ */
+function local_trustgrade_has_active_task($cmid) {
+    global $DB, $USER;
+    
+    $sql = "SELECT id FROM {local_trustgrade_task_status} 
+            WHERE cmid = ? AND userid = ? AND status IN ('queued', 'processing')";
+    
+    return $DB->get_record_sql($sql, [$cmid, $USER->id]) !== false;
 }
