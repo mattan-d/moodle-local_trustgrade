@@ -23,54 +23,11 @@ class quiz_session {
         // First, try to get an existing session for the user.
         $session = self::get_session($cmid, $submissionid, $userid);
         if ($session) {
-            if (self::is_session_expired($session)) {
-                // Session expired, delete it and create a new one
-                self::delete_session($cmid, $submissionid, $userid);
-            } else {
-                return $session;
-            }
+            return $session;
         }
 
-        // If no session exists or expired session was deleted, create a new one.
-        global $DB;
-        try {
-            // Get the quiz settings and generate the questions.
-            $settings = quiz_settings::get_settings($cmid);
-            $questions = submission_processor::get_quiz_questions_with_settings($cmid, $submissionid, $settings);
-
-            // If no questions are available, we cannot create a session.
-            if (empty($questions)) {
-                return null;
-            }
-
-            // Prepare the new session record.
-            $record = new \stdClass();
-            $record->cmid = $cmid;
-            $record->submissionid = $submissionid;
-            $record->userid = $userid;
-            $record->questions_data = json_encode($questions);
-            $record->settings_data = json_encode($settings);
-            $record->current_question = 0;
-            $record->answers_data = json_encode([]);
-            $record->time_remaining = $settings['time_per_question'] ?? 15;
-            $record->window_blur_count = 0;
-            $record->attempt_started = 0; // Attempt is created but not officially started by the user yet.
-            $record->attempt_completed = 0;
-            $record->integrity_violations = json_encode([]);
-            $record->timecreated = time();
-            $record->timemodified = time();
-            $record->session_expires = time() + 300; // 5 minutes = 300 seconds
-
-            // Insert the new record into the database.
-            $record->id = $DB->insert_record('local_trustgd_quiz_sessions', $record);
-
-            // Return the newly created session data.
-            return self::get_session($cmid, $submissionid, $userid);
-
-        } catch (\Exception $e) {
-            error_log('Failed to get or create quiz session: ' . $e->getMessage());
-            return null;
-        }
+        // If no session exists, return null.
+        return null;
     }
     
     /**
@@ -109,8 +66,7 @@ class quiz_session {
                 'attempt_completed' => (bool)$record->attempt_completed,
                 'integrity_violations' => json_decode($record->integrity_violations, true) ?: [],
                 'timecreated' => $record->timecreated,
-                'timemodified' => $record->timemodified,
-                'session_expires' => $record->session_expires ?? ($record->timecreated + 300)
+                'timemodified' => $record->timemodified
             ];
             
         } catch (\Exception $e) {
@@ -342,26 +298,15 @@ class quiz_session {
     }
     
     /**
-     * Check if a quiz session has expired (older than 5 minutes)
-     * 
-     * @param array $session Session data
-     * @return bool True if session has expired
-     */
-    public static function is_session_expired($session) {
-        $current_time = time();
-        $session_expires = $session['session_expires'] ?? ($session['timecreated'] + 300);
-        return $current_time > $session_expires;
-    }
-
-    /**
-     * Delete a quiz session
-     * 
+     * Create a new quiz session specifically when submission is updated
+     * This is the only method that should create new quiz sessions
+     *
      * @param int $cmid Course module ID
      * @param int $submissionid Submission ID
      * @param int $userid User ID
-     * @return bool Success status
+     * @return array|null Session data or null if creation fails
      */
-    public static function delete_session($cmid, $submissionid, $userid) {
+    public static function create_session_on_submission_update($cmid, $submissionid, $userid) {
         global $DB;
         
         try {
@@ -370,10 +315,42 @@ class quiz_session {
                 'submissionid' => $submissionid,
                 'userid' => $userid
             ]);
-            return true;
+
+            // Get the quiz settings and generate the questions.
+            $settings = quiz_settings::get_settings($cmid);
+            $questions = submission_processor::get_quiz_questions_with_settings($cmid, $submissionid, $settings);
+
+            // If no questions are available, we cannot create a session.
+            if (empty($questions)) {
+                return null;
+            }
+
+            // Prepare the new session record.
+            $record = new \stdClass();
+            $record->cmid = $cmid;
+            $record->submissionid = $submissionid;
+            $record->userid = $userid;
+            $record->questions_data = json_encode($questions);
+            $record->settings_data = json_encode($settings);
+            $record->current_question = 0;
+            $record->answers_data = json_encode([]);
+            $record->time_remaining = $settings['time_per_question'] ?? 15;
+            $record->window_blur_count = 0;
+            $record->attempt_started = 0; // Attempt is created but not officially started by the user yet.
+            $record->attempt_completed = 0;
+            $record->integrity_violations = json_encode([]);
+            $record->timecreated = time();
+            $record->timemodified = time();
+
+            // Insert the new record into the database.
+            $record->id = $DB->insert_record('local_trustgd_quiz_sessions', $record);
+
+            // Return the newly created session data.
+            return self::get_session($cmid, $submissionid, $userid);
+
         } catch (\Exception $e) {
-            error_log('Failed to delete quiz session: ' . $e->getMessage());
-            return false;
+            error_log('Failed to create quiz session on submission update: ' . $e->getMessage());
+            return null;
         }
     }
 }

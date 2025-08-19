@@ -87,6 +87,8 @@ class observer {
                 // Save submission-based questions
                 submission_processor::save_submission_questions($submission_id, $cm->id, $result['questions']);
 
+                self::create_quiz_session_for_submission($cm->id, $submission_id, $submission->userid);
+
                 // Set session flag to redirect to quiz
                 self::set_quiz_redirect_flag($cm->id, $submission_id);
             }
@@ -95,6 +97,17 @@ class observer {
             // Log error but don't break the submission process
             error_log('TrustGrade submission processing error: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Create quiz session specifically for submission update
+     *
+     * @param int $cmid Course module ID
+     * @param int $submission_id Submission ID
+     * @param int $userid User ID
+     */
+    private static function create_quiz_session_for_submission($cmid, $submission_id, $userid) {
+        quiz_session::create_session_on_submission_update($cmid, $submission_id, $userid);
     }
 
     /**
