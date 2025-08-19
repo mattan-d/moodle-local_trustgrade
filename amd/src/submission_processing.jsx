@@ -4,7 +4,22 @@ define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification) => 
   var SubmissionProcessing = {
     init: function (cmid) {
       this.cmid = cmid
+      this.checkForExistingTasks()
       this.setupSubmissionProcessing()
+    },
+
+    checkForExistingTasks: function () {
+      
+      console.log("[v0] Checking for existing queued tasks")
+
+      this.checkTaskStatus(null, (status) => {
+        console.log("[v0] Initial task status check:", status)
+        if (status === "queued" || status === "processing") {
+          console.log("[v0] Found existing queued/processing task, showing processing message")
+          this.showProcessingMessage()
+          this.startStatusPolling()
+        }
+      })
     },
 
     setupSubmissionProcessing: function () {
@@ -57,7 +72,7 @@ define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification) => 
         this.hideProcessingMessage()
         return
       }
-      
+
       var pollCount = 0
       var maxPolls = 60 // Poll for max 3 minutes
 
@@ -91,7 +106,7 @@ define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification) => 
         {
           methodname: "local_trustgrade_check_task_status",
           args: {
-            submission_id: submissionId,
+            submission_id: submissionId || this.getCurrentUserId(),
             cmid: this.cmid,
           },
         },

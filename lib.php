@@ -177,9 +177,7 @@ function local_trustgrade_before_standard_html_head() {
 
             $PAGE->requires->js_call_amd('local_trustgrade/navigation_buttons', 'init', [$cmid]);
             
-            if (local_trustgrade_has_active_task($cmid)) {
-                $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [$cmid]);
-            }
+            $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [$cmid]);
         }
     }
 
@@ -196,9 +194,7 @@ function local_trustgrade_before_standard_html_head() {
             // Initialize disclosure using external files
             \local_trustgrade\disclosure_handler::init_disclosure($cmid);
             
-            if (local_trustgrade_has_active_task($cmid)) {
-                $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [$cmid]);
-            }
+            $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [$cmid]);
         }
     }
 }
