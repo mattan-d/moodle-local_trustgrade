@@ -273,4 +273,9 @@ $string['error_deleting_question'] = 'Error deleting question';
 $string['plugindisabled'] = 'TrustGrade plugin is disabled';
 $string['trustgradedisabled'] = 'TrustGrade is disabled for this assignment';
 
+// Submission Processing Language Strings
+$string['processing_submission'] = 'Processing Your Submission';
+$string['processing_submission_message'] = 'Please wait while we process your assignment submission...';
+$string['processing_please_wait'] = 'Please wait...';
+
 ?>
