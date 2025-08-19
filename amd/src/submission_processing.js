@@ -9,10 +9,8 @@ define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification, M) 
       
 
       // Listen for form submissions
-      $(document).on("submit", 'form[data-form="submission"]', (e) => {
         this.showProcessingMessage()
         this.startStatusPolling()
-      })
     },
 
     showProcessingMessage: () => {
