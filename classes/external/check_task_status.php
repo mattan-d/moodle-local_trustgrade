@@ -46,6 +46,8 @@ class check_task_status extends external_api {
             'cmid' => $cmid
         ]);
 
+        error_log("TrustGrade: Checking task status for submission_id={$params['submission_id']}, cmid={$params['cmid']}");
+
         // Verify user has access to this assignment
         $cm = get_coursemodule_from_id('assign', $params['cmid']);
         if (!$cm) {
@@ -61,6 +63,17 @@ class check_task_status extends external_api {
             'submission_id' => $params['submission_id'],
             'cmid' => $params['cmid']
         ]);
+
+        if ($status) {
+            error_log("TrustGrade: Found task status: {$status->status}");
+        } else {
+            error_log("TrustGrade: No task status found, checking all records for this submission_id");
+            $all_records = $DB->get_records('local_trustgrade_task_status', ['submission_id' => $params['submission_id']]);
+            error_log("TrustGrade: Found " . count($all_records) . " records for submission_id {$params['submission_id']}");
+            foreach ($all_records as $record) {
+                error_log("TrustGrade: Record - submission_id: {$record->submission_id}, cmid: {$record->cmid}, status: {$record->status}");
+            }
+        }
 
         return [
             'status' => $status ? $status->status : 'not_found',
