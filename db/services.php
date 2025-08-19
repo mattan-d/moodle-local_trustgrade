@@ -144,6 +144,15 @@ $functions = [
         'ajax' => true,
         'capabilities' => 'mod/assign:submit',
     ],
+    'local_trustgrade_check_task_status' => [
+        'classname' => 'local_trustgrade\external\check_task_status',
+        'methodname' => 'execute',
+        'classpath' => 'local/trustgrade/classes/external/check_task_status.php',
+        'description' => 'Check the status of a submission processing task.',
+        'type' => 'read',
+        'ajax' => true,
+        'capabilities' => 'mod/assign:submit',
+    ],
 ];
 
 $services = [
@@ -167,6 +176,7 @@ $services = [
             'local_trustgrade_update_quiz_session',
             'local_trustgrade_complete_quiz_session',
             'local_trustgrade_log_integrity_violation',
+            'local_trustgrade_check_task_status',
         ],
         'restrictedusers' => 0,
         'enabled' => 1,
