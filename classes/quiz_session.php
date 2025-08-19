@@ -20,13 +20,10 @@ class quiz_session {
      * @return array|null Session data or null if creation fails (e.g., no questions).
      */
     public static function get_or_create_session($cmid, $submissionid, $userid) {
-        // First, try to get an existing session for the user.
-        $session = self::get_session($cmid, $submissionid, $userid);
-        if ($session) {
-            return $session;
-        }
+        // Archive any existing sessions first to allow fresh attempts
+        self::archive_existing_sessions($cmid, $submissionid, $userid);
 
-        // If no session exists, create a new one.
+        // Create a new session
         global $DB;
         try {
             // Get the quiz settings and generate the questions.
