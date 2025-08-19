@@ -317,12 +317,13 @@ class report_renderer extends \plugin_renderer_base {
     protected function render_questions_table($session) {
         $table = new \html_table();
         $table->head = [
-            '#',
-            get_string('question', 'local_trustgrade'),
-            get_string('student_answer', 'local_trustgrade'),
-            get_string('correct_answer', 'local_trustgrade'),
-            get_string('points', 'local_trustgrade'),
-            get_string('result', 'local_trustgrade')
+                '#',
+                get_string('blooms_level', 'local_trustgrade'),
+                get_string('question', 'local_trustgrade'),
+                get_string('student_answer', 'local_trustgrade'),
+                get_string('correct_answer', 'local_trustgrade'),
+                get_string('points', 'local_trustgrade'),
+                get_string('result', 'local_trustgrade')
         ];
         $table->attributes['class'] = 'table table-striped table-bordered';
 
@@ -335,6 +336,8 @@ class report_renderer extends \plugin_renderer_base {
 
             $student_answer_display = $this->format_student_answer($question, $user_answer);
             $correct_answer_display = $this->format_correct_answer($question, $user_answer);
+
+            $blooms_level = $question->metadata->blooms_level ?? '';
 
             // Determine if answer is correct
             $is_correct = $this->is_answer_correct($question, $user_answer);
@@ -349,6 +352,7 @@ class report_renderer extends \plugin_renderer_base {
 
             $row = new \html_table_row();
             $row->cells[] = $index + 1;
+            $row->cells[] = html_writer::span($blooms_level, 'badge badge-primary');;
 
             // Question cell with source badge
             $question_cell = html_writer::div(
@@ -404,7 +408,9 @@ class report_renderer extends \plugin_renderer_base {
                 if ($selectedBaseIndex !== null && isset($options[$selectedBaseIndex])) {
                     $label = chr(65 + max(0, (int)$selectedDisplayIndex));
                     $text = $options[$selectedBaseIndex]->text;
-                    return $raw_answer_display . html_writer::div(html_writer::tag('strong', $label . '. ') . $text, 'text-primary');
+                    return html_writer::div(html_writer::tag('strong', $label));
+
+                    //return $raw_answer_display . html_writer::div(html_writer::tag('strong', $label . '. ') . $text, 'text-primary');
                 } else {
                     $invalid_display = html_writer::span(
                         get_string('invalid_option_selected', 'local_trustgrade'),
@@ -473,8 +479,8 @@ class report_renderer extends \plugin_renderer_base {
                     if (!empty($opt->is_correct)) {
                         // Try to find its display index to compute a letter label.
                         $displayIndex = $this->base_to_display_index($baseIndex, $order);
-                        $label = $displayIndex !== null ? chr(65 + $displayIndex) . '. ' : '';
-                        $correctItems[] = $label . $opt->text;
+                        $label = $displayIndex !== null ? chr(65 + $displayIndex) : '';
+                        $correctItems[] = $label;// . $opt->text;
                     }
                 }
 
