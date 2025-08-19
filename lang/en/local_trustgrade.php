@@ -273,7 +273,4 @@ $string['error_deleting_question'] = 'Error deleting question';
 $string['plugindisabled'] = 'TrustGrade plugin is disabled';
 $string['trustgradedisabled'] = 'TrustGrade is disabled for this assignment';
 
-$string['quiz_completed'] = 'Quiz Completed';
-$string['resubmit_quiz'] = 'Retake Quiz';
-
 ?>

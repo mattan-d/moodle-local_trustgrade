@@ -6,7 +6,6 @@ require_once($CFG->dirroot . '/mod/assign/lib.php');
 
 $cmid = required_param('cmid', PARAM_INT);
 $submissionid = optional_param('submissionid', 0, PARAM_INT);
-$resubmit = optional_param('resubmit', 0, PARAM_INT);
 
 $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
 $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
@@ -21,40 +20,8 @@ if (!has_capability('mod/assign:submit', $context)) {
     throw new moodle_exception('nopermission');
 }
 
-$existing_session = \local_trustgrade\quiz_session::get_session($cmid, $submissionid, $USER->id);
-$is_completed = $existing_session && $existing_session['attempt_completed'];
-
-// If quiz is completed and user is not resubmitting, show results
-if ($is_completed && !$resubmit) {
-    $PAGE->requires->js_call_amd('local_trustgrade/quiz', 'showResults', [$existing_session]);
-    $PAGE->requires->css('/local/trustgrade/quiz_styles.css');
-    
-    echo $OUTPUT->header();
-    echo html_writer::tag('h2', get_string('ai_quiz_title', 'local_trustgrade'));
-    
-    // Show completed quiz results with resubmit option
-    echo html_writer::start_div('quiz-completed-container');
-    echo html_writer::tag('h3', get_string('quiz_completed', 'local_trustgrade'));
-    echo html_writer::div('', 'quiz-results-display');
-    
-    // Resubmit button
-    $resubmit_url = new moodle_url('/local/trustgrade/quiz_interface.php', [
-        'cmid' => $cmid, 
-        'submissionid' => $submissionid, 
-        'resubmit' => 1
-    ]);
-    echo html_writer::link($resubmit_url, get_string('resubmit_quiz', 'local_trustgrade'), [
-        'class' => 'btn btn-warning',
-        'style' => 'margin-top: 20px;'
-    ]);
-    
-    echo html_writer::end_div();
-    echo $OUTPUT->footer();
-    exit;
-}
-
-// Get or create the quiz session. Force new session if resubmitting.
-$session = \local_trustgrade\quiz_session::get_or_create_session($cmid, $submissionid, $USER->id, (bool)$resubmit);
+// Get or create the quiz session. This is now the single source of truth for the quiz state.
+$session = \local_trustgrade\quiz_session::get_or_create_session($cmid, $submissionid, $USER->id);
 
 $PAGE->set_url('/local/trustgrade/quiz_interface.php', ['cmid' => $cmid, 'submissionid' => $submissionid]);
 $PAGE->set_title(get_string('ai_quiz_title', 'local_trustgrade'));
