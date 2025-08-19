@@ -1,6 +1,4 @@
-// This file is part of Moodle - http://moodle.org/
-
-const define = window.define // Declare the define variable
+// This file is part of Moodle - http://moodle.org
 
 define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification) => {
   var SubmissionProcessing = {
