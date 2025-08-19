@@ -20,16 +20,18 @@ class quiz_session {
      * @return array|null Session data or null if creation fails (e.g., no questions).
      */
     public static function get_or_create_session($cmid, $submissionid, $userid) {
-        $existing_session = self::get_session($cmid, $submissionid, $userid);
-        if ($existing_session && $existing_session['attempt_completed']) {
-            // User is resubmitting - archive the old session and create a new one
-            self::archive_existing_sessions($cmid, $submissionid, $userid);
-        } else if ($existing_session) {
-            // User has an incomplete session - return it
-            return $existing_session;
+        // First, try to get an existing session for the user.
+        $session = self::get_session($cmid, $submissionid, $userid);
+        if ($session) {
+            if (self::is_session_expired($session)) {
+                // Session expired, delete it and create a new one
+                self::delete_session($cmid, $submissionid, $userid);
+            } else {
+                return $session;
+            }
         }
 
-        // If no session exists or we archived a completed one, create a new session
+        // If no session exists or expired session was deleted, create a new one.
         global $DB;
         try {
             // Get the quiz settings and generate the questions.
@@ -57,13 +59,13 @@ class quiz_session {
             $record->integrity_violations = json_encode([]);
             $record->timecreated = time();
             $record->timemodified = time();
-            $record->archived = 0; // New field to indicate if the session is archived
+            $record->session_expires = time() + 300; // 5 minutes = 300 seconds
 
             // Insert the new record into the database.
             $record->id = $DB->insert_record('local_trustgd_quiz_sessions', $record);
 
             // Return the newly created session data.
-            return self::get_session_by_id($record->id);
+            return self::get_session($cmid, $submissionid, $userid);
 
         } catch (\Exception $e) {
             error_log('Failed to get or create quiz session: ' . $e->getMessage());
@@ -72,42 +74,22 @@ class quiz_session {
     }
     
     /**
-     * Archive existing sessions for a user/assignment to allow new attempts
+     * Get existing quiz session
      * 
      * @param int $cmid Course module ID
      * @param int $submissionid Submission ID
      * @param int $userid User ID
-     * @return bool Success status
+     * @return array|null Session data or null if not found
      */
-    private static function archive_existing_sessions($cmid, $submissionid, $userid) {
+    public static function get_session($cmid, $submissionid, $userid) {
         global $DB;
         
         try {
-            // Mark all existing sessions as archived
-            $DB->set_field('local_trustgd_quiz_sessions', 'archived', 1, [
+            $record = $DB->get_record('local_trustgd_quiz_sessions', [
                 'cmid' => $cmid,
                 'submissionid' => $submissionid,
                 'userid' => $userid
             ]);
-            
-            return true;
-        } catch (\Exception $e) {
-            error_log('Failed to archive existing sessions: ' . $e->getMessage());
-            return false;
-        }
-    }
-    
-    /**
-     * Get session by ID
-     * 
-     * @param int $session_id Session ID
-     * @return array|null Session data or null if not found
-     */
-    public static function get_session_by_id($session_id) {
-        global $DB;
-        
-        try {
-            $record = $DB->get_record('local_trustgd_quiz_sessions', ['id' => $session_id]);
             
             if (!$record) {
                 return null;
@@ -128,53 +110,7 @@ class quiz_session {
                 'integrity_violations' => json_decode($record->integrity_violations, true) ?: [],
                 'timecreated' => $record->timecreated,
                 'timemodified' => $record->timemodified,
-                'archived' => (bool)$record->archived
-            ];
-            
-        } catch (\Exception $e) {
-            error_log('Failed to get quiz session by ID: ' . $e->getMessage());
-            return null;
-        }
-    }
-
-    /**
-     * Get existing quiz session (only active, non-archived sessions)
-     * 
-     * @param int $cmid Course module ID
-     * @param int $submissionid Submission ID
-     * @param int $userid User ID
-     * @return array|null Session data or null if not found
-     */
-    public static function get_session($cmid, $submissionid, $userid) {
-        global $DB;
-        
-        try {
-            $record = $DB->get_record('local_trustgd_quiz_sessions', [
-                'cmid' => $cmid,
-                'submissionid' => $submissionid,
-                'userid' => $userid,
-                'archived' => 0  // Only get non-archived sessions
-            ]);
-            
-            if (!$record) {
-                return null;
-            }
-            
-            return [
-                'id' => $record->id,
-                'cmid' => (int)$record->cmid,
-                'submissionid' => (int)$record->submissionid,
-                'questions' => json_decode($record->questions_data, true),
-                'settings' => json_decode($record->settings_data, true),
-                'current_question' => (int)$record->current_question,
-                'answers' => json_decode($record->answers_data, true) ?: [],
-                'time_remaining' => (int)$record->time_remaining,
-                'window_blur_count' => (int)$record->window_blur_count,
-                'attempt_started' => (bool)$record->attempt_started,
-                'attempt_completed' => (bool)$record->attempt_completed,
-                'integrity_violations' => json_decode($record->integrity_violations, true) ?: [],
-                'timecreated' => $record->timecreated,
-                'timemodified' => $record->timemodified
+                'session_expires' => $record->session_expires ?? ($record->timecreated + 300)
             ];
             
         } catch (\Exception $e) {
@@ -199,8 +135,7 @@ class quiz_session {
             $record = $DB->get_record('local_trustgd_quiz_sessions', [
                 'cmid' => $cmid,
                 'submissionid' => $submissionid,
-                'userid' => $userid,
-                'archived' => 0  // Only update non-archived sessions
+                'userid' => $userid
             ]);
             
             if (!$record) {
@@ -262,8 +197,7 @@ class quiz_session {
             $record = $DB->get_record('local_trustgd_quiz_sessions', [
                 'cmid' => $cmid,
                 'submissionid' => $submissionid,
-                'userid' => $userid,
-                'archived' => 0  // Only complete non-archived sessions
+                'userid' => $userid
             ]);
             
             if (!$record) {
@@ -287,7 +221,7 @@ class quiz_session {
     }
     
     /**
-     * Check if user has already completed the quiz (only check non-archived sessions)
+     * Check if user has already completed the quiz
      * 
      * @param int $cmid Course module ID
      * @param int $submissionid Submission ID
@@ -301,8 +235,7 @@ class quiz_session {
             $record = $DB->get_record('local_trustgd_quiz_sessions', [
                 'cmid' => $cmid,
                 'submissionid' => $submissionid,
-                'userid' => $userid,
-                'archived' => 0  // Only check non-archived sessions
+                'userid' => $userid
             ]);
             
             return $record && $record->attempt_completed;
@@ -330,8 +263,7 @@ class quiz_session {
             $record = $DB->get_record('local_trustgd_quiz_sessions', [
                 'cmid' => $cmid,
                 'submissionid' => $submissionid,
-                'userid' => $userid,
-                'archived' => 0  // Only log violations for non-archived sessions
+                'userid' => $userid
             ]);
             
             if (!$record) {
@@ -370,7 +302,7 @@ class quiz_session {
         $sql = "SELECT s.*, u.firstname, u.lastname, u.email
                 FROM {local_trustgd_quiz_sessions} s
                 JOIN {user} u ON s.userid = u.id
-                WHERE s.cmid = :cmid AND s.attempt_completed = 1 AND s.archived = 0
+                WHERE s.cmid = :cmid AND s.attempt_completed = 1
                 ORDER BY u.lastname, u.firstname";
         
         try {
@@ -405,6 +337,42 @@ class quiz_session {
             return true;
         } catch (\Exception $e) {
             error_log('Failed to cleanup old quiz sessions: ' . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Check if a quiz session has expired (older than 5 minutes)
+     * 
+     * @param array $session Session data
+     * @return bool True if session has expired
+     */
+    public static function is_session_expired($session) {
+        $current_time = time();
+        $session_expires = $session['session_expires'] ?? ($session['timecreated'] + 300);
+        return $current_time > $session_expires;
+    }
+
+    /**
+     * Delete a quiz session
+     * 
+     * @param int $cmid Course module ID
+     * @param int $submissionid Submission ID
+     * @param int $userid User ID
+     * @return bool Success status
+     */
+    public static function delete_session($cmid, $submissionid, $userid) {
+        global $DB;
+        
+        try {
+            $DB->delete_records('local_trustgd_quiz_sessions', [
+                'cmid' => $cmid,
+                'submissionid' => $submissionid,
+                'userid' => $userid
+            ]);
+            return true;
+        } catch (\Exception $e) {
+            error_log('Failed to delete quiz session: ' . $e->getMessage());
             return false;
         }
     }

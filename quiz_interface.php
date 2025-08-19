@@ -28,6 +28,35 @@ $PAGE->set_title(get_string('ai_quiz_title', 'local_trustgrade'));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_context($context);
 
+// Check if quiz is already completed
+if ($session && $session['attempt_completed']) {
+    // Show completion message and exit
+    $PAGE->set_url('/local/trustgrade/quiz_interface.php', ['cmid' => $cmid, 'submissionid' => $submissionid]);
+    $PAGE->set_title(get_string('ai_quiz_title', 'local_trustgrade'));
+    $PAGE->set_heading($course->fullname);
+    $PAGE->set_context($context);
+
+    echo $OUTPUT->header();
+    echo html_writer::tag('h2', get_string('ai_quiz_title', 'local_trustgrade'));
+
+    \core\notification::add(
+        'You have already completed this assessment. Only one attempt is allowed per assignment.',
+        \core\notification::INFO
+    );
+
+    echo html_writer::div(
+        html_writer::link(
+            new moodle_url('/mod/assign/view.php', ['id' => $cmid]),
+            'Return to Assignment',
+            ['class' => 'btn btn-primary']
+        ),
+        'text-center mt-3'
+    );
+
+    echo $OUTPUT->footer();
+    exit;
+}
+
 // Check if a session could be created (e.g., if questions were available)
 if (!$session) {
     echo $OUTPUT->header();

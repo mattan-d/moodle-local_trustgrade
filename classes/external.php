@@ -540,6 +540,18 @@ class external extends \external_api {
  public static function start_quiz_attempt($cmid, $submissionid) {
      global $USER;
      self::validate_submission_context($cmid);
+     
+     $session = quiz_session::get_session($cmid, $submissionid, $USER->id);
+     if (!$session) {
+         return ['success' => false, 'error' => 'No valid quiz session found. Please resubmit to start a new session.'];
+     }
+     
+     if (quiz_session::is_session_expired($session)) {
+         // Delete expired session
+         quiz_session::delete_session($cmid, $submissionid, $USER->id);
+         return ['success' => false, 'error' => 'Quiz session has expired. Please resubmit to start a new session.'];
+     }
+     
      $success = quiz_session::update_session($cmid, $submissionid, $USER->id, ['attempt_started' => 1]);
      if ($success) {
          return ['success' => true];
@@ -566,6 +578,17 @@ class external extends \external_api {
  public static function update_quiz_session($cmid, $submissionid, $updates) {
      global $USER;
      self::validate_submission_context($cmid);
+     
+     $session = quiz_session::get_session($cmid, $submissionid, $USER->id);
+     if (!$session) {
+         return ['success' => false, 'error' => 'No valid quiz session found'];
+     }
+     
+     if (quiz_session::is_session_expired($session)) {
+         quiz_session::delete_session($cmid, $submissionid, $USER->id);
+         return ['success' => false, 'error' => 'Quiz session has expired'];
+     }
+     
      $updates_decoded = json_decode($updates, true);
      if (!$updates_decoded) {
          return ['success' => false, 'error' => 'Invalid updates data'];
