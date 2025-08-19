@@ -236,11 +236,10 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
 function local_trustgrade_has_active_task($cmid) {
     global $DB, $USER;
     
-    $active_task = $DB->get_record('local_trustgrade_task_status', [
-        'cmid' => $cmid,
-        'userid' => $USER->id,
-        'status' => ['queued', 'processing']
-    ], '*', IGNORE_MULTIPLE);
+    $sql = "SELECT * FROM {local_trustgrade_task_status} 
+            WHERE cmid = ? AND userid = ? AND status IN ('queued', 'processing')";
+    
+    $active_task = $DB->get_record_sql($sql, [$cmid, $USER->id], IGNORE_MULTIPLE);
     
     return !empty($active_task);
 }
