@@ -276,4 +276,8 @@ $string['error_deleting_question'] = 'שגיאה במחיקת השאלה';
 $string['plugindisabled'] = 'תוסף TrustGrade מושבת';
 $string['trustgradedisabled'] = 'TrustGrade מושבת למטלה זו';
 
+// Submission Processing Language Strings
+$string['processing_submission'] = 'מעבד את ההגשה שלך';
+$string['processing_submission_message'] = 'אנא המתן בזמן שאנו מעבדים את ההגשה שלך...';
+$string['processing_please_wait'] = 'אנא המתן...';
 ?>
