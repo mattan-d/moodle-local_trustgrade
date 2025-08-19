@@ -176,7 +176,10 @@ function local_trustgrade_before_standard_html_head() {
             \local_trustgrade\redirect_handler::check_and_handle_redirect($cmid);
 
             $PAGE->requires->js_call_amd('local_trustgrade/navigation_buttons', 'init', [$cmid]);
-            $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [$cmid]);
+            
+            if (local_trustgrade_has_active_task($cmid)) {
+                $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [$cmid]);
+            }
         }
     }
 
@@ -222,4 +225,22 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
     }
 
     return $data;
+}
+
+/**
+ * Check if current user has an active submission processing task
+ *
+ * @param int $cmid Course module ID
+ * @return bool True if user has queued or processing task
+ */
+function local_trustgrade_has_active_task($cmid) {
+    global $DB, $USER;
+    
+    $active_task = $DB->get_record('local_trustgrade_task_status', [
+        'cmid' => $cmid,
+        'userid' => $USER->id,
+        'status' => ['queued', 'processing']
+    ], '*', IGNORE_MULTIPLE);
+    
+    return !empty($active_task);
 }
