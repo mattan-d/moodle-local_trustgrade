@@ -191,6 +191,8 @@ function local_trustgrade_before_standard_html_head() {
 
             // Initialize disclosure using external files
             \local_trustgrade\disclosure_handler::init_disclosure($cmid);
+            
+            $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [$cmid]);
         }
     }
 }
