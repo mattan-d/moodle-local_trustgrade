@@ -49,7 +49,8 @@
                         {{/isMetPartial}}{{/isMetNo}}{{/isMetYes}}
                     </td>
                     <td class="suggestions-cell">
-                        <div class="text-muted small">{{Suggestions}}</div>
+                        {{! Use triple braces to allow HTML/markdown in suggestions }}
+                        <div class="text-muted small">{{{Suggestions}}}</div>
                     </td>
                 </tr>
                 {{/rows}}

@@ -155,7 +155,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
               return {
                 Criterion: trustgrade.escapeHtml(row["Criterion"] || ""),
                 Met: trustgrade.escapeHtml(row["Met"] || row["Met (y/n)"] || ""),
-                Suggestions: trustgrade.escapeHtml(row["Suggestions"] || ""),
+                Suggestions: row["Suggestions"] || "",
                 isMetYes: metValue === "yes" || metValue === "y" || metValue === "true",
                 isMetNo: metValue === "no" || metValue === "n" || metValue === "false",
                 isMetPartial: metValue === "partial" || metValue === "partially" || metValue === "maybe",
@@ -270,7 +270,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
         rows.forEach((r) => {
           const c = trustgrade.escapeHtml(r["Criterion"] ?? "")
           const m = trustgrade.escapeHtml(r["Met"] ?? r["Met (y/n)"] ?? "")
-          const s = trustgrade.escapeHtml(r["Suggestions"] ?? "")
+          const s = r["Suggestions"] ?? ""
           const metValue = m.toLowerCase()
 
           let metBadge = `<span class="badge bg-secondary rounded-pill">${m}</span>`
