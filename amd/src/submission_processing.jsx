@@ -1,7 +1,7 @@
 // This file is part of Moodle - http://moodle.org/
 
-var define = window.define // Declare define variable
-var M = window.M // Declare M variable
+var define = window.define // Declare the define variable
+var M = window.M // Declare the M variable
 
 define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification) => {
   var SubmissionProcessing = {
