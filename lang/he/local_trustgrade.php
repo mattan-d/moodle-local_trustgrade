@@ -1,17 +1,17 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
 
-$string['pluginname'] = 'TrustGrade';
-$string['plugin_enabled'] = 'הפעל תוסף TrustGrade';
-$string['plugin_enabled_desc'] = 'הפעל או השבת את תוסף TrustGrade באופן גלובלי. כאשר מושבת, כל הפונקציונליות של TrustGrade תוסתר מטפסי המטלות והדפים.';
-$string['trustgrade_enabled'] = 'הפעל TrustGrade למטלה זו';
-$string['trustgrade_enabled_desc'] = 'הפעל תכונות בינה מלאכותית של TrustGrade למטלה ספציפית זו. כאשר מושבת, סטודנטים לא יראו חידוני בינה מלאכותית או פונקציונליות קשורה.';
-$string['trustgrade_tab'] = 'TrustGrade';
+$string['pluginname'] = 'מדד איכות אקדמית';
+$string['plugin_enabled'] = 'הפעל תוסף מדד איכות אקדמית';
+$string['plugin_enabled_desc'] = 'הפעל או השבת את תוסף מדד איכות אקדמית באופן גלובלי. כאשר מושבת, כל הפונקציונליות של מדד איכות אקדמית תוסתר מטפסי המטלות והדפים.';
+$string['מדד איכות אקדמית_enabled'] = 'הפעל מדד איכות אקדמית למטלה זו';
+$string['מדד איכות אקדמית_enabled_desc'] = 'הפעל תכונות בינה מלאכותית של מדד איכות אקדמית למטלה ספציפית זו. כאשר מושבת, סטודנטים לא יראו חידוני בינה מלאכותית או פונקציונליות קשורה.';
+$string['מדד איכות אקדמית_tab'] = 'מדד איכות אקדמית';
 $string['check_instructions'] = 'בדוק הוראות עם בינה מלאכותית';
 $string['ai_recommendation'] = 'המלצת בינה מלאכותית';
 $string['processing'] = 'מעבד...';
 $string['no_instructions'] = 'לא נמצאו הוראות לניתוח';
-$string['trustgrade_description'] = 'השתמש בשער הבינה המלאכותית כדי לנתח ולקבל המלצות לשיפור הוראות המטלה שלך.';
+$string['מדד איכות אקדמית_description'] = 'השתמש בשער הבינה המלאכותית כדי לנתח ולקבל המלצות לשיפור הוראות המטלה שלך.';
 $string['generate_questions'] = 'צור בנק שאלות עם בינה מלאכותית';
 $string['generated_questions'] = 'שאלות שנוצרו';
 $string['generating_questions'] = 'יוצר שאלות דרך השער...';
@@ -21,8 +21,8 @@ $string['error_saving_questions'] = 'שגיאה בשמירת השאלות שנו
 $string['debug_mode'] = 'מצב ניפוי שגיאות וזיכרון מטמון';
 $string['debug_mode_desc'] =
         'הפעל מצב ניפוי שגיאות כדי לשמור תגובות השער בזיכרון מטמון ולמנוע קריאות API חוזרות. כאשר מופעל, בקשות זהות יחזירו תגובות מהמטמון במקום לקרוא לשער. זה משפר ביצועים ומפחית שימוש ב-API בזמן פיתוח ובדיקות.';
-$string['cleanup_debug_cache'] = 'נקה מטמון ניפוי שגיאות של TrustGrade';
-$string['cleanup_quiz_sessions'] = 'נקה מפגשי חידון של TrustGrade';
+$string['cleanup_debug_cache'] = 'נקה מטמון ניפוי שגיאות של מדד איכות אקדמית';
+$string['cleanup_quiz_sessions'] = 'נקה מפגשי חידון של מדד איכות אקדמית';
 $string['ai_quiz_title'] = 'חידון שנוצר על ידי בינה מלאכותית';
 $string['no_questions_available'] = 'אין שאלות זמינות למטלה זו.';
 $string['next'] = 'הבא';
@@ -273,7 +273,7 @@ $string['error_generating_questions'] = 'שגיאה ביצירת שאלות';
 $string['confirm_delete_question'] = 'האם אתה בטוח שברצונך למחוק שאלה זו? פעולה זו לא ניתנת לביטול.';
 $string['question_deleted_successfully'] = 'השאלה נמחקה בהצלחה';
 $string['error_deleting_question'] = 'שגיאה במחיקת השאלה';
-$string['plugindisabled'] = 'תוסף TrustGrade מושבת';
-$string['trustgradedisabled'] = 'TrustGrade מושבת למטלה זו';
+$string['plugindisabled'] = 'תוסף מדד איכות אקדמית מושבת';
+$string['מדד איכות אקדמיתdisabled'] = 'מדד איכות אקדמית מושבת למטלה זו';
 
 ?>
