@@ -1,4 +1,6 @@
-define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification, M) => {
+define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification) => {
+  var M = window.M
+
   var SubmissionProcessing = {
     init: function (cmid) {
       this.cmid = cmid
@@ -6,11 +8,12 @@ define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification, M) 
     },
 
     setupSubmissionProcessing: function () {
-      
-
       // Listen for form submissions
+      $('form[data-form="submission"]').on("submit", (event) => {
+        event.preventDefault()
         this.showProcessingMessage()
         this.startStatusPolling()
+      })
     },
 
     showProcessingMessage: () => {
@@ -27,7 +30,6 @@ define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification, M) 
     },
 
     startStatusPolling: function () {
-      
       var submissionId = this.getSubmissionId()
 
       if (!submissionId) {
@@ -51,8 +53,6 @@ define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification, M) 
     },
 
     checkTaskStatus: function (submissionId, callback) {
-      
-
       Ajax.call([
         {
           methodname: "local_trustgrade_check_task_status",
@@ -90,7 +90,7 @@ define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification, M) 
     },
 
     redirectToQuiz: function () {
-      var quizUrl = M.cfg.wwwroot + "/local/trustgrade/quiz_interface.php?cmid=" + this.cmid
+      var quizUrl = window.M.cfg.wwwroot + "/local/trustgrade/quiz_interface.php?cmid=" + this.cmid
       window.location.href = quizUrl
     },
 
