@@ -276,4 +276,8 @@ $string['error_deleting_question'] = 'שגיאה במחיקת השאלה';
 $string['plugindisabled'] = 'תוסף TrustGrade מושבת';
 $string['trustgradedisabled'] = 'TrustGrade מושבת למטלה זו';
 
+// Resubmit Functionality Strings
+$string['quiz_completed'] = 'החידון הושלם';
+$string['resubmit_quiz'] = 'בצע חידון שוב';
+
 ?>

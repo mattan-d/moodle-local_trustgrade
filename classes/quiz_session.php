@@ -17,13 +17,22 @@ class quiz_session {
      * @param int $cmid Course module ID
      * @param int $submissionid Submission ID
      * @param int $userid User ID
+     * @param bool $force_new_session Force creation of new session (for resubmit)
      * @return array|null Session data or null if creation fails (e.g., no questions).
      */
-    public static function get_or_create_session($cmid, $submissionid, $userid) {
-        // Archive any existing sessions first to allow fresh attempts
-        self::archive_existing_sessions($cmid, $submissionid, $userid);
+    public static function get_or_create_session($cmid, $submissionid, $userid, $force_new_session = false) {
+        if ($force_new_session) {
+            // Archive existing sessions and create a new one
+            self::archive_existing_sessions($cmid, $submissionid, $userid);
+        } else {
+            // First, try to get an existing session for the user.
+            $session = self::get_session($cmid, $submissionid, $userid);
+            if ($session) {
+                return $session;
+            }
+        }
 
-        // Create a new session
+        // If no session exists or force_new_session is true, create a new one.
         global $DB;
         try {
             // Get the quiz settings and generate the questions.
@@ -81,7 +90,8 @@ class quiz_session {
             $DB->set_field('local_trustgd_quiz_sessions', 'archived', 1, [
                 'cmid' => $cmid,
                 'submissionid' => $submissionid,
-                'userid' => $userid
+                'userid' => $userid,
+                'archived' => 0  // Only archive currently active sessions
             ]);
             
             return true;
