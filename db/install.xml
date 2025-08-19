@@ -87,6 +87,7 @@
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="enabled" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
         <FIELD NAME="questions_to_generate" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="5" SEQUENCE="false"/>
         <FIELD NAME="total_quiz_questions" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="5" SEQUENCE="false"/>
         <FIELD NAME="instructor_questions" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="3" SEQUENCE="false"/>

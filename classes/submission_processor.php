@@ -28,7 +28,7 @@ class submission_processor {
         $submission_files = $submission_content['files'] ?? [];
         
         if (empty($submission_text) && empty($submission_files)) {
-            return ['error' => 'No submission content found to analyze'];
+            return ['error' => 'Either submission text or at least one file is required'];
         }
         
         // Validate questions count
@@ -290,6 +290,7 @@ class submission_processor {
                 $content['files'][] = [
                     'filename' => $file->get_filename(),
                     'mimetype' => $file->get_mimetype(),
+                    'size' => $file->get_filesize(),
                     'content' => base64_encode($file_content)
                 ];
             }

@@ -312,7 +312,15 @@ define([
    */
   function autoGradeByQuizScore() {
     var $button = $("#auto-grade-by-quiz")
-    $button.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Auto-grading...')
+
+    Str.get_string("auto_grading_progress", "local_trustgrade")
+      .then((loadingText) => {
+        $button.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> ' + loadingText)
+      })
+      .catch(() => {
+        // Fallback if string loading fails
+        $button.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Auto-grading...')
+      })
 
     var promise = Ajax.call([
       {
@@ -333,7 +341,13 @@ define([
               gradesObj = JSON.parse(response.grades)
             }
           } catch (e) {
-            console.error("Error parsing grades JSON:", e)
+            Str.get_string("error_parsing_grades", "local_trustgrade")
+              .then((errorText) => {
+                console.error(errorText + ":", e)
+              })
+              .catch(() => {
+                console.error("Error parsing grades JSON:", e)
+              })
             gradesObj = {}
           }
 
@@ -358,20 +372,45 @@ define([
           pendingGrades.clear()
           updatePendingGradesDisplay()
 
-          Notification.addNotification({
-            message: response.graded_count + " students auto-graded based on quiz scores",
-            type: "success",
-          })
+          Str.get_string("auto_grade_success", "local_trustgrade", response.graded_count)
+            .then((successText) => {
+              Notification.addNotification({
+                message: successText,
+                type: "success",
+              })
+            })
+            .catch(() => {
+              // Fallback if string loading fails
+              Notification.addNotification({
+                message: response.graded_count + " students auto-graded based on quiz scores",
+                type: "success",
+              })
+            })
         } else {
-          Notification.addNotification({
-            message: response.message || "Error auto-grading students",
-            type: "error",
-          })
+          Str.get_string("auto_grade_error", "local_trustgrade")
+            .then((errorText) => {
+              Notification.addNotification({
+                message: response.message || errorText.replace("{$a}", "students"),
+                type: "error",
+              })
+            })
+            .catch(() => {
+              Notification.addNotification({
+                message: response.message || "Error auto-grading students",
+                type: "error",
+              })
+            })
         }
       })
       .fail(Notification.exception)
       .always(() => {
-        $button.prop("disabled", false).html('<i class="fa fa-magic"></i> Auto-grade by Quiz Score')
+        Str.get_string("auto_grade_button_text", "local_trustgrade")
+          .then((buttonText) => {
+            $button.prop("disabled", false).html('<i class="fa fa-magic"></i> ' + buttonText)
+          })
+          .catch(() => {
+            $button.prop("disabled", false).html('<i class="fa fa-magic"></i> Auto-grade by Quiz Score')
+          })
       })
   }
 
