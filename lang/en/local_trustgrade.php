@@ -2,6 +2,10 @@
 // This file is part of Moodle - http://moodle.org/
 
 $string['pluginname'] = 'TrustGrade';
+$string['plugin_enabled'] = 'Enable TrustGrade Plugin';
+$string['plugin_enabled_desc'] = 'Enable or disable the TrustGrade plugin globally. When disabled, all TrustGrade functionality will be hidden from assignment forms and pages.';
+$string['trustgrade_enabled'] = 'Enable TrustGrade for this assignment';
+$string['trustgrade_enabled_desc'] = 'Enable TrustGrade AI features for this specific assignment. When disabled, students will not see AI quizzes or related functionality.';
 $string['trustgrade_tab'] = 'TrustGrade';
 $string['check_instructions'] = 'Check instructions with AI';
 $string['ai_recommendation'] = 'AI Recommendation';
@@ -31,12 +35,16 @@ $string['seconds'] = 'seconds';
 // Quiz Settings
 $string['quiz_settings_title'] = 'Quiz Settings';
 $string['questions_to_generate'] = 'Number of questions to generate';
+$string['questions_to_generate_help'] = 'Total number of questions to include in the quiz';
 $string['question_distribution'] = 'Question Source Distribution';
 $string['instructor_questions'] = 'Questions from instructor bank';
+$string['instructor_questions_help'] = 'Number of questions to select from the instructor question bank';
 $string['submission_questions'] = 'Questions based on submissions';
+$string['submission_questions_help'] = 'Number of questions to generate based on student submissions';
 $string['randomize_answers'] = 'Randomize answer order';
 $string['randomize_answers_desc'] = 'Randomly shuffle the order of answer choices for multiple choice questions.';
 $string['time_per_question'] = 'Time per question';
+$string['time_per_question_help'] = 'Maximum time allowed per question in seconds';
 $string['show_countdown'] = 'Show countdown timer';
 $string['show_countdown_desc'] = 'Display a countdown timer for each question. When time expires, the quiz automatically moves to the next question.';
 
@@ -157,6 +165,9 @@ $string['auto_grade_success'] = 'Successfully auto-graded {$a} students based on
 $string['auto_grade_no_grades'] = 'No grades could be applied. Check that students have completed quizzes.';
 $string['auto_grade_error'] = 'Error during auto-grading: {$a}';
 $string['auto_grade_confirmation'] = 'This will automatically set grades based on quiz scores for all students. Existing grades will be overwritten. Continue?';
+$string['auto_grading_progress'] = 'Auto-grading...';
+$string['auto_grade_button_text'] = 'Auto-grade by Quiz Score';
+$string['error_parsing_grades'] = 'Error parsing grades JSON';
 
 // Final Grade
 $string['final_grade'] = 'Final Grade';
@@ -192,7 +203,7 @@ $string['quiz_completed_header'] = 'Quiz Completed';
 $string['quiz_completed_message'] = 'Your formal assessment has been submitted successfully and cannot be retaken.';
 $string['your_answer'] = 'Your answer: {$a}';
 $string['correct_answer_was'] = 'Correct answer: {$a}';
-$string['explanation'] = 'Explanation: {$a}';
+$string['explanation'] = 'Explanation';
 $string['final_grade_notice'] = 'This is your final grade for this assessment.';
 $string['integrity_report_header'] = 'Integrity Report';
 $string['integrity_recorded'] = 'This information has been recorded for review.';
@@ -223,3 +234,48 @@ $string['final_score'] = 'Final Score: {$a->score}/{$a->total} ({$a->percentage}
 $string['window_focus_lost'] = 'Window focus was lost {$a} time(s) during the quiz.';
 $string['exceeded_window_switches'] = 'You have exceeded the maximum allowed window switches ({$a}). The quiz has been terminated.';
 $string['setting_updated_success'] = 'Setting "{$a}" updated successfully.';
+
+// Localization strings for recommendation rendering
+$string['criteria_evaluation'] = 'Criteria Evaluation';
+$string['criterion'] = 'Criterion';
+$string['met'] = 'Met';
+$string['suggestions'] = 'Suggestions';
+$string['evaluation'] = 'Evaluation';
+$string['improved_assignment'] = 'Improved Assignment';
+$string['no_criteria_provided'] = 'No criteria provided.';
+$string['recommendation_error'] = 'Error displaying recommendation.';
+
+$string['no_instructions_or_files'] = 'Either instructions or at least one file must be provided for analysis';
+
+// Additional strings for code functionality
+$string['type'] = 'Type';
+$string['options'] = 'Options';
+$string['text'] = 'Text';
+$string['entertext'] = 'Enter text';
+$string['points_help'] = 'Points awarded for this question';
+$string['level'] = 'Level';
+$string['optiontext'] = 'Option text';
+$string['option_placeholder'] = 'Enter option text...';
+$string['correct_answer_required'] = 'At least one correct answer is required';
+
+$string['save_assignment_first'] = 'Please save the assignment first before generating questions';
+
+// Question Bank Functionality Strings
+$string['question_bank'] = 'Question Bank';
+$string['question_bank_description'] = 'Manage your AI-generated questions. You can view, edit, delete existing questions, or generate new ones.';
+$string['no_questions_found'] = 'No questions found. Generate some questions to get started.';
+$string['question_text'] = 'Question Text';
+$string['questions_generated_successfully'] = 'Questions generated successfully';
+$string['error_generating_questions'] = 'Error generating questions';
+$string['confirm_delete_question'] = 'Are you sure you want to delete this question? This action cannot be undone.';
+$string['question_deleted_successfully'] = 'Question deleted successfully';
+$string['error_deleting_question'] = 'Error deleting question';
+$string['plugindisabled'] = 'TrustGrade plugin is disabled';
+$string['trustgradedisabled'] = 'TrustGrade is disabled for this assignment';
+
+// Submission Processing Language Strings
+$string['processing_submission'] = 'Processing Your Submission';
+$string['processing_submission_message'] = 'Please wait while we process your assignment submission...';
+$string['processing_please_wait'] = 'Please wait...';
+
+?>

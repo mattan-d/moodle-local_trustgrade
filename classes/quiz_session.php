@@ -26,45 +26,8 @@ class quiz_session {
             return $session;
         }
 
-        // If no session exists, create a new one.
-        global $DB;
-        try {
-            // Get the quiz settings and generate the questions.
-            $settings = quiz_settings::get_settings($cmid);
-            $questions = submission_processor::get_quiz_questions_with_settings($cmid, $submissionid, $settings);
-
-            // If no questions are available, we cannot create a session.
-            if (empty($questions)) {
-                return null;
-            }
-
-            // Prepare the new session record.
-            $record = new \stdClass();
-            $record->cmid = $cmid;
-            $record->submissionid = $submissionid;
-            $record->userid = $userid;
-            $record->questions_data = json_encode($questions);
-            $record->settings_data = json_encode($settings);
-            $record->current_question = 0;
-            $record->answers_data = json_encode([]);
-            $record->time_remaining = $settings['time_per_question'] ?? 15;
-            $record->window_blur_count = 0;
-            $record->attempt_started = 0; // Attempt is created but not officially started by the user yet.
-            $record->attempt_completed = 0;
-            $record->integrity_violations = json_encode([]);
-            $record->timecreated = time();
-            $record->timemodified = time();
-
-            // Insert the new record into the database.
-            $record->id = $DB->insert_record('local_trustgd_quiz_sessions', $record);
-
-            // Return the newly created session data.
-            return self::get_session($cmid, $submissionid, $userid);
-
-        } catch (\Exception $e) {
-            error_log('Failed to get or create quiz session: ' . $e->getMessage());
-            return null;
-        }
+        // If no session exists, return null.
+        return null;
     }
     
     /**
@@ -331,6 +294,63 @@ class quiz_session {
         } catch (\Exception $e) {
             error_log('Failed to cleanup old quiz sessions: ' . $e->getMessage());
             return false;
+        }
+    }
+    
+    /**
+     * Create a new quiz session specifically when submission is updated
+     * This is the only method that should create new quiz sessions
+     *
+     * @param int $cmid Course module ID
+     * @param int $submissionid Submission ID
+     * @param int $userid User ID
+     * @return array|null Session data or null if creation fails
+     */
+    public static function create_session_on_submission_update($cmid, $submissionid, $userid) {
+        global $DB;
+        
+        try {
+            $DB->delete_records('local_trustgd_quiz_sessions', [
+                'cmid' => $cmid,
+                'submissionid' => $submissionid,
+                'userid' => $userid
+            ]);
+
+            // Get the quiz settings and generate the questions.
+            $settings = quiz_settings::get_settings($cmid);
+            $questions = submission_processor::get_quiz_questions_with_settings($cmid, $submissionid, $settings);
+
+            // If no questions are available, we cannot create a session.
+            if (empty($questions)) {
+                return null;
+            }
+
+            // Prepare the new session record.
+            $record = new \stdClass();
+            $record->cmid = $cmid;
+            $record->submissionid = $submissionid;
+            $record->userid = $userid;
+            $record->questions_data = json_encode($questions);
+            $record->settings_data = json_encode($settings);
+            $record->current_question = 0;
+            $record->answers_data = json_encode([]);
+            $record->time_remaining = $settings['time_per_question'] ?? 15;
+            $record->window_blur_count = 0;
+            $record->attempt_started = 0; // Attempt is created but not officially started by the user yet.
+            $record->attempt_completed = 0;
+            $record->integrity_violations = json_encode([]);
+            $record->timecreated = time();
+            $record->timemodified = time();
+
+            // Insert the new record into the database.
+            $record->id = $DB->insert_record('local_trustgd_quiz_sessions', $record);
+
+            // Return the newly created session data.
+            return self::get_session($cmid, $submissionid, $userid);
+
+        } catch (\Exception $e) {
+            error_log('Failed to create quiz session on submission update: ' . $e->getMessage());
+            return null;
         }
     }
 }
