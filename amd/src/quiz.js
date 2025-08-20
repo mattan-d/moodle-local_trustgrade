@@ -1,5 +1,7 @@
 // This file is part of Moodle - http://moodle.org/
 
+const define = window.define // Declare the define variable
+
 define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notification, Str) => {
   var Quiz = {
     session: null,
@@ -359,12 +361,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         Str.get_string("enter_answer_placeholder", "local_trustgrade"),
       ]).then((strings) => {
         var progress = Math.round(((index + 1) / this.questions.length) * 100)
-        var bloomsLevel =
-          (question &&
-            question.metadata &&
-            (question.metadata.blooms_level || question.metadata.blooms || question.metadata.bloomsLevel)) ||
-          question.difficulty ||
-          "medium"
         var html = `<div class="quiz-progress mb-3">
           <div class="progress">
             <div class="progress-bar bg-primary" style="width: ${progress}%"></div>
@@ -376,8 +372,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
             <span class="question-source badge ${question.source === "instructor" ? "badge-primary" : "badge-success"}">
               ${question.source === "instructor" ? strings[2] : strings[3]}
             </span>
-            <span class="question-difficulty badge badge-secondary">${bloomsLevel}</span>
-            <span class="question-points">${question.points || 10} points</span>
           </div>
           <div class="alert alert-info">
             <i class="fa fa-info-circle"></i> 
@@ -616,22 +610,21 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
               <span class="result-status ${isCorrect ? "text-success" : "text-danger"}">
                 ${isCorrect ? `✓ ${strings[2]}` : `✗ ${strings[3]}`}
               </span>
-              <span class="result-points">${isCorrect ? points : 0}/${points} points</span>
             </div>
             <p class="question-text">${this.getQuestionText(question)}</p>`
 
           // Show the user's answer text
           if (question.type === "multiple_choice") {
-            var userAnswerText = strings[6]
+            var mcAnswerText = strings[6]
             if (
               userAnswer !== undefined &&
               userAnswer !== null &&
               question.options &&
               question.options[Number(userAnswer)] !== undefined
             ) {
-              userAnswerText = this.getOptionText(question.options[Number(userAnswer)])
+              mcAnswerText = this.getOptionText(question.options[Number(userAnswer)])
             }
-            resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswerText)}</strong></p>`
+            resultsHtml += `<p><strong>${strings[4].replace("{$a}", mcAnswerText)}</strong></p>`
 
             // Show the explanation corresponding to the selected answer (per-answer explanation)
             var explanationText = this.getOptionExplanation(question, Number(userAnswer))
@@ -639,8 +632,8 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
               resultsHtml += `<div class="explanation"><strong>${strings[7]}:</strong> ${explanationText}</div>`
             }
           } else if (question.type === "true_false") {
-            var userAnswerText = userAnswer !== undefined ? (userAnswer ? strings[9] : strings[10]) : strings[6]
-            resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswerText)}</strong></p>`
+            var tfAnswerText = userAnswer !== undefined ? (userAnswer ? strings[9] : strings[10]) : strings[6]
+            resultsHtml += `<p><strong>${strings[4].replace("{$a}", tfAnswerText)}</strong></p>`
 
             // Attempt to show a per-answer explanation if provided in a map or options
             var tfExplanation = ""
