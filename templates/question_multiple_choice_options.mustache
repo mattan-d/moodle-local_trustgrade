@@ -1,0 +1,24 @@
+{{!
+    @template local_trustgrade/question_multiple_choice_options
+
+    Multiple choice options template for question editor.
+
+    Context variables required for this template:
+    * questionIndex - The index of the question
+    * options - Array of option objects with text, isCorrect, explanation
+}}
+<div class="multiple-choice-options">
+    <label>{{#str}}options, local_trustgrade{{/str}}:</label>
+    {{#options}}
+    <div class="option-row">
+        <div class="form-check">
+            <input class="form-check-input correct-answer-radio" type="radio" name="correct_answer_{{questionIndex}}" value="{{index}}" {{#isCorrect}}checked{{/isCorrect}}>
+            <input type="text" class="form-control option-text-input" placeholder="{{optionLabel}}" value="{{text}}">
+        </div>
+        <div class="form-group mt-2">
+            <label class="form-label">{{#str}}explanation, local_trustgrade{{/str}}</label>
+            <textarea class="form-control option-explanation-input" rows="2" placeholder="{{#str}}enter_explanation_option, local_trustgrade{{/str}}">{{explanation}}</textarea>
+        </div>
+    </div>
+    {{/options}}
+</div>
