@@ -34,7 +34,7 @@ class observer {
      * @param \mod_assign\event\assessable_submitted $event
      */
     public static function assessable_submitted(\mod_assign\event\assessable_submitted $event) {
-        self::process_submission($event);
+        self::process_assessable_submission($event);
     }
 
     /**
@@ -105,6 +105,77 @@ class observer {
         } catch (\Exception $e) {
             // Log error but don't break the submission process
             error_log('TrustGrade submission processing error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Process assessable submission and generate AI questions
+     *
+     * @param \mod_assign\event\assessable_submitted $event
+     */
+    private static function process_assessable_submission(\mod_assign\event\assessable_submitted $event) {
+        global $DB;
+
+        try {
+            $eventdata = $event->get_data();
+            
+            // Map event data fields correctly for assessable_submitted
+            $submission_id = $eventdata['objectid']; // objectid is the submission ID
+            $assignment_id = $eventdata['contextinstanceid']; // contextinstanceid is the assignment ID
+            $user_id = $eventdata['userid'];
+            $context = $event->get_context();
+
+            // Get course module
+            $cm = get_coursemodule_from_id('assign', $assignment_id);
+            if (!$cm) {
+                return;
+            }
+
+            // Get submission data
+            $submission = $DB->get_record('assign_submission', ['id' => $submission_id]);
+            if (!$submission) {
+                return;
+            }
+
+            // Get assignment data
+            $assignment = $DB->get_record('assign', ['id' => $submission->assignment]);
+            if (!$assignment) {
+                return;
+            }
+
+            // Get quiz settings to determine how many submission questions to generate
+            $quiz_settings = \local_trustgrade\quiz_settings::get_settings($cm->id);
+            $questions_to_generate = $quiz_settings['submission_questions'];
+
+            // Extract submission content (text and files)
+            $submission_content = submission_processor::extract_submission_content($submission, $context);
+
+            if (empty($submission_content['text']) && empty($submission_content['files'])) {
+                return; // No content to analyze
+            }
+
+            $assignment_instructions = strip_tags($assignment->intro ?? '');
+
+            // Generate questions based on submission using the configured count
+            $result = submission_processor::generate_submission_questions_with_count(
+                $submission_content,
+                $assignment_instructions,
+                $questions_to_generate
+            );
+
+            if ($result['success']) {
+                // Save submission-based questions
+                submission_processor::save_submission_questions($submission_id, $cm->id, $result['questions']);
+
+                self::create_quiz_session_for_submission($cm->id, $submission_id, $user_id);
+
+                // Set session flag to redirect to quiz
+                self::set_quiz_redirect_flag($cm->id, $submission_id);
+            }
+
+        } catch (\Exception $e) {
+            // Log error but don't break the submission process
+            error_log('TrustGrade assessable submission processing error: ' . $e->getMessage());
         }
     }
 
