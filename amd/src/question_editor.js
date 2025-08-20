@@ -393,17 +393,15 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       }))
 
       const options = []
-      if (type === "multiple_choice") {
-        for (let i = 0; i < 4; i++) {
-          const opt = question.options[i] || { text: "", is_correct: i === 0, explanation: "" }
-          options.push({
-            index: i,
-            text: opt.text,
-            isCorrect: opt.is_correct,
-            explanation: opt.explanation,
-            optionLabel: `Option ${String.fromCharCode(65 + i)}`,
-          })
-        }
+      for (let i = 0; i < 4; i++) {
+        const opt = question.options[i] || { text: "", is_correct: i === 0, explanation: "" }
+        options.push({
+          index: i,
+          text: opt.text,
+          isCorrect: opt.is_correct,
+          explanation: opt.explanation,
+          optionLabel: `Option ${String.fromCharCode(65 + i)}`,
+        })
       }
 
       return {
