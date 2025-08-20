@@ -1,4 +1,6 @@
-// This file is part of Moodle - http://moodle.org
+// This file is part of Moodle - http://moodle.org/
+
+const define = window.define // Declare the define variable
 
 define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notification, Str) => {
   var Quiz = {
@@ -368,12 +370,12 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         <div class="question-container">
           <div class="question-header d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-              <span class="question-number me-3"><strong>Question ${index + 1}</strong></span>
-              <span class="question-timer-inline"></span>
+              <span class="question-number me-3"><strong>${strings[1]}</strong></span>
+              <span class="question-source badge ${question.source === "instructor" ? "badge-primary" : "badge-success"}">
+                ${question.source === "instructor" ? strings[2] : strings[3]}
+              </span>
             </div>
-            <span class="question-source badge ${question.source === "instructor" ? "badge-primary" : "badge-success"}">
-              ${question.source === "instructor" ? strings[2] : strings[3]}
-            </span>
+            <div class="question-timer-container"></div>
           </div>
           <div class="alert alert-info">
             <i class="fa fa-info-circle"></i> 
@@ -429,6 +431,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         this.timeRemaining = this.settings.time_per_question
       }
       this.updateTimerDisplay()
+      $(".question-timer-container").show()
       this.timer = setInterval(() => {
         this.timeRemaining--
         this.updateTimerDisplay()
@@ -444,6 +447,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         clearInterval(this.timer)
         this.timer = null
       }
+      $(".question-timer-container").hide()
     },
 
     updateTimerDisplay: function () {
@@ -452,10 +456,10 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       var timeString = minutes + ":" + (seconds < 10 ? "0" : "") + seconds
       Str.get_string("time_remaining", "local_trustgrade", timeString).then((message) => {
         var timerClass = this.timeRemaining <= 5 ? "timer-warning" : ""
-        var timerHtml = `<span class="timer-display-inline ${timerClass}">
+        var timerHtml = `<div class="timer-display ${timerClass}">
                           <i class="fa fa-clock-o"></i> ${message}
-                        </span>`
-        $(".question-timer-inline").html(timerHtml)
+                        </div>`
+        $(".question-timer-container").html(timerHtml)
       })
     },
 
@@ -613,6 +617,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
             </div>
             <p class="question-text">${this.getQuestionText(question)}</p>`
 
+          // Show the user's answer text
           if (question.type === "multiple_choice") {
             var mcAnswerText = strings[6]
             if (
@@ -625,6 +630,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
             }
             resultsHtml += `<p><strong>${strings[4].replace("{$a}", mcAnswerText)}</strong></p>`
 
+            // Show the explanation corresponding to the selected answer (per-answer explanation)
             var explanationText = this.getOptionExplanation(question, Number(userAnswer))
             if (explanationText) {
               resultsHtml += `<div class="explanation"><strong>${strings[7]}:</strong> ${explanationText}</div>`
@@ -633,6 +639,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
             var tfAnswerText = userAnswer !== undefined ? (userAnswer ? strings[9] : strings[10]) : strings[6]
             resultsHtml += `<p><strong>${strings[4].replace("{$a}", tfAnswerText)}</strong></p>`
 
+            // Attempt to show a per-answer explanation if provided in a map or options
             var tfExplanation = ""
             if (question.explanations && typeof question.explanations === "object") {
               if (userAnswer === true || userAnswer === "true" || userAnswer === 1 || userAnswer === "1") {
@@ -643,6 +650,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
                   question.explanations.false || question.explanations["0"] || question.explanations[0] || ""
               }
             } else if (Array.isArray(question.options) && question.options.length === 2) {
+              // If options are objects, try to read explanation
               var idx = userAnswer === true || userAnswer === "true" || userAnswer === 1 || userAnswer === "1" ? 1 : 0
               if (
                 question.options[idx] &&
@@ -657,7 +665,10 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
             }
           } else if (question.type === "short_answer") {
             resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswer || strings[6])}</strong></p>`
+            // No per-answer explanation for short answer in the new pattern
           }
+
+          // IMPORTANT CHANGE: Do NOT show the "Correct answer was" line.
 
           resultsHtml += `</div>`
         })
@@ -698,6 +709,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       $(".quiz-content").hide()
       $(".quiz-navigation").hide()
       $(".question-counter").hide()
+      $(".question-timer-container").hide()
       $(".quiz-results").html(resultsHtml).show()
     },
 
@@ -724,6 +736,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         $(".quiz-content").html(violationHtml)
         $(".quiz-navigation").hide()
         $(".question-counter").hide()
+        $(".question-timer-container").hide()
         this.logIntegrityViolation("integrity_violation", {
           violation_type: "excessive_window_blur",
           window_blur_count: this.windowBlurCount,
