@@ -369,8 +369,9 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         </div>
         <div class="question-container">
           <div class="question-header d-flex justify-content-between align-items-center">
+                        <span class="question-number me-3"><strong>${strings[1]}</strong></span>
             <div class="d-flex align-items-center">
-              <span class="question-number me-3"><strong>${strings[1]}</strong></span>
+          
               <span class="question-source badge ${question.source === "instructor" ? "badge-primary" : "badge-success"}">
                 ${question.source === "instructor" ? strings[2] : strings[3]}
               </span>
