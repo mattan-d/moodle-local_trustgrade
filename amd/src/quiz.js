@@ -140,7 +140,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
     startAutoSave: function () {
       this.autoSaveInterval = setInterval(() => {
         this.saveSessionState()
-      }, 10000)
+      }, 2000)
     },
 
     saveSessionState: function () {
