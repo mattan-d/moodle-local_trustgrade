@@ -1,5 +1,6 @@
 // This file is part of Moodle - http://moodle.org/
 
+const define = window.define // Declare the define variable
 
 define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"], (
   $,
@@ -719,9 +720,30 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
     },
 
     showIntegrityViolation: function () {
+      this.saveSessionState()
+
       this.attemptCompleted = true
       this.stopTimer()
       if (this.autoSaveInterval) clearInterval(this.autoSaveInterval)
+
+      var completionUpdates = {
+        current_question: this.currentQuestion,
+        answers: this.answers,
+        time_remaining: this.timeRemaining,
+        window_blur_count: this.windowBlurCount,
+        attempt_completed: true,
+      }
+
+      Ajax.call([
+        {
+          methodname: "local_trustgrade_update_quiz_session",
+          args: {
+            cmid: this.cmid,
+            submissionid: this.submissionid,
+            updates: JSON.stringify(completionUpdates),
+          },
+        },
+      ])
 
       Promise.all([
         Str.get_string("integrity_violation_header", "local_trustgrade"),
