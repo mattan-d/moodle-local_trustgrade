@@ -1,7 +1,14 @@
 // This file is part of Moodle - http://moodle.org/
 
+const define = window.define // Declare the define variable
 
-define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notification, Str) => {
+define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"], (
+  $,
+  Ajax,
+  Notification,
+  Str,
+  Templates,
+) => {
   var Quiz = {
     session: null,
     questions: [],
@@ -69,31 +76,30 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         Str.get_string("cannot_restart_notice", "local_trustgrade"),
         Str.get_string("understand_start_quiz", "local_trustgrade"),
       ]).then((strings) => {
-        var warningHtml = `
-          <div class="quiz-integrity-warning alert alert-warning">
-            <h4><i class="fa fa-exclamation-triangle"></i> ${strings[0]}</h4>
-            <p><strong>${strings[1]}</strong></p>
-            <ul>
-              <li><strong>${strings[2]}</strong></li>
-              <li><strong>${strings[3]}</strong></li>
-              <li><strong>${strings[4]}</strong></li>
-              <li><strong>${strings[5]}</strong></li>
-              <li><strong>${strings[6]}</strong></li>
-              <li><strong>${strings[7]}</strong></li>
-              <li><strong>${strings[8]}</strong></li>
-            </ul>
-            <p class="text-danger"><strong>${strings[9]}</strong></p>
-            <div class="text-center mt-3">
-              <button id="start-quiz-btn" class="btn btn-danger btn-lg">
-                <i class="fa fa-play"></i> ${strings[10]}
-              </button>
-            </div>
-          </div>
-        `
-        $(".quiz-content").html(warningHtml)
-        $(".question-counter").hide()
-        $(".quiz-navigation").hide()
-        this.bindStartEvent()
+        var templateContext = {
+          title: strings[0],
+          subtitle: strings[1],
+          rules: [
+            strings[2], // one_attempt_only
+            strings[3], // no_going_back
+            strings[4], // no_restarts
+            strings[5], // time_limits
+            strings[6], // no_cheating
+            strings[7], // final_grade
+            strings[8], // stay_focused
+          ],
+          notice: strings[9],
+          button_text: strings[10],
+        }
+
+        Templates.render("local_trustgrade/quiz_integrity_warning", templateContext)
+          .then((html) => {
+            $(".quiz-content").html(html)
+            $(".question-counter").hide()
+            $(".quiz-navigation").hide()
+            this.bindStartEvent()
+          })
+          .catch(Notification.exception)
       })
     },
 

@@ -1,0 +1,27 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Template for displaying the quiz integrity warning before starting a quiz attempt.
+
+    Context variables:
+    * title - The main warning title
+    * subtitle - Read carefully instruction
+    * rules - Array of warning rules
+    * notice - Final notice about not being able to restart
+    * button_text - Start quiz button text
+}}
+<div class="quiz-integrity-warning alert alert-warning">
+    <h4><i class="fa fa-exclamation-triangle"></i> {{title}}</h4>
+    <p><strong>{{subtitle}}</strong></p>
+    <ul>
+        {{#rules}}
+        <li><strong>{{.}}</strong></li>
+        {{/rules}}
+    </ul>
+    <p class="text-danger"><strong>{{notice}}</strong></p>
+    <div class="text-center mt-3">
+        <button id="start-quiz-btn" class="btn btn-danger btn-lg">
+            <i class="fa fa-play"></i> {{button_text}}
+        </button>
+    </div>
+</div>
