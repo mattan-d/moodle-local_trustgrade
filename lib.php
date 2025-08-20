@@ -24,7 +24,8 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         // Get current settings
         $current_settings = \local_trustgrade\quiz_settings::get_settings($cmid);
 
-        $default_enabled = ($cmid > 0) ? ($current_settings['enabled'] ? 1 : 0) : (get_config('local_trustgrade', 'plugin_enabled') ? 1 : 0);
+        $default_enabled =
+                ($cmid > 0) ? ($current_settings['enabled'] ? 1 : 0) : (get_config('local_trustgrade', 'plugin_enabled') ? 1 : 0);
 
         $mform->addElement('advcheckbox', 'trustgrade_enabled',
                 get_string('trustgrade_enabled', 'local_trustgrade'),
@@ -180,7 +181,7 @@ function local_trustgrade_before_standard_html_head() {
     }
 
     // Handle disclosure for assignment submission pages
-    if ($PAGE->pagetype === 'mod-assign-editsubmission') {
+    if ($PAGE->pagetype === 'mod-assign-editsubmission' || $PAGE->pagetype === 'mod-assign-submit') {
         $cmid = optional_param('id', 0, PARAM_INT);
 
         if ($cmid > 0) {
@@ -191,7 +192,7 @@ function local_trustgrade_before_standard_html_head() {
 
             // Initialize disclosure using external files
             \local_trustgrade\disclosure_handler::init_disclosure($cmid);
-            
+
             $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [$cmid]);
         }
     }
