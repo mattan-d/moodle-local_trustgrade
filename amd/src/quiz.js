@@ -1,5 +1,7 @@
 // This file is part of Moodle - http://moodle.org/
 
+const define = window.define // Declare the define variable
+
 define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"], (
   $,
   Ajax,
@@ -721,6 +723,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       this.attemptCompleted = true
       this.stopTimer()
       if (this.autoSaveInterval) clearInterval(this.autoSaveInterval)
+
       Promise.all([
         Str.get_string("integrity_violation_header", "local_trustgrade"),
         Str.get_string("quiz_flagged", "local_trustgrade"),
@@ -728,24 +731,27 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         Str.get_string("incident_logged", "local_trustgrade"),
         Str.get_string("progress_saved_cannot_continue", "local_trustgrade"),
       ]).then((strings) => {
-        var violationHtml = `
-          <div class="integrity-violation alert alert-danger">
-            <h2><i class="fa fa-ban"></i> ${strings[0]}</h2>
-            <p><strong>${strings[1]}</strong></p>
-            <p>${strings[2]}</p>
-            <p>${strings[3]}</p>
-            <p><strong>${strings[4]}</strong></p>
-          </div>
-        `
-        $(".quiz-content").html(violationHtml)
-        $(".quiz-navigation").hide()
-        $(".question-counter").hide()
-        $(".question-timer-container").hide()
-        this.logIntegrityViolation("integrity_violation", {
-          violation_type: "excessive_window_blur",
-          window_blur_count: this.windowBlurCount,
-          current_question: this.currentQuestion,
-        })
+        var templateContext = {
+          title: strings[0],
+          flagged_message: strings[1],
+          exceeded_message: strings[2],
+          logged_message: strings[3],
+          progress_message: strings[4],
+        }
+
+        Templates.render("local_trustgrade/quiz_integrity_violation", templateContext)
+          .then((html) => {
+            $(".quiz-content").html(html)
+            $(".quiz-navigation").hide()
+            $(".question-counter").hide()
+            $(".question-timer-container").hide()
+            this.logIntegrityViolation("integrity_violation", {
+              violation_type: "excessive_window_blur",
+              window_blur_count: this.windowBlurCount,
+              current_question: this.currentQuestion,
+            })
+          })
+          .catch(Notification.exception)
       })
     },
   }
