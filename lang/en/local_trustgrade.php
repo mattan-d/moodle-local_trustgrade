@@ -188,6 +188,96 @@ $string['confirm_delete_question_message'] = 'Are you sure you want to delete th
 $string['question_deleted_success'] = 'Question deleted successfully';
 $string['ai_quiz_report'] = 'AI Quiz Report';
 
+// JavaScript UI Strings
+$string['instructor_question'] = 'Instructor Question';
+$string['based_on_submission'] = 'Based on Your Submission';
+$string['progress_auto_saved'] = 'Your progress is automatically saved. Refreshing the page will resume from this question.';
+$string['next_question'] = 'Next Question →';
+$string['submit_final_answers'] = 'Submit Final Answers';
+$string['provide_answer_warning'] = 'Please provide an answer before continuing. Remember, you cannot return to this question later.';
+$string['quiz_started_notice'] = 'Quiz started. Remember: you cannot go back to previous questions or restart this assessment.';
+$string['failed_start_session'] = 'Failed to start quiz session';
+$string['dev_tools_blocked'] = 'Developer tools access is not allowed during the quiz.';
+$string['quiz_progress_saved'] = 'Your quiz progress is automatically saved. The quiz will resume from where you left off when you return.';
+$string['quiz_completed_header'] = 'Quiz Completed';
+$string['quiz_completed_message'] = 'Your formal assessment has been submitted successfully and cannot be retaken.';
+$string['your_answer'] = 'Your answer: {$a}';
+$string['correct_answer_was'] = 'Correct answer: {$a}';
+$string['explanation'] = 'Explanation';
+$string['final_grade_notice'] = 'This is your final grade for this assessment.';
+$string['integrity_report_header'] = 'Integrity Report';
+$string['integrity_recorded'] = 'This information has been recorded for review.';
+$string['integrity_violation_header'] = 'Assessment Integrity Violation';
+$string['quiz_flagged'] = 'Your quiz attempt has been flagged for suspicious activity.';
+$string['incident_logged'] = 'This incident has been logged and will be reviewed by your instructor.';
+$string['progress_saved_cannot_continue'] = 'Your current progress has been saved, but you cannot continue the assessment.';
+$string['failed_save_contact_instructor'] = 'Failed to save final results. Please contact your instructor.';
+$string['understand_start_quiz'] = 'I Understand - Start Quiz';
+$string['important_formal_assessment'] = 'Important: Formal Assessment';
+$string['read_carefully'] = 'Please read carefully before starting:';
+$string['one_attempt_only'] = 'One Attempt Only: You have only ONE attempt to complete this quiz.';
+$string['no_going_back'] = 'No Going Back: Once you move to the next question, you cannot return to previous questions.';
+$string['no_restarts'] = 'No Restarts: Refreshing the page will NOT restart the quiz - it will resume from where you left off.';
+$string['time_limits'] = 'Time Limits: Each question has a strict time limit. The quiz will automatically advance when time expires.';
+$string['no_cheating'] = 'No Cheating: This is a formal assessment. Any attempt to cheat or tamper with the quiz will be detected.';
+$string['stay_focused'] = 'Stay Focused: Switching windows or tabs excessively may be flagged as suspicious behavior.';
+$string['cannot_restart_notice'] = 'Once you click "Start Quiz", you cannot restart or retake this assessment.';
+$string['enter_answer_placeholder'] = 'Enter your answer here...';
+
+// Missing JavaScript UI Strings
+$string['window_switching_warning'] = 'Warning: You have switched windows/tabs {$a->count} times. Maximum allowed: {$a->max}. Excessive switching may result in quiz termination.';
+$string['quiz_progress_complete'] = '{$a}% Complete';
+$string['question_x_of_y'] = 'Question {$a->current} of {$a->total}';
+$string['time_remaining'] = 'Time Remaining: {$a}';
+$string['failed_save_results'] = 'Failed to save quiz results: {$a}';
+$string['final_score'] = 'Final Score: {$a->score}/{$a->total} ({$a->percentage}%)';
+$string['window_focus_lost'] = 'Window focus was lost {$a} time(s) during the quiz.';
+$string['exceeded_window_switches'] = 'You have exceeded the maximum allowed window switches ({$a}). The quiz has been terminated.';
+$string['setting_updated_success'] = 'Setting "{$a}" updated successfully.';
+
+// Localization strings for recommendation rendering
+$string['criteria_evaluation'] = 'Criteria Evaluation';
+$string['criterion'] = 'Criterion';
+$string['met'] = 'Met';
+$string['suggestions'] = 'Suggestions';
+$string['evaluation'] = 'Evaluation';
+$string['improved_assignment'] = 'Improved Assignment';
+$string['no_criteria_provided'] = 'No criteria provided.';
+$string['recommendation_error'] = 'Error displaying recommendation.';
+
+$string['no_instructions_or_files'] = 'Either instructions or at least one file must be provided for analysis';
+
+// Additional strings for code functionality
+$string['type'] = 'Type';
+$string['options'] = 'Options';
+$string['text'] = 'Text';
+$string['entertext'] = 'Enter text';
+$string['points_help'] = 'Points awarded for this question';
+$string['level'] = 'Level';
+$string['optiontext'] = 'Option text';
+$string['option_placeholder'] = 'Enter option text...';
+$string['correct_answer_required'] = 'At least one correct answer is required';
+
+$string['save_assignment_first'] = 'Please save the assignment first before generating questions';
+
+// Question Bank Functionality Strings
+$string['question_bank'] = 'Question Bank';
+$string['question_bank_description'] = 'Manage your AI-generated questions. You can view, edit, delete existing questions, or generate new ones.';
+$string['no_questions_found'] = 'No questions found. Generate some questions to get started.';
+$string['question_text'] = 'Question Text';
+$string['questions_generated_successfully'] = 'Questions generated successfully';
+$string['error_generating_questions'] = 'Error generating questions';
+$string['confirm_delete_question'] = 'Are you sure you want to delete this question? This action cannot be undone.';
+$string['question_deleted_successfully'] = 'Question deleted successfully';
+$string['error_deleting_question'] = 'Error deleting question';
+$string['plugindisabled'] = 'TrustGrade plugin is disabled';
+$string['trustgradedisabled'] = 'TrustGrade is disabled for this assignment';
+
+// Submission Processing Language Strings
+$string['processing_submission'] = 'Processing Your Submission';
+$string['processing_submission_message'] = 'Please wait while we process your assignment submission...';
+$string['processing_please_wait'] = 'Please wait...';
+
 $string['blooms_level'] = 'Bloom\'s Level';
 $string['error_saving_grade_user'] = 'Error saving grade for user';
 $string['no_pending_grades'] = 'No pending grades to save.';
@@ -213,23 +303,3 @@ $string['true_false'] = 'True/False';
 $string['short_answer'] = 'Short Answer';
 $string['option_text'] = 'Option text';
 $string['save_changes'] = 'Save Changes';
-
-// Question Bank Functionality Strings
-$string['question_bank'] = 'Question Bank';
-$string['question_bank_description'] = 'Manage your AI-generated questions. You can view, edit, delete existing questions, or generate new ones.';
-$string['no_questions_found'] = 'No questions found. Generate some questions to get started.';
-$string['question_text'] = 'Question Text';
-$string['questions_generated_successfully'] = 'Questions generated successfully';
-$string['error_generating_questions'] = 'Error generating questions';
-$string['confirm_delete_question'] = 'Are you sure you want to delete this question? This action cannot be undone.';
-$string['question_deleted_successfully'] = 'Question deleted successfully';
-$string['error_deleting_question'] = 'Error deleting question';
-$string['plugindisabled'] = 'TrustGrade plugin is disabled';
-$string['trustgradedisabled'] = 'TrustGrade is disabled for this assignment';
-
-// Submission Processing Language Strings
-$string['processing_submission'] = 'Processing Your Submission';
-$string['processing_submission_message'] = 'Please wait while we process your assignment submission...';
-$string['processing_please_wait'] = 'Please wait...';
-
-?>
