@@ -29,6 +29,15 @@ class observer {
     }
 
     /**
+     * Handle assessable submitted event
+     *
+     * @param \mod_assign\event\assessable_submitted $event
+     */
+    public static function assessable_submitted(\mod_assign\event\assessable_submitted $event) {
+        self::process_submission($event);
+    }
+
+    /**
      * Process submission and generate AI questions
      *
      * @param \core\event\base $event
