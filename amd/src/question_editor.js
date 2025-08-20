@@ -17,6 +17,12 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
 
     bindEvents: () => {
       $(document).off("click.questioneditor").off("change.questioneditor")
+
+      $(document).on("click.questioneditor", "#add-new-question-btn", (e) => {
+        e.preventDefault()
+        QuestionEditor.addNewQuestion()
+      })
+
       $(document).on("click.questioneditor", ".edit-question-btn", function (e) {
         e.preventDefault()
         var questionItem = $(this).closest(".editable-question-item")
@@ -328,6 +334,149 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     reinitialize: function (cmid) {
       this.initialized = false
       this.init(cmid)
+    },
+
+    addNewQuestion: () => {
+      const questionCount = $("#question-bank-container .editable-question-item").length
+      const newIndex = questionCount
+
+      // Create a blank question object
+      const blankQuestion = {
+        id: 0,
+        type: "multiple_choice",
+        text: "",
+        options: [
+          { text: "", is_correct: true, explanation: "" },
+          { text: "", is_correct: false, explanation: "" },
+          { text: "", is_correct: false, explanation: "" },
+          { text: "", is_correct: false, explanation: "" },
+        ],
+        metadata: {
+          points: 10,
+          blooms_level: "",
+        },
+      }
+
+      // Generate HTML for the new question using the same structure as existing questions
+      Str.get_string("question", "local_trustgrade").then((questionStr) => {
+        let html = `<div class="editable-question-item card mb-4" data-question-index="${newIndex}" data-cmid="${QuestionEditor.cmid}" data-question-id="0">`
+
+        // Header
+        html += '<div class="card-header d-flex align-items-center justify-content-between">'
+        html += `<h5 class="mb-0">${questionStr} ${newIndex + 1}</h5>`
+        html += '<div class="question-controls d-flex gap-2">'
+        html += '<button type="button" class="btn btn-sm btn-outline-secondary edit-question-btn">'
+        html += '<i class="fa fa-edit" aria-hidden="true"></i> Edit</button>'
+        html += '<button type="button" class="btn btn-sm btn-outline-danger delete-question-btn">'
+        html += '<i class="fa fa-trash" aria-hidden="true"></i> Delete</button>'
+        html += "</div></div>"
+
+        // Body with display and edit modes
+        html += '<div class="card-body">'
+        html += '<div class="question-display-mode">'
+        html += '<div class="question-content">'
+        html += '<p class="mb-1"><strong>Type:</strong> Multiple Choice</p>'
+        html += '<p class="text-muted mb-2">Points: 10</p>'
+        html += "<p><strong>Question:</strong> <em>Click Edit to add question text</em></p>"
+        html += '<div class="mt-3"><p class="mb-2"><strong>Options:</strong></p>'
+        html += '<ul class="mb-0"><li class="mb-1"><em>Click Edit to add options</em></li></ul></div>'
+        html += "</div></div>"
+
+        html += '<div class="question-edit-mode" style="display: none;">'
+        html += QuestionEditor.generateEditForm(blankQuestion, newIndex)
+        html += "</div>"
+
+        html += "</div></div>"
+
+        // Insert before the add button section
+        $(".add-question-section").before(html)
+
+        // Automatically enter edit mode for the new question
+        const newQuestionItem = $(`.editable-question-item[data-question-index="${newIndex}"]`)
+        QuestionEditor.enterEditMode(newQuestionItem)
+
+        // Focus on the question text input
+        newQuestionItem.find(".question-text-input").focus()
+      })
+    },
+
+    generateEditForm: (question, index) => {
+      const type = question.type || "multiple_choice"
+      const text = question.text || ""
+      const metadata = question.metadata || {}
+      const points = metadata.points || 10
+      const blooms = metadata.blooms_level || ""
+
+      let html = '<div class="question-edit-form container-fluid px-0">'
+
+      // Question text
+      html += '<div class="form-group mb-3">'
+      html += `<label for="question_text_${index}" class="form-label">Question Text:</label>`
+      html += `<textarea class="form-control question-text-input" id="question_text_${index}" rows="3" placeholder="Enter question text">${text}</textarea>`
+      html += "</div>"
+
+      // Type, Points, Bloom's row
+      html += '<div class="row g-3">'
+      html += '<div class="col-12 col-md-4">'
+      html += '<div class="form-group">'
+      html += `<label for="question_type_${index}" class="form-label">Type:</label>`
+      html += `<select class="form-control question-type-input" id="question_type_${index}">`
+      html += `<option value="multiple_choice" selected>Multiple Choice</option>`
+      html += "</select></div></div>"
+
+      html += '<div class="col-12 col-md-4">'
+      html += '<div class="form-group">'
+      html += `<label for="question_points_${index}" class="form-label">Points:</label>`
+      html += `<input type="number" class="form-control question-points-input" id="question_points_${index}" value="${points}" min="0" max="100" />`
+      html += "</div></div>"
+
+      html += '<div class="col-12 col-md-4">'
+      html += '<div class="form-group">'
+      html += `<label for="question_blooms_${index}" class="form-label">Bloom's Level:</label>`
+      html += `<select class="form-control question-blooms-input" id="question_blooms_${index}">`
+      const levels = ["", "Remember", "Understand", "Apply", "Analyze", "Evaluate", "Create"]
+      levels.forEach((level) => {
+        const sel = blooms === level ? "selected" : ""
+        const label = level === "" ? "-" : level
+        html += `<option value="${level}" ${sel}>${label}</option>`
+      })
+      html += "</select></div></div></div>"
+
+      // Options section
+      html += '<div class="question-options-section mt-4">'
+      html += '<div class="d-flex align-items-center justify-content-between mb-2">'
+      html += '<h6 class="mb-0">Options</h6></div>'
+      html += '<div class="row text-muted small fw-semibold mb-1">'
+      html += '<div class="col-12 col-md-1">Correct</div>'
+      html += '<div class="col-12 col-md-5">Option Text</div>'
+      html += '<div class="col-12 col-md-6">Explanation</div></div>'
+
+      // Generate 4 option rows
+      for (let i = 0; i < 4; i++) {
+        const opt = question.options[i] || { text: "", is_correct: i === 0, explanation: "" }
+        const checked = opt.is_correct ? "checked" : ""
+
+        html += '<div class="row align-items-start gy-2 gx-3 mb-2 option-row">'
+        html += '<div class="col-12 col-md-1 d-flex align-items-start pt-2">'
+        html += `<input class="form-check-input mt-0 correct-answer-radio" type="radio" name="correct_answer_${index}" value="${i}" ${checked}>`
+        html += "</div>"
+        html += '<div class="col-12 col-md-5">'
+        html += `<input type="text" class="form-control option-text-input" placeholder="Option ${String.fromCharCode(65 + i)}" value="${opt.text}">`
+        html += "</div>"
+        html += '<div class="col-12 col-md-6">'
+        html += `<textarea class="form-control option-explanation-input" rows="2" placeholder="Explanation">${opt.explanation}</textarea>`
+        html += "</div></div>"
+      }
+
+      html += "</div>"
+
+      // Save/Cancel buttons
+      html += '<div class="question-edit-buttons mt-4 d-flex gap-2">'
+      html += '<button type="button" class="btn btn-primary save-question-btn">Save Changes</button>'
+      html += '<button type="button" class="btn btn-secondary cancel-edit-btn">Cancel</button>'
+      html += "</div></div>"
+
+      return html
     },
   }
 
