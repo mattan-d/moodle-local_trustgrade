@@ -1,5 +1,7 @@
 // This file is part of Moodle - http://moodle.org/
 
+const define = window.define // Declare the define variable
+
 define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notification, Str) => {
   var Quiz = {
     session: null,
@@ -370,6 +372,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
             <span class="question-source badge ${question.source === "instructor" ? "badge-primary" : "badge-success"}">
               ${question.source === "instructor" ? strings[2] : strings[3]}
             </span>
+            <div class="question-timer" style="display: none;"></div>
           </div>
           <div class="alert alert-info">
             <i class="fa fa-info-circle"></i> 
