@@ -358,8 +358,10 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
           // Insert before the add button section
           $(".add-question-section").before(html)
 
-          // Automatically enter edit mode for the new question
           const newQuestionItem = $(`.editable-question-item[data-question-index="${newIndex}"]`)
+          QuestionEditor.updateOptionsSection("multiple_choice", newIndex)
+
+          // Automatically enter edit mode for the new question
           QuestionEditor.enterEditMode(newQuestionItem)
 
           // Focus on the question text input
@@ -391,15 +393,17 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       }))
 
       const options = []
-      for (let i = 0; i < 4; i++) {
-        const opt = question.options[i] || { text: "", is_correct: i === 0, explanation: "" }
-        options.push({
-          index: i,
-          text: opt.text,
-          isCorrect: opt.is_correct,
-          explanation: opt.explanation,
-          optionLabel: `Option ${String.fromCharCode(65 + i)}`,
-        })
+      if (type === "multiple_choice") {
+        for (let i = 0; i < 4; i++) {
+          const opt = question.options[i] || { text: "", is_correct: i === 0, explanation: "" }
+          options.push({
+            index: i,
+            text: opt.text,
+            isCorrect: opt.is_correct,
+            explanation: opt.explanation,
+            optionLabel: `Option ${String.fromCharCode(65 + i)}`,
+          })
+        }
       }
 
       return {
