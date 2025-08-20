@@ -89,7 +89,9 @@ class observer {
             $result = submission_processor::generate_submission_questions_with_count(
                 $submission_content,
                 $assignment_instructions,
-                $questions_to_generate
+                $questions_to_generate,
+                $cm->id,
+                $submission->userid
             );
 
             if ($result['success']) {
@@ -160,7 +162,9 @@ class observer {
             $result = submission_processor::generate_submission_questions_with_count(
                 $submission_content,
                 $assignment_instructions,
-                $questions_to_generate
+                $questions_to_generate,
+                $cm->id,
+                $user_id
             );
 
             if ($result['success']) {
