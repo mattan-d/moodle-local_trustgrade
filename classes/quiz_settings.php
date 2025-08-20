@@ -26,6 +26,7 @@ class quiz_settings {
             $settings = self::get_default_settings();
         } else {
             $settings = [
+                'enabled' => (bool)$record->enabled,
                 'questions_to_generate' => (int)$record->questions_to_generate,
                 'instructor_questions' => (int)$record->instructor_questions,
                 'submission_questions' => (int)$record->submission_questions,
@@ -62,6 +63,7 @@ class quiz_settings {
             
             if ($existing) {
                 // Update existing settings
+                $existing->enabled = $validated_settings['enabled'] ? 1 : 0;
                 $existing->questions_to_generate = $validated_settings['questions_to_generate'];
                 $existing->instructor_questions = $validated_settings['instructor_questions'];
                 $existing->submission_questions = $validated_settings['submission_questions'];
@@ -75,6 +77,7 @@ class quiz_settings {
                 // Create new settings
                 $record = new \stdClass();
                 $record->cmid = $cmid;
+                $record->enabled = $validated_settings['enabled'] ? 1 : 0;
                 $record->questions_to_generate = $validated_settings['questions_to_generate'];
                 $record->instructor_questions = $validated_settings['instructor_questions'];
                 $record->submission_questions = $validated_settings['submission_questions'];
@@ -100,6 +103,7 @@ class quiz_settings {
      */
     public static function get_default_settings() {
         return [
+            'enabled' => true,
             'questions_to_generate' => 5,
             'instructor_questions' => 3,
             'submission_questions' => 2,
@@ -117,6 +121,9 @@ class quiz_settings {
      */
     private static function validate_settings($settings) {
         $validated = [];
+        
+        // Enabled field validation
+        $validated['enabled'] = !empty($settings['enabled']);
         
         // Questions to generate (1-10)
         $validated['questions_to_generate'] = max(1, min(10, intval($settings['questions_to_generate'] ?? 5)));

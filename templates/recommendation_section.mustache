@@ -1,0 +1,27 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+    
+    Template for rendering recommendation text sections
+    
+    Context variables:
+    * title - Section title
+    * content - Section content (supports HTML tags)
+    * icon - Optional icon class
+    * sectionClass - CSS class for styling
+}}
+<div class="tg-section {{sectionClass}} mb-4">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-light border-0 py-3">
+            <h4 class="card-title mb-0 d-flex align-items-center">
+                {{#icon}}
+                <i class="{{icon}} me-2 text-primary"></i>
+                {{/icon}}
+                {{title}}
+            </h4>
+        </div>
+        <div class="card-body">
+            {{! Use triple braces to allow HTML content rendering }}
+            <div class="recommendation-content">{{{content}}}</div>
+        </div>
+    </div>
+</div>

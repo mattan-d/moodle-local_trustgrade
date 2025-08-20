@@ -1,5 +1,6 @@
 // This file is part of Moodle - http://moodle.org/
 
+
 define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notification, Str) => {
   var Quiz = {
     session: null,
@@ -246,6 +247,93 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       ])
     },
 
+    getQuestionText: (q) => {
+      if (!q) return ""
+      return q.text || q.question || ""
+    },
+
+    getOptionText: (option) => {
+      if (option == null) return ""
+      if (typeof option === "string") return option
+      if (typeof option === "object") {
+        return option.text ?? option.label ?? String(option)
+      }
+      return String(option)
+    },
+
+    getOptionExplanation: (question, index) => {
+      if (!question) return ""
+      const options = question.options || []
+      const i = typeof index === "number" ? index : Number.parseInt(index, 10)
+      if (Number.isNaN(i) || i == null) return ""
+
+      // New pattern: explanation on the option object
+      if (Array.isArray(options) && options[i] && typeof options[i] === "object" && "explanation" in options[i]) {
+        return options[i].explanation || ""
+      }
+
+      // Alternate pattern: explanations array aligning to options index
+      if (Array.isArray(question.explanations)) {
+        return question.explanations[i] || ""
+      }
+
+      // Alternate pattern: map object, e.g., { "true": "...", "false": "..." }
+      if (question.explanations && typeof question.explanations === "object") {
+        // Try boolean-like keys, then index keys
+        const key = i === 1 ? "true" : i === 0 ? "false" : String(i)
+        return question.explanations[key] || question.explanations[String(i)] || ""
+      }
+
+      // Fallback
+      if (question.option_explanations && Array.isArray(question.option_explanations)) {
+        return question.option_explanations[i] || ""
+      }
+
+      return ""
+    },
+
+    getCorrectAnswerIndex: (question) => {
+      if (!question) return null
+
+      // Backward-compatible: numeric index
+      if (Number.isInteger(question.correct_answer)) {
+        return question.correct_answer
+      }
+
+      // New pattern: detect correct option by flag
+      const options = question.options || []
+      for (let i = 0; i < options.length; i++) {
+        const opt = options[i]
+        if (
+          opt &&
+          typeof opt === "object" &&
+          (opt.correct === true || opt.is_correct === true || opt.isCorrect === true)
+        ) {
+          return i
+        }
+      }
+      return null
+    },
+
+    isAnswerCorrect: function (question, userAnswer) {
+      if (!question) return false
+
+      if (question.type === "true_false") {
+        // Backward-compat: boolean compare
+        if (typeof question.correct_answer !== "boolean") return false
+        let userBool = null
+        if (userAnswer === true || userAnswer === "true" || userAnswer === 1 || userAnswer === "1") userBool = true
+        else if (userAnswer === false || userAnswer === "false" || userAnswer === 0 || userAnswer === "0")
+          userBool = false
+        return userBool !== null && userBool === question.correct_answer
+      }
+
+      const correctIndex = this.getCorrectAnswerIndex(question)
+      if (correctIndex == null) return false
+      const userIndex = typeof userAnswer === "number" ? userAnswer : Number.parseInt(userAnswer, 10)
+      return userIndex === correctIndex
+    },
+
     advanceToNextQuestion: function () {
       if (this.currentQuestion < this.questions.length - 1) {
         this.currentQuestion++
@@ -279,26 +367,30 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
           <small class="text-muted">${strings[1]} (${strings[0]})</small>
         </div>
         <div class="question-container">
-          <div class="question-header">
-            <span class="question-source badge ${question.source === "instructor" ? "badge-primary" : "badge-success"}">
-              ${question.source === "instructor" ? strings[2] : strings[3]}
-            </span>
-            <span class="question-difficulty badge badge-secondary">${question.difficulty || "medium"}</span>
-            <span class="question-points">${question.points || 10} points</span>
+          <div class="question-header d-flex justify-content-between align-items-center">
+                        <span class="question-number me-3"><strong>${strings[1]}</strong></span>
+            <div class="d-flex align-items-center">
+          
+              <span class="question-source badge ${question.source === "instructor" ? "badge-primary" : "badge-success"}">
+                ${question.source === "instructor" ? strings[2] : strings[3]}
+              </span>
+            </div>
+            <div class="question-timer-container"></div>
           </div>
           <div class="alert alert-info">
             <i class="fa fa-info-circle"></i> 
             <small>${strings[4]}</small>
           </div>
-          <h3 class="question-text">${question.question}</h3>`
+          <h3 class="question-text">${this.getQuestionText(question)}</h3>`
 
         if (question.type === "multiple_choice" && question.options) {
           html += `<div class="question-options">`
           question.options.forEach((option, optIndex) => {
             var checked = this.answers[index] === optIndex ? "checked" : ""
+            var label = this.getOptionText(option)
             html += `<div class="form-check">
               <input class="form-check-input" type="radio" name="answer" value="${optIndex}" id="option_${optIndex}" ${checked}>
-              <label class="form-check-label" for="option_${optIndex}">${option}</label>
+              <label class="form-check-label" for="option_${optIndex}">${label}</label>
             </div>`
           })
           html += `</div>`
@@ -339,7 +431,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         this.timeRemaining = this.settings.time_per_question
       }
       this.updateTimerDisplay()
-      $(".question-timer").show()
+      $(".question-timer-container").show()
       this.timer = setInterval(() => {
         this.timeRemaining--
         this.updateTimerDisplay()
@@ -355,7 +447,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         clearInterval(this.timer)
         this.timer = null
       }
-      $(".question-timer").hide()
+      $(".question-timer-container").hide()
     },
 
     updateTimerDisplay: function () {
@@ -367,7 +459,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         var timerHtml = `<div class="timer-display ${timerClass}">
                           <i class="fa fa-clock-o"></i> ${message}
                         </div>`
-        $(".question-timer").html(timerHtml)
+        $(".question-timer-container").html(timerHtml)
       })
     },
 
@@ -480,11 +572,8 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       var score = 0
       this.questions.forEach((question, index) => {
         var userAnswer = this.answers[index]
-        var isCorrect = false
+        var isCorrect = this.isAnswerCorrect(question, userAnswer)
         var points = question.points || 10
-        if (question.type === "multiple_choice" || question.type === "true_false") {
-          isCorrect = userAnswer === question.correct_answer
-        }
         if (isCorrect) score += points
       })
       return score
@@ -514,12 +603,9 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
 
         this.questions.forEach((question, index) => {
           var userAnswer = this.answers[index]
-          var isCorrect = false
+          var isCorrect = this.isAnswerCorrect(question, userAnswer)
           var points = question.points || 10
           totalPoints += points
-          if (question.type === "multiple_choice" || question.type === "true_false") {
-            isCorrect = userAnswer === question.correct_answer
-          }
           if (isCorrect) score += points
 
           resultsHtml += `<div class="result-item ${isCorrect ? "correct" : "incorrect"}">
@@ -528,37 +614,62 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
               <span class="result-status ${isCorrect ? "text-success" : "text-danger"}">
                 ${isCorrect ? `✓ ${strings[2]}` : `✗ ${strings[3]}`}
               </span>
-              <span class="result-points">${isCorrect ? points : 0}/${points} points</span>
             </div>
-            <p class="question-text">${question.question}</p>`
+            <p class="question-text">${this.getQuestionText(question)}</p>`
 
+          // Show the user's answer text
           if (question.type === "multiple_choice") {
-            var userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : strings[6]
-            resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswerText)}</strong></p>`
-            if (!isCorrect && question.correct_answer !== undefined) {
-              resultsHtml += `<p><strong>${strings[5].replace(
-                "{$a}",
-                question.options[question.correct_answer],
-              )}</strong></p>`
+            var mcAnswerText = strings[6]
+            if (
+              userAnswer !== undefined &&
+              userAnswer !== null &&
+              question.options &&
+              question.options[Number(userAnswer)] !== undefined
+            ) {
+              mcAnswerText = this.getOptionText(question.options[Number(userAnswer)])
+            }
+            resultsHtml += `<p><strong>${strings[4].replace("{$a}", mcAnswerText)}</strong></p>`
+
+            // Show the explanation corresponding to the selected answer (per-answer explanation)
+            var explanationText = this.getOptionExplanation(question, Number(userAnswer))
+            if (explanationText) {
+              resultsHtml += `<div class="explanation"><strong>${strings[7]}:</strong> ${explanationText}</div>`
             }
           } else if (question.type === "true_false") {
-            var userAnswerText = userAnswer !== undefined ? (userAnswer ? strings[9] : strings[10]) : strings[6]
-            resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswerText)}</strong></p>`
-            if (!isCorrect && question.correct_answer !== undefined) {
-              resultsHtml += `<p><strong>${strings[5].replace(
-                "{$a}",
-                question.correct_answer ? strings[9] : strings[10],
-              )}</strong></p>`
+            var tfAnswerText = userAnswer !== undefined ? (userAnswer ? strings[9] : strings[10]) : strings[6]
+            resultsHtml += `<p><strong>${strings[4].replace("{$a}", tfAnswerText)}</strong></p>`
+
+            // Attempt to show a per-answer explanation if provided in a map or options
+            var tfExplanation = ""
+            if (question.explanations && typeof question.explanations === "object") {
+              if (userAnswer === true || userAnswer === "true" || userAnswer === 1 || userAnswer === "1") {
+                tfExplanation =
+                  question.explanations.true || question.explanations["1"] || question.explanations[1] || ""
+              } else if (userAnswer === false || userAnswer === "false" || userAnswer === 0 || userAnswer === "0") {
+                tfExplanation =
+                  question.explanations.false || question.explanations["0"] || question.explanations[0] || ""
+              }
+            } else if (Array.isArray(question.options) && question.options.length === 2) {
+              // If options are objects, try to read explanation
+              var idx = userAnswer === true || userAnswer === "true" || userAnswer === 1 || userAnswer === "1" ? 1 : 0
+              if (
+                question.options[idx] &&
+                typeof question.options[idx] === "object" &&
+                "explanation" in question.options[idx]
+              ) {
+                tfExplanation = question.options[idx].explanation || ""
+              }
+            }
+            if (tfExplanation) {
+              resultsHtml += `<div class="explanation"><strong>${strings[7]}:</strong> ${tfExplanation}</div>`
             }
           } else if (question.type === "short_answer") {
             resultsHtml += `<p><strong>${strings[4].replace("{$a}", userAnswer || strings[6])}</strong></p>`
+            // No per-answer explanation for short answer in the new pattern
           }
-          if (question.explanation) {
-            resultsHtml += `<div class="explanation"><strong>${strings[7].replace(
-              "{$a}",
-              question.explanation,
-            )}</strong></div>`
-          }
+
+          // IMPORTANT CHANGE: Do NOT show the "Correct answer was" line.
+
           resultsHtml += `</div>`
         })
 
@@ -598,7 +709,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       $(".quiz-content").hide()
       $(".quiz-navigation").hide()
       $(".question-counter").hide()
-      $(".question-timer").hide()
+      $(".question-timer-container").hide()
       $(".quiz-results").html(resultsHtml).show()
     },
 
@@ -625,7 +736,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         $(".quiz-content").html(violationHtml)
         $(".quiz-navigation").hide()
         $(".question-counter").hide()
-        $(".question-timer").hide()
+        $(".question-timer-container").hide()
         this.logIntegrityViolation("integrity_violation", {
           violation_type: "excessive_window_blur",
           window_blur_count: this.windowBlurCount,

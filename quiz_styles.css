@@ -76,6 +76,7 @@
 }
 
 .form-check-input {
+  position: unset;
   margin-right: 10px;
 }
 

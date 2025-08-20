@@ -6,6 +6,13 @@ defined('MOODLE_INTERNAL') || die();
 if ($hassiteconfig) {
     $settings = new admin_settingpage('local_trustgrade', get_string('pluginname', 'local_trustgrade'));
 
+    $settings->add(new admin_setting_configcheckbox(
+        'local_trustgrade/plugin_enabled',
+        get_string('plugin_enabled', 'local_trustgrade'),
+        get_string('plugin_enabled_desc', 'local_trustgrade'),
+        1
+    ));
+
     // Add debugging mode setting
     $settings->add(new admin_setting_configcheckbox(
         'local_trustgrade/debug_mode',

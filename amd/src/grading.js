@@ -184,10 +184,19 @@ define([
           }
         } else {
           updateGradeStatus($input, "error")
-          Notification.addNotification({
-            message: "Error saving grade for user " + userid + ": " + (response.message || "Unknown error"),
-            type: "error",
-          })
+          Str.get_string("error_saving_grade_user", "local_trustgrade", userid)
+            .then((errorText) => {
+              Notification.addNotification({
+                message: errorText + ": " + (response.message || "Unknown error"),
+                type: "error",
+              })
+            })
+            .catch(() => {
+              Notification.addNotification({
+                message: "Error saving grade for user " + userid + ": " + (response.message || "Unknown error"),
+                type: "error",
+              })
+            })
         }
       })
       .fail((ex) => {
@@ -201,15 +210,30 @@ define([
    */
   function savePendingGrades() {
     if (pendingGrades.size === 0) {
-      Notification.addNotification({
-        message: "No pending grades to save.",
-        type: "info",
-      })
+      Str.get_string("no_pending_grades", "local_trustgrade")
+        .then((message) => {
+          Notification.addNotification({
+            message: message,
+            type: "info",
+          })
+        })
+        .catch(() => {
+          Notification.addNotification({
+            message: "No pending grades to save.",
+            type: "info",
+          })
+        })
       return
     }
 
     var $button = $("#bulk-save-grades")
-    $button.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Saving...')
+    Str.get_string("saving_grades", "local_trustgrade")
+      .then((savingText) => {
+        $button.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> ' + savingText)
+      })
+      .catch(() => {
+        $button.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Saving...')
+      })
 
     // Convert Map to object for JSON encoding
     var gradesObject = {}
@@ -243,20 +267,44 @@ define([
           pendingGrades.clear()
           updatePendingGradesDisplay()
 
-          Notification.addNotification({
-            message: response.saved_count + " grades saved successfully",
-            type: "success",
-          })
+          Str.get_string("grades_saved_success", "local_trustgrade", response.saved_count)
+            .then((message) => {
+              Notification.addNotification({
+                message: message,
+                type: "success",
+              })
+            })
+            .catch(() => {
+              Notification.addNotification({
+                message: response.saved_count + " grades saved successfully",
+                type: "success",
+              })
+            })
         } else {
-          Notification.addNotification({
-            message: response.message || "Error saving grades",
-            type: "error",
-          })
+          Str.get_string("error_saving_grades", "local_trustgrade")
+            .then((errorText) => {
+              Notification.addNotification({
+                message: response.message || errorText,
+                type: "error",
+              })
+            })
+            .catch(() => {
+              Notification.addNotification({
+                message: response.message || "Error saving grades",
+                type: "error",
+              })
+            })
         }
       })
       .fail(Notification.exception)
       .always(() => {
-        $button.prop("disabled", false).html('<i class="fa fa-save"></i> Save All Pending')
+        Str.get_string("save_all_pending", "local_trustgrade")
+          .then((buttonText) => {
+            $button.prop("disabled", false).html('<i class="fa fa-save"></i> ' + buttonText)
+          })
+          .catch(() => {
+            $button.prop("disabled", false).html('<i class="fa fa-save"></i> Save All Pending')
+          })
       })
   }
 
@@ -265,7 +313,13 @@ define([
    */
   function clearAllGrades() {
     var $button = $("#clear-all-grades")
-    $button.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Clearing...')
+    Str.get_string("clearing_grades", "local_trustgrade")
+      .then((clearingText) => {
+        $button.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> ' + clearingText)
+      })
+      .catch(() => {
+        $button.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Clearing...')
+      })
 
     var promise = Ajax.call([
       {
@@ -290,20 +344,44 @@ define([
           pendingGrades.clear()
           updatePendingGradesDisplay()
 
-          Notification.addNotification({
-            message: "All grades cleared successfully",
-            type: "success",
-          })
+          Str.get_string("all_grades_cleared", "local_trustgrade")
+            .then((message) => {
+              Notification.addNotification({
+                message: message,
+                type: "success",
+              })
+            })
+            .catch(() => {
+              Notification.addNotification({
+                message: "All grades cleared successfully",
+                type: "success",
+              })
+            })
         } else {
-          Notification.addNotification({
-            message: response.message || "Error clearing grades",
-            type: "error",
-          })
+          Str.get_string("error_clearing_grades", "local_trustgrade")
+            .then((errorText) => {
+              Notification.addNotification({
+                message: response.message || errorText,
+                type: "error",
+              })
+            })
+            .catch(() => {
+              Notification.addNotification({
+                message: response.message || "Error clearing grades",
+                type: "error",
+              })
+            })
         }
       })
       .fail(Notification.exception)
       .always(() => {
-        $button.prop("disabled", false).html('<i class="fa fa-eraser"></i> Clear All Grades')
+        Str.get_string("clear_all_grades", "local_trustgrade")
+          .then((buttonText) => {
+            $button.prop("disabled", false).html('<i class="fa fa-eraser"></i> ' + buttonText)
+          })
+          .catch(() => {
+            $button.prop("disabled", false).html('<i class="fa fa-eraser"></i> Clear All Grades')
+          })
       })
   }
 
@@ -312,7 +390,15 @@ define([
    */
   function autoGradeByQuizScore() {
     var $button = $("#auto-grade-by-quiz")
-    $button.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Auto-grading...')
+
+    Str.get_string("auto_grading_progress", "local_trustgrade")
+      .then((loadingText) => {
+        $button.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> ' + loadingText)
+      })
+      .catch(() => {
+        // Fallback if string loading fails
+        $button.prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Auto-grading...')
+      })
 
     var promise = Ajax.call([
       {
@@ -333,7 +419,13 @@ define([
               gradesObj = JSON.parse(response.grades)
             }
           } catch (e) {
-            console.error("Error parsing grades JSON:", e)
+            Str.get_string("error_parsing_grades", "local_trustgrade")
+              .then((errorText) => {
+                console.error(errorText + ":", e)
+              })
+              .catch(() => {
+                console.error("Error parsing grades JSON:", e)
+              })
             gradesObj = {}
           }
 
@@ -358,20 +450,45 @@ define([
           pendingGrades.clear()
           updatePendingGradesDisplay()
 
-          Notification.addNotification({
-            message: response.graded_count + " students auto-graded based on quiz scores",
-            type: "success",
-          })
+          Str.get_string("auto_grade_success", "local_trustgrade", response.graded_count)
+            .then((successText) => {
+              Notification.addNotification({
+                message: successText,
+                type: "success",
+              })
+            })
+            .catch(() => {
+              // Fallback if string loading fails
+              Notification.addNotification({
+                message: response.graded_count + " students auto-graded based on quiz scores",
+                type: "success",
+              })
+            })
         } else {
-          Notification.addNotification({
-            message: response.message || "Error auto-grading students",
-            type: "error",
-          })
+          Str.get_string("auto_grade_error", "local_trustgrade")
+            .then((errorText) => {
+              Notification.addNotification({
+                message: response.message || errorText.replace("{$a}", "students"),
+                type: "error",
+              })
+            })
+            .catch(() => {
+              Notification.addNotification({
+                message: response.message || "Error auto-grading students",
+                type: "error",
+              })
+            })
         }
       })
       .fail(Notification.exception)
       .always(() => {
-        $button.prop("disabled", false).html('<i class="fa fa-magic"></i> Auto-grade by Quiz Score')
+        Str.get_string("auto_grade_button_text", "local_trustgrade")
+          .then((buttonText) => {
+            $button.prop("disabled", false).html('<i class="fa fa-magic"></i> ' + buttonText)
+          })
+          .catch(() => {
+            $button.prop("disabled", false).html('<i class="fa fa-magic"></i> Auto-grade by Quiz Score')
+          })
       })
   }
 
@@ -441,19 +558,43 @@ define([
     switch (status) {
       case "pending":
         $icon.addClass("text-warning").html('<i class="fa fa-clock-o"></i>')
-        $icon.attr("title", "Grade pending save")
+        Str.get_string("grade_pending_save", "local_trustgrade")
+          .then((title) => {
+            $icon.attr("title", title)
+          })
+          .catch(() => {
+            $icon.attr("title", "Grade pending save")
+          })
         break
       case "saving":
         $icon.addClass("text-primary").html('<i class="fa fa-spinner fa-spin"></i>')
-        $icon.attr("title", "Saving grade...")
+        Str.get_string("saving_grade", "local_trustgrade")
+          .then((title) => {
+            $icon.attr("title", title)
+          })
+          .catch(() => {
+            $icon.attr("title", "Saving grade...")
+          })
         break
       case "saved":
         $icon.addClass("text-success").html('<i class="fa fa-check"></i>')
-        $icon.attr("title", "Grade saved")
+        Str.get_string("grade_saved", "local_trustgrade")
+          .then((title) => {
+            $icon.attr("title", title)
+          })
+          .catch(() => {
+            $icon.attr("title", "Grade saved")
+          })
         break
       case "error":
         $icon.addClass("text-danger").html('<i class="fa fa-exclamation-triangle"></i>')
-        $icon.attr("title", "Error saving grade")
+        Str.get_string("error_saving_grade", "local_trustgrade")
+          .then((title) => {
+            $icon.attr("title", title)
+          })
+          .catch(() => {
+            $icon.attr("title", "Error saving grade")
+          })
         break
     }
   }
@@ -467,7 +608,13 @@ define([
     var $bulkButton = $("#bulk-save-grades")
 
     if (count > 0) {
-      $counter.text(count + " unsaved change" + (count === 1 ? "" : "s")).show()
+      Str.get_string("unsaved_changes", "local_trustgrade", count)
+        .then((text) => {
+          $counter.text(text).show()
+        })
+        .catch(() => {
+          $counter.text(count + " unsaved change" + (count === 1 ? "" : "s")).show()
+        })
       $bulkButton.show()
     } else {
       $counter.hide()

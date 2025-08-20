@@ -33,7 +33,7 @@ class report_renderer extends \plugin_renderer_base {
         // Render the report as a table
         $table = new \html_table();
         $table->head = [
-            get_string('student'),
+            get_string('defaultcoursestudent'),
             get_string('quiz_score', 'local_trustgrade'),
             get_string('completed_on', 'local_trustgrade'),
             get_string('time_taken', 'local_trustgrade'),
@@ -104,12 +104,12 @@ class report_renderer extends \plugin_renderer_base {
                 $details_cell = new \html_table_cell($details_html);
                 $details_cell->colspan = count($table->head);
                 $details_cell->attributes['class'] = 'student-details-cell p-3';
-                
+
                 $details_row = new \html_table_row();
                 $details_row->cells[] = $details_cell;
                 $details_row->attributes['class'] = 'collapse';
                 $details_row->id = $collapse_id;
-                
+
                 $table->data[] = $details_row;
             }
         }
@@ -242,29 +242,6 @@ class report_renderer extends \plugin_renderer_base {
     }
 
     /**
-     * Get current assignment grade for a user
-     *
-     * @param int $userid User ID
-     * @param int $cmid Course module ID
-     * @return float|null Current grade or null if not graded
-     */
-    protected function get_current_assignment_grade($userid, $cmid) {
-        global $DB;
-
-        $cm = get_coursemodule_from_id('assign', $cmid);
-        if (!$cm) {
-            return null;
-        }
-
-        $grade = $DB->get_field('assign_grades', 'grade', [
-            'assignment' => $cm->instance,
-            'userid' => $userid
-        ]);
-
-        return $grade !== false ? floatval($grade) : null;
-    }
-
-    /**
      * Renders the body of an accordion card with session details.
      *
      * @param \stdClass $session The session object.
@@ -340,12 +317,13 @@ class report_renderer extends \plugin_renderer_base {
     protected function render_questions_table($session) {
         $table = new \html_table();
         $table->head = [
-            '#',
-            get_string('question', 'local_trustgrade'),
-            get_string('student_answer', 'local_trustgrade'),
-            get_string('correct_answer', 'local_trustgrade'),
-            get_string('points', 'local_trustgrade'),
-            get_string('result', 'local_trustgrade')
+                '#',
+                get_string('blooms_level', 'local_trustgrade'),
+                get_string('question', 'local_trustgrade'),
+                get_string('student_answer', 'local_trustgrade'),
+                get_string('correct_answer', 'local_trustgrade'),
+                get_string('points', 'local_trustgrade'),
+                get_string('result', 'local_trustgrade')
         ];
         $table->attributes['class'] = 'table table-striped table-bordered';
 
@@ -357,7 +335,9 @@ class report_renderer extends \plugin_renderer_base {
             $user_answer = isset($answers[$index]) ? $answers[$index] : null;
 
             $student_answer_display = $this->format_student_answer($question, $user_answer);
-            $correct_answer_display = $this->format_correct_answer($question);
+            $correct_answer_display = $this->format_correct_answer($question, $user_answer);
+
+            $blooms_level = $question->metadata->blooms_level ?? '';
 
             // Determine if answer is correct
             $is_correct = $this->is_answer_correct($question, $user_answer);
@@ -372,6 +352,7 @@ class report_renderer extends \plugin_renderer_base {
 
             $row = new \html_table_row();
             $row->cells[] = $index + 1;
+            $row->cells[] = html_writer::span($blooms_level, 'badge badge-primary');;
 
             // Question cell with source badge
             $question_cell = html_writer::div(
@@ -379,8 +360,8 @@ class report_renderer extends \plugin_renderer_base {
                     ucfirst($question->source ?? 'instructor'),
                     'badge badge-' . (($question->source ?? 'instructor') === 'instructor' ? 'primary' : 'success') . ' mb-2'
                 ) .
-                html_writer::tag('div', format_text($question->question, FORMAT_HTML), ['class' => 'question-text']) .
-                $this->render_question_options($question),
+                html_writer::tag('div', format_text($this->get_question_text($question), FORMAT_HTML), ['class' => 'question-text']) .
+                $this->render_question_options($question, $user_answer),
                 'question-container'
             );
             $row->cells[] = $question_cell;
@@ -413,16 +394,23 @@ class report_renderer extends \plugin_renderer_base {
 
         switch ($question->type) {
             case 'multiple_choice':
+                $options = $this->normalize_options($question);
+                $order = $this->get_display_order($question, $user_answer, count($options));
+                $selectedDisplayIndex = $this->get_selected_display_index($user_answer);
+                $selectedBaseIndex = $this->display_to_base_index($selectedDisplayIndex, $order);
+
                 $raw_answer_display = html_writer::div(
                     html_writer::tag('small', get_string('raw_answer_value', 'local_trustgrade') . ': ') .
                     html_writer::tag('code', var_export($user_answer, true)),
                     'text-muted mb-1'
                 );
 
-                if (is_numeric($user_answer) && isset($question->options[(int)$user_answer])) {
-                    $option_display = html_writer::tag('strong', chr(65 + (int)$user_answer) . '. ') .
-                        $question->options[(int)$user_answer];
-                    return $raw_answer_display . html_writer::div($option_display, 'text-primary');
+                if ($selectedBaseIndex !== null && isset($options[$selectedBaseIndex])) {
+                    $label = chr(65 + max(0, (int)$selectedDisplayIndex));
+                    $text = $options[$selectedBaseIndex]->text;
+                    return html_writer::div(html_writer::tag('strong', $label));
+
+                    //return $raw_answer_display . html_writer::div(html_writer::tag('strong', $label . '. ') . $text, 'text-primary');
                 } else {
                     $invalid_display = html_writer::span(
                         get_string('invalid_option_selected', 'local_trustgrade'),
@@ -432,6 +420,7 @@ class report_renderer extends \plugin_renderer_base {
                 }
 
             case 'true_false':
+                // Legacy support if still present.
                 $raw_answer_display = html_writer::div(
                     html_writer::tag('small', get_string('raw_answer_value', 'local_trustgrade') . ': ') .
                     html_writer::tag('code', var_export($user_answer, true)),
@@ -470,19 +459,49 @@ class report_renderer extends \plugin_renderer_base {
      * Format the correct answer for display
      *
      * @param \stdClass $question The question object
+     * @param mixed $user_answer The user's answer (used to align letters with the shown order)
      * @return string Formatted correct answer
      */
-    protected function format_correct_answer($question) {
+    protected function format_correct_answer($question, $user_answer) {
         switch ($question->type) {
             case 'multiple_choice':
-                if (isset($question->options[$question->correct_answer])) {
-                    return html_writer::tag('strong', chr(65 + $question->correct_answer) . '. ') .
-                        $question->options[$question->correct_answer];
+                $options = $this->normalize_options($question);
+                if (empty($options)) {
+                    return get_string('not_available', 'local_trustgrade');
                 }
-                return get_string('not_available', 'local_trustgrade');
+
+                // Determine display order to label with the letters students saw.
+                $order = $this->get_display_order($question, $user_answer, count($options));
+
+                // Collect all correct options.
+                $correctItems = [];
+                foreach ($options as $baseIndex => $opt) {
+                    if (!empty($opt->is_correct)) {
+                        // Try to find its display index to compute a letter label.
+                        $displayIndex = $this->base_to_display_index($baseIndex, $order);
+                        $label = $displayIndex !== null ? chr(65 + $displayIndex) : '';
+                        $correctItems[] = $label;// . $opt->text;
+                    }
+                }
+
+                if (empty($correctItems)) {
+                    // Legacy fallback: single index on $question->correct_answer
+                    if (isset($question->correct_answer) && isset($options[(int)$question->correct_answer])) {
+                        $baseIndex = (int)$question->correct_answer;
+                        $displayIndex = $this->base_to_display_index($baseIndex, $order);
+                        $label = $displayIndex !== null ? chr(65 + $displayIndex) . '. ' : '';
+                        return $label . $options[$baseIndex]->text;
+                    }
+                    return get_string('not_available', 'local_trustgrade');
+                }
+
+                // Join multiple correct answers if any (comma-separated).
+                return implode(', ', $correctItems);
 
             case 'true_false':
-                return $question->correct_answer ? get_string('true', 'local_trustgrade') : get_string('false', 'local_trustgrade');
+                return isset($question->correct_answer)
+                    ? ($question->correct_answer ? get_string('true', 'local_trustgrade') : get_string('false', 'local_trustgrade'))
+                    : get_string('not_available', 'local_trustgrade');
 
             case 'short_answer':
                 return html_writer::span(get_string('manual_grading_required', 'local_trustgrade'), 'text-info font-italic');
@@ -505,10 +524,38 @@ class report_renderer extends \plugin_renderer_base {
         }
 
         switch ($question->type) {
-            case 'multiple_choice':
-                return (int)$user_answer === (int)$question->correct_answer;
+            case 'multiple_choice': {
+                $options = $this->normalize_options($question);
+                if (empty($options)) {
+                    return false;
+                }
+                $order = $this->get_display_order($question, $user_answer, count($options));
+                $selectedDisplayIndex = $this->get_selected_display_index($user_answer);
+                $selectedBaseIndex = $this->display_to_base_index($selectedDisplayIndex, $order);
 
-            case 'true_false':
+                if ($selectedBaseIndex === null || !isset($options[$selectedBaseIndex])) {
+                    // Legacy fallback: if user_answer is a base index directly.
+                    if (is_numeric($user_answer) && isset($options[(int)$user_answer])) {
+                        $selectedBaseIndex = (int)$user_answer;
+                    } else {
+                        return false;
+                    }
+                }
+
+                // Primary: per-option is_correct.
+                if (isset($options[$selectedBaseIndex]->is_correct)) {
+                    return (bool)$options[$selectedBaseIndex]->is_correct;
+                }
+
+                // Legacy fallback: compare to question->correct_answer
+                if (isset($question->correct_answer)) {
+                    return (int)$selectedBaseIndex === (int)$question->correct_answer;
+                }
+
+                return false;
+            }
+
+            case 'true_false': {
                 $user_bool = null;
                 if ($user_answer === true || $user_answer === 'true' || $user_answer === 1 || $user_answer === '1') {
                     $user_bool = true;
@@ -516,10 +563,11 @@ class report_renderer extends \plugin_renderer_base {
                     $user_bool = false;
                 }
 
-                return $user_bool !== null && $user_bool === (bool)$question->correct_answer;
+                return $user_bool !== null && isset($question->correct_answer) && $user_bool === (bool)$question->correct_answer;
+            }
 
             case 'short_answer':
-                return !empty(trim($user_answer));
+                return !empty(trim((string)$user_answer));
 
             default:
                 return false;
@@ -528,22 +576,34 @@ class report_renderer extends \plugin_renderer_base {
 
     /**
      * Render question options for multiple choice questions
+     * Respects the display order used in the attempt (if available) and highlights correct options.
      *
      * @param \stdClass $question The question object
+     * @param mixed $user_answer The user's answer (used to discover display order)
      * @return string HTML for question options
      */
-    protected function render_question_options($question) {
+    protected function render_question_options($question, $user_answer) {
         if ($question->type !== 'multiple_choice' || !isset($question->options)) {
             return '';
         }
 
+        $options = $this->normalize_options($question);
+        if (empty($options)) {
+            return '';
+        }
+
+        $order = $this->get_display_order($question, $user_answer, count($options));
+
         $html = html_writer::start_tag('ol', ['type' => 'A', 'class' => 'mt-2 mb-0']);
-        foreach ($question->options as $index => $option) {
-            $class = '';
-            if ($index === $question->correct_answer) {
-                $class = 'text-success font-weight-bold';
+
+        // Iterate over display order to show what the student actually saw.
+        foreach ($order as $displayIndex => $baseIndex) {
+            if (!isset($options[$baseIndex])) {
+                continue;
             }
-            $html .= html_writer::tag('li', $option, ['class' => $class]);
+            $opt = $options[$baseIndex];
+            $class = !empty($opt->is_correct) ? 'text-success font-weight-bold' : '';
+            $html .= html_writer::tag('li', $opt->text, ['class' => $class]);
         }
         $html .= html_writer::end_tag('ol');
 
@@ -564,5 +624,222 @@ class report_renderer extends \plugin_renderer_base {
             return $minutes . 'm ' . $seconds . 's';
         }
         return $seconds . 's';
+    }
+
+    /**
+     * Get current assignment grade for a user
+     *
+     * @param int $userid User ID
+     * @param int $cmid Course module ID
+     * @return float|null Current grade or null if not graded
+     */
+    protected function get_current_assignment_grade($userid, $cmid) {
+        global $DB;
+
+        $cm = get_coursemodule_from_id('assign', $cmid);
+        if (!$cm) {
+            return null;
+        }
+
+        $grade = $DB->get_field('assign_grades', 'grade', [
+            'assignment' => $cm->instance,
+            'userid' => $userid
+        ]);
+
+        return $grade !== false ? floatval($grade) : null;
+    }
+
+    // ---------------------------
+    // Helpers for new JSON schema
+    // ---------------------------
+
+    /**
+     * Get question text from new or legacy field.
+     *
+     * @param \stdClass $question
+     * @return string
+     */
+    protected function get_question_text($question) {
+        if (isset($question->text) && $question->text !== '') {
+            return (string)$question->text;
+        }
+        if (isset($question->question) && $question->question !== '') {
+            return (string)$question->question;
+        }
+        return '';
+    }
+
+    /**
+     * Normalize options into an array of objects with text, explanation, is_correct.
+     * Supports:
+     * - New schema: options as objects: { text, explanation?, is_correct? | correct? | isCorrect? }
+     * - Legacy schema: options as strings with question->correct_answer index
+     *
+     * @param \stdClass $question
+     * @return array<int,\stdClass>
+     */
+    protected function normalize_options($question) {
+        $raw = isset($question->options) ? $question->options : [];
+        // Convert to plain array (stdClass to array if necessary)
+        if ($raw instanceof \stdClass) {
+            $raw = (array)$raw;
+        }
+
+        $normalized = [];
+        $hasCorrectIndex = isset($question->correct_answer);
+
+        $i = 0;
+        foreach ($raw as $key => $opt) {
+            $item = (object)[
+                'text' => '',
+                'explanation' => null,
+                'is_correct' => null,
+            ];
+
+            if (is_string($opt)) {
+                // Legacy string option
+                $item->text = $opt;
+                if ($hasCorrectIndex && (int)$question->correct_answer === (int)$i) {
+                    $item->is_correct = true;
+                } else {
+                    $item->is_correct = false;
+                }
+            } else if (is_object($opt) || is_array($opt)) {
+                $optObj = is_array($opt) ? (object)$opt : $opt;
+                $item->text = isset($optObj->text) ? (string)$optObj->text : (isset($optObj->label) ? (string)$optObj->label : '');
+                $item->explanation = isset($optObj->explanation) ? (string)$optObj->explanation : (isset($optObj->rationale) ? (string)$optObj->rationale : null);
+
+                // Determine correctness flag from various possible keys
+                if (isset($optObj->is_correct)) {
+                    $item->is_correct = (bool)$optObj->is_correct;
+                } else if (isset($optObj->correct)) {
+                    $item->is_correct = (bool)$optObj->correct;
+                } else if (isset($optObj->isCorrect)) {
+                    $item->is_correct = (bool)$optObj->isCorrect;
+                } else if ($hasCorrectIndex) {
+                    // Legacy fallback if per-option missing
+                    $item->is_correct = ((int)$question->correct_answer === (int)$i);
+                } else {
+                    $item->is_correct = null;
+                }
+            } else {
+                // Unknown option shape; stringify to be safe.
+                $item->text = (string)json_encode($opt);
+                $item->is_correct = null;
+            }
+
+            $normalized[] = $item;
+            $i++;
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Resolve the display order used for this attempt, if present.
+     * Supports these keys on either user_answer or question:
+     * - order
+     * - options_order
+     * - shuffled_order
+     *
+     * Returns an array where each entry is the baseIndex at a given displayIndex.
+     *
+     * @param \stdClass $question
+     * @param mixed $user_answer
+     * @param int $count number of options
+     * @return array<int,int>
+     */
+    protected function get_display_order($question, $user_answer, $count) {
+        $order = null;
+
+        // Try on $user_answer (stdClass or array)
+        if (is_object($user_answer) || is_array($user_answer)) {
+            $ua = is_array($user_answer) ? (object)$user_answer : $user_answer;
+            if (isset($ua->order) && is_array($ua->order)) {
+                $order = $ua->order;
+            } else if (isset($ua->options_order) && is_array($ua->options_order)) {
+                $order = $ua->options_order;
+            } else if (isset($ua->shuffled_order) && is_array($ua->shuffled_order)) {
+                $order = $ua->shuffled_order;
+            }
+        }
+
+        // Try on $question (stdClass)
+        if ($order === null && is_object($question)) {
+            if (isset($question->order) && is_array($question->order)) {
+                $order = $question->order;
+            } else if (isset($question->options_order) && is_array($question->options_order)) {
+                $order = $question->options_order;
+            } else if (isset($question->shuffled_order) && is_array($question->shuffled_order)) {
+                $order = $question->shuffled_order;
+            }
+        }
+
+        // Identity if nothing recorded or invalid
+        if (!is_array($order) || empty($order)) {
+            $order = [];
+            for ($i = 0; $i < $count; $i++) {
+                $order[$i] = $i;
+            }
+        }
+
+        // Normalize: ensure integers and valid range
+        $order = array_values(array_map('intval', $order));
+        foreach ($order as $i => $v) {
+            if ($v < 0 || $v >= $count) {
+                $order[$i] = $i; // fallback
+            }
+        }
+
+        return $order;
+    }
+
+    /**
+     * Get selected display index from various possible user_answer shapes.
+     *
+     * @param mixed $user_answer
+     * @return int|null
+     */
+    protected function get_selected_display_index($user_answer) {
+        if (is_numeric($user_answer)) {
+            return (int)$user_answer;
+        }
+
+        if (is_object($user_answer) || is_array($user_answer)) {
+            $ua = is_array($user_answer) ? (object)$user_answer : $user_answer;
+            foreach (['index', 'selectedIndex', 'selected', 'answer'] as $key) {
+                if (isset($ua->{$key}) && is_numeric($ua->{$key})) {
+                    return (int)$ua->{$key};
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Map display index to base index using the order array.
+     *
+     * @param int|null $displayIndex
+     * @param array<int,int> $order
+     * @return int|null
+     */
+    protected function display_to_base_index($displayIndex, $order) {
+        if ($displayIndex === null) {
+            return null;
+        }
+        return isset($order[$displayIndex]) ? (int)$order[$displayIndex] : null;
+    }
+
+    /**
+     * Map base index to display index using the order array.
+     *
+     * @param int $baseIndex
+     * @param array<int,int> $order
+     * @return int|null
+     */
+    protected function base_to_display_index($baseIndex, $order) {
+        $displayIndex = array_search((int)$baseIndex, $order, true);
+        return $displayIndex === false ? null : (int)$displayIndex;
     }
 }

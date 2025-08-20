@@ -9,7 +9,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_trustgrade';
-$plugin->version = 2024012313; // Incremented version for quiz settings
+$plugin->version = 2025081702; // Incremented version for activity-level enable/disable setting
 $plugin->requires = 2022112800; // Moodle 4.1
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.1.0';
+$plugin->release = '1.1.1';
