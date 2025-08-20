@@ -1,7 +1,5 @@
 // This file is part of Moodle - http://moodle.org/
 
-const define = window.define // Declare the define variable
-
 define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notification, Str) => {
   var Quiz = {
     session: null,
