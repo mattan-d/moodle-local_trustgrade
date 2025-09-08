@@ -201,6 +201,7 @@ function local_trustgrade_before_standard_html_head() {
  * Hook called after assignment form is submitted
  */
 function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
+    global $USER;
     if (!get_config('local_trustgrade', 'plugin_enabled')) {
         return $data;
     }
@@ -229,12 +230,14 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
             }
             
             $files = [];
-            if (isset($data->intro) && isset($data->intro['itemid'])) {
-                $context = context_module::instance($cmid);
+            
+            // Try to get files from the draft area first (for new assignments)
+            if (isset($data->intro) && isset($data->intro['itemid']) && $data->intro['itemid'] > 0) {
+                $usercontext = context_user::instance($USER->id);
                 $fs = get_file_storage();
-                $intro_files = $fs->get_area_files($context->id, 'mod_assign', 'intro', $data->intro['itemid'], 'filename', false);
+                $draft_files = $fs->get_area_files($usercontext->id, 'user', 'draft', $data->intro['itemid'], 'filename', false);
                 
-                foreach ($intro_files as $file) {
+                foreach ($draft_files as $file) {
                     if (!$file->is_directory()) {
                         $files[] = [
                             'filename' => $file->get_filename(),
@@ -243,6 +246,28 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
                             'filesize' => $file->get_filesize()
                         ];
                     }
+                }
+            }
+            
+            // If no files found in draft area and this is an existing assignment, try the module context
+            if (empty($files) && $cmid > 0) {
+                try {
+                    $context = context_module::instance($cmid);
+                    $fs = get_file_storage();
+                    $intro_files = $fs->get_area_files($context->id, 'mod_assign', 'intro', 0, 'filename', false);
+                    
+                    foreach ($intro_files as $file) {
+                        if (!$file->is_directory()) {
+                            $files[] = [
+                                'filename' => $file->get_filename(),
+                                'content' => $file->get_content(),
+                                'mimetype' => $file->get_mimetype(),
+                                'filesize' => $file->get_filesize()
+                            ];
+                        }
+                    }
+                } catch (Exception $e) {
+                    // Context might not exist yet for new assignments, continue without files
                 }
             }
             
