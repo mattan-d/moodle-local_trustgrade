@@ -249,8 +249,17 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
                 $result = $gateway_client->generateQuestions($instructions, $question_count, $files);
                 
                 if ($result && isset($result['success']) && $result['success']) {
-                    // Questions generated successfully - they will be saved by the gateway client
-                    \core\notification::success(get_string('questions_generated_success', 'local_trustgrade'));
+                    $questions = $result['data']['questions'] ?? [];
+                    if (!empty($questions) && is_array($questions)) {
+                        $save_success = \local_trustgrade\question_generator::save_questions($cmid, $questions);
+                        if ($save_success) {
+                            \core\notification::success(get_string('questions_generated_success', 'local_trustgrade'));
+                        } else {
+                            \core\notification::error(get_string('error_saving_questions', 'local_trustgrade'));
+                        }
+                    } else {
+                        \core\notification::error(get_string('no_questions_generated', 'local_trustgrade'));
+                    }
                 } else {
                     $error_msg = isset($result['error']) ? $result['error'] : get_string('questions_generation_failed', 'local_trustgrade');
                     \core\notification::error($error_msg);
