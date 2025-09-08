@@ -201,7 +201,6 @@ function local_trustgrade_before_standard_html_head() {
  * Hook called after assignment form is submitted
  */
 function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
-    global $USER;
     if (!get_config('local_trustgrade', 'plugin_enabled')) {
         return $data;
     }
@@ -229,47 +228,19 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
                 $instructions = $data->intro['text'] ?? '';
             }
             
-            $files = [];
+            $intro_itemid = 0;
+            $intro_attachments_itemid = 0;
             
-            // Try to get files from the draft area first (for new assignments)
-            if (isset($data->intro) && isset($data->intro['itemid']) && $data->intro['itemid'] > 0) {
-                $usercontext = context_user::instance($USER->id);
-                $fs = get_file_storage();
-                $draft_files = $fs->get_area_files($usercontext->id, 'user', 'draft', $data->intro['itemid'], 'filename', false);
-                
-                foreach ($draft_files as $file) {
-                    if (!$file->is_directory()) {
-                        $files[] = [
-                            'filename' => $file->get_filename(),
-                            'content' => $file->get_content(),
-                            'mimetype' => $file->get_mimetype(),
-                            'filesize' => $file->get_filesize()
-                        ];
-                    }
-                }
+            // Extract file item IDs from form data
+            if (isset($data->intro) && isset($data->intro['itemid'])) {
+                $intro_itemid = (int)$data->intro['itemid'];
+            }
+            if (isset($data->introattachments)) {
+                $intro_attachments_itemid = (int)$data->introattachments;
             }
             
-            // If no files found in draft area and this is an existing assignment, try the module context
-            if (empty($files) && $cmid > 0) {
-                try {
-                    $context = context_module::instance($cmid);
-                    $fs = get_file_storage();
-                    $intro_files = $fs->get_area_files($context->id, 'mod_assign', 'intro', 0, 'filename', false);
-                    
-                    foreach ($intro_files as $file) {
-                        if (!$file->is_directory()) {
-                            $files[] = [
-                                'filename' => $file->get_filename(),
-                                'content' => $file->get_content(),
-                                'mimetype' => $file->get_mimetype(),
-                                'filesize' => $file->get_filesize()
-                            ];
-                        }
-                    }
-                } catch (Exception $e) {
-                    // Context might not exist yet for new assignments, continue without files
-                }
-            }
+            // Collect files using the external class method
+            $files = \local_trustgrade\external::collect_intro_files($intro_itemid, $intro_attachments_itemid);
             
             // Trigger question generation
             try {
