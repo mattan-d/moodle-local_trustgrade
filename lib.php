@@ -38,25 +38,6 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
 
         $mform->disabledIf('trustgrade_description', 'trustgrade_enabled');
 
-        // Add quiz settings section FIRST
-        $mform->addElement('static', 'trustgrade_quiz_settings_title', '',
-                '<h4>' . get_string('quiz_settings_title', 'local_trustgrade') . '</h4>');
-
-        // Questions to generate
-        $generate_options = [];
-        for ($i = 1; $i <= 10; $i++) {
-            $generate_options[$i] = $i;
-        }
-        $mform->addElement('select', 'trustgrade_questions_to_generate',
-                get_string('questions_to_generate', 'local_trustgrade'), $generate_options);
-        $mform->setDefault('trustgrade_questions_to_generate', $current_settings['questions_to_generate']);
-        $mform->addHelpButton('trustgrade_questions_to_generate', 'questions_to_generate', 'local_trustgrade');
-
-        $mform->addElement('advcheckbox', 'trustgrade_auto_generate',
-                get_string('auto_generate_questions', 'local_trustgrade'),
-                get_string('auto_generate_questions_desc', 'local_trustgrade'));
-        $mform->setDefault('trustgrade_auto_generate', 0);
-
         // Keep Check Instructions button for manual instruction checking
         $buttonarray = array();
         $buttonarray[] = $mform->createElement('button', 'check_instructions_btn',
@@ -75,6 +56,25 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addElement('static', 'trustgrade_question_loading', '',
                 '<div id="ai-question-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
                 get_string('generating_questions', 'local_trustgrade') . '</div>');
+
+        // Add quiz settings section FIRST
+        $mform->addElement('static', 'trustgrade_quiz_settings_title', '',
+                '<h4>' . get_string('quiz_settings_title', 'local_trustgrade') . '</h4>');
+
+        // Questions to generate
+        $generate_options = [];
+        for ($i = 1; $i <= 10; $i++) {
+            $generate_options[$i] = $i;
+        }
+        $mform->addElement('select', 'trustgrade_questions_to_generate',
+                get_string('questions_to_generate', 'local_trustgrade'), $generate_options);
+        $mform->setDefault('trustgrade_questions_to_generate', $current_settings['questions_to_generate']);
+        $mform->addHelpButton('trustgrade_questions_to_generate', 'questions_to_generate', 'local_trustgrade');
+
+        $mform->addElement('advcheckbox', 'trustgrade_auto_generate',
+                get_string('auto_generate_questions', 'local_trustgrade'),
+                get_string('auto_generate_questions_desc', 'local_trustgrade'));
+        $mform->setDefault('trustgrade_auto_generate', 0);
 
         // Options for number of questions (used for instructor and submission questions)
         $question_count_options = [];
@@ -227,10 +227,10 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
             if (isset($data->intro)) {
                 $instructions = $data->intro['text'] ?? '';
             }
-            
+
             $intro_itemid = 0;
             $intro_attachments_itemid = 0;
-            
+
             // Extract file item IDs from form data
             if (isset($data->intro) && isset($data->intro['itemid'])) {
                 $intro_itemid = (int)$data->intro['itemid'];
@@ -238,16 +238,16 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
             if (isset($data->introattachments)) {
                 $intro_attachments_itemid = (int)$data->introattachments;
             }
-            
+
             // Collect files using the external class method
             $files = \local_trustgrade\external::collect_intro_files($intro_itemid, $intro_attachments_itemid);
-            
+
             // Trigger question generation
             try {
                 $gateway_client = new \local_trustgrade\gateway_client();
                 $question_count = $data->trustgrade_questions_to_generate ?? 5;
                 $result = $gateway_client->generateQuestions($instructions, $question_count, $files);
-                
+
                 if ($result && isset($result['success']) && $result['success']) {
                     $questions = $result['data']['questions'] ?? [];
                     if (!empty($questions) && is_array($questions)) {
