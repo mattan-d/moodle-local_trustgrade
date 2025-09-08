@@ -225,7 +225,7 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
             // Get assignment instructions for question generation
             $instructions = '';
             if (isset($data->intro)) {
-                $instructions = $data->intro['text'] ?? '';
+                $instructions = $data->intro ?? '';
             }
 
             $intro_itemid = 0;
