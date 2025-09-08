@@ -254,6 +254,8 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
                         $save_success = \local_trustgrade\question_generator::save_questions($cmid, $questions);
                         if ($save_success) {
                             \core\notification::success(get_string('questions_generated_success', 'local_trustgrade'));
+                            $question_bank_url = new \moodle_url('/local/trustgrade/question_bank.php', ['cmid' => $cmid]);
+                            redirect($question_bank_url);
                         } else {
                             \core\notification::error(get_string('error_saving_questions', 'local_trustgrade'));
                         }
