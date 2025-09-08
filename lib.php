@@ -231,7 +231,8 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
             // Trigger question generation
             try {
                 $gateway_client = new \local_trustgrade\gateway_client();
-                $result = $gateway_client->generateQuestions($cmid, $instructions, 0, 0);
+                $question_count = $data->trustgrade_questions_to_generate ?? 5;
+                $result = $gateway_client->generateQuestions($instructions, $question_count, []);
                 
                 if ($result && isset($result['success']) && $result['success']) {
                     // Questions generated successfully - they will be saved by the gateway client
