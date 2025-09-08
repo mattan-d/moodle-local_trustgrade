@@ -228,11 +228,29 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
                 $instructions = $data->intro['text'] ?? '';
             }
             
+            $files = [];
+            if (isset($data->intro) && isset($data->intro['itemid'])) {
+                $context = context_module::instance($cmid);
+                $fs = get_file_storage();
+                $intro_files = $fs->get_area_files($context->id, 'mod_assign', 'intro', $data->intro['itemid'], 'filename', false);
+                
+                foreach ($intro_files as $file) {
+                    if (!$file->is_directory()) {
+                        $files[] = [
+                            'filename' => $file->get_filename(),
+                            'content' => $file->get_content(),
+                            'mimetype' => $file->get_mimetype(),
+                            'filesize' => $file->get_filesize()
+                        ];
+                    }
+                }
+            }
+            
             // Trigger question generation
             try {
                 $gateway_client = new \local_trustgrade\gateway_client();
                 $question_count = $data->trustgrade_questions_to_generate ?? 5;
-                $result = $gateway_client->generateQuestions($instructions, $question_count, []);
+                $result = $gateway_client->generateQuestions($instructions, $question_count, $files);
                 
                 if ($result && isset($result['success']) && $result['success']) {
                     // Questions generated successfully - they will be saved by the gateway client
