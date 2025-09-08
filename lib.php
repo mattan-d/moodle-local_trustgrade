@@ -52,10 +52,13 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->setDefault('trustgrade_questions_to_generate', $current_settings['questions_to_generate']);
         $mform->addHelpButton('trustgrade_questions_to_generate', 'questions_to_generate', 'local_trustgrade');
 
+        $mform->addElement('advcheckbox', 'trustgrade_auto_generate',
+                get_string('auto_generate_questions', 'local_trustgrade'),
+                get_string('auto_generate_questions_desc', 'local_trustgrade'));
+        $mform->setDefault('trustgrade_auto_generate', 0);
+
+        // Keep Check Instructions button for manual instruction checking
         $buttonarray = array();
-        $buttonarray[] = $mform->createElement('button', 'generate_questions_btn',
-                get_string('generate_questions', 'local_trustgrade'),
-                array('id' => 'generate-questions-btn', 'class' => ''));
         $buttonarray[] = $mform->createElement('button', 'check_instructions_btn',
                 get_string('check_instructions', 'local_trustgrade'),
                 array('id' => 'check-instructions-btn', 'class' => ''));
@@ -134,12 +137,8 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->setType('trustgrade_cmid', PARAM_INT);
 
         $mform->disabledIf('trustgrade_questions_to_generate', 'trustgrade_enabled');
+        $mform->disabledIf('trustgrade_auto_generate', 'trustgrade_enabled');
         $mform->disabledIf('trustgrade_buttons', 'trustgrade_enabled');
-        $mform->disabledIf('trustgrade_instructor_questions', 'trustgrade_enabled');
-        $mform->disabledIf('trustgrade_submission_questions', 'trustgrade_enabled');
-        $mform->disabledIf('trustgrade_randomize_answers', 'trustgrade_enabled');
-        $mform->disabledIf('trustgrade_time_per_question', 'trustgrade_enabled');
-        $mform->disabledIf('trustgrade_show_countdown', 'trustgrade_enabled');
 
         // Add JavaScript for AJAX functionality
         $PAGE->requires->js_call_amd('local_trustgrade/trustgrade', 'init');
@@ -221,6 +220,30 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
         ];
 
         \local_trustgrade\quiz_settings::save_settings($cmid, $settings);
+
+        if (!empty($data->trustgrade_auto_generate) && !empty($data->trustgrade_enabled)) {
+            // Get assignment instructions for question generation
+            $instructions = '';
+            if (isset($data->intro)) {
+                $instructions = $data->intro['text'] ?? '';
+            }
+            
+            // Trigger question generation
+            try {
+                $gateway_client = new \local_trustgrade\gateway_client();
+                $result = $gateway_client->generateQuestions($cmid, $instructions, 0, 0);
+                
+                if ($result && isset($result['success']) && $result['success']) {
+                    // Questions generated successfully - they will be saved by the gateway client
+                    \core\notification::success(get_string('questions_generated_success', 'local_trustgrade'));
+                } else {
+                    $error_msg = isset($result['error']) ? $result['error'] : get_string('questions_generation_failed', 'local_trustgrade');
+                    \core\notification::error($error_msg);
+                }
+            } catch (Exception $e) {
+                \core\notification::error(get_string('questions_generation_error', 'local_trustgrade') . ': ' . $e->getMessage());
+            }
+        }
     }
 
     return $data;

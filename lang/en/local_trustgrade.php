@@ -303,3 +303,9 @@ $string['true_false'] = 'True/False';
 $string['short_answer'] = 'Short Answer';
 $string['option_text'] = 'Option text';
 $string['save_changes'] = 'Save Changes';
+
+$string['auto_generate_questions'] = 'Create questions for this assignment';
+$string['auto_generate_questions_desc'] = 'Automatically generate questions when the assignment is saved. Questions will be created based on the assignment instructions.';
+$string['questions_generation_failed'] = 'Failed to generate questions automatically';
+$string['questions_generation_error'] = 'Error occurred during automatic question generation';
+?>
