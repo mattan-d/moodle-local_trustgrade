@@ -354,15 +354,7 @@ class external extends \external_api {
     }
     
     self::validate_editing_context($cmid);
-    
-    if (empty(trim($instructions))) {
-        $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
-        $assign = new \assign(\context_module::instance($cm->id), $cm, $cm->course);
-        $assignment = $assign->get_instance();
-        $instructions = strip_tags($assignment->intro);
-    } else {
-        $instructions = strip_tags(trim((string) $instructions));
-    }
+    $instructions = strip_tags(trim((string) $instructions));
     
     $files = self::collect_intro_files((int)$intro_itemid, (int)$intro_attachments_itemid);
     
@@ -524,40 +516,6 @@ class external extends \external_api {
          return ['success' => true];
      } else {
          return ['success' => false, 'error' => 'Failed to update setting'];
-     }
- }
-
- public static function get_assignment_instructions_parameters() {
-     return new \external_function_parameters([
-         'cmid' => new \external_value(PARAM_INT, 'Course module ID'),
-     ]);
- }
-
- public static function get_assignment_instructions_returns() {
-     return new \external_single_structure([
-         'success' => new \external_value(PARAM_BOOL, 'True if successful'),
-         'instructions' => new \external_value(PARAM_RAW, 'Assignment instructions', VALUE_OPTIONAL),
-         'error' => new \external_value(PARAM_TEXT, 'Error message', VALUE_OPTIONAL),
-     ]);
- }
-
- public static function get_assignment_instructions($cmid) {
-     self::validate_editing_context($cmid);
-     
-     try {
-         $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
-         $assign = new \assign(\context_module::instance($cm->id), $cm, $cm->course);
-         $assignment = $assign->get_instance();
-         
-         return [
-             'success' => true,
-             'instructions' => $assignment->intro
-         ];
-     } catch (\Exception $e) {
-         return [
-             'success' => false,
-             'error' => 'Failed to get assignment instructions: ' . $e->getMessage()
-         ];
      }
  }
 

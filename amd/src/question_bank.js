@@ -25,52 +25,20 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
 
       var promises = Ajax.call([
         {
-          methodname: "local_trustgrade_get_assignment_instructions",
+          methodname: "local_trustgrade_generate_questions",
           args: {
             cmid: this.cmid,
+            count: Number.parseInt(questionsCount),
           },
         },
       ])
 
       promises[0]
-        .then((instructionsResponse) => {
-          if (!instructionsResponse.success) {
-            throw new Error(instructionsResponse.error || "Failed to get assignment instructions")
-          }
-
-          return Ajax.call([
-            {
-              methodname: "local_trustgrade_update_quiz_setting",
-              args: {
-                cmid: this.cmid,
-                setting_name: "questions_to_generate",
-                setting_value: Number.parseInt(questionsCount),
-              },
-            },
-          ])
-        })
-        .then((updateResponse) => {
-          if (!updateResponse[0].success) {
-            throw new Error(updateResponse[0].error || "Failed to update question count")
-          }
-
-          return Ajax.call([
-            {
-              methodname: "local_trustgrade_generate_questions",
-              args: {
-                cmid: this.cmid,
-                instructions: "", // Will be fetched from assignment by the web service
-                intro_itemid: 0,
-                intro_attachments_itemid: 0,
-              },
-            },
-          ])
-        })
         .then((response) => {
           $("#generation-loading").hide()
           $("#generate-new-questions").prop("disabled", false)
 
-          if (response[0].success) {
+          if (response.success) {
             Notification.addNotification({
               message: questionsCount + " " + M.util.get_string("questions_generated_successfully", "local_trustgrade"),
               type: "success",
@@ -79,7 +47,7 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
             window.location.reload()
           } else {
             Notification.addNotification({
-              message: response[0].error || M.util.get_string("error_generating_questions", "local_trustgrade"),
+              message: response.error || M.util.get_string("error_generating_questions", "local_trustgrade"),
               type: "error",
             })
           }
@@ -89,7 +57,7 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
           $("#generate-new-questions").prop("disabled", false)
 
           Notification.addNotification({
-            message: error.message || M.util.get_string("error_generating_questions", "local_trustgrade"),
+            message: M.util.get_string("error_generating_questions", "local_trustgrade"),
             type: "error",
           })
         })
