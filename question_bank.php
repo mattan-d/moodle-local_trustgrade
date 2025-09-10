@@ -6,7 +6,12 @@ require_once($CFG->dirroot . '/mod/assign/locallib.php');
 
 $cmid = required_param('cmid', PARAM_INT);
 
-$cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
+$cm = get_coursemodule_from_id('assign', $cmid, 0, false, IGNORE_MISSING);
+if (!$cm) {
+    // Provide user-friendly error message instead of exception
+    print_error('invalidcoursemodule', 'error');
+}
+
 $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
 $assign = new assign(context_module::instance($cm->id), $cm, $course);
 

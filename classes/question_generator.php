@@ -81,38 +81,11 @@ class question_generator {
         global $DB, $USER;
         
         try {
-            if (!$cmid || $cmid <= 0) {
-                error_log('TrustGrade: Invalid cmid provided to save_questions: ' . $cmid);
-                return false;
-            }
-
-            $cm_exists = $DB->record_exists_sql(
-                "SELECT cm.id FROM {course_modules} cm 
-                 JOIN {modules} md ON md.id = cm.module 
-                 WHERE cm.id = ? AND md.name = ?", 
-                [$cmid, 'assign']
-            );
-
-            if (!$cm_exists) {
-                error_log('TrustGrade: Course module not found for cmid: ' . $cmid);
-                return false;
-            }
-
-            if (!is_array($questions) || empty($questions)) {
-                error_log('TrustGrade: Invalid questions array provided to save_questions');
-                return false;
-            }
-
             // Delete existing questions for this assignment
             $DB->delete_records('local_trustgrade_questions', ['cmid' => $cmid]);
-
+            
             // Save new questions
             foreach ($questions as $question) {
-                if (!is_array($question) && !is_object($question)) {
-                    error_log('TrustGrade: Invalid question data format');
-                    continue;
-                }
-
                 $record = new \stdClass();
                 $record->cmid = $cmid;
                 $record->userid = $USER->id;
@@ -120,15 +93,11 @@ class question_generator {
                 $record->timecreated = time();
                 $record->timemodified = time();
                 
-                $result = $DB->insert_record('local_trustgrade_questions', $record);
-                if (!$result) {
-                    error_log('TrustGrade: Failed to insert question record for cmid: ' . $cmid);
-                }
+                $DB->insert_record('local_trustgrade_questions', $record);
             }
-
+            
             return true;
         } catch (\Exception $e) {
-            error_log('TrustGrade save_questions error: ' . $e->getMessage() . ' for cmid: ' . $cmid . ', questions count: ' . count($questions));
             return false;
         }
     }

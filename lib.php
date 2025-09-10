@@ -151,10 +151,69 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
  * Hook called when assignment page is viewed
  */
 function local_trustgrade_before_standard_html_head() {
-    global $PAGE;
+    global $PAGE, $SESSION;
 
     if (!get_config('local_trustgrade', 'plugin_enabled')) {
         return;
+    }
+
+    if (isset($SESSION->trustgrade_pending_generation)) {
+        $pending = $SESSION->trustgrade_pending_generation;
+        
+        // Only process if this is the assignment view page and it matches the pending cmid
+        if ($PAGE->pagetype === 'mod-assign-view') {
+            $current_cmid = optional_param('id', 0, PARAM_INT);
+            
+            if ($current_cmid == $pending['cmid']) {
+                // Clear the pending generation to prevent reprocessing
+                unset($SESSION->trustgrade_pending_generation);
+                
+                // Now process the question generation with proper course module validation
+                try {
+                    // Verify course module exists before proceeding
+                    $cm = get_coursemodule_from_id('assign', $pending['cmid'], 0, false, IGNORE_MISSING);
+                    if (!$cm) {
+                        throw new Exception('Course module not found');
+                    }
+                    
+                    // Collect files using the external class method
+                    $files = \local_trustgrade\external::collect_intro_files(
+                        $pending['intro_itemid'], 
+                        $pending['intro_attachments_itemid']
+                    );
+
+                    // Trigger question generation
+                    $gateway_client = new \local_trustgrade\gateway_client();
+                    $result = $gateway_client->generateQuestions(
+                        $pending['instructions'], 
+                        $pending['question_count'], 
+                        $files
+                    );
+
+                    if ($result && isset($result['success']) && $result['success']) {
+                        $questions = $result['data']['questions'] ?? [];
+                        if (!empty($questions) && is_array($questions)) {
+                            $save_success = \local_trustgrade\question_generator::save_questions($pending['cmid'], $questions);
+                            if ($save_success) {
+                                \core\notification::success(get_string('questions_generated_success', 'local_trustgrade'));
+                                // Redirect to question bank after successful generation
+                                $question_bank_url = new \moodle_url('/local/trustgrade/question_bank.php', ['cmid' => $pending['cmid']]);
+                                redirect($question_bank_url);
+                            } else {
+                                \core\notification::error(get_string('error_saving_questions', 'local_trustgrade'));
+                            }
+                        } else {
+                            \core\notification::error(get_string('no_questions_generated', 'local_trustgrade'));
+                        }
+                    } else {
+                        $error_msg = isset($result['error']) ? $result['error'] : get_string('questions_generation_failed', 'local_trustgrade');
+                        \core\notification::error($error_msg);
+                    }
+                } catch (Exception $e) {
+                    \core\notification::error(get_string('questions_generation_error', 'local_trustgrade') . ': ' . $e->getMessage());
+                }
+            }
+        }
     }
 
     // Load CSS early for all assignment pages
@@ -209,25 +268,6 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
     if (isset($data->trustgrade_questions_to_generate)) {
         $cmid = $data->coursemodule;
 
-        if (!$cmid || $cmid <= 0) {
-            \core\notification::error(get_string('invalid_course_module', 'local_trustgrade'));
-            return $data;
-        }
-
-        global $DB;
-        $cm_exists = $DB->record_exists_sql(
-            "SELECT cm.id FROM {course_modules} cm 
-             JOIN {modules} md ON md.id = cm.module 
-             JOIN {assign} m ON m.id = cm.instance 
-             WHERE cm.id = ? AND md.name = ?", 
-            [$cmid, 'assign']
-        );
-
-        if (!$cm_exists) {
-            \core\notification::error(get_string('course_module_not_found', 'local_trustgrade'));
-            return $data;
-        }
-
         $settings = [
                 'enabled' => !empty($data->trustgrade_enabled), // Save activity-level enable/disable
                 'questions_to_generate' => $data->trustgrade_questions_to_generate,
@@ -241,6 +281,9 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
         \local_trustgrade\quiz_settings::save_settings($cmid, $settings);
 
         if (!empty($data->trustgrade_auto_generate) && !empty($data->trustgrade_enabled)) {
+            // This prevents the course_modules error by allowing the assignment to be fully saved first
+            global $SESSION;
+            
             // Get assignment instructions for question generation
             $instructions = '';
             if (isset($data->intro)) {
@@ -258,37 +301,18 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
                 $intro_attachments_itemid = (int)$data->introattachments;
             }
 
-            // Collect files using the external class method
-            $files = \local_trustgrade\external::collect_intro_files($intro_itemid, $intro_attachments_itemid);
-
-            // Trigger question generation
-            try {
-                $gateway_client = new \local_trustgrade\gateway_client();
-                $question_count = $data->trustgrade_questions_to_generate ?? 5;
-                $result = $gateway_client->generateQuestions($instructions, $question_count, $files);
-
-                if ($result && isset($result['success']) && $result['success']) {
-                    $questions = $result['data']['questions'] ?? [];
-                    if (!empty($questions) && is_array($questions)) {
-                        $save_success = \local_trustgrade\question_generator::save_questions($cmid, $questions);
-                        if ($save_success) {
-                            \core\notification::success(get_string('questions_generated_success', 'local_trustgrade'));
-                            $question_bank_url = new \moodle_url('/local/trustgrade/question_bank.php', ['cmid' => $cmid]);
-                            redirect($question_bank_url);
-                        } else {
-                            \core\notification::error(get_string('error_saving_questions', 'local_trustgrade'));
-                        }
-                    } else {
-                        \core\notification::error(get_string('no_questions_generated', 'local_trustgrade'));
-                    }
-                } else {
-                    $error_msg = isset($result['error']) ? $result['error'] : get_string('questions_generation_failed', 'local_trustgrade');
-                    \core\notification::error($_msg);
-                }
-            } catch (Exception $e) {
-                error_log('TrustGrade question generation error: ' . $e->getMessage() . ' for cmid: ' . $cmid);
-                \core\notification::error(get_string('questions_generation_error', 'local_trustgrade') . ': ' . $e->getMessage());
-            }
+            // Store generation parameters in session for delayed processing
+            $SESSION->trustgrade_pending_generation = [
+                'cmid' => $cmid,
+                'instructions' => $instructions,
+                'question_count' => $data->trustgrade_questions_to_generate ?? 5,
+                'intro_itemid' => $intro_itemid,
+                'intro_attachments_itemid' => $intro_attachments_itemid,
+                'timestamp' => time()
+            ];
+            
+            // Add notification that questions will be generated
+            \core\notification::success(get_string('questions_will_be_generated', 'local_trustgrade'));
         }
     }
 
