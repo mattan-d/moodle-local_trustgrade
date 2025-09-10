@@ -1,4 +1,5 @@
-// This file is part of Moodle - http://moodle
+// This file is part of Moodle - http://moodle.com
+
 define(["jquery", "core/templates", "core/str"], ($, Templates, Str) => {
   var SubmissionProcessing = {
     cmid: 0,
@@ -20,7 +21,7 @@ define(["jquery", "core/templates", "core/str"], ($, Templates, Str) => {
 
         if ($forms.length > 0) {
           $forms.on("submit", (e) => {
-            this.showProcessingMessage()
+            this.showProcessingMessage("submission")
             // Allow form to submit normally
             // The processing message will be shown while the page processes
           })
@@ -45,7 +46,7 @@ define(["jquery", "core/templates", "core/str"], ($, Templates, Str) => {
               $trustgradeEnabled.length > 0 &&
               $trustgradeEnabled.is(":checked")
             ) {
-              this.showQuestionGenerationMessage()
+              this.showProcessingMessage("questions")
             }
             // Allow form to submit normally
           })
@@ -53,11 +54,20 @@ define(["jquery", "core/templates", "core/str"], ($, Templates, Str) => {
       })
     },
 
-    showProcessingMessage: function () {
-      var stringRequests = [
-        { key: "processing_submission", component: "local_trustgrade" },
-        { key: "processing_submission_message", component: "local_trustgrade" },
-      ]
+    showProcessingMessage: function (type = "submission") {
+      var stringRequests = []
+
+      if (type === "questions") {
+        stringRequests = [
+          { key: "processing_question_generation", component: "local_trustgrade" },
+          { key: "processing_question_generation_message", component: "local_trustgrade" },
+        ]
+      } else {
+        stringRequests = [
+          { key: "processing_submission", component: "local_trustgrade" },
+          { key: "processing_submission_message", component: "local_trustgrade" },
+        ]
+      }
 
       Str.get_strings(stringRequests)
         .then((strings) => {
@@ -80,67 +90,32 @@ define(["jquery", "core/templates", "core/str"], ($, Templates, Str) => {
           $("body").css("overflow", "hidden")
         })
         .catch((error) => {
-          console.error("Error rendering submission processing overlay:", error)
+          console.error("Error rendering processing overlay:", error)
           // Fallback to simple overlay if template fails
-          this.showFallbackProcessingMessage()
+          this.showFallbackProcessingMessage(type)
         })
     },
 
-    showQuestionGenerationMessage: function () {
-      var stringRequests = [
-        { key: "processing_question_generation", component: "local_trustgrade" },
-        { key: "processing_question_generation_message", component: "local_trustgrade" },
-      ]
+    showFallbackProcessingMessage: (type = "submission") => {
+      var overlayHtml = ""
 
-      Str.get_strings(stringRequests)
-        .then((strings) => {
-          var context = {
-            title: strings[0],
-            message: strings[1],
-            spinner_class: "fa fa-spinner fa-spin",
-          }
-
-          return Templates.render("local_trustgrade/submission_processing_overlay", context)
-        })
-        .then((html) => {
-          // Remove any existing overlay
-          $("#submission-processing-overlay").remove()
-
-          // Add overlay to body
-          $("body").append(html)
-
-          // Prevent scrolling
-          $("body").css("overflow", "hidden")
-        })
-        .catch((error) => {
-          console.error("Error rendering question generation processing overlay:", error)
-          // Fallback to simple overlay if template fails
-          this.showFallbackQuestionGenerationMessage()
-        })
-    },
-
-    showFallbackProcessingMessage: () => {
-      var overlayHtml =
-        '<div id="submission-processing-overlay" class="submission-processing-overlay">' +
-        '<div class="processing-modal">' +
-        '<div class="spinner-container"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></div>' +
-        '<h3 class="processing-title">Processing...</h3>' +
-        '<p class="processing-message">Please wait while we process your submission...</p>' +
-        "</div></div>"
-
-      $("#submission-processing-overlay").remove()
-      $("body").append(overlayHtml)
-      $("body").css("overflow", "hidden")
-    },
-
-    showFallbackQuestionGenerationMessage: () => {
-      var overlayHtml =
-        '<div id="submission-processing-overlay" class="submission-processing-overlay">' +
-        '<div class="processing-modal">' +
-        '<div class="spinner-container"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></div>' +
-        '<h3 class="processing-title">Processing Assignment...</h3>' +
-        '<p class="processing-message">Please wait while we save your assignment and prepare to generate questions...</p>' +
-        "</div></div>"
+      if (type === "questions") {
+        overlayHtml =
+          '<div id="submission-processing-overlay" class="submission-processing-overlay">' +
+          '<div class="processing-modal">' +
+          '<div class="spinner-container"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></div>' +
+          '<h3 class="processing-title">Processing Assignment...</h3>' +
+          '<p class="processing-message">Please wait while we save your assignment and prepare to generate questions...</p>' +
+          "</div></div>"
+      } else {
+        overlayHtml =
+          '<div id="submission-processing-overlay" class="submission-processing-overlay">' +
+          '<div class="processing-modal">' +
+          '<div class="spinner-container"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></div>' +
+          '<h3 class="processing-title">Processing...</h3>' +
+          '<p class="processing-message">Please wait while we process your submission...</p>' +
+          "</div></div>"
+      }
 
       $("#submission-processing-overlay").remove()
       $("body").append(overlayHtml)
