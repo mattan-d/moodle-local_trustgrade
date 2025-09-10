@@ -1,5 +1,4 @@
-// This file is part of Moodle - http://moodle.org
-const define = require("define") // Declare the define variable
+// This file is part of Moodle - http://moodle
 define(["jquery", "core/templates", "core/str"], ($, Templates, Str) => {
   var SubmissionProcessing = {
     cmid: 0,
