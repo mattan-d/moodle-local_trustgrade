@@ -278,8 +278,37 @@ $string['processing_submission'] = 'Processing Your Submission';
 $string['processing_submission_message'] = 'Please wait while we process your assignment submission...';
 $string['processing_please_wait'] = 'Please wait...';
 
-// Question Generation Processing Strings
-$string['processing_question_generation'] = 'Processing Assignment';
-$string['processing_question_generation_message'] = 'Please wait while we save your assignment and prepare to generate questions automatically...';
+$string['blooms_level'] = 'Bloom\'s Level';
+$string['error_saving_grade_user'] = 'Error saving grade for user';
+$string['no_pending_grades'] = 'No pending grades to save.';
+$string['saving_grades'] = 'Saving...';
+$string['grades_saved_success'] = 'grades saved successfully';
+$string['error_saving_grades'] = 'Error saving grades';
+$string['clearing_grades'] = 'Clearing...';
+$string['all_grades_cleared'] = 'All grades cleared successfully';
+$string['error_clearing_grades'] = 'Error clearing grades';
+$string['grade_pending_save'] = 'Grade pending save';
+$string['saving_grade'] = 'Saving grade...';
+$string['grade_saved'] = 'Grade saved';
+$string['error_saving_grade'] = 'Error saving grade';
+$string['unsaved_changes'] = 'Unsaved changes';
+$string['enter_explanation_option'] = 'Enter explanation for this option...';
+$string['multiple_choice'] = 'Multiple Choice';
+$string['click_edit_add_question'] = 'Click edit to add question text';
+$string['click_edit_add_options'] = 'Click edit to add answer options';
+$string['explanation_for_true'] = 'Explanation for True';
+$string['explanation_for_false'] = 'Explanation for False';
+$string['enter_question_text'] = 'Enter question text...';
+$string['true_false'] = 'True/False';
+$string['short_answer'] = 'Short Answer';
+$string['option_text'] = 'Option text';
+$string['save_changes'] = 'Save Changes';
+
+// Auto-generate Questions Strings
+$string['auto_generate_questions'] = 'Create questions for this assignment';
+$string['auto_generate_questions_desc'] = 'Automatically generate questions when the assignment is saved. Questions will be created based on the assignment instructions.';
+$string['questions_generation_failed'] = 'Failed to generate questions automatically';
+$string['questions_generation_error'] = 'Error occurred during automatic question generation';
+$string['questions_will_be_generated'] = 'Questions will be generated automatically for this assignment';
 
 ?>
