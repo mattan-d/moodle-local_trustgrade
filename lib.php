@@ -14,6 +14,8 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
     }
 
     if ($PAGE->pagetype === 'mod-assign-mod') {
+        $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [0]);
+
         // Get course module ID if editing existing assignment
         $cmid = optional_param('update', 0, PARAM_INT);
 
