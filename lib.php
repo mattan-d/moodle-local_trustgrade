@@ -209,6 +209,25 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
     if (isset($data->trustgrade_questions_to_generate)) {
         $cmid = $data->coursemodule;
 
+        if (!$cmid || $cmid <= 0) {
+            \core\notification::error(get_string('invalid_course_module', 'local_trustgrade'));
+            return $data;
+        }
+
+        global $DB;
+        $cm_exists = $DB->record_exists_sql(
+            "SELECT cm.id FROM {course_modules} cm 
+             JOIN {modules} md ON md.id = cm.module 
+             JOIN {assign} m ON m.id = cm.instance 
+             WHERE cm.id = ? AND md.name = ?", 
+            [$cmid, 'assign']
+        );
+
+        if (!$cm_exists) {
+            \core\notification::error(get_string('course_module_not_found', 'local_trustgrade'));
+            return $data;
+        }
+
         $settings = [
                 'enabled' => !empty($data->trustgrade_enabled), // Save activity-level enable/disable
                 'questions_to_generate' => $data->trustgrade_questions_to_generate,
@@ -264,9 +283,10 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
                     }
                 } else {
                     $error_msg = isset($result['error']) ? $result['error'] : get_string('questions_generation_failed', 'local_trustgrade');
-                    \core\notification::error($error_msg);
+                    \core\notification::error($_msg);
                 }
             } catch (Exception $e) {
+                error_log('TrustGrade question generation error: ' . $e->getMessage() . ' for cmid: ' . $cmid);
                 \core\notification::error(get_string('questions_generation_error', 'local_trustgrade') . ': ' . $e->getMessage());
             }
         }
