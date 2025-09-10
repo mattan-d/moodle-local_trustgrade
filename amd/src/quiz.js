@@ -1,7 +1,12 @@
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Moodle - http://moodle.org
 
-
-define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notification, Str) => {
+define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"], (
+  $,
+  Ajax,
+  Notification,
+  Str,
+  Templates,
+) => {
   var Quiz = {
     session: null,
     questions: [],
@@ -69,31 +74,30 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         Str.get_string("cannot_restart_notice", "local_trustgrade"),
         Str.get_string("understand_start_quiz", "local_trustgrade"),
       ]).then((strings) => {
-        var warningHtml = `
-          <div class="quiz-integrity-warning alert alert-warning">
-            <h4><i class="fa fa-exclamation-triangle"></i> ${strings[0]}</h4>
-            <p><strong>${strings[1]}</strong></p>
-            <ul>
-              <li><strong>${strings[2]}</strong></li>
-              <li><strong>${strings[3]}</strong></li>
-              <li><strong>${strings[4]}</strong></li>
-              <li><strong>${strings[5]}</strong></li>
-              <li><strong>${strings[6]}</strong></li>
-              <li><strong>${strings[7]}</strong></li>
-              <li><strong>${strings[8]}</strong></li>
-            </ul>
-            <p class="text-danger"><strong>${strings[9]}</strong></p>
-            <div class="text-center mt-3">
-              <button id="start-quiz-btn" class="btn btn-danger btn-lg">
-                <i class="fa fa-play"></i> ${strings[10]}
-              </button>
-            </div>
-          </div>
-        `
-        $(".quiz-content").html(warningHtml)
-        $(".question-counter").hide()
-        $(".quiz-navigation").hide()
-        this.bindStartEvent()
+        var templateContext = {
+          title: strings[0],
+          subtitle: strings[1],
+          rules: [
+            strings[2], // one_attempt_only
+            strings[3], // no_going_back
+            strings[4], // no_restarts
+            strings[5], // time_limits
+            strings[6], // no_cheating
+            strings[7], // final_grade
+            strings[8], // stay_focused
+          ],
+          notice: strings[9],
+          button_text: strings[10],
+        }
+
+        Templates.render("local_trustgrade/quiz_integrity_warning", templateContext)
+          .then((html) => {
+            $(".quiz-content").html(html)
+            $(".question-counter").hide()
+            $(".quiz-navigation").hide()
+            this.bindStartEvent()
+          })
+          .catch(Notification.exception)
       })
     },
 
@@ -136,7 +140,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     startAutoSave: function () {
       this.autoSaveInterval = setInterval(() => {
         this.saveSessionState()
-      }, 10000)
+      }, 2000)
     },
 
     saveSessionState: function () {
@@ -714,9 +718,31 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     },
 
     showIntegrityViolation: function () {
+      this.saveSessionState()
+
       this.attemptCompleted = true
       this.stopTimer()
       if (this.autoSaveInterval) clearInterval(this.autoSaveInterval)
+
+      var completionUpdates = {
+        current_question: this.currentQuestion,
+        answers: this.answers,
+        time_remaining: this.timeRemaining,
+        window_blur_count: this.windowBlurCount,
+        attempt_completed: true,
+      }
+
+      Ajax.call([
+        {
+          methodname: "local_trustgrade_update_quiz_session",
+          args: {
+            cmid: this.cmid,
+            submissionid: this.submissionid,
+            updates: JSON.stringify(completionUpdates),
+          },
+        },
+      ])
+
       Promise.all([
         Str.get_string("integrity_violation_header", "local_trustgrade"),
         Str.get_string("quiz_flagged", "local_trustgrade"),
@@ -724,24 +750,27 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         Str.get_string("incident_logged", "local_trustgrade"),
         Str.get_string("progress_saved_cannot_continue", "local_trustgrade"),
       ]).then((strings) => {
-        var violationHtml = `
-          <div class="integrity-violation alert alert-danger">
-            <h2><i class="fa fa-ban"></i> ${strings[0]}</h2>
-            <p><strong>${strings[1]}</strong></p>
-            <p>${strings[2]}</p>
-            <p>${strings[3]}</p>
-            <p><strong>${strings[4]}</strong></p>
-          </div>
-        `
-        $(".quiz-content").html(violationHtml)
-        $(".quiz-navigation").hide()
-        $(".question-counter").hide()
-        $(".question-timer-container").hide()
-        this.logIntegrityViolation("integrity_violation", {
-          violation_type: "excessive_window_blur",
-          window_blur_count: this.windowBlurCount,
-          current_question: this.currentQuestion,
-        })
+        var templateContext = {
+          title: strings[0],
+          flagged_message: strings[1],
+          exceeded_message: strings[2],
+          logged_message: strings[3],
+          progress_message: strings[4],
+        }
+
+        Templates.render("local_trustgrade/quiz_integrity_violation", templateContext)
+          .then((html) => {
+            $(".quiz-content").html(html)
+            $(".quiz-navigation").hide()
+            $(".question-counter").hide()
+            $(".question-timer-container").hide()
+            this.logIntegrityViolation("integrity_violation", {
+              violation_type: "excessive_window_blur",
+              window_blur_count: this.windowBlurCount,
+              current_question: this.currentQuestion,
+            })
+          })
+          .catch(Notification.exception)
       })
     },
   }

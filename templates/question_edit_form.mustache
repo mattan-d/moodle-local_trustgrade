@@ -1,0 +1,81 @@
+{{!
+    @template local_trustgrade/question_edit_form
+
+    Question edit form template.
+
+    Context variables required for this template:
+    * index - Question index
+    * text - Question text
+    * type - Question type
+    * points - Question points
+    * bloomsLevel - Bloom's taxonomy level
+    * bloomsOptions - Array of Bloom's level options
+    * options - Array of option objects for multiple choice
+}}
+<div class="question-edit-form container-fluid px-0">
+    <div class="form-group mb-3">
+        <label for="question_text_{{index}}" class="form-label">{{#str}}question_text, local_trustgrade{{/str}}:</label>
+        <textarea class="form-control question-text-input" id="question_text_{{index}}" rows="3" placeholder="{{#str}}enter_question_text, local_trustgrade{{/str}}">{{text}}</textarea>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-md-4">
+            <div class="form-group">
+                <label for="question_type_{{index}}" class="form-label">{{#str}}type, local_trustgrade{{/str}}:</label>
+                <select class="form-control question-type-input" id="question_type_{{index}}">
+                    <option value="multiple_choice" {{#isMultipleChoice}}selected{{/isMultipleChoice}}>{{#str}}multiple_choice, local_trustgrade{{/str}}</option>
+                    <option value="true_false" {{#isTrueFalse}}selected{{/isTrueFalse}}>{{#str}}true_false, local_trustgrade{{/str}}</option>
+                    <option value="short_answer" {{#isShortAnswer}}selected{{/isShortAnswer}}>{{#str}}short_answer, local_trustgrade{{/str}}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="form-group">
+                <label for="question_points_{{index}}" class="form-label">{{#str}}points, local_trustgrade{{/str}}:</label>
+                <input type="number" class="form-control question-points-input" id="question_points_{{index}}" value="{{points}}" min="0" max="100" />
+            </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+            <div class="form-group">
+                <label for="question_blooms_{{index}}" class="form-label">{{#str}}blooms_level, local_trustgrade{{/str}}:</label>
+                <select class="form-control question-blooms-input" id="question_blooms_{{index}}">
+                    {{#bloomsOptions}}
+                    <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                    {{/bloomsOptions}}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="question-options-section mt-4">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <h6 class="mb-0">{{#str}}options, local_trustgrade{{/str}}</h6>
+        </div>
+        <div class="row text-muted small fw-semibold mb-1">
+            <div class="col-12 col-md-1">{{#str}}correct, local_trustgrade{{/str}}</div>
+            <div class="col-12 col-md-5">{{#str}}option_text, local_trustgrade{{/str}}</div>
+            <div class="col-12 col-md-6">{{#str}}explanation, local_trustgrade{{/str}}</div>
+        </div>
+
+        {{#options}}
+        <div class="row align-items-start gy-2 gx-3 mb-2 option-row">
+            <div class="col-12 col-md-1 d-flex align-items-start pt-2">
+                <input class="form-check-input mt-0 correct-answer-radio" type="radio" name="correct_answer_{{../index}}" value="{{index}}" {{#isCorrect}}checked{{/isCorrect}}>
+            </div>
+            <div class="col-12 col-md-5">
+                <input type="text" class="form-control option-text-input" placeholder="{{optionLabel}}" value="{{text}}">
+            </div>
+            <div class="col-12 col-md-6">
+                <textarea class="form-control option-explanation-input" rows="2" placeholder="{{#str}}explanation, local_trustgrade{{/str}}">{{explanation}}</textarea>
+            </div>
+        </div>
+        {{/options}}
+    </div>
+
+    <div class="question-edit-buttons mt-4 d-flex gap-2">
+        <button type="button" class="btn btn-primary save-question-btn">{{#str}}save_changes, local_trustgrade{{/str}}</button>
+        <button type="button" class="btn btn-secondary cancel-edit-btn">{{#str}}cancel, core{{/str}}</button>
+    </div>
+</div>

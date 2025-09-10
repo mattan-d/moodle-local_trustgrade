@@ -23,10 +23,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
         e.preventDefault()
         trustgrade.checkInstructions()
       })
-      $(document).on("click", "#generate-questions-btn", (e) => {
-        e.preventDefault()
-        trustgrade.generateQuestions()
-      })
       $(document).on("change", "#id_trustgrade_questions_to_generate", (e) => {
         e.preventDefault()
         trustgrade.updateSingleQuizSetting("questions_to_generate", $(e.target).val())

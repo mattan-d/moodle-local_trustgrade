@@ -125,7 +125,7 @@ class external extends \external_api {
   * Collect intro attachments as an array of files for the Gateway payload.
   * Each entry: ['filename' => ..., 'mimetype' => ..., 'size' => ..., 'content' => base64-string]
   */
- private static function collect_intro_files(int $intro_itemid, int $intro_attachments_itemid): array {
+ public static function collect_intro_files(int $intro_itemid, int $intro_attachments_itemid): array {
      global $USER;
      $filesOut = [];
 

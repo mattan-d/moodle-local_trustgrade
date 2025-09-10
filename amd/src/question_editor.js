@@ -3,7 +3,13 @@
 var define = window.define
 var M = window.M
 
-define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notification, Str) => {
+define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"], (
+  $,
+  Ajax,
+  Notification,
+  Str,
+  Templates,
+) => {
   var QuestionEditor = {
     cmid: 0,
     initialized: false,
@@ -17,6 +23,12 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
 
     bindEvents: () => {
       $(document).off("click.questioneditor").off("change.questioneditor")
+
+      $(document).on("click.questioneditor", "#add-new-question-btn", (e) => {
+        e.preventDefault()
+        QuestionEditor.addNewQuestion()
+      })
+
       $(document).on("click.questioneditor", ".edit-question-btn", function (e) {
         e.preventDefault()
         var questionItem = $(this).closest(".editable-question-item")
@@ -255,64 +267,43 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         `.editable-question-item[data-question-index="${questionIndex}"] .question-options-section`,
       )
       if (questionType === "multiple_choice") {
-        optionsSection.html(QuestionEditor.generateMultipleChoiceOptions(questionIndex))
+        const context = {
+          questionIndex: questionIndex,
+          options: [
+            { index: 0, text: "", isCorrect: true, explanation: "", optionLabel: "Option A" },
+            { index: 1, text: "", isCorrect: false, explanation: "", optionLabel: "Option B" },
+            { index: 2, text: "", isCorrect: false, explanation: "", optionLabel: "Option C" },
+            { index: 3, text: "", isCorrect: false, explanation: "", optionLabel: "Option D" },
+          ],
+        }
+        Templates.render("local_trustgrade/question_multiple_choice_options", context)
+          .then((html) => optionsSection.html(html))
+          .catch(Notification.exception)
       } else if (questionType === "true_false") {
-        QuestionEditor.generateTrueFalseOptions(questionIndex).then((html) => optionsSection.html(html))
+        const context = {
+          questionIndex: questionIndex,
+          trueSelected: true,
+          falseSelected: false,
+          trueExplanation: "",
+          falseExplanation: "",
+        }
+        Templates.render("local_trustgrade/question_true_false_options", context)
+          .then((html) => optionsSection.html(html))
+          .catch(Notification.exception)
       } else {
         optionsSection.html("")
       }
     },
 
     generateMultipleChoiceOptions: (questionIndex) => {
-      var html = '<div class="multiple-choice-options"><label>Options:</label>'
-      for (var i = 0; i < 4; i++) {
-        html += `<div class="option-row">
-    <div class="form-check">
-      <input class="form-check-input correct-answer-radio" type="radio" name="correct_answer_${questionIndex}" value="${i}" ${i === 0 ? "checked" : ""}>
-      <input type="text" class="form-control option-text-input" placeholder="Option ${String.fromCharCode(65 + i)}">
-    </div>
-    <div class="form-group mt-2">
-      <label class="form-label">Explanation</label>
-      <textarea class="form-control option-explanation-input" rows="2" placeholder="Enter explanation for this option"></textarea>
-    </div>
-  </div>`
-      }
-      html += "</div>"
-      return html
+      console.warn("generateMultipleChoiceOptions is deprecated, use updateOptionsSection instead")
+      return ""
     },
 
-    generateTrueFalseOptions: (questionIndex) =>
-      Promise.all([
-        Str.get_string("correct_answer", "local_trustgrade"),
-        Str.get_string("true", "local_trustgrade"),
-        Str.get_string("false", "local_trustgrade"),
-        Str.get_string("explanation", "local_trustgrade"),
-      ]).then((strings) => {
-        const [correctAns, trueStr, falseStr, explanationStr] = strings
-        return `<div class="true-false-options">
-    <label>${correctAns}:</label>
-    <div class="tf-row" data-value="true">
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="tf_answer_${questionIndex}" value="true" checked>
-        <label class="form-check-label tf-label">${trueStr}</label>
-      </div>
-      <div class="form-group mt-2">
-        <label class="form-label">${explanationStr}</label>
-        <textarea class="form-control option-explanation-input" rows="2" placeholder="${explanationStr} for ${trueStr}"></textarea>
-      </div>
-    </div>
-    <div class="tf-row mt-3" data-value="false">
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="tf_answer_${questionIndex}" value="false">
-        <label class="form-check-label tf-label">${falseStr}</label>
-      </div>
-      <div class="form-group mt-2">
-        <label class="form-label">${explanationStr}</label>
-        <textarea class="form-control option-explanation-input" rows="2" placeholder="${explanationStr} for ${falseStr}"></textarea>
-      </div>
-    </div>
-  </div>`
-      }),
+    generateTrueFalseOptions: (questionIndex) => {
+      console.warn("generateTrueFalseOptions is deprecated, use updateOptionsSection instead")
+      return Promise.resolve("")
+    },
 
     reindexQuestions: () => {
       Str.get_string("question", "local_trustgrade").then((str) => {
@@ -328,6 +319,103 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     reinitialize: function (cmid) {
       this.initialized = false
       this.init(cmid)
+    },
+
+    addNewQuestion: () => {
+      const questionCount = $("#question-bank-container .editable-question-item").length
+      const newIndex = questionCount
+
+      // Create a blank question object
+      const blankQuestion = {
+        id: 0,
+        type: "multiple_choice",
+        text: "",
+        options: [
+          { text: "", is_correct: true, explanation: "" },
+          { text: "", is_correct: false, explanation: "" },
+          { text: "", is_correct: false, explanation: "" },
+          { text: "", is_correct: false, explanation: "" },
+        ],
+        metadata: {
+          points: 10,
+          blooms_level: "",
+        },
+      }
+
+      const editFormContext = QuestionEditor.prepareEditFormContext(blankQuestion, newIndex)
+
+      Templates.render("local_trustgrade/question_edit_form", editFormContext)
+        .then((editFormHtml) => {
+          const context = {
+            index: newIndex,
+            cmid: QuestionEditor.cmid,
+            questionNumber: newIndex + 1,
+            editFormHtml: editFormHtml,
+          }
+          return Templates.render("local_trustgrade/question_new_item", context)
+        })
+        .then((html) => {
+          // Insert before the add button section
+          $(".add-question-section").before(html)
+
+          const newQuestionItem = $(`.editable-question-item[data-question-index="${newIndex}"]`)
+          QuestionEditor.updateOptionsSection("multiple_choice", newIndex)
+
+          // Automatically enter edit mode for the new question
+          QuestionEditor.enterEditMode(newQuestionItem)
+
+          // Focus on the question text input
+          newQuestionItem.find(".question-text-input").focus()
+        })
+        .catch(Notification.exception)
+    },
+
+    generateEditForm: (question, index) => {
+      const context = QuestionEditor.prepareEditFormContext(question, index)
+      return Templates.render("local_trustgrade/question_edit_form", context).catch((err) => {
+        Notification.exception(err)
+        return ""
+      })
+    },
+
+    prepareEditFormContext: (question, index) => {
+      const type = question.type || "multiple_choice"
+      const text = question.text || ""
+      const metadata = question.metadata || {}
+      const points = metadata.points || 10
+      const blooms = metadata.blooms_level || ""
+
+      const bloomsLevels = ["", "Remember", "Understand", "Apply", "Analyze", "Evaluate", "Create"]
+      const bloomsOptions = bloomsLevels.map((level) => ({
+        value: level,
+        label: level === "" ? "-" : level,
+        selected: blooms === level,
+      }))
+
+      const options = []
+      for (let i = 0; i < 4; i++) {
+        const opt = question.options[i] || { text: "", is_correct: i === 0, explanation: "" }
+        options.push({
+          index: i,
+          text: opt.text,
+          isCorrect: opt.is_correct,
+          explanation: opt.explanation,
+          optionLabel: `Option ${String.fromCharCode(65 + i)}`,
+        })
+      }
+
+      return {
+        index: index,
+        text: text,
+        type: type,
+        points: points,
+        bloomsLevel: blooms,
+        bloomsOptions: bloomsOptions,
+        isMultipleChoice: type === "multiple_choice",
+        isTrueFalse: type === "true_false",
+        isShortAnswer: type === "short_answer",
+        options: options,
+      }
     },
   }
 

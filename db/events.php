@@ -12,4 +12,8 @@ $observers = [
         'eventname' => '\mod_assign\event\submission_updated',
         'callback' => '\local_trustgrade\observer::submission_updated',
     ],
+    [
+        'eventname' => '\mod_assign\event\assessable_submitted',
+        'callback' => '\local_trustgrade\observer::assessable_submitted',
+    ],
 ];

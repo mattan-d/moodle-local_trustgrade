@@ -16,9 +16,11 @@ class submission_processor {
      * @param array $submission_content The student's submission content (text and files)
      * @param string $assignment_instructions The original assignment instructions
      * @param int $questions_count Number of questions to generate
+     * @param int $cmid Course module ID (optional, for metadata)
+     * @param int $userid User ID (optional, for metadata)
      * @return array Response from Gateway or error
      */
-    public static function generate_submission_questions_with_count($submission_content, $assignment_instructions = '', $questions_count = 3) {
+    public static function generate_submission_questions_with_count($submission_content, $assignment_instructions = '', $questions_count = 3, $cmid = null, $userid = null) {
         // Ensure submission_content is an array with expected keys
         if (!is_array($submission_content) || (!isset($submission_content['text']) && !isset($submission_content['files']))) {
             return ['error' => 'Submission content must be a structured array'];
@@ -34,9 +36,28 @@ class submission_processor {
         // Validate questions count
         $questions_count = max(1, min(10, intval($questions_count)));
         
+        $metadata = [];
+        if ($cmid && $userid) {
+            global $DB;
+            
+            // Get course module and course information
+            $cm = get_coursemodule_from_id('assign', $cmid);
+            if ($cm) {
+                $course = $DB->get_record('course', ['id' => $cm->course]);
+                if ($course) {
+                    $metadata = [
+                        'course_id' => $course->id,
+                        'course_name' => $course->fullname,
+                        'course_module_id' => $cmid,
+                        'user_id' => $userid
+                    ];
+                }
+            }
+        }
+        
         try {
             $gateway = new gateway_client();
-            $result = $gateway->generateSubmissionQuestions($submission_text, $assignment_instructions, $questions_count, $submission_files);
+            $result = $gateway->generateSubmissionQuestions($submission_text, $assignment_instructions, $questions_count, $submission_files, $metadata);
             
             if ($result['success']) {
                 return [

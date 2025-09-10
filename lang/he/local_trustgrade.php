@@ -214,7 +214,7 @@ $string['integrity_report_header'] = 'דוח יושרה';
 $string['integrity_recorded'] = 'מידע זה נרשם לבדיקה.';
 $string['integrity_violation_header'] = 'הפרת יושרת הערכה';
 $string['quiz_flagged'] = 'ניסיון החידון שלך סומן כפעילות חשודה.';
-$string['incident_logged'] = 'התקרית הזו נרשמה וrebbeדק על ידי המדריך שלך.';
+$string['incident_logged'] = 'אירוע זה נרשם וייבחן על ידי המורה שלך.';
 $string['progress_saved_cannot_continue'] = 'ההתקדמות הנוכחית שלך נשמרה, אבל לא תוכל להמשיך בהערכה.';
 $string['failed_save_contact_instructor'] = 'נכשל בשמירת תוצאות סופיות. אנא פנה למדריך שלך.';
 $string['understand_start_quiz'] = 'הבנתי - התחל חידון';
@@ -247,7 +247,7 @@ $string['criterion'] = 'קריטריון';
 $string['met'] = 'הושג';
 $string['suggestions'] = 'הצעות';
 $string['evaluation'] = 'הערכה';
-$string['improved_assignment'] = 'משימה משופרת';
+$string['improved_assignment'] = 'מטלה משופרת';
 $string['no_criteria_provided'] = 'לא סופקו קריטריונים.';
 $string['recommendation_error'] = 'שגיאה בהצגת ההמלצה.';
 
@@ -265,19 +265,49 @@ $string['save_assignment_first'] = 'אנא שמור את המטלה תחילה �
 
 // Question Bank Functionality Strings
 $string['question_bank'] = 'בנק שאלות';
-$string['question_bank_description'] = 'נהל את השאלות שנוצרו על ידי בינה מלאכותית. תוכל לצפות, לערוך, למחוק שאלות קיימות, או ליצור חדשות.';
+$string['question_bank_description'] = 'נהל את השאלות שנוצרו על ידי AI. אתה יכול לצפות, לערוך, למחוק שאלות קיימות, או ליצור חדשות.';
 $string['no_questions_found'] = 'לא נמצאו שאלות. צור כמה שאלות כדי להתחיל.';
-$string['question_text'] = 'טקסט השאלה';
+$string['question_text'] = 'טקסט שאלה';
 $string['questions_generated_successfully'] = 'שאלות נוצרו בהצלחה';
 $string['error_generating_questions'] = 'שגיאה ביצירת שאלות';
 $string['confirm_delete_question'] = 'האם אתה בטוח שברצונך למחוק שאלה זו? פעולה זו לא ניתנת לביטול.';
-$string['question_deleted_successfully'] = 'השאלה נמחקה בהצלחה';
-$string['error_deleting_question'] = 'שגיאה במחיקת השאלה';
+$string['question_deleted_successfully'] = 'שאלה נמחקה בהצלחה';
+$string['error_deleting_question'] = 'שגיאה במחיקת שאלה';
 $string['plugindisabled'] = 'תוסף TrustGrade מושבת';
-$string['trustgradedisabled'] = 'TrustGrade מושבת למטלה זו';
+$string['trustgradedisabled'] = 'TrustGrade מושבת עבור מטלה זו';
 
 // Submission Processing Language Strings
 $string['processing_submission'] = 'מעבד את ההגשה שלך';
-$string['processing_submission_message'] = 'אנא המתן בזמן שאנו מעבדים את ההגשה שלך...';
+$string['processing_submission_message'] = 'אנא המתן בעוד אנו מעבדים את הגשת המטלה שלך...';
 $string['processing_please_wait'] = 'אנא המתן...';
-?>
+
+$string['blooms_level'] = 'רמת בלום';
+$string['error_saving_grade_user'] = 'שגיאה בשמירת ציון למשתמש';
+$string['no_pending_grades'] = 'אין ציונים ממתינים לשמירה.';
+$string['saving_grades'] = 'שומר...';
+$string['grades_saved_success'] = 'ציונים נשמרו בהצלחה';
+$string['error_saving_grades'] = 'שגיאה בשמירת ציונים';
+$string['clearing_grades'] = 'מנקה...';
+$string['all_grades_cleared'] = 'כל הציונים נמחקו בהצלחה';
+$string['error_clearing_grades'] = 'שגיאה במחיקת ציונים';
+$string['grade_pending_save'] = 'ציון ממתין לשמירה';
+$string['saving_grade'] = 'שומר ציון...';
+$string['grade_saved'] = 'ציון נשמר';
+$string['error_saving_grade'] = 'שגיאה בשמירת ציון';
+$string['unsaved_changes'] = 'שינויים לא שמורים';
+$string['enter_explanation_option'] = 'הכנס הסבר עבור אפשרות זו...';
+$string['multiple_choice'] = 'רב-ברירה';
+$string['click_edit_add_question'] = 'לחץ עריכה להוספת טקסט שאלה';
+$string['click_edit_add_options'] = 'לחץ עריכה להוספת אפשרויות תשובה';
+$string['explanation_for_true'] = 'הסבר עבור נכון';
+$string['explanation_for_false'] = 'הסבר עבור לא נכון';
+$string['enter_question_text'] = 'הכנס טקסט שאלה...';
+$string['true_false'] = 'נכון/לא נכון';
+$string['short_answer'] = 'תשובה קצרה';
+$string['option_text'] = 'טקסט אפשרות';
+$string['save_changes'] = 'שמירת שינויים';
+
+$string['auto_generate_questions'] = 'צור שאלות עבור מטלה זו';
+$string['auto_generate_questions_desc'] = 'צור שאלות באופן אוטומטי כאשר המטלה נשמרת. השאלות ייווצרו על בסיס הוראות המטלה.';
+$string['questions_generation_failed'] = 'יצירת השאלות האוטומטית נכשלה';
+$string['questions_generation_error'] = 'אירעה שגיאה במהלך יצירת השאלות האוטומטית';
