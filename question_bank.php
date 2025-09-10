@@ -45,6 +45,38 @@ echo $OUTPUT->header();
 
 echo $OUTPUT->heading(get_string('question_bank', 'local_trustgrade'));
 
+?>
+
+<div class="question-generation-section mb-4">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><?php echo get_string('generate_questions', 'local_trustgrade'); ?></h5>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-end">
+                <div class="col-md-3">
+                    <label for="questions-count" class="form-label">
+                        <?php echo get_string('number_of_questions', 'local_trustgrade'); ?>
+                    </label>
+                    <input type="number" id="questions-count" class="form-control" 
+                           value="5" min="1" max="10">
+                </div>
+                <div class="col-md-9">
+                    <button type="button" id="generate-new-questions" class="btn btn-primary">
+                        <i class="fa fa-magic"></i> <?php echo get_string('generate_questions', 'local_trustgrade'); ?>
+                    </button>
+                    <div id="generation-loading" class="spinner-border spinner-border-sm ms-2" 
+                         style="display: none;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php
+
 $questions = \local_trustgrade\question_generator::get_questions($cmid);
 
 ?>
