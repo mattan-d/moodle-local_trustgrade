@@ -281,6 +281,10 @@ $string['processing_submission'] = 'מעבד את ההגשה שלך';
 $string['processing_submission_message'] = 'אנא המתן בעוד אנו מעבדים את הגשת המטלה שלך...';
 $string['processing_please_wait'] = 'אנא המתן...';
 
+// Question Generation Processing Strings
+$string['processing_question_generation'] = 'מעבד מטלה';
+$string['processing_question_generation_message'] = 'אנא המתן בעוד אנו שומרים את המטלה שלך ומכינים ליצור שאלות באופן אוטומטי...';
+
 $string['blooms_level'] = 'רמת בלום';
 $string['error_saving_grade_user'] = 'שגיאה בשמירת ציון למשתמש';
 $string['no_pending_grades'] = 'אין ציונים ממתינים לשמירה.';

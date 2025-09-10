@@ -221,6 +221,10 @@ function local_trustgrade_before_standard_html_head() {
         $PAGE->requires->css('/local/trustgrade/styles.css');
     }
 
+    if ($PAGE->pagetype === 'course-modedit') {
+        $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [0]);
+    }
+
     // Check if this is an assignment view page
     if ($PAGE->pagetype === 'mod-assign-view') {
         $cmid = optional_param('id', 0, PARAM_INT);

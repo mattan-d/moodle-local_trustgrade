@@ -110,6 +110,9 @@ importers:
       date-fns:
         specifier: 4.1.0
         version: 4.1.0
+      define:
+        specifier: 1.0.1
+        version: 1.0.1
       embla-carousel-react:
         specifier: 8.5.1
         version: 8.5.1(react@19.0.0)
@@ -1181,6 +1184,9 @@ packages:
 
   decimal.js-light@2.5.1:
     resolution: {integrity: sha512-qIMFpTMZmny+MMIitAB6D7iVPEorVw6YQRWkvarTkT4tBeSLLiHzcwj6q0MmYSFCiVpiqPJTJEYIrpcPzVEIvg==}
+
+  define@1.0.1:
+    resolution: {integrity: sha512-88KsZRGqPPRvVzS0iJOF6rQeWJ78xwgc/CqkrJN4aYqRa7AsMWABdgWbZciMPaRVqh5tqPEckfVh+1BvTlaLMw==}
 
   detect-node-es@1.1.0:
     resolution: {integrity: sha512-ypdmJU/TbBby2Dxibuv7ZLW3Bs1QEmM7nHjEANfohJLvE0XVujisn1qPJcZxg+qDucsr+bP6fLD1rPS3AhJ7EQ==}
@@ -2776,6 +2782,8 @@ snapshots:
   date-fns@4.1.0: {}
 
   decimal.js-light@2.5.1: {}
+
+  define@1.0.1: {}
 
   detect-node-es@1.1.0: {}
 
