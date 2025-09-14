@@ -226,16 +226,20 @@ class observer {
             'files' => []
         ];
 
+        $assignment_context = \context_module::instance($context->instanceid);
+        
         // Get files attached to assignment intro
         $fs = get_file_storage();
         $files = $fs->get_area_files(
-            $context->id,
+            $assignment_context->id,
             'mod_assign',
             'intro',
             0, // itemid is 0 for intro files
             'timemodified',
             false
         );
+
+        error_log('TrustGrade: Looking for intro files in context ' . $assignment_context->id . ', found ' . count($files) . ' files');
 
         foreach ($files as $file) {
             if ($file->is_directory()) {
@@ -244,6 +248,7 @@ class observer {
 
             $file_content = $file->get_content();
             if (!empty($file_content)) {
+                error_log('TrustGrade: Found intro file: ' . $file->get_filename() . ' (' . $file->get_filesize() . ' bytes)');
                 $instructions['files'][] = [
                     'filename' => $file->get_filename(),
                     'mimetype' => $file->get_mimetype(),
