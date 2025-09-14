@@ -226,20 +226,22 @@ class observer {
             'files' => []
         ];
 
-        $assignment_context = \context_module::instance($context->instanceid);
+        // Get files attached to assignment intro using the external class method
+        // Note: For published assignments, intro files are stored in the assignment context
+        // We need to get the intro itemid from the assignment intro field
+        $intro_itemid = 0;
+        $intro_attachments_itemid = 0;
         
-        // Get files attached to assignment intro
+        // Try to get files from the assignment intro area directly
         $fs = get_file_storage();
         $files = $fs->get_area_files(
-            $assignment_context->id,
+            $context->id,
             'mod_assign',
             'intro',
-            0, // itemid is 0 for intro files
+            0, // itemid is 0 for intro files in published assignments
             'timemodified',
             false
         );
-
-        error_log('TrustGrade: Looking for intro files in context ' . $assignment_context->id . ', found ' . count($files) . ' files');
 
         foreach ($files as $file) {
             if ($file->is_directory()) {
@@ -248,7 +250,6 @@ class observer {
 
             $file_content = $file->get_content();
             if (!empty($file_content)) {
-                error_log('TrustGrade: Found intro file: ' . $file->get_filename() . ' (' . $file->get_filesize() . ' bytes)');
                 $instructions['files'][] = [
                     'filename' => $file->get_filename(),
                     'mimetype' => $file->get_mimetype(),
