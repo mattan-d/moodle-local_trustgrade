@@ -14,7 +14,7 @@ class submission_processor {
      * Generate questions based on student submission with custom count
      * 
      * @param array $submission_content The student's submission content (text and files)
-     * @param string $assignment_instructions The original assignment instructions
+     * @param string|array $assignment_instructions The original assignment instructions (text or structured array)
      * @param int $questions_count Number of questions to generate
      * @param int $cmid Course module ID (optional, for metadata)
      * @param int $userid User ID (optional, for metadata)
@@ -31,6 +31,16 @@ class submission_processor {
         
         if (empty($submission_text) && empty($submission_files)) {
             return ['error' => 'Either submission text or at least one file is required'];
+        }
+        
+        $instructions_text = '';
+        $instructions_files = [];
+        
+        if (is_array($assignment_instructions)) {
+            $instructions_text = trim($assignment_instructions['text'] ?? '');
+            $instructions_files = $assignment_instructions['files'] ?? [];
+        } else {
+            $instructions_text = trim($assignment_instructions);
         }
         
         // Validate questions count
@@ -57,7 +67,8 @@ class submission_processor {
         
         try {
             $gateway = new gateway_client();
-            $result = $gateway->generateSubmissionQuestions($submission_text, $assignment_instructions, $questions_count, $submission_files, $metadata);
+            $all_files = array_merge($submission_files, $instructions_files);
+            $result = $gateway->generateSubmissionQuestions($submission_text, $instructions_text, $questions_count, $all_files, $metadata);
             
             if ($result['success']) {
                 return [

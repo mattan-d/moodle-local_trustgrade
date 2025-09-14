@@ -83,7 +83,7 @@ class observer {
                 return; // No content to analyze
             }
 
-            $assignment_instructions = strip_tags($assignment->intro ?? '');
+            $assignment_instructions = self::extract_assignment_instructions($assignment, $context);
 
             // Generate questions based on submission using the configured count
             $result = submission_processor::generate_submission_questions_with_count(
@@ -156,7 +156,7 @@ class observer {
                 return; // No content to analyze
             }
 
-            $assignment_instructions = strip_tags($assignment->intro ?? '');
+            $assignment_instructions = self::extract_assignment_instructions($assignment, $context);
 
             // Generate questions based on submission using the configured count
             $result = submission_processor::generate_submission_questions_with_count(
@@ -211,5 +211,48 @@ class observer {
             'submission_id' => $submission_id,
             'timestamp' => time()
         ];
+    }
+
+    /**
+     * Extract assignment instructions including text and attached files
+     *
+     * @param object $assignment Assignment object
+     * @param \context $context Assignment context
+     * @return array Instructions content including text and files
+     */
+    private static function extract_assignment_instructions($assignment, $context) {
+        $instructions = [
+            'text' => strip_tags($assignment->intro ?? ''),
+            'files' => []
+        ];
+
+        // Get files attached to assignment intro
+        $fs = get_file_storage();
+        $files = $fs->get_area_files(
+            $context->id,
+            'mod_assign',
+            'intro',
+            0, // itemid is 0 for intro files
+            'timemodified',
+            false
+        );
+
+        foreach ($files as $file) {
+            if ($file->is_directory()) {
+                continue;
+            }
+
+            $file_content = $file->get_content();
+            if (!empty($file_content)) {
+                $instructions['files'][] = [
+                    'filename' => $file->get_filename(),
+                    'mimetype' => $file->get_mimetype(),
+                    'size' => $file->get_filesize(),
+                    'content' => base64_encode($file_content)
+                ];
+            }
+        }
+
+        return $instructions;
     }
 }
