@@ -226,24 +226,32 @@ class observer {
             'files' => []
         ];
 
-        // Get files attached to assignment intro using the external class method
-        // Note: For published assignments, intro files are stored in the assignment context
-        // We need to get the intro itemid from the assignment intro field
-        $intro_itemid = 0;
-        $intro_attachments_itemid = 0;
-        
-        // Try to get files from the assignment intro area directly
         $fs = get_file_storage();
-        $files = $fs->get_area_files(
+        
+        // Get files from intro area
+        $intro_files = $fs->get_area_files(
             $context->id,
             'mod_assign',
             'intro',
-            0, // itemid is 0 for intro files in published assignments
+            0, // itemid is 0 for intro files
             'timemodified',
             false
         );
+        
+        // Get files from introattachment area
+        $attachment_files = $fs->get_area_files(
+            $context->id,
+            'mod_assign',
+            'introattachment',
+            0, // itemid is 0 for intro attachment files
+            'timemodified',
+            false
+        );
+        
+        // Combine both file arrays
+        $all_files = array_merge($intro_files ?: [], $attachment_files ?: []);
 
-        foreach ($files as $file) {
+        foreach ($all_files as $file) {
             if ($file->is_directory()) {
                 continue;
             }
