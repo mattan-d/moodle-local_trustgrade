@@ -593,7 +593,7 @@ class report_renderer extends \plugin_renderer_base {
 
         $order = $this->get_display_order($question, $user_answer, count($options));
 
-        $html = html_writer::start_tag('ol', ['type' => 'A', 'class' => 'mt-2 mb-0']);
+        $html = html_writer::start_div('question-options mt-2 mb-0');
 
         // Iterate over display order to show what the student actually saw.
         foreach ($order as $displayIndex => $baseIndex) {
@@ -602,9 +602,15 @@ class report_renderer extends \plugin_renderer_base {
             }
             $opt = $options[$baseIndex];
             $class = !empty($opt->is_correct) ? 'text-success font-weight-bold' : '';
-            $html .= html_writer::tag('li', $opt->text, ['class' => $class]);
+            $letter = chr(65 + $displayIndex); // A, B, C, etc.
+            
+            $html .= html_writer::div(
+                html_writer::tag('strong', $letter . '. ', ['class' => 'option-letter']) . 
+                html_writer::span($opt->text, $class),
+                'option-item mb-1'
+            );
         }
-        $html .= html_writer::end_tag('ol');
+        $html .= html_writer::end_div();
 
         return $html;
     }
