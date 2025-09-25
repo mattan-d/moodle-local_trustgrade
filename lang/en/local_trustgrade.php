@@ -356,11 +356,11 @@ $string['questions_generation_error'] = 'Error occurred during automatic questio
 $string['questions_will_be_generated'] = 'Questions will be generated automatically for this assignment';
 
 // Bloom's taxonomy level strings
-$string['blooms_remember'] = 'Remember';
-$string['blooms_understand'] = 'Understand';
-$string['blooms_apply'] = 'Apply';
-$string['blooms_analyze'] = 'Analyze';
-$string['blooms_evaluate'] = 'Evaluate';
+$string['blooms_remembering'] = 'Remember';
+$string['blooms_understanding'] = 'Understand';
+$string['blooms_applying'] = 'Apply';
+$string['blooms_analyzing'] = 'Analyze';
+$string['blooms_evaluating'] = 'Evaluate';
 $string['blooms_create'] = 'Create';
 $string['blooms_level_label'] = 'Bloom\'s Level';
 

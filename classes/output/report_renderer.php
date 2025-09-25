@@ -33,12 +33,12 @@ class report_renderer extends \plugin_renderer_base {
         // Render the report as a table
         $table = new \html_table();
         $table->head = [
-            get_string('defaultcoursestudent'),
-            get_string('quiz_score', 'local_trustgrade'),
-            get_string('completed_on', 'local_trustgrade'),
-            get_string('time_taken', 'local_trustgrade'),
-            get_string('final_grade', 'local_trustgrade'),
-            get_string('details', 'local_trustgrade')
+                get_string('defaultcoursestudent'),
+                get_string('quiz_score', 'local_trustgrade'),
+                get_string('completed_on', 'local_trustgrade'),
+                get_string('time_taken', 'local_trustgrade'),
+                get_string('final_grade', 'local_trustgrade'),
+                get_string('details', 'local_trustgrade')
         ];
         $table->attributes['class'] = 'table table-striped table-bordered grading-table';
         $table->id = 'quiz-report-table';
@@ -63,7 +63,7 @@ class report_renderer extends \plugin_renderer_base {
                 $row->cells[] = fullname($session);
 
                 // Quiz Score
-                $questions = (array)$session->questions_data;
+                $questions = (array) $session->questions_data;
                 $total_points = 0;
                 foreach ($questions as $question) {
                     $total_points += isset($question->points) ? $question->points : 10;
@@ -89,11 +89,11 @@ class report_renderer extends \plugin_renderer_base {
 
                 // Details button
                 $details_button = html_writer::tag('button', get_string('view_details', 'local_trustgrade'), [
-                    'class' => 'btn btn-secondary btn-sm',
-                    'data-toggle' => 'collapse',
-                    'data-target' => '#' . $collapse_id,
-                    'aria-expanded' => 'false',
-                    'aria-controls' => $collapse_id
+                        'class' => 'btn btn-secondary btn-sm',
+                        'data-toggle' => 'collapse',
+                        'data-target' => '#' . $collapse_id,
+                        'aria-expanded' => 'false',
+                        'aria-controls' => $collapse_id
                 ]);
                 $row->cells[] = $details_button;
 
@@ -139,32 +139,32 @@ class report_renderer extends \plugin_renderer_base {
         $html .= html_writer::start_div('btn-group', ['role' => 'group']);
 
         $html .= html_writer::tag('button',
-            '<i class="fa fa-save"></i> ' . get_string('save_all_pending', 'local_trustgrade'),
-            [
-                'id' => 'bulk-save-grades',
-                'class' => 'btn btn-primary',
-                'style' => 'display: none;'
-            ]
+                '<i class="fa fa-save"></i> ' . get_string('save_all_pending', 'local_trustgrade'),
+                [
+                        'id' => 'bulk-save-grades',
+                        'class' => 'btn btn-primary',
+                        'style' => 'display: none;'
+                ]
         );
 
         // Auto-grade button - only show if there are completed sessions
         if (!empty($sessions)) {
             $html .= html_writer::tag('button',
-                '<i class="fa fa-magic"></i> ' . get_string('auto_grade_by_quiz', 'local_trustgrade'),
-                [
-                    'id' => 'auto-grade-by-quiz',
-                    'class' => 'btn btn-success',
-                    'title' => get_string('auto_grade_by_quiz_desc', 'local_trustgrade')
-                ]
+                    '<i class="fa fa-magic"></i> ' . get_string('auto_grade_by_quiz', 'local_trustgrade'),
+                    [
+                            'id' => 'auto-grade-by-quiz',
+                            'class' => 'btn btn-success',
+                            'title' => get_string('auto_grade_by_quiz_desc', 'local_trustgrade')
+                    ]
             );
         }
 
         $html .= html_writer::tag('button',
-            '<i class="fa fa-eraser"></i> ' . get_string('clear_all_grades', 'local_trustgrade'),
-            [
-                'id' => 'clear-all-grades',
-                'class' => 'btn btn-outline-secondary'
-            ]
+                '<i class="fa fa-eraser"></i> ' . get_string('clear_all_grades', 'local_trustgrade'),
+                [
+                        'id' => 'clear-all-grades',
+                        'class' => 'btn btn-outline-secondary'
+                ]
         );
 
         $html .= html_writer::end_div(); // btn-group
@@ -173,8 +173,8 @@ class report_renderer extends \plugin_renderer_base {
         // Right side - status
         $html .= html_writer::start_div('col-md-4 text-right');
         $html .= html_writer::span('', 'pending-grades-status', [
-            'id' => 'pending-grades-count',
-            'style' => 'display: none;'
+                'id' => 'pending-grades-count',
+                'style' => 'display: none;'
         ]);
         $html .= html_writer::end_div(); // col-md-4
 
@@ -183,8 +183,8 @@ class report_renderer extends \plugin_renderer_base {
         // Instructions
         $html .= html_writer::start_div('grading-instructions mt-2');
         $html .= html_writer::tag('small',
-            '<i class="fa fa-info-circle"></i> ' . get_string('grading_instructions', 'local_trustgrade'),
-            ['class' => 'text-muted']
+                '<i class="fa fa-info-circle"></i> ' . get_string('grading_instructions', 'local_trustgrade'),
+                ['class' => 'text-muted']
         );
         $html .= html_writer::end_div();
 
@@ -208,8 +208,8 @@ class report_renderer extends \plugin_renderer_base {
 
         // Grade label
         $html .= html_writer::tag('label', get_string('final_grade', 'local_trustgrade'), [
-            'for' => 'grade_' . $userid,
-            'class' => 'grade-label sr-only'
+                'for' => 'grade_' . $userid,
+                'class' => 'grade-label sr-only'
         ]);
 
         // Input group
@@ -217,21 +217,21 @@ class report_renderer extends \plugin_renderer_base {
 
         // Grade input
         $html .= html_writer::empty_tag('input', [
-            'type' => 'number',
-            'id' => 'grade_' . $userid,
-            'class' => 'form-control grade-input',
-            'data-userid' => $userid,
-            'value' => $grade_value,
-            'placeholder' => '0.00',
-            'step' => '0.01',
-            'min' => '0',
-            'style' => 'width: 100px;'
+                'type' => 'number',
+                'id' => 'grade_' . $userid,
+                'class' => 'form-control grade-input',
+                'data-userid' => $userid,
+                'value' => $grade_value,
+                'placeholder' => '0.00',
+                'step' => '0.01',
+                'min' => '0',
+                'style' => 'width: 100px;'
         ]);
 
         // Status icon
         $html .= html_writer::start_div('input-group-append');
         $html .= html_writer::span('', 'input-group-text grade-status-icon', [
-            'title' => get_string('grade_status', 'local_trustgrade')
+                'title' => get_string('grade_status', 'local_trustgrade')
         ]);
         $html .= html_writer::end_div();
 
@@ -266,7 +266,7 @@ class report_renderer extends \plugin_renderer_base {
         $html .= html_writer::end_div();
 
         $html .= html_writer::start_div('col-md-4');
-        $questions = (array)$session->questions_data;
+        $questions = (array) $session->questions_data;
         $total_points = 0;
         foreach ($questions as $question) {
             $total_points += isset($question->points) ? $question->points : 10;
@@ -283,7 +283,7 @@ class report_renderer extends \plugin_renderer_base {
         // Integrity summary
         $html .= html_writer::tag('h5', get_string('integrity_summary', 'local_trustgrade'));
         $blur_count = $session->window_blur_count ?? 0;
-        $violations = (array)$session->integrity_violations;
+        $violations = (array) $session->integrity_violations;
 
         $html .= html_writer::start_div('alert alert-' . ($blur_count > 0 || !empty($violations) ? 'warning' : 'success'));
         $html .= html_writer::tag('p', get_string('window_blur_events', 'local_trustgrade') . ': ' . $blur_count);
@@ -293,8 +293,8 @@ class report_renderer extends \plugin_renderer_base {
             $html .= html_writer::start_tag('ul');
             foreach ($violations as $violation) {
                 $html .= html_writer::tag('li',
-                    ucfirst(str_replace('_', ' ', $violation->type)) .
-                    ' (' . userdate($violation->timestamp) . ')'
+                        ucfirst(str_replace('_', ' ', $violation->type)) .
+                        ' (' . userdate($violation->timestamp) . ')'
                 );
             }
             $html .= html_writer::end_tag('ul');
@@ -327,8 +327,8 @@ class report_renderer extends \plugin_renderer_base {
         ];
         $table->attributes['class'] = 'table table-striped table-bordered';
 
-        $questions = (array)$session->questions_data;
-        $answers = (array)$session->answers_data;
+        $questions = (array) $session->questions_data;
+        $answers = (array) $session->answers_data;
 
         foreach ($questions as $index => $question) {
             // Get the user's answer for this question index
@@ -348,8 +348,10 @@ class report_renderer extends \plugin_renderer_base {
             $earned_points = $is_correct ? $question_points : 0;
 
             $result_icon = $is_correct
-                ? $this->output->pix_icon('i/valid', get_string('correct', 'local_trustgrade'), 'moodle', ['class' => 'text-success'])
-                : $this->output->pix_icon('i/invalid', get_string('incorrect', 'local_trustgrade'), 'moodle', ['class' => 'text-danger']);
+                    ? $this->output->pix_icon('i/valid', get_string('correct', 'local_trustgrade'), 'moodle',
+                            ['class' => 'text-success'])
+                    : $this->output->pix_icon('i/invalid', get_string('incorrect', 'local_trustgrade'), 'moodle',
+                            ['class' => 'text-danger']);
 
             $row = new \html_table_row();
             $row->cells[] = chr(65 + $index);
@@ -357,13 +359,15 @@ class report_renderer extends \plugin_renderer_base {
 
             // Question cell with source badge
             $question_cell = html_writer::div(
-                html_writer::span(
-                    $this->format_question_source($question->source ?? 'instructor'),
-                    'badge badge-' . (($question->source ?? 'instructor') === 'instructor' ? 'primary' : 'success') . ' mb-2'
-                ) .
-                html_writer::tag('div', format_text($this->get_question_text($question), FORMAT_HTML), ['class' => 'question-text']) .
-                $this->render_question_options($question, $user_answer),
-                'question-container'
+                    html_writer::span(
+                            $this->format_question_source($question->source ?? 'instructor'),
+                            'badge badge-' . (($question->source ?? 'instructor') === 'instructor' ? 'primary' : 'success') .
+                            ' mb-2'
+                    ) .
+                    html_writer::tag('div', format_text($this->get_question_text($question), FORMAT_HTML),
+                            ['class' => 'question-text']) .
+                    $this->render_question_options($question, $user_answer),
+                    'question-container'
             );
             $row->cells[] = $question_cell;
 
@@ -401,19 +405,21 @@ class report_renderer extends \plugin_renderer_base {
                 $selectedBaseIndex = $this->display_to_base_index($selectedDisplayIndex, $order);
 
                 $raw_answer_display = html_writer::div(
-                    html_writer::tag('small', get_string('raw_answer_value', 'local_trustgrade') . ': ') .
-                    html_writer::tag('code', var_export($user_answer, true)),
-                    'text-muted mb-1'
+                        html_writer::tag('small', get_string('raw_answer_value', 'local_trustgrade') . ': ') .
+                        html_writer::tag('code', var_export(($user_answer + 1), true)),
+                        'text-muted mb-1'
                 );
 
                 if ($selectedBaseIndex !== null && isset($options[$selectedBaseIndex])) {
-                    $label = chr(65 + max(0, (int)$selectedDisplayIndex));
+                    $label = chr(65 + max(0, (int) $selectedDisplayIndex));
                     $text = $options[$selectedBaseIndex]->text;
-                    return $raw_answer_display . html_writer::div(html_writer::tag('strong', $label . '. ') . $text, 'text-primary');
+                    return $raw_answer_display .
+                            html_writer::div(html_writer::tag('strong', ($selectedDisplayIndex + 1) . '. ') . $text,
+                                    'text-primary');
                 } else {
                     $invalid_display = html_writer::span(
-                        get_string('invalid_option_selected', 'local_trustgrade'),
-                        'text-danger font-weight-bold'
+                            get_string('invalid_option_selected', 'local_trustgrade'),
+                            'text-danger font-weight-bold'
                     );
                     return $raw_answer_display . $invalid_display;
                 }
@@ -421,9 +427,9 @@ class report_renderer extends \plugin_renderer_base {
             case 'true_false':
                 // Legacy support if still present.
                 $raw_answer_display = html_writer::div(
-                    html_writer::tag('small', get_string('raw_answer_value', 'local_trustgrade') . ': ') .
-                    html_writer::tag('code', var_export($user_answer, true)),
-                    'text-muted mb-1'
+                        html_writer::tag('small', get_string('raw_answer_value', 'local_trustgrade') . ': ') .
+                        html_writer::tag('code', var_export($user_answer, true)),
+                        'text-muted mb-1'
                 );
 
                 if ($user_answer === true || $user_answer === 'true' || $user_answer === 1 || $user_answer === '1') {
@@ -432,8 +438,8 @@ class report_renderer extends \plugin_renderer_base {
                     return $raw_answer_display . html_writer::div(get_string('false', 'local_trustgrade'), 'text-primary');
                 } else {
                     $invalid_display = html_writer::span(
-                        get_string('invalid_boolean_value', 'local_trustgrade'),
-                        'text-danger font-weight-bold'
+                            get_string('invalid_boolean_value', 'local_trustgrade'),
+                            'text-danger font-weight-bold'
                     );
                     return $raw_answer_display . $invalid_display;
                 }
@@ -443,13 +449,13 @@ class report_renderer extends \plugin_renderer_base {
 
             default:
                 return html_writer::div(
-                    html_writer::tag('small', get_string('raw_answer_value', 'local_trustgrade') . ': ') .
-                    html_writer::tag('code', var_export($user_answer, true)) .
-                    html_writer::div(
-                        html_writer::span(get_string('unknown_question_type', 'local_trustgrade'), 'text-warning'),
-                        'mt-1'
-                    ),
-                    'text-muted'
+                        html_writer::tag('small', get_string('raw_answer_value', 'local_trustgrade') . ': ') .
+                        html_writer::tag('code', var_export($user_answer, true)) .
+                        html_writer::div(
+                                html_writer::span(get_string('unknown_question_type', 'local_trustgrade'), 'text-warning'),
+                                'mt-1'
+                        ),
+                        'text-muted'
                 );
         }
     }
@@ -485,8 +491,8 @@ class report_renderer extends \plugin_renderer_base {
 
                 if (empty($correctItems)) {
                     // Legacy fallback: single index on $question->correct_answer
-                    if (isset($question->correct_answer) && isset($options[(int)$question->correct_answer])) {
-                        $baseIndex = (int)$question->correct_answer;
+                    if (isset($question->correct_answer) && isset($options[(int) $question->correct_answer])) {
+                        $baseIndex = (int) $question->correct_answer;
                         $displayIndex = $this->base_to_display_index($baseIndex, $order);
                         $label = $displayIndex !== null ? chr(65 + $displayIndex) . '. ' : '';
                         return $label . $options[$baseIndex]->text;
@@ -499,8 +505,9 @@ class report_renderer extends \plugin_renderer_base {
 
             case 'true_false':
                 return isset($question->correct_answer)
-                    ? ($question->correct_answer ? get_string('true', 'local_trustgrade') : get_string('false', 'local_trustgrade'))
-                    : get_string('not_available', 'local_trustgrade');
+                        ? ($question->correct_answer ? get_string('true', 'local_trustgrade') :
+                                get_string('false', 'local_trustgrade'))
+                        : get_string('not_available', 'local_trustgrade');
 
             case 'short_answer':
                 return html_writer::span(get_string('manual_grading_required', 'local_trustgrade'), 'text-info font-italic');
@@ -523,7 +530,8 @@ class report_renderer extends \plugin_renderer_base {
         }
 
         switch ($question->type) {
-            case 'multiple_choice': {
+            case 'multiple_choice':
+            {
                 $options = $this->normalize_options($question);
                 if (empty($options)) {
                     return false;
@@ -534,8 +542,8 @@ class report_renderer extends \plugin_renderer_base {
 
                 if ($selectedBaseIndex === null || !isset($options[$selectedBaseIndex])) {
                     // Legacy fallback: if user_answer is a base index directly.
-                    if (is_numeric($user_answer) && isset($options[(int)$user_answer])) {
-                        $selectedBaseIndex = (int)$user_answer;
+                    if (is_numeric($user_answer) && isset($options[(int) $user_answer])) {
+                        $selectedBaseIndex = (int) $user_answer;
                     } else {
                         return false;
                     }
@@ -543,18 +551,19 @@ class report_renderer extends \plugin_renderer_base {
 
                 // Primary: per-option is_correct.
                 if (isset($options[$selectedBaseIndex]->is_correct)) {
-                    return (bool)$options[$selectedBaseIndex]->is_correct;
+                    return (bool) $options[$selectedBaseIndex]->is_correct;
                 }
 
                 // Legacy fallback: compare to question->correct_answer
                 if (isset($question->correct_answer)) {
-                    return (int)$selectedBaseIndex === (int)$question->correct_answer;
+                    return (int) $selectedBaseIndex === (int) $question->correct_answer;
                 }
 
                 return false;
             }
 
-            case 'true_false': {
+            case 'true_false':
+            {
                 $user_bool = null;
                 if ($user_answer === true || $user_answer === 'true' || $user_answer === 1 || $user_answer === '1') {
                     $user_bool = true;
@@ -562,11 +571,11 @@ class report_renderer extends \plugin_renderer_base {
                     $user_bool = false;
                 }
 
-                return $user_bool !== null && isset($question->correct_answer) && $user_bool === (bool)$question->correct_answer;
+                return $user_bool !== null && isset($question->correct_answer) && $user_bool === (bool) $question->correct_answer;
             }
 
             case 'short_answer':
-                return !empty(trim((string)$user_answer));
+                return !empty(trim((string) $user_answer));
 
             default:
                 return false;
@@ -602,12 +611,11 @@ class report_renderer extends \plugin_renderer_base {
             }
             $opt = $options[$baseIndex];
             $class = !empty($opt->is_correct) ? 'text-success font-weight-bold' : '';
-            $letter = chr(65 + $displayIndex); // A, B, C, etc.
-            
+
             $html .= html_writer::div(
-                html_writer::tag('strong', $letter . '. ', ['class' => 'option-letter']) . 
-                html_writer::span($opt->text, $class),
-                'option-item mb-1'
+                    html_writer::tag('strong', ($displayIndex + 1) . '. ', ['class' => 'option-letter']) .
+                    html_writer::span($opt->text, $class),
+                    'option-item mb-1'
             );
         }
         $html .= html_writer::end_div();
@@ -647,8 +655,8 @@ class report_renderer extends \plugin_renderer_base {
         }
 
         $grade = $DB->get_field('assign_grades', 'grade', [
-            'assignment' => $cm->instance,
-            'userid' => $userid
+                'assignment' => $cm->instance,
+                'userid' => $userid
         ]);
 
         return $grade !== false ? floatval($grade) : null;
@@ -666,10 +674,10 @@ class report_renderer extends \plugin_renderer_base {
      */
     protected function get_question_text($question) {
         if (isset($question->text) && $question->text !== '') {
-            return (string)$question->text;
+            return (string) $question->text;
         }
         if (isset($question->question) && $question->question !== '') {
-            return (string)$question->question;
+            return (string) $question->question;
         }
         return '';
     }
@@ -687,7 +695,7 @@ class report_renderer extends \plugin_renderer_base {
         $raw = isset($question->options) ? $question->options : [];
         // Convert to plain array (stdClass to array if necessary)
         if ($raw instanceof \stdClass) {
-            $raw = (array)$raw;
+            $raw = (array) $raw;
         }
 
         $normalized = [];
@@ -695,41 +703,43 @@ class report_renderer extends \plugin_renderer_base {
 
         $i = 0;
         foreach ($raw as $key => $opt) {
-            $item = (object)[
-                'text' => '',
-                'explanation' => null,
-                'is_correct' => null,
+            $item = (object) [
+                    'text' => '',
+                    'explanation' => null,
+                    'is_correct' => null,
             ];
 
             if (is_string($opt)) {
                 // Legacy string option
                 $item->text = $opt;
-                if ($hasCorrectIndex && (int)$question->correct_answer === (int)$i) {
+                if ($hasCorrectIndex && (int) $question->correct_answer === (int) $i) {
                     $item->is_correct = true;
                 } else {
                     $item->is_correct = false;
                 }
             } else if (is_object($opt) || is_array($opt)) {
-                $optObj = is_array($opt) ? (object)$opt : $opt;
-                $item->text = isset($optObj->text) ? (string)$optObj->text : (isset($optObj->label) ? (string)$optObj->label : '');
-                $item->explanation = isset($optObj->explanation) ? (string)$optObj->explanation : (isset($optObj->rationale) ? (string)$optObj->rationale : null);
+                $optObj = is_array($opt) ? (object) $opt : $opt;
+                $item->text =
+                        isset($optObj->text) ? (string) $optObj->text : (isset($optObj->label) ? (string) $optObj->label : '');
+                $item->explanation = isset($optObj->explanation) ? (string) $optObj->explanation :
+                        (isset($optObj->rationale) ? (string) $optObj->rationale : null);
 
                 // Determine correctness flag from various possible keys
                 if (isset($optObj->is_correct)) {
-                    $item->is_correct = (bool)$optObj->is_correct;
+                    $item->is_correct = (bool) $optObj->is_correct;
                 } else if (isset($optObj->correct)) {
-                    $item->is_correct = (bool)$optObj->correct;
+                    $item->is_correct = (bool) $optObj->correct;
                 } else if (isset($optObj->isCorrect)) {
-                    $item->is_correct = (bool)$optObj->isCorrect;
+                    $item->is_correct = (bool) $optObj->isCorrect;
                 } else if ($hasCorrectIndex) {
                     // Legacy fallback if per-option missing
-                    $item->is_correct = ((int)$question->correct_answer === (int)$i);
+                    $item->is_correct = ((int) $question->correct_answer === (int) $i);
                 } else {
                     $item->is_correct = null;
                 }
             } else {
                 // Unknown option shape; stringify to be safe.
-                $item->text = (string)json_encode($opt);
+                $item->text = (string) json_encode($opt);
                 $item->is_correct = null;
             }
 
@@ -759,7 +769,7 @@ class report_renderer extends \plugin_renderer_base {
 
         // Try on $user_answer (stdClass or array)
         if (is_object($user_answer) || is_array($user_answer)) {
-            $ua = is_array($user_answer) ? (object)$user_answer : $user_answer;
+            $ua = is_array($user_answer) ? (object) $user_answer : $user_answer;
             if (isset($ua->order) && is_array($ua->order)) {
                 $order = $ua->order;
             } else if (isset($ua->options_order) && is_array($ua->options_order)) {
@@ -807,14 +817,14 @@ class report_renderer extends \plugin_renderer_base {
      */
     protected function get_selected_display_index($user_answer) {
         if (is_numeric($user_answer)) {
-            return (int)$user_answer;
+            return (int) $user_answer;
         }
 
         if (is_object($user_answer) || is_array($user_answer)) {
-            $ua = is_array($user_answer) ? (object)$user_answer : $user_answer;
+            $ua = is_array($user_answer) ? (object) $user_answer : $user_answer;
             foreach (['index', 'selectedIndex', 'selected', 'answer'] as $key) {
                 if (isset($ua->{$key}) && is_numeric($ua->{$key})) {
-                    return (int)$ua->{$key};
+                    return (int) $ua->{$key};
                 }
             }
         }
@@ -833,7 +843,7 @@ class report_renderer extends \plugin_renderer_base {
         if ($displayIndex === null) {
             return null;
         }
-        return isset($order[$displayIndex]) ? (int)$order[$displayIndex] : null;
+        return isset($order[$displayIndex]) ? (int) $order[$displayIndex] : null;
     }
 
     /**
@@ -844,8 +854,8 @@ class report_renderer extends \plugin_renderer_base {
      * @return int|null
      */
     protected function base_to_display_index($baseIndex, $order) {
-        $displayIndex = array_search((int)$baseIndex, $order, true);
-        return $displayIndex === false ? null : (int)$displayIndex;
+        $displayIndex = array_search((int) $baseIndex, $order, true);
+        return $displayIndex === false ? null : (int) $displayIndex;
     }
 
     /**
@@ -860,6 +870,7 @@ class report_renderer extends \plugin_renderer_base {
         }
 
         $level_key = 'blooms_' . strtolower($blooms_level);
+        echo $level_key;die;
         if (get_string_manager()->string_exists($level_key, 'local_trustgrade')) {
             return get_string($level_key, 'local_trustgrade');
         }

@@ -317,16 +317,14 @@ $string['questions_generation_failed'] = 'יצירת השאלות האוטומט
 $string['questions_generation_error'] = 'אירעה שגיאה במהלך יצירת השאלות האוטומטית';
 $string['questions_will_be_generated'] = 'שאלות ייווצרו אוטומטית עבור מטלה זו';
 
-$string['blooms_remember'] = 'זכירה';
-$string['blooms_understand'] = 'הבנה';
-$string['blooms_apply'] = 'יישום';
-$string['blooms_analyze'] = 'ניתוח';
-$string['blooms_evaluate'] = 'הערכה';
+$string['blooms_remembering'] = 'זכרון';
+$string['blooms_understanding'] = 'הבנה';
+$string['blooms_applying'] = 'יישום';
+$string['blooms_analyzing'] = 'ניתוח';
+$string['blooms_evaluating'] = 'הערכה';
 $string['blooms_create'] = 'יצירה';
 $string['blooms_level_label'] = 'רמת בלום';
 
 $string['question_source_instructor'] = 'מדריך';
 $string['question_source_ai_generated'] = 'נוצר על ידי AI';
 $string['question_source_submission'] = 'מבוסס על הגשה';
-
-?>
