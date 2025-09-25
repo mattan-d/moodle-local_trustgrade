@@ -269,7 +269,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           const s = r["Suggestions"] ?? ""
           const metValue = m.toLowerCase()
 
-          let metBadge = `<span class="badge bg-secondary rounded-pill">${m}</span>`
+          let metBadge = `<span class="badge bg-primary rounded-pill">${m}</span>`
           if (metValue === "yes" || metValue === "y" || metValue === "true") {
             metBadge = `<span class="badge bg-success rounded-pill"><i class="fa fa-check me-1"></i>${m}</span>`
           } else if (metValue === "no" || metValue === "n" || metValue === "false") {
