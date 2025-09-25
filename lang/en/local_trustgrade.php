@@ -274,8 +274,8 @@ $string['plugindisabled'] = 'TrustGrade plugin is disabled';
 $string['trustgradedisabled'] = 'TrustGrade is disabled for this assignment';
 
 // Question Generation Processing Strings
-$string['processing_question_generation'] = 'מעבד מטלה';
-$string['processing_question_generation_message'] = 'אנא המתן בעוד אנו שומרים את המטלה שלך ומכינים ליצור שאלות באופן אוטומטי...';
+$string['processing_question_generation'] = 'Processing Question Generation';
+$string['processing_question_generation_message'] = 'Please wait while we generate questions for your assignment...';
 
 // Submission Processing Language Strings
 $string['processing_submission'] = 'Processing Your Submission';
@@ -314,5 +314,14 @@ $string['auto_generate_questions_desc'] = 'Automatically generate questions when
 $string['questions_generation_failed'] = 'Failed to generate questions automatically';
 $string['questions_generation_error'] = 'Error occurred during automatic question generation';
 $string['questions_will_be_generated'] = 'Questions will be generated automatically for this assignment';
+
+// Bloom's taxonomy level strings
+$string['blooms_remember'] = 'Remember';
+$string['blooms_understand'] = 'Understand';
+$string['blooms_apply'] = 'Apply';
+$string['blooms_analyze'] = 'Analyze';
+$string['blooms_evaluate'] = 'Evaluate';
+$string['blooms_create'] = 'Create';
+$string['blooms_level_label'] = 'Bloom\'s Level';
 
 ?>

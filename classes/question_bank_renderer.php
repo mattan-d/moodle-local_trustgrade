@@ -117,7 +117,8 @@ class question_bank_renderer {
           $metaBits[] = get_string('points', 'local_trustgrade') . ': ' . $points;
       }
       if (!empty($blooms)) {
-          $metaBits[] = 'Bloom\'s: ' . htmlspecialchars($blooms);
+          $bloomsLabel = get_string('blooms_level_label', 'local_trustgrade');
+          $metaBits[] = $bloomsLabel . ': ' . htmlspecialchars($blooms);
       }
       if (!empty($metaBits)) {
           $html .= '<p class="text-muted mb-2">' . implode(' | ', $metaBits) . '</p>';
@@ -204,12 +205,22 @@ class question_bank_renderer {
       // Bloom's Level
       $html .= '  <div class="col-12 col-md-4">';
       $html .= '    <div class="form-group">';
-      $html .= '      <label for="question_blooms_' . $index . '" class="form-label">Bloom\'s ' . get_string('level', 'local_trustgrade') . ':</label>';
+      $html .= '      <label for="question_blooms_' . $index . '" class="form-label">' . get_string('blooms_level_label', 'local_trustgrade') . ':</label>';
       $html .= '      <select class="form-control question-blooms-input" id="question_blooms_' . $index . '">';
-      $levels = ['', 'Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
-      foreach ($levels as $level) {
+      
+      // Use language strings for Bloom's levels
+      $levels = [
+          '' => '-',
+          'Remember' => get_string('blooms_remember', 'local_trustgrade'),
+          'Understand' => get_string('blooms_understand', 'local_trustgrade'),
+          'Apply' => get_string('blooms_apply', 'local_trustgrade'),
+          'Analyze' => get_string('blooms_analyze', 'local_trustgrade'),
+          'Evaluate' => get_string('blooms_evaluate', 'local_trustgrade'),
+          'Create' => get_string('blooms_create', 'local_trustgrade')
+      ];
+      
+      foreach ($levels as $level => $label) {
           $sel = ($blooms === $level) ? 'selected' : '';
-          $label = $level === '' ? '-' : $level;
           $html .= '        <option value="' . htmlspecialchars($level) . '" ' . $sel . '>' . htmlspecialchars($label) . '</option>';
       }
       $html .= '      </select>';

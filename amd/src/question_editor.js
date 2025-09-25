@@ -385,37 +385,61 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       const points = metadata.points || 10
       const blooms = metadata.blooms_level || ""
 
-      const bloomsLevels = ["", "Remember", "Understand", "Apply", "Analyze", "Evaluate", "Create"]
-      const bloomsOptions = bloomsLevels.map((level) => ({
-        value: level,
-        label: level === "" ? "-" : level,
-        selected: blooms === level,
-      }))
+      const bloomsLevels = [
+        "",
+        "blooms_remember",
+        "blooms_understand",
+        "blooms_apply",
+        "blooms_analyze",
+        "blooms_evaluate",
+        "blooms_create",
+      ]
 
-      const options = []
-      for (let i = 0; i < 4; i++) {
-        const opt = question.options[i] || { text: "", is_correct: i === 0, explanation: "" }
-        options.push({
-          index: i,
-          text: opt.text,
-          isCorrect: opt.is_correct,
-          explanation: opt.explanation,
-          optionLabel: `Option ${String.fromCharCode(65 + i)}`,
-        })
-      }
+      // Get language strings for Bloom's levels
+      const bloomsPromises = bloomsLevels.map((level) => {
+        if (level === "") return Promise.resolve("-")
+        return Str.get_string(level, "local_trustgrade").catch(() => level.replace("blooms_", ""))
+      })
 
-      return {
-        index: index,
-        text: text,
-        type: type,
-        points: points,
-        bloomsLevel: blooms,
-        bloomsOptions: bloomsOptions,
-        isMultipleChoice: type === "multiple_choice",
-        isTrueFalse: type === "true_false",
-        isShortAnswer: type === "short_answer",
-        options: options,
-      }
+      return Promise.all(bloomsPromises).then((bloomsLabels) => {
+        const bloomsOptions = bloomsLevels.map((level, i) => ({
+          value:
+            level === ""
+              ? ""
+              : level.replace("blooms_", "").charAt(0).toUpperCase() + level.replace("blooms_", "").slice(1),
+          label: bloomsLabels[i],
+          selected:
+            blooms ===
+            (level === ""
+              ? ""
+              : level.replace("blooms_", "").charAt(0).toUpperCase() + level.replace("blooms_", "").slice(1)),
+        }))
+
+        const options = []
+        for (let i = 0; i < 4; i++) {
+          const opt = question.options[i] || { text: "", is_correct: i === 0, explanation: "" }
+          options.push({
+            index: i,
+            text: opt.text,
+            isCorrect: opt.is_correct,
+            explanation: opt.explanation,
+            optionLabel: `Option ${String.fromCharCode(65 + i)}`,
+          })
+        }
+
+        return {
+          index: index,
+          text: text,
+          type: type,
+          points: points,
+          bloomsLevel: blooms,
+          bloomsOptions: bloomsOptions,
+          isMultipleChoice: type === "multiple_choice",
+          isTrueFalse: type === "true_false",
+          isShortAnswer: type === "short_answer",
+          options: options,
+        }
+      })
     },
   }
 

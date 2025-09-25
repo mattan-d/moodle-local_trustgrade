@@ -156,7 +156,7 @@ $string['grade_save_error'] = 'שגיאה בשמירת ציון: {$a}';
 $string['bulk_grades_saved'] = 'נשמרו בהצלחה {$a} ציונים';
 $string['bulk_grades_partial'] = 'נשמרו {$a->saved} ציונים, {$a->failed} נכשלו';
 $string['grades_cleared_success'] = 'כל הציונים נוקו בהצלחה';
-$string['grade_clear_error'] = 'שגיאה בניקוי ציונים: {$a}';
+$string['grade_clear_error'] = 'שגיאה במחיקת ציונים: {$a}';
 $string['confirm_clear_all_grades'] = 'נקה את כל הציונים';
 $string['confirm_clear_all_grades_body'] = 'האם אתה בטוח שברצונך לנקות את כל הציונים? פעולה זו לא ניתנת לביטול.';
 
@@ -316,5 +316,13 @@ $string['auto_generate_questions_desc'] = 'צור שאלות באופן אוטו
 $string['questions_generation_failed'] = 'יצירת השאלות האוטומטית נכשלה';
 $string['questions_generation_error'] = 'אירעה שגיאה במהלך יצירת השאלות האוטומטית';
 $string['questions_will_be_generated'] = 'שאלות ייווצרו אוטומטית עבור מטלה זו';
+
+$string['blooms_remember'] = 'זכירה';
+$string['blooms_understand'] = 'הבנה';
+$string['blooms_apply'] = 'יישום';
+$string['blooms_analyze'] = 'ניתוח';
+$string['blooms_evaluate'] = 'הערכה';
+$string['blooms_create'] = 'יצירה';
+$string['blooms_level_label'] = 'רמת בלום';
 
 ?>
