@@ -1,5 +1,7 @@
 // This file is part of Moodle - http://moodle.org
 
+const define = window.define // Declare the define variable
+
 define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"], (
   $,
   Ajax,
@@ -598,6 +600,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         Str.get_string("final_grade_notice", "local_trustgrade"),
         Str.get_string("true", "local_trustgrade"),
         Str.get_string("false", "local_trustgrade"),
+        Str.get_string("question", "local_trustgrade"),
       ]).then((strings) => {
         var resultsHtml = `<div class="quiz-completion-header alert alert-success">
           <h2><i class="fa fa-check-circle"></i> ${strings[0]}</h2>
@@ -614,7 +617,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
 
           resultsHtml += `<div class="result-item ${isCorrect ? "correct" : "incorrect"}">
             <div class="result-header">
-              <span class="question-number">Question ${index + 1}</span>
+              <span class="question-number">${strings[11]} ${index + 1}</span>
               <span class="result-status ${isCorrect ? "text-success" : "text-danger"}">
                 ${isCorrect ? `✓ ${strings[2]}` : `✗ ${strings[3]}`}
               </span>
