@@ -155,6 +155,46 @@ $string['grade_clear_error'] = 'Error clearing grades: {$a}';
 $string['confirm_clear_all_grades'] = 'Clear All Grades';
 $string['confirm_clear_all_grades_body'] = 'Are you sure you want to clear all grades? This action cannot be undone.';
 
+// Quiz Details
+$string['quiz_details'] = 'Quiz Details';
+$string['question'] = 'Question';
+$string['student_answer'] = 'Student\'s Answer';
+$string['correct_answer'] = 'Correct Answer';
+$string['result'] = 'Result';
+$string['correct'] = 'Correct';
+$string['incorrect'] = 'Incorrect';
+$string['no_completed_quizzes'] = 'No students have completed the AI quiz for this assignment yet.';
+$string['integrity_summary'] = 'Integrity Summary';
+$string['window_blur_events'] = 'Window Blur Events';
+
+// Additional Quiz Report Strings
+$string['session_info'] = 'Session Information';
+$string['completed_on'] = 'Completed On';
+$string['time_taken'] = 'Time Taken';
+$string['points'] = 'Points';
+$string['no_answer'] = 'No Answer';
+$string['true'] = 'True';
+$string['false'] = 'False';
+$string['not_available'] = 'Not Available';
+$string['manual_grading_required'] = 'Manual Grading Required';
+$string['integrity_violations_count'] = 'Total integrity violations: {$a}';
+
+// Enhanced Answer Display Strings
+$string['raw_answer_value'] = 'Raw Answer';
+$string['invalid_option_selected'] = 'Invalid option selected';
+$string['invalid_boolean_value'] = 'Invalid boolean value';
+$string['unknown_question_type'] = 'Unknown question type';
+
+// Direct Grading Strings
+$string['grade_saved_successfully'] = 'Grade saved successfully';
+$string['grade_save_error'] = 'Error saving grade: {$a}';
+$string['bulk_grades_saved'] = 'Successfully saved {$a} grades';
+$string['bulk_grades_partial'] = 'Saved {$a->saved} grades, {$a->failed} failed';
+$string['grades_cleared_success'] = 'All grades cleared successfully';
+$string['grade_clear_error'] = 'Error clearing grades: {$a}';
+$string['confirm_clear_all_grades'] = 'Clear All Grades';
+$string['confirm_clear_all_grades_body'] = 'Are you sure you want to clear all grades? This action cannot be undone.';
+
 // Grade Validation Strings (used in grading_manager.php)
 $string['grade_not_numeric'] = 'Grade must be a number';
 $string['grade_cannot_be_negative'] = 'Grade cannot be negative';
@@ -323,5 +363,10 @@ $string['blooms_analyze'] = 'Analyze';
 $string['blooms_evaluate'] = 'Evaluate';
 $string['blooms_create'] = 'Create';
 $string['blooms_level_label'] = 'Bloom\'s Level';
+
+// Question Source Strings
+$string['question_source_instructor'] = 'Instructor';
+$string['question_source_ai_generated'] = 'AI Generated';
+$string['question_source_submission'] = 'Submission Based';
 
 ?>

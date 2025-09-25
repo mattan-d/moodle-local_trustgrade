@@ -338,6 +338,7 @@ class report_renderer extends \plugin_renderer_base {
             $correct_answer_display = $this->format_correct_answer($question, $user_answer);
 
             $blooms_level = $question->metadata->blooms_level ?? '';
+            $blooms_display = $this->format_blooms_level($blooms_level);
 
             // Determine if answer is correct
             $is_correct = $this->is_answer_correct($question, $user_answer);
@@ -351,13 +352,13 @@ class report_renderer extends \plugin_renderer_base {
                 : $this->output->pix_icon('i/invalid', get_string('incorrect', 'local_trustgrade'), 'moodle', ['class' => 'text-danger']);
 
             $row = new \html_table_row();
-            $row->cells[] = $index + 1;
-            $row->cells[] = html_writer::span($blooms_level, 'badge badge-primary');;
+            $row->cells[] = chr(65 + $index);
+            $row->cells[] = html_writer::span($blooms_display, 'badge badge-primary');;
 
             // Question cell with source badge
             $question_cell = html_writer::div(
                 html_writer::span(
-                    ucfirst($question->source ?? 'instructor'),
+                    $this->format_question_source($question->source ?? 'instructor'),
                     'badge badge-' . (($question->source ?? 'instructor') === 'instructor' ? 'primary' : 'success') . ' mb-2'
                 ) .
                 html_writer::tag('div', format_text($this->get_question_text($question), FORMAT_HTML), ['class' => 'question-text']) .
@@ -408,9 +409,7 @@ class report_renderer extends \plugin_renderer_base {
                 if ($selectedBaseIndex !== null && isset($options[$selectedBaseIndex])) {
                     $label = chr(65 + max(0, (int)$selectedDisplayIndex));
                     $text = $options[$selectedBaseIndex]->text;
-                    return html_writer::div(html_writer::tag('strong', $label));
-
-                    //return $raw_answer_display . html_writer::div(html_writer::tag('strong', $label . '. ') . $text, 'text-primary');
+                    return $raw_answer_display . html_writer::div(html_writer::tag('strong', $label . '. ') . $text, 'text-primary');
                 } else {
                     $invalid_display = html_writer::span(
                         get_string('invalid_option_selected', 'local_trustgrade'),
@@ -479,8 +478,8 @@ class report_renderer extends \plugin_renderer_base {
                     if (!empty($opt->is_correct)) {
                         // Try to find its display index to compute a letter label.
                         $displayIndex = $this->base_to_display_index($baseIndex, $order);
-                        $label = $displayIndex !== null ? chr(65 + $displayIndex) : '';
-                        $correctItems[] = $label;// . $opt->text;
+                        $label = $displayIndex !== null ? chr(65 + $displayIndex) . '. ' : '';
+                        $correctItems[] = $label . $opt->text;
                     }
                 }
 
@@ -841,5 +840,45 @@ class report_renderer extends \plugin_renderer_base {
     protected function base_to_display_index($baseIndex, $order) {
         $displayIndex = array_search((int)$baseIndex, $order, true);
         return $displayIndex === false ? null : (int)$displayIndex;
+    }
+
+    /**
+     * Format Bloom's taxonomy level for display using language strings
+     *
+     * @param string $blooms_level The Bloom's level
+     * @return string Formatted Bloom's level
+     */
+    protected function format_blooms_level($blooms_level) {
+        if (empty($blooms_level)) {
+            return '';
+        }
+
+        $level_key = 'blooms_' . strtolower($blooms_level);
+        if (get_string_manager()->string_exists($level_key, 'local_trustgrade')) {
+            return get_string($level_key, 'local_trustgrade');
+        }
+
+        // Fallback to original value if no translation exists
+        return ucfirst($blooms_level);
+    }
+
+    /**
+     * Format question source for display using language strings
+     *
+     * @param string $source The question source
+     * @return string Formatted question source
+     */
+    protected function format_question_source($source) {
+        if (empty($source)) {
+            $source = 'instructor'; // Default fallback
+        }
+
+        $source_key = 'question_source_' . strtolower($source);
+        if (get_string_manager()->string_exists($source_key, 'local_trustgrade')) {
+            return get_string($source_key, 'local_trustgrade');
+        }
+
+        // Fallback to formatted original value if no translation exists
+        return ucfirst(str_replace('_', ' ', $source));
     }
 }

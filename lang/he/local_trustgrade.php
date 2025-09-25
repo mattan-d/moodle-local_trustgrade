@@ -325,4 +325,8 @@ $string['blooms_evaluate'] = 'הערכה';
 $string['blooms_create'] = 'יצירה';
 $string['blooms_level_label'] = 'רמת בלום';
 
+$string['question_source_instructor'] = 'מדריך';
+$string['question_source_ai_generated'] = 'נוצר על ידי AI';
+$string['question_source_submission'] = 'מבוסס על הגשה';
+
 ?>
