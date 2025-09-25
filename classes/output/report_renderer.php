@@ -870,7 +870,6 @@ class report_renderer extends \plugin_renderer_base {
         }
 
         $level_key = 'blooms_' . strtolower($blooms_level);
-        echo $level_key;die;
         if (get_string_manager()->string_exists($level_key, 'local_trustgrade')) {
             return get_string($level_key, 'local_trustgrade');
         }
