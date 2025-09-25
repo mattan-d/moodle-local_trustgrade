@@ -76,7 +76,7 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addElement('advcheckbox', 'trustgrade_auto_generate',
                 get_string('auto_generate_questions', 'local_trustgrade'),
                 get_string('auto_generate_questions_desc', 'local_trustgrade'));
-        $mform->setDefault('trustgrade_auto_generate', 0);
+        $mform->setDefault('trustgrade_auto_generate', 1);
 
         // Options for number of questions (used for instructor and submission questions)
         $question_count_options = [];
