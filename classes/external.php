@@ -125,7 +125,7 @@ class external extends \external_api {
   * Collect intro attachments as an array of files for the Gateway payload.
   * Each entry: ['filename' => ..., 'mimetype' => ..., 'size' => ..., 'content' => base64-string]
   */
- private static function collect_intro_files(int $intro_itemid, int $intro_attachments_itemid): array {
+ public static function collect_intro_files(int $intro_itemid, int $intro_attachments_itemid): array {
      global $USER;
      $filesOut = [];
 
@@ -138,9 +138,45 @@ class external extends \external_api {
          return $fs->get_area_files($userctx->id, 'user', 'draft', $itemid, 'sortorder, id', false) ?: [];
      };
 
+     $readAssignmentFiles = function(int $cmid) {
+         if ($cmid <= 0) {
+             return [];
+         }
+         try {
+             $cm = get_coursemodule_from_id('assign', $cmid, 0, false, MUST_EXIST);
+             $context = \context_module::instance($cm->id);
+             $fs = get_file_storage();
+             
+             // Get files from both intro and introattachment file areas
+             $introFiles = $fs->get_area_files($context->id, 'mod_assign', 'intro', 0, 'sortorder, id', false) ?: [];
+             $attachmentFiles = $fs->get_area_files($context->id, 'mod_assign', 'introattachment', 0, 'sortorder, id', false) ?: [];
+             
+             return array_merge($introFiles, $attachmentFiles);
+         } catch (\Throwable $e) {
+             return [];
+         }
+     };
+
      $all = [];
+     
+     // First try to get files from draft areas (for unsaved assignments)
      foreach ([$intro_itemid, $intro_attachments_itemid] as $did) {
          $all = array_merge($all, $readDraft($did));
+     }
+     
+     if (empty($all)) {
+         // Try to get cmid from current context or URL parameters
+         $cmid = optional_param('cmid', 0, PARAM_INT);
+         if ($cmid <= 0) {
+             $cmid = optional_param('id', 0, PARAM_INT);
+         }
+         if ($cmid <= 0) {
+             $cmid = optional_param('update', 0, PARAM_INT);
+         }
+         
+         if ($cmid > 0) {
+             $all = array_merge($all, $readAssignmentFiles($cmid));
+         }
      }
 
      if (empty($all)) {

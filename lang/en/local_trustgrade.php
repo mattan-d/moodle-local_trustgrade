@@ -4,6 +4,8 @@
 $string['pluginname'] = 'TrustGrade';
 $string['plugin_enabled'] = 'Enable TrustGrade Plugin';
 $string['plugin_enabled_desc'] = 'Enable or disable the TrustGrade plugin globally. When disabled, all TrustGrade functionality will be hidden from assignment forms and pages.';
+$string['default_enabled'] = 'Enable TrustGrade by default for new assignments';
+$string['default_enabled_desc'] = 'When enabled, TrustGrade will be automatically enabled for newly created assignments. Instructors can still disable it for individual assignments.';
 $string['trustgrade_enabled'] = 'Enable TrustGrade for this assignment';
 $string['trustgrade_enabled_desc'] = 'Enable TrustGrade AI features for this specific assignment. When disabled, students will not see AI quizzes or related functionality.';
 $string['trustgrade_tab'] = 'TrustGrade';
@@ -114,6 +116,46 @@ $string['auto_grade_by_quiz'] = 'Auto-grade by Quiz Score';
 $string['auto_grade_by_quiz_desc'] = 'Automatically set assignment grades based on quiz scores for all students';
 $string['grading_instructions'] = 'Enter grades directly in the table below. Changes are auto-saved after 2 seconds or when you move to another field.';
 $string['grade_status'] = 'Grade Status';
+
+// Quiz Details
+$string['quiz_details'] = 'Quiz Details';
+$string['question'] = 'Question';
+$string['student_answer'] = 'Student\'s Answer';
+$string['correct_answer'] = 'Correct Answer';
+$string['result'] = 'Result';
+$string['correct'] = 'Correct';
+$string['incorrect'] = 'Incorrect';
+$string['no_completed_quizzes'] = 'No students have completed the AI quiz for this assignment yet.';
+$string['integrity_summary'] = 'Integrity Summary';
+$string['window_blur_events'] = 'Window Blur Events';
+
+// Additional Quiz Report Strings
+$string['session_info'] = 'Session Information';
+$string['completed_on'] = 'Completed On';
+$string['time_taken'] = 'Time Taken';
+$string['points'] = 'Points';
+$string['no_answer'] = 'No Answer';
+$string['true'] = 'True';
+$string['false'] = 'False';
+$string['not_available'] = 'Not Available';
+$string['manual_grading_required'] = 'Manual Grading Required';
+$string['integrity_violations_count'] = 'Total integrity violations: {$a}';
+
+// Enhanced Answer Display Strings
+$string['raw_answer_value'] = 'Raw Answer';
+$string['invalid_option_selected'] = 'Invalid option selected';
+$string['invalid_boolean_value'] = 'Invalid boolean value';
+$string['unknown_question_type'] = 'Unknown question type';
+
+// Direct Grading Strings
+$string['grade_saved_successfully'] = 'Grade saved successfully';
+$string['grade_save_error'] = 'Error saving grade: {$a}';
+$string['bulk_grades_saved'] = 'Successfully saved {$a} grades';
+$string['bulk_grades_partial'] = 'Saved {$a->saved} grades, {$a->failed} failed';
+$string['grades_cleared_success'] = 'All grades cleared successfully';
+$string['grade_clear_error'] = 'Error clearing grades: {$a}';
+$string['confirm_clear_all_grades'] = 'Clear All Grades';
+$string['confirm_clear_all_grades_body'] = 'Are you sure you want to clear all grades? This action cannot be undone.';
 
 // Quiz Details
 $string['quiz_details'] = 'Quiz Details';
@@ -273,9 +315,60 @@ $string['error_deleting_question'] = 'Error deleting question';
 $string['plugindisabled'] = 'TrustGrade plugin is disabled';
 $string['trustgradedisabled'] = 'TrustGrade is disabled for this assignment';
 
+// Question Generation Processing Strings
+$string['processing_question_generation'] = 'Processing Question Generation';
+$string['processing_question_generation_message'] = 'Please wait while we generate questions for your assignment...';
+
 // Submission Processing Language Strings
 $string['processing_submission'] = 'Processing Your Submission';
 $string['processing_submission_message'] = 'Please wait while we process your assignment submission...';
 $string['processing_please_wait'] = 'Please wait...';
+
+$string['blooms_level'] = 'Bloom\'s Level';
+$string['error_saving_grade_user'] = 'Error saving grade for user';
+$string['no_pending_grades'] = 'No pending grades to save.';
+$string['saving_grades'] = 'Saving...';
+$string['grades_saved_success'] = 'grades saved successfully';
+$string['error_saving_grades'] = 'Error saving grades';
+$string['clearing_grades'] = 'Clearing...';
+$string['all_grades_cleared'] = 'All grades cleared successfully';
+$string['error_clearing_grades'] = 'Error clearing grades';
+$string['grade_pending_save'] = 'Grade pending save';
+$string['saving_grade'] = 'Saving grade...';
+$string['grade_saved'] = 'Grade saved';
+$string['error_saving_grade'] = 'Error saving grade';
+$string['unsaved_changes'] = 'Unsaved changes';
+$string['enter_explanation_option'] = 'Enter explanation for this option...';
+$string['multiple_choice'] = 'Multiple Choice';
+$string['click_edit_add_question'] = 'Click edit to add question text';
+$string['click_edit_add_options'] = 'Click edit to add answer options';
+$string['explanation_for_true'] = 'Explanation for True';
+$string['explanation_for_false'] = 'Explanation for False';
+$string['enter_question_text'] = 'Enter question text...';
+$string['true_false'] = 'True/False';
+$string['short_answer'] = 'Short Answer';
+$string['option_text'] = 'Option text';
+$string['save_changes'] = 'Save Changes';
+
+// Auto-generate Questions Strings
+$string['auto_generate_questions'] = 'Create questions for this assignment';
+$string['auto_generate_questions_desc'] = 'Automatically generate questions when the assignment is saved. Questions will be created based on the assignment instructions.';
+$string['questions_generation_failed'] = 'Failed to generate questions automatically';
+$string['questions_generation_error'] = 'Error occurred during automatic question generation';
+$string['questions_will_be_generated'] = 'Questions will be generated automatically for this assignment';
+
+// Bloom's taxonomy level strings
+$string['blooms_remembering'] = 'Remember';
+$string['blooms_understanding'] = 'Understand';
+$string['blooms_applying'] = 'Apply';
+$string['blooms_analyzing'] = 'Analyze';
+$string['blooms_evaluating'] = 'Evaluate';
+$string['blooms_create'] = 'Create';
+$string['blooms_level_label'] = 'Bloom\'s Level';
+
+// Question Source Strings
+$string['question_source_instructor'] = 'Instructor';
+$string['question_source_ai_generated'] = 'AI Generated';
+$string['question_source_submission'] = 'Submission Based';
 
 ?>

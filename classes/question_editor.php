@@ -25,18 +25,19 @@ class question_editor {
           // Get existing questions
           $existing_questions = question_generator::get_questions($cmid);
           
-          if (!isset($existing_questions[$question_index])) {
-              return ['error' => 'Question not found'];
-          }
-          
           // Validate question data
           $validation_result = self::validate_question_data($question_data);
           if (!$validation_result['valid']) {
-              return ['error' => $validation_result['error']];
+              return ['success' => false, 'error' => $validation_result['error']];
           }
           
-          // Update the question in the array
-          $existing_questions[$question_index] = $question_data;
+          if (isset($existing_questions[$question_index])) {
+              // Update existing question
+              $existing_questions[$question_index] = $question_data;
+          } else {
+              // Add new question - append to the end of the array
+              $existing_questions[] = $question_data;
+          }
           
           // Delete existing questions for this assignment
           $DB->delete_records('local_trustgrade_questions', ['cmid' => $cmid]);
@@ -56,7 +57,7 @@ class question_editor {
           return ['success' => true, 'message' => 'Question saved successfully'];
           
       } catch (\Exception $e) {
-          return ['error' => 'Failed to save question: ' . $e->getMessage()];
+          return ['success' => false, 'error' => 'Failed to save question: ' . $e->getMessage()];
       }
   }
   
@@ -75,7 +76,7 @@ class question_editor {
           $existing_questions = question_generator::get_questions($cmid);
           
           if (!isset($existing_questions[$question_index])) {
-              return ['error' => 'Question not found'];
+              return ['success' => false, 'error' => 'Question not found'];
           }
           
           // Remove the question from the array
@@ -102,7 +103,7 @@ class question_editor {
           return ['success' => true, 'message' => 'Question deleted successfully'];
           
       } catch (\Exception $e) {
-          return ['error' => 'Failed to delete question: ' . $e->getMessage()];
+          return ['success' => false, 'error' => 'Failed to delete question: ' . $e->getMessage()];
       }
   }
   

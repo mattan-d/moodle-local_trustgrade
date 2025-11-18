@@ -14,11 +14,13 @@ class submission_processor {
      * Generate questions based on student submission with custom count
      * 
      * @param array $submission_content The student's submission content (text and files)
-     * @param string $assignment_instructions The original assignment instructions
+     * @param string|array $assignment_instructions The original assignment instructions (text or structured array)
      * @param int $questions_count Number of questions to generate
+     * @param int $cmid Course module ID (optional, for metadata)
+     * @param int $userid User ID (optional, for metadata)
      * @return array Response from Gateway or error
      */
-    public static function generate_submission_questions_with_count($submission_content, $assignment_instructions = '', $questions_count = 3) {
+    public static function generate_submission_questions_with_count($submission_content, $assignment_instructions = '', $questions_count = 3, $cmid = null, $userid = null) {
         // Ensure submission_content is an array with expected keys
         if (!is_array($submission_content) || (!isset($submission_content['text']) && !isset($submission_content['files']))) {
             return ['error' => 'Submission content must be a structured array'];
@@ -31,12 +33,42 @@ class submission_processor {
             return ['error' => 'Either submission text or at least one file is required'];
         }
         
+        $instructions_text = '';
+        $instructions_files = [];
+        
+        if (is_array($assignment_instructions)) {
+            $instructions_text = trim($assignment_instructions['text'] ?? '');
+            $instructions_files = $assignment_instructions['files'] ?? [];
+        } else {
+            $instructions_text = trim($assignment_instructions);
+        }
+        
         // Validate questions count
         $questions_count = max(1, min(10, intval($questions_count)));
         
+        $metadata = [];
+        if ($cmid && $userid) {
+            global $DB;
+            
+            // Get course module and course information
+            $cm = get_coursemodule_from_id('assign', $cmid);
+            if ($cm) {
+                $course = $DB->get_record('course', ['id' => $cm->course]);
+                if ($course) {
+                    $metadata = [
+                        'course_id' => $course->id,
+                        'course_name' => $course->fullname,
+                        'course_module_id' => $cmid,
+                        'user_id' => $userid
+                    ];
+                }
+            }
+        }
+        
         try {
             $gateway = new gateway_client();
-            $result = $gateway->generateSubmissionQuestions($submission_text, $assignment_instructions, $questions_count, $submission_files);
+            $all_files = array_merge($submission_files, $instructions_files);
+            $result = $gateway->generateSubmissionQuestions($submission_text, $instructions_text, $questions_count, $all_files, $metadata);
             
             if ($result['success']) {
                 return [

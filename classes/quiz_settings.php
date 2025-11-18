@@ -105,8 +105,8 @@ class quiz_settings {
         return [
             'enabled' => true,
             'questions_to_generate' => 5,
-            'instructor_questions' => 3,
-            'submission_questions' => 2,
+            'instructor_questions' => 0,
+            'submission_questions' => 5,
             'randomize_answers' => true,
             'time_per_question' => 15,
             'show_countdown' => true
@@ -129,10 +129,10 @@ class quiz_settings {
         $validated['questions_to_generate'] = max(1, min(10, intval($settings['questions_to_generate'] ?? 5)));
         
         // Instructor questions (0-20)
-        $validated['instructor_questions'] = max(0, min(20, intval($settings['instructor_questions'] ?? 3)));
+        $validated['instructor_questions'] = max(0, min(20, intval($settings['instructor_questions'] ?? 0)));
         
         // Submission questions (0-20)
-        $validated['submission_questions'] = max(0, min(20, intval($settings['submission_questions'] ?? 2)));
+        $validated['submission_questions'] = max(0, min(20, intval($settings['submission_questions'] ?? 5)));
         
         // Randomize answers (boolean)
         $validated['randomize_answers'] = !empty($settings['randomize_answers']);

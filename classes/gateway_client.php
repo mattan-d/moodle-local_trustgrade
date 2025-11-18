@@ -73,15 +73,17 @@ class gateway_client {
    * @param string $instructions Assignment instructions
    * @param int $questionCount Number of questions to generate
    * @param array $files Array of file data (filename, mimetype, content)
+   * @param array $metadata Additional metadata (course_id, course_name, course_module_id, user_id)
    * @return array Response from Gateway or cache
    */
-  public function generateSubmissionQuestions($submissionText, $instructions = '', $questionCount = 3, $files = []) {
+  public function generateSubmissionQuestions($submissionText, $instructions = '', $questionCount = 3, $files = [], $metadata = []) {
       $requestData = [
           'action' => 'generate_submission_questions',
           'submission_text' => $submissionText,
           'instructions' => $instructions,
           'question_count' => $questionCount,
-          'files' => $files
+          'files' => $files,
+          'metadata' => $metadata
       ];
 
       return $this->makeRequestWithCache('generate_submission_questions', $requestData);

@@ -13,6 +13,13 @@ if ($hassiteconfig) {
         1
     ));
 
+    $settings->add(new admin_setting_configcheckbox(
+        'local_trustgrade/default_enabled',
+        get_string('default_enabled', 'local_trustgrade'),
+        get_string('default_enabled_desc', 'local_trustgrade'),
+        0
+    ));
+
     // Add debugging mode setting
     $settings->add(new admin_setting_configcheckbox(
         'local_trustgrade/debug_mode',
@@ -59,7 +66,7 @@ if ($hassiteconfig) {
         'local_trustgrade/gateway_endpoint',
         get_string('gateway_endpoint', 'local_trustgrade'),
         get_string('gateway_endpoint_desc', 'local_trustgrade'),
-        '',
+        'http://trustgrade.cloud/', // Set default gateway endpoint to trustgrade.cloud
         PARAM_URL
     ));
 

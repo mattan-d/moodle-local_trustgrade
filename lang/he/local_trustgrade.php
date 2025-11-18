@@ -7,7 +7,7 @@ $string['plugin_enabled_desc'] = 'הפעל או השבת את תוסף TrustGrad
 $string['trustgrade_enabled'] = 'הפעל TrustGrade למטלה זו';
 $string['trustgrade_enabled_desc'] = 'הפעל תכונות בינה מלאכותית של TrustGrade למטלה ספציפית זו. כאשר מושבת, סטודנטים לא יראו חידוני בינה מלאכותית או פונקציונליות קשורה.';
 $string['trustgrade_tab'] = 'מדד איכות אקדמית';
-$string['check_instructions'] = 'בדוק הוראות עם בינה מלאכותית';
+$string['check_instructions'] = 'בדוק הנחיות המטלה בעזרת AI';
 $string['ai_recommendation'] = 'המלצת בינה מלאכותית';
 $string['processing'] = 'מעבד...';
 $string['no_instructions'] = 'לא נמצאו הוראות לניתוח';
@@ -27,7 +27,7 @@ $string['ai_quiz_title'] = 'חידון שנוצר על ידי בינה מלאכ�
 $string['no_questions_available'] = 'אין שאלות זמינות למטלה זו.';
 $string['next'] = 'הבא';
 $string['finish_quiz'] = 'סיים חידון';
-$string['quiz_ready_message'] = 'החידון שנוצר על ידי בינה מלאכותית מוכן! חידון זה יעזור לך להרהר על ההגשה שלך ולחזק את הלמידה שלך.';
+$string['quiz_ready_message'] = ' החידון שנוצר על ידי בינה מלאכותית מוכן! חידון זה יעזור לך להרהר על ההגשה שלך ולחזק את הלמידה שלך.';
 $string['edit'] = 'ערוך';
 $string['delete'] = 'מחק';
 $string['add_new_question'] = 'הוסף שאלה חדשה';
@@ -35,9 +35,9 @@ $string['seconds'] = 'שניות';
 
 // Quiz Settings
 $string['quiz_settings_title'] = 'הגדרות חידון';
-$string['questions_to_generate'] = 'מספר השאלות ליצירה';
+$string['questions_to_generate'] = 'כמה שאלות ליצור לבנק השאלות?';
 $string['questions_to_generate_help'] = 'מספר כולל של שאלות לכלול בחידון';
-$string['question_distribution'] = 'חלוקת מקורות השאלות';
+$string['question_distribution'] = 'הגדרת תמהיל השאלות (כמה מבנק השאלות וכמה על בסיס ההגשה)';
 $string['instructor_questions'] = 'שאלות מבנק המדריך';
 $string['instructor_questions_help'] = 'מספר השאלות לבחירה מבנק השאלות של המדריך';
 $string['submission_questions'] = 'שאלות על בסיס הגשות';
@@ -61,9 +61,8 @@ $string['custom_disclosure_message_desc'] =
 
 // AI Disclosure Messages
 $string['ai_disclosure_title'] = 'אנו מעמידים לרשותך טכנולוגיית AI מתקדמת שמתאימה את הלמידה לסגנון שלך!';
-$string['ai_disclosure_message'] = 'לאחר הגשת העבודה, מערכת הבינה המלאכותית שלנו תנתח את עבודתך בזמן אמת ותיצור עבורך חידון מותאם אישית שיעזור לך לבדוק ולחזק את ההבנה שלך.';
-$string['ai_disclosure_details_toggle'] = 'החידון יופיע מיד לאחר ההגשה.';
-$string['ai_disclosure_detail_analysis'] = 'ההגשה שלך תנותח על ידי בינה מלאכותית כדי להבין את הגישה וההיגיון שלך.';
+$string['ai_disclosure_message'] = 'לאחר הגשת העבודה, מערכת הבינה המלאכותית תנתח את עבודתך בזמן אמת ותיצור עבורך חידון מותאם אישית שיעזור לך לבדוק ולחזק את שליטתך בחומר הנלמד.';$string['ai_disclosure_details_toggle'] = 'החידון יופיע מיד לאחר ההגשה.';
+$string['ai_disclosure_detail_analysis'] = 'המטלה שהגשת תנותח על ידי בינה מלאכותית כדי להעריך את שליטך בחומר הנלמד';
 $string['ai_disclosure_detail_questions'] = 'הבינה מלאכותית תיצור {$a} שאלות מותאמות אישית על בסיס ההגשה הספציפית שלך.';
 $string['ai_disclosure_detail_quiz'] = 'תעבור חידון של {$a} שאלות המשלב שאלות שנוצרו על ידי המדריך ושאלות מותאמות אישית.';
 $string['ai_disclosure_detail_timer'] = 'לכל שאלת חידון יש מגבלת זמן של {$a} שניות כדי לעודד חשיבה מהירה.';
@@ -156,7 +155,7 @@ $string['grade_save_error'] = 'שגיאה בשמירת ציון: {$a}';
 $string['bulk_grades_saved'] = 'נשמרו בהצלחה {$a} ציונים';
 $string['bulk_grades_partial'] = 'נשמרו {$a->saved} ציונים, {$a->failed} נכשלו';
 $string['grades_cleared_success'] = 'כל הציונים נוקו בהצלחה';
-$string['grade_clear_error'] = 'שגיאה בניקוי ציונים: {$a}';
+$string['grade_clear_error'] = 'שגיאה במחיקת ציונים: {$a}';
 $string['confirm_clear_all_grades'] = 'נקה את כל הציונים';
 $string['confirm_clear_all_grades_body'] = 'האם אתה בטוח שברצונך לנקות את כל הציונים? פעולה זו לא ניתנת לביטול.';
 
@@ -214,7 +213,7 @@ $string['integrity_report_header'] = 'דוח יושרה';
 $string['integrity_recorded'] = 'מידע זה נרשם לבדיקה.';
 $string['integrity_violation_header'] = 'הפרת יושרת הערכה';
 $string['quiz_flagged'] = 'ניסיון החידון שלך סומן כפעילות חשודה.';
-$string['incident_logged'] = 'התקרית הזו נרשמה וrebbeדק על ידי המדריך שלך.';
+$string['incident_logged'] = 'אירוע זה נרשם וייבחן על ידי המורה שלך.';
 $string['progress_saved_cannot_continue'] = 'ההתקדמות הנוכחית שלך נשמרה, אבל לא תוכל להמשיך בהערכה.';
 $string['failed_save_contact_instructor'] = 'נכשל בשמירת תוצאות סופיות. אנא פנה למדריך שלך.';
 $string['understand_start_quiz'] = 'הבנתי - התחל חידון';
@@ -247,7 +246,7 @@ $string['criterion'] = 'קריטריון';
 $string['met'] = 'הושג';
 $string['suggestions'] = 'הצעות';
 $string['evaluation'] = 'הערכה';
-$string['improved_assignment'] = 'משימה משופרת';
+$string['improved_assignment'] = 'מטלה משופרת';
 $string['no_criteria_provided'] = 'לא סופקו קריטריונים.';
 $string['recommendation_error'] = 'שגיאה בהצגת ההמלצה.';
 
@@ -265,19 +264,67 @@ $string['save_assignment_first'] = 'אנא שמור את המטלה תחילה �
 
 // Question Bank Functionality Strings
 $string['question_bank'] = 'בנק שאלות';
-$string['question_bank_description'] = 'נהל את השאלות שנוצרו על ידי בינה מלאכותית. תוכל לצפות, לערוך, למחוק שאלות קיימות, או ליצור חדשות.';
+$string['question_bank_description'] = 'נהל את השאלות שנוצרו על ידי AI. אתה יכול לצפות, לערוך, למחוק שאלות קיימות, או ליצור חדשות.';
 $string['no_questions_found'] = 'לא נמצאו שאלות. צור כמה שאלות כדי להתחיל.';
-$string['question_text'] = 'טקסט השאלה';
+$string['question_text'] = 'טקסט שאלה';
 $string['questions_generated_successfully'] = 'שאלות נוצרו בהצלחה';
 $string['error_generating_questions'] = 'שגיאה ביצירת שאלות';
 $string['confirm_delete_question'] = 'האם אתה בטוח שברצונך למחוק שאלה זו? פעולה זו לא ניתנת לביטול.';
-$string['question_deleted_successfully'] = 'השאלה נמחקה בהצלחה';
-$string['error_deleting_question'] = 'שגיאה במחיקת השאלה';
+$string['question_deleted_successfully'] = 'שאלה נמחקה בהצלחה';
+$string['error_deleting_question'] = 'שגיאה במחיקת שאלה';
 $string['plugindisabled'] = 'תוסף TrustGrade מושבת';
-$string['trustgradedisabled'] = 'TrustGrade מושבת למטלה זו';
+$string['trustgradedisabled'] = 'TrustGrade מושבת עבור מטלה זו';
 
 // Submission Processing Language Strings
 $string['processing_submission'] = 'מעבד את ההגשה שלך';
-$string['processing_submission_message'] = 'אנא המתן בזמן שאנו מעבדים את ההגשה שלך...';
+$string['processing_submission_message'] = 'אנא המתן בעוד אנו מעבדים את הגשת המטלה שלך...';
 $string['processing_please_wait'] = 'אנא המתן...';
-?>
+
+// Question Generation Processing Strings
+$string['processing_question_generation'] = 'מעבד מטלה';
+$string['processing_question_generation_message'] = 'אנא המתן בעוד אנו שומרים את המטלה שלך ומכינים ליצור שאלות באופן אוטומטי...';
+
+$string['blooms_level'] = 'רמת בלום';
+$string['error_saving_grade_user'] = 'שגיאה בשמירת ציון למשתמש';
+$string['no_pending_grades'] = 'אין ציונים ממתינים לשמירה.';
+$string['saving_grades'] = 'שומר...';
+$string['grades_saved_success'] = 'ציונים נשמרו בהצלחה';
+$string['error_saving_grades'] = 'שגיאה בשמירת ציונים';
+$string['clearing_grades'] = 'מנקה...';
+$string['all_grades_cleared'] = 'כל הציונים נמחקו בהצלחה';
+$string['error_clearing_grades'] = 'שגיאה במחיקת ציונים';
+$string['grade_pending_save'] = 'ציון ממתין לשמירה';
+$string['saving_grade'] = 'שומר ציון...';
+$string['grade_saved'] = 'ציון נשמר';
+$string['error_saving_grade'] = 'שגיאה בשמירת ציון';
+$string['unsaved_changes'] = 'שינויים לא שמורים';
+$string['enter_explanation_option'] = 'הכנס הסבר עבור אפשרות זו...';
+$string['multiple_choice'] = 'רב-ברירה';
+$string['click_edit_add_question'] = 'לחץ עריכה להוספת טקסט שאלה';
+$string['click_edit_add_options'] = 'לחץ עריכה להוספת אפשרויות תשובה';
+$string['explanation_for_true'] = 'הסבר עבור נכון';
+$string['explanation_for_false'] = 'הסבר עבור לא נכון';
+$string['enter_question_text'] = 'הכנס טקסט שאלה...';
+$string['true_false'] = 'נכון/לא נכון';
+$string['short_answer'] = 'תשובה קצרה';
+$string['option_text'] = 'טקסט אפשרות';
+$string['save_changes'] = 'שמירת שינויים';
+
+$string['auto_generate_questions'] = 'צור בנק שאלות עבור מטלה זו בעזרת AI';
+$string['auto_generate_questions_desc'] = 'צור בנק שאלות על בסיס הוראות המטלה באופן אוטומטי, עם שמירת המטלה.';
+$string['questions_generation_failed'] = 'יצירת השאלות האוטומטית נכשלה';
+$string['questions_generation_error'] = 'אירעה שגיאה במהלך יצירת השאלות האוטומטית';
+$string['questions_will_be_generated'] = 'שאלות ייווצרו אוטומטית עבור מטלה זו';
+
+$string['blooms_remembering'] = 'זכרון';
+$string['blooms_understanding'] = 'הבנה';
+$string['blooms_applying'] = 'יישום';
+$string['blooms_analyzing'] = 'ניתוח';
+$string['blooms_evaluating'] = 'הערכה';
+$string['blooms_create'] = 'יצירה';
+$string['blooms_level_label'] = 'רמת בלום';
+
+$string['question_source_instructor'] = 'מדריך';
+$string['question_source_ai_generated'] = 'נוצר על ידי AI';
+$string['question_source_submission'] = 'מבוסס על הגשה';
+$string['default_enabled'] = 'הפעל את התוסף באופן אוטומטי עבור כל מטלה חדשה';

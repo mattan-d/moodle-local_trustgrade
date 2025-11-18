@@ -559,3 +559,48 @@
     font-size: 20px;
   }
 }
+
+/* High contrast badge colors for AI recommendation table */
+/* Override Bootstrap badge colors for better visibility and accessibility */
+.badge.bg-primary.rounded-pill {
+  background-color: #0056b3 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.badge.bg-success.rounded-pill {
+  background-color: #198754 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.badge.bg-danger.rounded-pill {
+  background-color: #dc3545 !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.badge.bg-warning.rounded-pill {
+  background-color: #fd7e14 !important;
+  color: #000000 !important;
+  font-weight: 600;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* Ensure badges in recommendation table have proper contrast */
+#ai-recommendation .badge {
+  min-width: 60px;
+  text-align: center;
+}
+
+/* Additional contrast for table badges */
+.modern-criteria-table .badge {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}

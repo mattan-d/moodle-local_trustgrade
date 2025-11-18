@@ -23,10 +23,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
         e.preventDefault()
         trustgrade.checkInstructions()
       })
-      $(document).on("click", "#generate-questions-btn", (e) => {
-        e.preventDefault()
-        trustgrade.generateQuestions()
-      })
       $(document).on("change", "#id_trustgrade_questions_to_generate", (e) => {
         e.preventDefault()
         trustgrade.updateSingleQuizSetting("questions_to_generate", $(e.target).val())
@@ -273,7 +269,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           const s = r["Suggestions"] ?? ""
           const metValue = m.toLowerCase()
 
-          let metBadge = `<span class="badge bg-secondary rounded-pill">${m}</span>`
+          let metBadge = `<span class="badge bg-primary rounded-pill">${m}</span>`
           if (metValue === "yes" || metValue === "y" || metValue === "true") {
             metBadge = `<span class="badge bg-success rounded-pill"><i class="fa fa-check me-1"></i>${m}</span>`
           } else if (metValue === "no" || metValue === "n" || metValue === "false") {
