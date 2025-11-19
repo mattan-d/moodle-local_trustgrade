@@ -4,6 +4,9 @@
 require_once('../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 
+require_login();
+require_capability('moodle/site:config', context_system::instance());
+
 $PAGE->set_url('/local/trustgrade/gateway_test.php');
 $PAGE->set_title('AI Gateway Test');
 $PAGE->set_heading('AI Gateway Connection Test');

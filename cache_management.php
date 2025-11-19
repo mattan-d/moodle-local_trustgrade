@@ -4,6 +4,9 @@
 require_once('../../config.php');
 require_once($CFG->libdir . '/adminlib.php');
 
+require_login();
+require_capability('moodle/site:config', context_system::instance());
+
 $action = optional_param('action', '', PARAM_TEXT);
 
 $PAGE->set_url('/local/trustgrade/cache_management.php');
