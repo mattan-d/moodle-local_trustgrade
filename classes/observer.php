@@ -195,22 +195,18 @@ class observer {
     }
 
     /**
-     * Set flag in session to redirect user to quiz
+     * Set flag in cache to redirect user to quiz
      *
      * @param int $cmid Course module ID
      * @param int $submission_id Submission ID
      */
     private static function set_quiz_redirect_flag($cmid, $submission_id) {
-        global $SESSION;
-
-        if (!isset($SESSION->trustgrade_quiz_redirect)) {
-            $SESSION->trustgrade_quiz_redirect = [];
-        }
-
-        $SESSION->trustgrade_quiz_redirect[$cmid] = [
+        $cache = \cache::make('local_trustgrade', 'quiz_redirect');
+        
+        $cache->set($cmid, [
             'submission_id' => $submission_id,
             'timestamp' => time()
-        ];
+        ]);
     }
 
     /**

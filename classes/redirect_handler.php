@@ -17,17 +17,17 @@ class redirect_handler {
      * @return bool True if redirect was handled
      */
     public static function check_and_handle_redirect($cmid) {
-        global $SESSION;
+        $cache = \cache::make('local_trustgrade', 'quiz_redirect');
         
-        if (!isset($SESSION->trustgrade_quiz_redirect[$cmid])) {
+        $redirect_data = $cache->get($cmid);
+        
+        if ($redirect_data === false) {
             return false;
         }
         
-        $redirect_data = $SESSION->trustgrade_quiz_redirect[$cmid];
-        
         // Check if redirect is still valid (within 5 minutes)
         if (time() - $redirect_data['timestamp'] > 300) {
-            unset($SESSION->trustgrade_quiz_redirect[$cmid]);
+            $cache->delete($cmid);
             return false;
         }
         
@@ -38,12 +38,12 @@ class redirect_handler {
         
         if (empty($questions)) {
             // No questions available, clear redirect flag
-            unset($SESSION->trustgrade_quiz_redirect[$cmid]);
+            $cache->delete($cmid);
             return false;
         }
         
         // Clear the redirect flag
-        unset($SESSION->trustgrade_quiz_redirect[$cmid]);
+        $cache->delete($cmid);
         
         // Perform immediate redirect to quiz
         self::redirect_to_quiz($cmid, $submission_id);
