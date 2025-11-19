@@ -21,6 +21,9 @@
  * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+namespace local_trustgrade;
+
 class submission_processor {
     
     /**
