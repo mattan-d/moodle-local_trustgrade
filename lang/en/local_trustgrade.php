@@ -371,4 +371,69 @@ $string['question_source_instructor'] = 'Instructor';
 $string['question_source_ai_generated'] = 'AI Generated';
 $string['question_source_submission'] = 'Submission Based';
 
+// Privacy API language strings for GDPR compliance
+// Privacy API metadata descriptions
+$string['privacy:metadata:local_trustgrade_logs'] = 'Stores logs of TrustGrade instruction analysis requests and AI recommendations.';
+$string['privacy:metadata:local_trustgrade_logs:userid'] = 'The ID of the user who requested the instruction analysis.';
+$string['privacy:metadata:local_trustgrade_logs:cmid'] = 'The course module ID where the analysis was performed.';
+$string['privacy:metadata:local_trustgrade_logs:instructions'] = 'The assignment instructions that were analyzed.';
+$string['privacy:metadata:local_trustgrade_logs:recommendation'] = 'The AI-generated recommendation for the instructions.';
+$string['privacy:metadata:local_trustgrade_logs:timecreated'] = 'The time when the analysis request was made.';
+
+$string['privacy:metadata:local_trustgrade_questions'] = 'Stores AI-generated questions for assignments created by instructors.';
+$string['privacy:metadata:local_trustgrade_questions:cmid'] = 'The course module ID for which questions were generated.';
+$string['privacy:metadata:local_trustgrade_questions:userid'] = 'The ID of the instructor who generated the questions.';
+$string['privacy:metadata:local_trustgrade_questions:question_data'] = 'The question data including text, type, options, and correct answers.';
+$string['privacy:metadata:local_trustgrade_questions:timecreated'] = 'The time when the questions were created.';
+$string['privacy:metadata:local_trustgrade_questions:timemodified'] = 'The time when the questions were last modified.';
+
+$string['privacy:metadata:local_trustgd_sub_questions'] = 'Stores AI-generated questions based on individual student submissions.';
+$string['privacy:metadata:local_trustgd_sub_questions:submission_id'] = 'The submission ID that the questions are based on.';
+$string['privacy:metadata:local_trustgd_sub_questions:cmid'] = 'The course module ID associated with the submission.';
+$string['privacy:metadata:local_trustgd_sub_questions:userid'] = 'The ID of the student whose submission was analyzed.';
+$string['privacy:metadata:local_trustgd_sub_questions:question_data'] = 'The personalized question data generated from the submission.';
+$string['privacy:metadata:local_trustgd_sub_questions:timecreated'] = 'The time when the questions were generated.';
+$string['privacy:metadata:local_trustgd_sub_questions:timemodified'] = 'The time when the questions were last modified.';
+
+$string['privacy:metadata:local_trustgrade_debug'] = 'Stores debug information and cached API responses for development purposes.';
+$string['privacy:metadata:local_trustgrade_debug:userid'] = 'The ID of the user who triggered the API request.';
+$string['privacy:metadata:local_trustgrade_debug:cmid'] = 'The course module ID associated with the request.';
+$string['privacy:metadata:local_trustgrade_debug:request_type'] = 'The type of API request made.';
+$string['privacy:metadata:local_trustgrade_debug:request_data'] = 'The data sent in the API request.';
+$string['privacy:metadata:local_trustgrade_debug:raw_response'] = 'The raw response received from the API.';
+$string['privacy:metadata:local_trustgrade_debug:parsed_response'] = 'The parsed API response data.';
+$string['privacy:metadata:local_trustgrade_debug:timecreated'] = 'The time when the request was made.';
+
+$string['privacy:metadata:local_trustgd_quiz_sessions'] = 'Stores quiz session state including student answers and integrity monitoring data.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:cmid'] = 'The course module ID for the quiz.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:submissionid'] = 'The submission ID associated with this quiz session.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:userid'] = 'The ID of the student taking the quiz.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:questions_data'] = 'The questions presented in the quiz.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:settings_data'] = 'The quiz settings applied for this session.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:current_question'] = 'The current question number in the quiz.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:answers_data'] = 'The student\'s answers to quiz questions.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:time_remaining'] = 'The time remaining for the current question.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:window_blur_count'] = 'The number of times the student switched windows/tabs during the quiz.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:attempt_started'] = 'Whether the quiz attempt has been started.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:attempt_completed'] = 'Whether the quiz attempt has been completed.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:integrity_violations'] = 'Recorded integrity violations during the quiz.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:final_score'] = 'The final score achieved on the quiz.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:timecreated'] = 'The time when the quiz session was created.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:timemodified'] = 'The time when the quiz session was last modified.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:timecompleted'] = 'The time when the quiz was completed.';
+
+$string['privacy:metadata:ai_gateway'] = 'Personal data is sent to an external AI Gateway service for processing assignment instructions and generating personalized questions.';
+$string['privacy:metadata:ai_gateway:userid'] = 'The user ID may be included in metadata for tracking purposes.';
+$string['privacy:metadata:ai_gateway:instructions'] = 'Assignment instructions are sent to the AI Gateway for analysis.';
+$string['privacy:metadata:ai_gateway:submission_text'] = 'Student submission text is sent to generate personalized quiz questions.';
+$string['privacy:metadata:ai_gateway:files'] = 'File attachments may be sent for analysis and question generation.';
+$string['privacy:metadata:ai_gateway:metadata'] = 'Additional contextual information (course ID, course name, module ID) is sent with requests.';
+
+// Privacy export paths
+$string['privacy:path:logs'] = 'TrustGrade Instruction Analysis Logs';
+$string['privacy:path:questions'] = 'TrustGrade Generated Questions';
+$string['privacy:path:submission_questions'] = 'TrustGrade Submission-Based Questions';
+$string['privacy:path:quiz_sessions'] = 'TrustGrade Quiz Sessions';
+$string['privacy:path:debug'] = 'TrustGrade Debug Data';
+
 ?>
