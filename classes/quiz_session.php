@@ -279,6 +279,76 @@ class quiz_session {
     }
     
     /**
+     * Get all completed quiz sessions for a specific course
+     * 
+     * @param int $courseid Course ID
+     * @return array Array of session records with user details and course module info
+     */
+    public static function get_completed_sessions_for_course($courseid) {
+        global $DB;
+        
+        $sql = "SELECT s.*, u.firstname, u.lastname, u.email, cm.id as cmid, a.name as assignmentname
+                FROM {local_trustgd_quiz_sessions} s
+                JOIN {user} u ON s.userid = u.id
+                JOIN {course_modules} cm ON s.cmid = cm.id
+                JOIN {assign} a ON cm.instance = a.id
+                WHERE cm.course = :courseid AND s.attempt_completed = 1
+                ORDER BY a.name, u.lastname, u.firstname";
+        
+        try {
+            $sessions = $DB->get_records_sql($sql, ['courseid' => $courseid]);
+            
+            foreach ($sessions as $session) {
+                $session->questions_data = json_decode($session->questions_data);
+                $session->answers_data = json_decode($session->answers_data);
+                $session->integrity_violations = json_decode($session->integrity_violations);
+            }
+            
+            return $sessions;
+            
+        } catch (\Exception $e) {
+            error_log('Failed to get completed quiz sessions for course: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Get all completed quiz sessions across all courses
+     * 
+     * @return array Array of session records with user details and course/assignment info
+     */
+    public static function get_all_completed_sessions() {
+        global $DB;
+        
+        $sql = "SELECT s.*, u.firstname, u.lastname, u.email, 
+                       cm.id as cmid, a.name as assignmentname, 
+                       c.id as courseid, c.fullname as coursename
+                FROM {local_trustgd_quiz_sessions} s
+                JOIN {user} u ON s.userid = u.id
+                JOIN {course_modules} cm ON s.cmid = cm.id
+                JOIN {assign} a ON cm.instance = a.id
+                JOIN {course} c ON cm.course = c.id
+                WHERE s.attempt_completed = 1
+                ORDER BY c.fullname, a.name, u.lastname, u.firstname";
+        
+        try {
+            $sessions = $DB->get_records_sql($sql);
+            
+            foreach ($sessions as $session) {
+                $session->questions_data = json_decode($session->questions_data);
+                $session->answers_data = json_decode($session->answers_data);
+                $session->integrity_violations = json_decode($session->integrity_violations);
+            }
+            
+            return $sessions;
+            
+        } catch (\Exception $e) {
+            error_log('Failed to get all completed quiz sessions: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
      * Clean up old quiz sessions (older than specified days)
      * 
      * @param int $days Number of days to keep (default: 30)
