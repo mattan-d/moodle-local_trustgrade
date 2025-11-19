@@ -429,3 +429,95 @@ $string['privacy:path:questions'] = 'TrustGrade Generated Questions';
 $string['privacy:path:submission_questions'] = 'TrustGrade Submission-Based Questions';
 $string['privacy:path:quiz_sessions'] = 'TrustGrade Quiz Sessions';
 $string['privacy:path:debug'] = 'TrustGrade Debug Data';
+
+// Cache management page strings
+// Cache management page.
+$string['cache_management_title'] = 'TrustGrade Cache Management';
+$string['cache_management_heading'] = 'TrustGrade Cache Management';
+$string['debug_mode_disabled_info'] = 'Debug mode is currently disabled. Enable debug mode in plugin settings to use caching features.';
+$string['debug_mode_enabled_info'] = 'Debug mode is enabled. Gateway responses are being cached to improve performance.';
+$string['cache_statistics'] = 'Cache Statistics';
+$string['total_cached_responses'] = 'Total Cached Responses';
+$string['last_24_hours'] = 'Last 24 Hours';
+$string['cacheable_responses'] = 'Cacheable Responses';
+$string['cache_efficiency'] = 'Cache Efficiency';
+$string['cache_by_type'] = 'Cache by Request Type';
+$string['request_type'] = 'Request Type';
+$string['cached_responses'] = 'Cached Responses';
+$string['actions'] = 'Actions';
+$string['clear'] = 'Clear';
+$string['recent_cache_activity'] = 'Recent Cache Activity';
+$string['time'] = 'Time';
+$string['status'] = 'Status';
+$string['cached'] = 'Cached';
+$string['not_cached'] = 'Not Cached';
+$string['error_loading_cache_stats'] = 'Error loading cache statistics: {$a}';
+$string['cache_management_actions'] = 'Cache Management Actions';
+$string['clear_all_cache_title'] = 'Clear All Cache';
+$string['clear_all_cache_desc'] = 'Remove all cached Gateway responses. This will force fresh requests to the Gateway.';
+$string['clear_all_cache_button'] = 'Clear All Cache';
+$string['cleanup_old_records_title'] = 'Cleanup Old Records';
+$string['cleanup_old_records_desc'] = 'Remove cache records older than 7 days to free up database space.';
+$string['cleanup_old_records_button'] = 'Cleanup Old Records';
+$string['related_pages'] = 'Related Pages';
+$string['plugin_settings'] = 'Plugin Settings';
+$string['all_cache_cleared'] = 'All cache cleared successfully';
+$string['instruction_cache_cleared'] = 'Instruction analysis cache cleared';
+$string['question_cache_cleared'] = 'Question generation cache cleared';
+$string['submission_cache_cleared'] = 'Submission questions cache cleared';
+$string['old_cache_cleaned_up'] = 'Old cache records cleaned up';
+
+// Gateway test page strings
+// Gateway test page.
+$string['gateway_test_title'] = 'AI Gateway Test';
+$string['gateway_test_heading'] = 'AI Gateway Connection Test';
+$string['gateway_connection_success'] = 'Connection successful';
+$string['gateway_connection_failed'] = 'Connection failed: {$a}';
+$string['gateway_configuration'] = 'Gateway Configuration';
+$string['gateway_endpoint_label'] = 'Endpoint';
+$string['gateway_token_label'] = 'Token';
+$string['gateway_token_configured'] = 'Configured';
+$string['gateway_token_not_configured'] = 'Not configured';
+$string['gateway_openrouter_note'] = 'Note: OpenRouter API Key and Model are configured in the Gateway server, not in the plugin.';
+$string['gateway_troubleshooting'] = 'Troubleshooting';
+$string['gateway_verify_url'] = 'Verify the Gateway endpoint URL is correct and accessible';
+$string['gateway_check_token'] = 'Check that the Gateway authentication token is valid';
+$string['gateway_ensure_running'] = 'Ensure the Gateway server is running and responding';
+$string['gateway_verify_apikey'] = 'Verify the Gateway has a valid OpenRouter API key configured';
+$string['gateway_config_error'] = 'Configuration error: {$a}';
+$string['gateway_config_required'] = 'Configuration Required';
+$string['gateway_config_endpoint'] = 'Configure the Gateway endpoint URL in plugin settings';
+$string['gateway_config_token'] = 'Set the Gateway authentication token (use "Demo123" for testing)';
+$string['gateway_config_openrouter'] = 'Ensure the Gateway server has OpenRouter API key configured';
+$string['configure_gateway_settings'] = 'Configure Gateway Settings';
+
+// Question editor validation strings
+// Question editor validation.
+$string['question_saved_successfully_msg'] = 'Question saved successfully';
+$string['failed_save_question'] = 'Failed to save question: {$a}';
+$string['question_not_found_error'] = 'Question not found';
+$string['question_deleted_successfully_msg'] = 'Question deleted successfully';
+$string['failed_delete_question'] = 'Failed to delete question: {$a}';
+$string['invalid_json_error'] = 'Invalid JSON: {$a}';
+$string['question_data_must_be_array'] = 'Question data must be an associative array';
+$string['question_type_required'] = 'Question type is required';
+$string['invalid_question_type'] = 'Invalid question type';
+$string['question_text_field_required'] = 'Question text (field "text") is required';
+$string['options_must_be_array'] = 'Options must be provided as an array';
+$string['at_least_2_options_required'] = 'At least 2 options are required';
+$string['option_must_be_object'] = 'Each option must be an object';
+$string['option_non_numeric_id'] = 'Option at index {$a} has non-numeric id';
+$string['option_text_required'] = 'Option at index {$a} must include non-empty \'text\'';
+$string['option_is_correct_required'] = 'Option at index {$a} must include \'is_correct\'';
+$string['option_is_correct_invalid'] = 'Option at index {$a} has invalid \'is_correct\' (must be boolean)';
+$string['option_explanation_invalid'] = 'Option at index {$a} has invalid \'explanation\' (must be string)';
+$string['at_least_one_correct_option'] = 'Multiple choice questions must have at least one correct option';
+$string['metadata_must_be_object'] = 'Metadata must be an object';
+$string['points_must_be_1_to_100'] = 'Points must be between 1 and 100';
+$string['blooms_level_must_be_string'] = 'Metadata \'blooms_level\' must be a string';
+
+// Quiz completion strings
+// Quiz completion messages.
+$string['quiz_already_completed'] = 'You have already completed this assessment. Only one attempt is allowed per assignment.';
+$string['return_to_assignment'] = 'Return to Assignment';
+?>

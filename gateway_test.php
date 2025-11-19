@@ -29,12 +29,12 @@ require_login();
 require_capability('moodle/site:config', context_system::instance());
 
 $PAGE->set_url('/local/trustgrade/gateway_test.php');
-$PAGE->set_title('AI Gateway Test');
-$PAGE->set_heading('AI Gateway Connection Test');
+$PAGE->set_title(get_string('gateway_test_title', 'local_trustgrade'));
+$PAGE->set_heading(get_string('gateway_test_heading', 'local_trustgrade'));
 
 echo $OUTPUT->header();
 
-echo html_writer::tag('h2', 'AI Gateway Connection Test');
+echo html_writer::tag('h2', get_string('gateway_test_heading', 'local_trustgrade'));
 
 // Test Gateway connection
 try {
@@ -47,50 +47,56 @@ try {
             'alert alert-success'
         );
         
-        echo html_writer::tag('h3', 'Gateway Configuration');
+        echo html_writer::tag('h3', get_string('gateway_configuration', 'local_trustgrade'));
         echo html_writer::start_tag('ul');
-        echo html_writer::tag('li', 'Endpoint: ' . get_config('local_trustgrade', 'gateway_endpoint'));
-        echo html_writer::tag('li', 'Token: ' . (get_config('local_trustgrade', 'gateway_token') ? 'Configured' : 'Not configured'));
+        echo html_writer::tag('li', get_string('gateway_endpoint_label', 'local_trustgrade') . ': ' . 
+            get_config('local_trustgrade', 'gateway_endpoint'));
+        echo html_writer::tag('li', get_string('gateway_token_label', 'local_trustgrade') . ': ' . 
+            (get_config('local_trustgrade', 'gateway_token') ? 
+                get_string('gateway_token_configured', 'local_trustgrade') : 
+                get_string('gateway_token_not_configured', 'local_trustgrade')));
         echo html_writer::end_tag('ul');
         
         echo html_writer::tag('p', 
-            html_writer::tag('strong', 'Note: ') . 
-            'OpenRouter API Key and Model are configured in the Gateway server, not in the plugin.'
+            html_writer::tag('strong', get_string('note', 'moodle') . ': ') . 
+            get_string('gateway_openrouter_note', 'local_trustgrade')
         );
         
     } else {
         echo html_writer::div(
-            html_writer::tag('i', '', ['class' => 'fa fa-exclamation-triangle']) . ' Connection failed: ' . $result['error'],
+            html_writer::tag('i', '', ['class' => 'fa fa-exclamation-triangle']) . ' ' . 
+            get_string('gateway_connection_failed', 'local_trustgrade', $result['error']),
             'alert alert-danger'
         );
         
-        echo html_writer::tag('h3', 'Troubleshooting');
+        echo html_writer::tag('h3', get_string('gateway_troubleshooting', 'local_trustgrade'));
         echo html_writer::start_tag('ul');
-        echo html_writer::tag('li', 'Verify the Gateway endpoint URL is correct and accessible');
-        echo html_writer::tag('li', 'Check that the Gateway authentication token is valid');
-        echo html_writer::tag('li', 'Ensure the Gateway server is running and responding');
-        echo html_writer::tag('li', 'Verify the Gateway has a valid OpenRouter API key configured');
+        echo html_writer::tag('li', get_string('gateway_verify_url', 'local_trustgrade'));
+        echo html_writer::tag('li', get_string('gateway_check_token', 'local_trustgrade'));
+        echo html_writer::tag('li', get_string('gateway_ensure_running', 'local_trustgrade'));
+        echo html_writer::tag('li', get_string('gateway_verify_apikey', 'local_trustgrade'));
         echo html_writer::end_tag('ul');
     }
     
 } catch (Exception $e) {
     echo html_writer::div(
-        html_writer::tag('i', '', ['class' => 'fa fa-times-circle']) . ' Configuration error: ' . $e->getMessage(),
+        html_writer::tag('i', '', ['class' => 'fa fa-times-circle']) . ' ' . 
+        get_string('gateway_config_error', 'local_trustgrade', $e->getMessage()),
         'alert alert-danger'
     );
     
-    echo html_writer::tag('h3', 'Configuration Required');
+    echo html_writer::tag('h3', get_string('gateway_config_required', 'local_trustgrade'));
     echo html_writer::start_tag('ul');
-    echo html_writer::tag('li', 'Configure the Gateway endpoint URL in plugin settings');
-    echo html_writer::tag('li', 'Set the Gateway authentication token (use "Demo123" for testing)');
-    echo html_writer::tag('li', 'Ensure the Gateway server has OpenRouter API key configured');
+    echo html_writer::tag('li', get_string('gateway_config_endpoint', 'local_trustgrade'));
+    echo html_writer::tag('li', get_string('gateway_config_token', 'local_trustgrade'));
+    echo html_writer::tag('li', get_string('gateway_config_openrouter', 'local_trustgrade'));
     echo html_writer::end_tag('ul');
 }
 
 echo html_writer::tag('p', 
     html_writer::link(
         new moodle_url('/admin/settings.php', ['section' => 'local_trustgrade']),
-        'Configure Gateway Settings',
+        get_string('configure_gateway_settings', 'local_trustgrade'),
         ['class' => 'btn btn-primary']
     )
 );

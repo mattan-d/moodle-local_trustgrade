@@ -61,14 +61,14 @@ if ($session && $session['attempt_completed']) {
     echo html_writer::tag('h2', get_string('ai_quiz_title', 'local_trustgrade'));
 
     \core\notification::add(
-        'You have already completed this assessment. Only one attempt is allowed per assignment.',
+        get_string('quiz_already_completed', 'local_trustgrade'),
         \core\notification::INFO
     );
 
     echo html_writer::div(
         html_writer::link(
             new moodle_url('/mod/assign/view.php', ['id' => $cmid]),
-            'Return to Assignment',
+            get_string('return_to_assignment', 'local_trustgrade'),
             ['class' => 'btn btn-primary']
         ),
         'text-center mt-3'

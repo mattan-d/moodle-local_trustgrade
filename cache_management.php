@@ -31,35 +31,35 @@ require_capability('moodle/site:config', context_system::instance());
 $action = optional_param('action', '', PARAM_TEXT);
 
 $PAGE->set_url('/local/trustgrade/cache_management.php');
-$PAGE->set_title('TrustGrade Cache Management');
-$PAGE->set_heading('TrustGrade Cache Management');
+$PAGE->set_title(get_string('cache_management_title', 'local_trustgrade'));
+$PAGE->set_heading(get_string('cache_management_heading', 'local_trustgrade'));
 
 // Handle actions
 if ($action && confirm_sesskey()) {
     switch ($action) {
         case 'clear_all':
             \local_trustgrade\debug_cache::cleanup_old_records(0); // Clear all
-            \core\notification::add('All cache cleared successfully', \core\notification::SUCCESS);
+            \core\notification::add(get_string('all_cache_cleared', 'local_trustgrade'), \core\notification::SUCCESS);
             break;
             
         case 'clear_instructions':
             \local_trustgrade\debug_cache::clear_cache_by_type('check_instructions');
-            \core\notification::add('Instruction analysis cache cleared', \core\notification::SUCCESS);
+            \core\notification::add(get_string('instruction_cache_cleared', 'local_trustgrade'), \core\notification::SUCCESS);
             break;
             
         case 'clear_questions':
             \local_trustgrade\debug_cache::clear_cache_by_type('generate_questions');
-            \core\notification::add('Question generation cache cleared', \core\notification::SUCCESS);
+            \core\notification::add(get_string('question_cache_cleared', 'local_trustgrade'), \core\notification::SUCCESS);
             break;
             
         case 'clear_submissions':
             \local_trustgrade\debug_cache::clear_cache_by_type('generate_submission_questions');
-            \core\notification::add('Submission questions cache cleared', \core\notification::SUCCESS);
+            \core\notification::add(get_string('submission_cache_cleared', 'local_trustgrade'), \core\notification::SUCCESS);
             break;
             
         case 'cleanup_old':
             \local_trustgrade\debug_cache::cleanup_old_records(7); // Keep only 7 days
-            \core\notification::add('Old cache records cleaned up', \core\notification::SUCCESS);
+            \core\notification::add(get_string('old_cache_cleaned_up', 'local_trustgrade'), \core\notification::SUCCESS);
             break;
     }
     
@@ -68,21 +68,21 @@ if ($action && confirm_sesskey()) {
 
 echo $OUTPUT->header();
 
-echo html_writer::tag('h2', 'TrustGrade Cache Management');
+echo html_writer::tag('h2', get_string('cache_management_heading', 'local_trustgrade'));
 
 // Check if debug mode is enabled
 $debug_mode = get_config('local_trustgrade', 'debug_mode');
 
 if (!$debug_mode) {
     echo html_writer::div(
-        html_writer::tag('i', '', ['class' => 'fa fa-info-circle']) . 
-        ' Debug mode is currently disabled. Enable debug mode in plugin settings to use caching features.',
+        html_writer::tag('i', '', ['class' => 'fa fa-info-circle']) . ' ' .
+        get_string('debug_mode_disabled_info', 'local_trustgrade'),
         'alert alert-info'
     );
 } else {
     echo html_writer::div(
-        html_writer::tag('i', '', ['class' => 'fa fa-check-circle']) . 
-        ' Debug mode is enabled. Gateway responses are being cached to improve performance.',
+        html_writer::tag('i', '', ['class' => 'fa fa-check-circle']) . ' ' .
+        get_string('debug_mode_enabled_info', 'local_trustgrade'),
         'alert alert-success'
     );
 }
@@ -93,7 +93,7 @@ try {
     $stats = $gateway->getCacheStats();
     
     if ($stats['cache_enabled']) {
-        echo html_writer::tag('h3', 'Cache Statistics');
+        echo html_writer::tag('h3', get_string('cache_statistics', 'local_trustgrade'));
         
         echo html_writer::start_div('row');
         
@@ -102,7 +102,7 @@ try {
         echo html_writer::start_div('card');
         echo html_writer::start_div('card-body text-center');
         echo html_writer::tag('h4', $stats['total_records'] ?? 0, ['class' => 'text-primary']);
-        echo html_writer::tag('p', 'Total Cached Responses', ['class' => 'card-text']);
+        echo html_writer::tag('p', get_string('total_cached_responses', 'local_trustgrade'), ['class' => 'card-text']);
         echo html_writer::end_div();
         echo html_writer::end_div();
         echo html_writer::end_div();
@@ -112,7 +112,7 @@ try {
         echo html_writer::start_div('card');
         echo html_writer::start_div('card-body text-center');
         echo html_writer::tag('h4', $stats['last_24h'] ?? 0, ['class' => 'text-info']);
-        echo html_writer::tag('p', 'Last 24 Hours', ['class' => 'card-text']);
+        echo html_writer::tag('p', get_string('last_24_hours', 'local_trustgrade'), ['class' => 'card-text']);
         echo html_writer::end_div();
         echo html_writer::end_div();
         echo html_writer::end_div();
@@ -122,7 +122,7 @@ try {
         echo html_writer::start_div('card');
         echo html_writer::start_div('card-body text-center');
         echo html_writer::tag('h4', $stats['cache_potential'] ?? 0, ['class' => 'text-success']);
-        echo html_writer::tag('p', 'Cacheable Responses', ['class' => 'card-text']);
+        echo html_writer::tag('p', get_string('cacheable_responses', 'local_trustgrade'), ['class' => 'card-text']);
         echo html_writer::end_div();
         echo html_writer::end_div();
         echo html_writer::end_div();
@@ -132,7 +132,7 @@ try {
         echo html_writer::start_div('card');
         echo html_writer::start_div('card-body text-center');
         echo html_writer::tag('h4', ($stats['cache_efficiency'] ?? 0) . '%', ['class' => 'text-warning']);
-        echo html_writer::tag('p', 'Cache Efficiency', ['class' => 'card-text']);
+        echo html_writer::tag('p', get_string('cache_efficiency', 'local_trustgrade'), ['class' => 'card-text']);
         echo html_writer::end_div();
         echo html_writer::end_div();
         echo html_writer::end_div();
@@ -141,13 +141,13 @@ try {
         
         // Cache by type
         if (isset($stats['by_type']) && !empty($stats['by_type'])) {
-            echo html_writer::tag('h4', 'Cache by Request Type');
+            echo html_writer::tag('h4', get_string('cache_by_type', 'local_trustgrade'));
             echo html_writer::start_tag('table', ['class' => 'table table-striped']);
             echo html_writer::start_tag('thead');
             echo html_writer::start_tag('tr');
-            echo html_writer::tag('th', 'Request Type');
-            echo html_writer::tag('th', 'Cached Responses');
-            echo html_writer::tag('th', 'Actions');
+            echo html_writer::tag('th', get_string('request_type', 'local_trustgrade'));
+            echo html_writer::tag('th', get_string('cached_responses', 'local_trustgrade'));
+            echo html_writer::tag('th', get_string('actions', 'local_trustgrade'));
             echo html_writer::end_tag('tr');
             echo html_writer::end_tag('thead');
             echo html_writer::start_tag('tbody');
@@ -162,7 +162,7 @@ try {
                     'action' => 'clear_' . str_replace('generate_', '', str_replace('_questions', '', $type)),
                     'sesskey' => sesskey()
                 ]);
-                echo html_writer::link($clear_url, 'Clear', ['class' => 'btn btn-sm btn-outline-danger']);
+                echo html_writer::link($clear_url, get_string('clear', 'local_trustgrade'), ['class' => 'btn btn-sm btn-outline-danger']);
                 
                 echo html_writer::end_tag('td');
                 echo html_writer::end_tag('tr');
@@ -175,13 +175,13 @@ try {
         // Recent activity
         $recent_activity = \local_trustgrade\debug_cache::get_recent_activity(10);
         if (!empty($recent_activity)) {
-            echo html_writer::tag('h4', 'Recent Cache Activity');
+            echo html_writer::tag('h4', get_string('recent_cache_activity', 'local_trustgrade'));
             echo html_writer::start_tag('table', ['class' => 'table table-sm']);
             echo html_writer::start_tag('thead');
             echo html_writer::start_tag('tr');
-            echo html_writer::tag('th', 'Type');
-            echo html_writer::tag('th', 'Time');
-            echo html_writer::tag('th', 'Status');
+            echo html_writer::tag('th', get_string('type', 'local_trustgrade'));
+            echo html_writer::tag('th', get_string('time', 'local_trustgrade'));
+            echo html_writer::tag('th', get_string('status', 'local_trustgrade'));
             echo html_writer::end_tag('tr');
             echo html_writer::end_tag('thead');
             echo html_writer::start_tag('tbody');
@@ -191,8 +191,8 @@ try {
                 echo html_writer::tag('td', ucfirst(str_replace('_', ' ', $activity['type'])));
                 echo html_writer::tag('td', $activity['time_ago']);
                 $status = $activity['cacheable'] ? 
-                    '<span class="badge badge-success">Cached</span>' : 
-                    '<span class="badge badge-secondary">Not Cached</span>';
+                    '<span class="badge badge-success">' . get_string('cached', 'local_trustgrade') . '</span>' : 
+                    '<span class="badge badge-secondary">' . get_string('not_cached', 'local_trustgrade') . '</span>';
                 echo html_writer::tag('td', $status);
                 echo html_writer::end_tag('tr');
             }
@@ -204,14 +204,14 @@ try {
     
 } catch (Exception $e) {
     echo html_writer::div(
-        html_writer::tag('i', '', ['class' => 'fa fa-exclamation-triangle']) . 
-        ' Error loading cache statistics: ' . $e->getMessage(),
+        html_writer::tag('i', '', ['class' => 'fa fa-exclamation-triangle']) . ' ' .
+        get_string('error_loading_cache_stats', 'local_trustgrade', $e->getMessage()),
         'alert alert-danger'
     );
 }
 
 // Cache management actions
-echo html_writer::tag('h3', 'Cache Management Actions');
+echo html_writer::tag('h3', get_string('cache_management_actions', 'local_trustgrade'));
 
 echo html_writer::start_div('row');
 
@@ -219,12 +219,12 @@ echo html_writer::start_div('row');
 echo html_writer::start_div('col-md-6');
 echo html_writer::start_div('card');
 echo html_writer::start_div('card-body');
-echo html_writer::tag('h5', 'Clear All Cache', ['class' => 'card-title']);
-echo html_writer::tag('p', 'Remove all cached Gateway responses. This will force fresh requests to the Gateway.', ['class' => 'card-text']);
+echo html_writer::tag('h5', get_string('clear_all_cache_title', 'local_trustgrade'), ['class' => 'card-title']);
+echo html_writer::tag('p', get_string('clear_all_cache_desc', 'local_trustgrade'), ['class' => 'card-text']);
 $clear_all_url = new moodle_url($PAGE->url, ['action' => 'clear_all', 'sesskey' => sesskey()]);
-echo html_writer::link($clear_all_url, 'Clear All Cache', [
+echo html_writer::link($clear_all_url, get_string('clear_all_cache_button', 'local_trustgrade'), [
     'class' => 'btn btn-danger',
-    'onclick' => 'return confirm("Are you sure you want to clear all cache?")'
+    'onclick' => 'return confirm("' . get_string('confirm_clear_cache', 'local_trustgrade') . '")'
 ]);
 echo html_writer::end_div();
 echo html_writer::end_div();
@@ -234,10 +234,10 @@ echo html_writer::end_div();
 echo html_writer::start_div('col-md-6');
 echo html_writer::start_div('card');
 echo html_writer::start_div('card-body');
-echo html_writer::tag('h5', 'Cleanup Old Records', ['class' => 'card-title']);
-echo html_writer::tag('p', 'Remove cache records older than 7 days to free up database space.', ['class' => 'card-text']);
+echo html_writer::tag('h5', get_string('cleanup_old_records_title', 'local_trustgrade'), ['class' => 'card-title']);
+echo html_writer::tag('p', get_string('cleanup_old_records_desc', 'local_trustgrade'), ['class' => 'card-text']);
 $cleanup_url = new moodle_url($PAGE->url, ['action' => 'cleanup_old', 'sesskey' => sesskey()]);
-echo html_writer::link($cleanup_url, 'Cleanup Old Records', ['class' => 'btn btn-warning']);
+echo html_writer::link($cleanup_url, get_string('cleanup_old_records_button', 'local_trustgrade'), ['class' => 'btn btn-warning']);
 echo html_writer::end_div();
 echo html_writer::end_div();
 echo html_writer::end_div();
@@ -245,15 +245,15 @@ echo html_writer::end_div();
 echo html_writer::end_div();
 
 // Links
-echo html_writer::tag('h3', 'Related Pages');
+echo html_writer::tag('h3', get_string('related_pages', 'local_trustgrade'));
 echo html_writer::start_tag('ul');
 echo html_writer::tag('li', html_writer::link(
     new moodle_url('/admin/settings.php', ['section' => 'local_trustgrade']),
-    'Plugin Settings'
+    get_string('plugin_settings', 'local_trustgrade')
 ));
 echo html_writer::tag('li', html_writer::link(
     new moodle_url('/local/trustgrade/gateway_test.php'),
-    'Gateway Connection Test'
+    get_string('gateway_test_heading', 'local_trustgrade')
 ));
 echo html_writer::end_tag('ul');
 
