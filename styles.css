@@ -1,12 +1,15 @@
 /* TrustGrade Plugin Styles */
 
-#id_trustgrade_fieldset {
+/* Added .local-trustgrade namespace to all selectors to prevent conflicts with Moodle core */
+
+/* TrustGrade fieldset styles */
+.local-trustgrade #id_trustgrade_fieldset {
   margin-top: 20px;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
 
-#id_trustgrade_fieldset legend {
+.local-trustgrade #id_trustgrade_fieldset legend {
   background-color: #f5f5f5;
   padding: 10px 15px;
   margin: 0;
@@ -14,17 +17,18 @@
   width: 100%;
 }
 
-#id_trustgrade_fieldset legend a {
+.local-trustgrade #id_trustgrade_fieldset legend a {
   text-decoration: none;
   color: #333;
   font-weight: bold;
 }
 
-#id_trustgrade_fieldset legend a:hover {
+.local-trustgrade #id_trustgrade_fieldset legend a:hover {
   color: #0073aa;
 }
 
-#check-instructions-btn {
+/* Check instructions button */
+.local-trustgrade #check-instructions-btn {
   background-color: #0073aa;
   border-color: #0073aa;
   color: white;
@@ -33,33 +37,35 @@
   cursor: pointer;
 }
 
-#check-instructions-btn:hover {
+.local-trustgrade #check-instructions-btn:hover {
   background-color: #005a87;
   border-color: #005a87;
 }
 
-#check-instructions-btn:disabled {
+.local-trustgrade #check-instructions-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   background-color: #ccc;
   border-color: #ccc;
 }
 
-#ai-loading {
+/* AI loading indicator */
+.local-trustgrade #ai-loading {
   color: #666;
   font-style: italic;
   margin-top: 10px;
 }
 
-#ai-loading i {
+.local-trustgrade #ai-loading i {
   margin-right: 5px;
 }
 
-#ai-recommendation-container {
+/* AI recommendation container */
+.local-trustgrade #ai-recommendation-container {
   margin-top: 15px;
 }
 
-#ai-recommendation {
+.local-trustgrade #ai-recommendation {
   word-wrap: break-word;
   overflow-y: auto;
   font-size: 14px;
@@ -72,41 +78,41 @@
 }
 
 /* Ensure proper spacing in form */
-.fitem #ai-loading,
-.fitem #ai-recommendation-container {
+.local-trustgrade .fitem #ai-loading,
+.local-trustgrade .fitem #ai-recommendation-container {
   margin-left: 0;
 }
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
-  #ai-recommendation {
+  .local-trustgrade #ai-recommendation {
     font-size: 13px;
     padding: 10px;
   }
 
-  #check-instructions-btn {
+  .local-trustgrade #check-instructions-btn {
     width: 100%;
     margin-bottom: 10px;
   }
 }
 
 /* Integration with Moodle's form styling */
-.fitem .felement #check-instructions-btn {
+.local-trustgrade .fitem .felement #check-instructions-btn {
   margin: 0;
 }
 
-.fitem .felement #ai-loading {
+.local-trustgrade .fitem .felement #ai-loading {
   margin-top: 10px;
   margin-bottom: 0;
 }
 
-.fitem .felement #ai-recommendation-container {
+.local-trustgrade .fitem .felement #ai-recommendation-container {
   margin-top: 10px;
   width: 100%;
 }
 
-/* Question generation styles */
-#generate-questions-btn {
+/* Question generation button */
+.local-trustgrade #generate-questions-btn {
   background-color: #28a745;
   border-color: #28a745;
   color: white;
@@ -115,29 +121,31 @@
   cursor: pointer;
 }
 
-#generate-questions-btn:hover {
+.local-trustgrade #generate-questions-btn:hover {
   background-color: #218838;
   border-color: #1e7e34;
 }
 
-#generate-questions-btn:disabled {
+.local-trustgrade #generate-questions-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   background-color: #ccc;
   border-color: #ccc;
 }
 
-#ai-question-loading {
+/* AI question loading */
+.local-trustgrade #ai-question-loading {
   color: #666;
   font-style: italic;
   margin-top: 10px;
 }
 
-#ai-questions-container {
+/* AI questions container */
+.local-trustgrade #ai-questions-container {
   margin-top: 15px;
 }
 
-#ai-questions {
+.local-trustgrade #ai-questions {
   background-color: #d4edda;
   border: 1px solid #c3e6cb;
   border-radius: 4px;
@@ -146,7 +154,7 @@
   overflow-y: auto;
 }
 
-.question-item {
+.local-trustgrade .question-item {
   background-color: #f8f9fa;
   margin-bottom: 15px;
   padding: 15px;
@@ -154,25 +162,25 @@
   border: 1px solid #dee2e6;
 }
 
-.question-item h5 {
+.local-trustgrade .question-item h5 {
   color: #495057;
   margin-bottom: 10px;
 }
 
-.question-item ul {
+.local-trustgrade .question-item ul {
   margin-left: 20px;
 }
 
-.question-item li {
+.local-trustgrade .question-item li {
   margin-bottom: 5px;
 }
 
 /* Question Bank Editor Styles */
-.question-bank-container {
+.local-trustgrade .question-bank-container {
   margin-top: 20px;
 }
 
-.editable-question-item {
+.local-trustgrade .editable-question-item {
   background: #f8f9fa;
   border: 1px solid #dee2e6;
   border-radius: 8px;
@@ -180,7 +188,7 @@
   margin-bottom: 20px;
 }
 
-.question-header {
+.local-trustgrade .question-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -189,57 +197,57 @@
   padding-bottom: 10px;
 }
 
-.question-controls {
+.local-trustgrade .question-controls {
   display: flex;
   gap: 10px;
 }
 
-.question-edit-form .form-group {
+.local-trustgrade .question-edit-form .form-group {
   margin-bottom: 15px;
 }
 
-.question-edit-form label {
+.local-trustgrade .question-edit-form label {
   font-weight: bold;
   margin-bottom: 5px;
   display: block;
 }
 
-.multiple-choice-options .option-row {
+.local-trustgrade .multiple-choice-options .option-row {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
 }
 
-.multiple-choice-options .form-check {
+.local-trustgrade .multiple-choice-options .form-check {
   display: flex;
   align-items: center;
   width: 100%;
 }
 
-.multiple-choice-options .form-check-input {
+.local-trustgrade .multiple-choice-options .form-check-input {
   margin-right: 10px;
   flex-shrink: 0;
 }
 
-.multiple-choice-options .option-text-input {
+.local-trustgrade .multiple-choice-options .option-text-input {
   flex: 1;
 }
 
-.true-false-options .form-check {
+.local-trustgrade .true-false-options .form-check {
   margin-bottom: 10px;
 }
 
-.question-edit-buttons {
+.local-trustgrade .question-edit-buttons {
   margin-top: 20px;
   padding-top: 15px;
   border-top: 1px solid #dee2e6;
 }
 
-.question-edit-buttons .btn {
+.local-trustgrade .question-edit-buttons .btn {
   margin-right: 10px;
 }
 
-.add-question-section {
+.local-trustgrade .add-question-section {
   text-align: center;
   margin-top: 20px;
   padding: 20px;
@@ -248,25 +256,25 @@
 }
 
 /* Quiz Settings Styles */
-.quiz-settings-info {
+.local-trustgrade .quiz-settings-info {
   background-color: #e9ecef;
   padding: 15px;
   border-radius: 5px;
   margin-bottom: 20px;
 }
 
-.quiz-settings-info p {
+.local-trustgrade .quiz-settings-info p {
   margin-bottom: 5px;
   font-weight: 500;
 }
 
 /* Timer Styles */
-.question-timer {
+.local-trustgrade .question-timer {
   text-align: center;
   margin-bottom: 20px;
 }
 
-.timer-display {
+.local-trustgrade .timer-display {
   display: inline-block;
   padding: 2px 20px;
   background-color: #007bff;
@@ -277,12 +285,12 @@
   transition: background-color 0.3s ease;
 }
 
-.timer-display.timer-warning {
+.local-trustgrade .timer-display.timer-warning {
   background-color: #dc3545;
-  animation: pulse 1s infinite;
+  animation: local-trustgrade-pulse 1s infinite;
 }
 
-@keyframes pulse {
+@keyframes local-trustgrade-pulse {
   0% {
     opacity: 1;
   }
@@ -294,24 +302,24 @@
   }
 }
 
-.timer-display i {
+.local-trustgrade .timer-display i {
   margin-right: 8px;
 }
 
 /* Cache Management Widget Styles */
-.cache-stats-widget {
+.local-trustgrade .cache-stats-widget {
   margin: 15px 0;
 }
 
-.cache-stats-widget .row {
+.local-trustgrade .cache-stats-widget .row {
   margin: 0 -5px;
 }
 
-.cache-stats-widget .col-md-3 {
+.local-trustgrade .cache-stats-widget .col-md-3 {
   padding: 0 5px;
 }
 
-.cache-stats-widget .card {
+.local-trustgrade .cache-stats-widget .card {
   margin-bottom: 10px;
   border: 1px solid #dee2e6;
   border-radius: 6px;
@@ -319,39 +327,39 @@
   transition: box-shadow 0.2s ease;
 }
 
-.cache-stats-widget .card:hover {
+.local-trustgrade .cache-stats-widget .card:hover {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-.cache-stats-widget .card-body {
+.local-trustgrade .cache-stats-widget .card-body {
   padding: 15px;
   text-align: center;
 }
 
-.cache-stats-widget h4 {
+.local-trustgrade .cache-stats-widget h4 {
   margin: 0 0 5px 0;
   font-size: 24px;
   font-weight: bold;
 }
 
-.cache-stats-widget small {
+.local-trustgrade .cache-stats-widget small {
   color: #6c757d;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.cache-quick-actions {
+.local-trustgrade .cache-quick-actions {
   border-top: 1px solid #dee2e6;
   padding-top: 15px;
   margin-top: 15px;
 }
 
-.cache-quick-actions .btn-group {
+.local-trustgrade .cache-quick-actions .btn-group {
   flex-wrap: wrap;
 }
 
-.cache-quick-actions .btn {
+.local-trustgrade .cache-quick-actions .btn {
   margin-right: 5px;
   margin-bottom: 5px;
   font-size: 12px;
@@ -359,11 +367,11 @@
 }
 
 /* Admin settings page specific styles */
-.admin .cache-stats-widget .card {
+.admin .local-trustgrade .cache-stats-widget .card {
   background: #fff;
 }
 
-.admin .cache-quick-actions .btn-group {
+.admin .local-trustgrade .cache-quick-actions .btn-group {
   display: flex;
   flex-wrap: wrap;
   gap: 5px;
@@ -371,91 +379,91 @@
 
 /* Mobile responsiveness */
 @media (max-width: 768px) {
-  .question-header {
+  .local-trustgrade .question-header {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .question-controls {
+  .local-trustgrade .question-controls {
     margin-top: 10px;
   }
 
-  .multiple-choice-options .option-row {
+  .local-trustgrade .multiple-choice-options .option-row {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .multiple-choice-options .form-check {
+  .local-trustgrade .multiple-choice-options .form-check {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .multiple-choice-options .option-text-input {
+  .local-trustgrade .multiple-choice-options .option-text-input {
     margin-top: 5px;
     width: 100%;
   }
 
-  .timer-display {
+  .local-trustgrade .timer-display {
     font-size: 14px;
     padding: 8px 16px;
   }
 
-  .cache-stats-widget .col-md-3 {
+  .local-trustgrade .cache-stats-widget .col-md-3 {
     margin-bottom: 10px;
   }
 
-  .cache-quick-actions .btn {
+  .local-trustgrade .cache-quick-actions .btn {
     width: 100%;
     margin-right: 0;
   }
 }
 
 /* AI Disclosure Styles */
-.ai-disclosure-container {
+.local-trustgrade .ai-disclosure-container {
   border-left: 4px solid #17a2b8;
   background-color: #d1ecf1;
   border-color: #bee5eb;
   color: #0c5460;
 }
 
-.ai-disclosure-container h5 {
+.local-trustgrade .ai-disclosure-container h5 {
   color: #0c5460;
   margin-bottom: 10px;
   font-weight: bold;
 }
 
-.ai-disclosure-container h5 i {
+.local-trustgrade .ai-disclosure-container h5 i {
   margin-right: 8px;
 }
 
-.ai-disclosure-content {
+.local-trustgrade .ai-disclosure-content {
   line-height: 1.5;
   margin-bottom: 10px;
 }
 
-.ai-disclosure-toggle {
+.local-trustgrade .ai-disclosure-toggle {
   color: #0c5460;
   text-decoration: none;
   font-weight: 500;
   font-size: 14px;
 }
 
-.ai-disclosure-toggle:hover {
+.local-trustgrade .ai-disclosure-toggle:hover {
   color: #062c33;
   text-decoration: underline;
 }
 
-.ai-disclosure-toggle i {
+.local-trustgrade .ai-disclosure-toggle i {
   margin-left: 5px;
   transition: transform 0.2s ease;
 }
 
-.ai-disclosure-details ul {
+.local-trustgrade .ai-disclosure-details ul {
   margin: 0;
   padding-left: 20px;
 }
 
-.ai-disclosure-details li {
+.local-trustgrade .ai-disclosure-details li {
   margin-bottom: 5px;
   font-size: 14px;
   line-height: 1.4;
@@ -463,35 +471,35 @@
 
 /* Mobile responsiveness for disclosure */
 @media (max-width: 768px) {
-  .ai-disclosure-container {
+  .local-trustgrade .ai-disclosure-container {
     margin: 10px 0;
     padding: 12px;
   }
 
-  .ai-disclosure-container h5 {
+  .local-trustgrade .ai-disclosure-container h5 {
     font-size: 16px;
   }
 
-  .ai-disclosure-content {
+  .local-trustgrade .ai-disclosure-content {
     font-size: 14px;
   }
 
-  .ai-disclosure-details li {
+  .local-trustgrade .ai-disclosure-details li {
     font-size: 13px;
   }
 }
 
 /* Animation for collapsible content */
-.ai-disclosure-details .collapse {
+.local-trustgrade .ai-disclosure-details .collapse {
   transition: all 0.3s ease;
 }
 
-.ai-disclosure-details .collapse.show {
+.local-trustgrade .ai-disclosure-details .collapse.show {
   display: block !important;
 }
 
 /* Submission Processing Overlay Styles */
-.submission-processing-overlay {
+.local-trustgrade .submission-processing-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -506,7 +514,7 @@
   font-size: 18px;
 }
 
-.processing-modal {
+.local-trustgrade .processing-modal {
   background: white;
   color: #333;
   padding: 30px;
@@ -517,23 +525,23 @@
   width: 90%;
 }
 
-.spinner-container {
+.local-trustgrade .spinner-container {
   margin-bottom: 20px;
 }
 
-.spinner-container i {
+.local-trustgrade .spinner-container i {
   font-size: 24px;
   color: #007cba;
 }
 
-.processing-title {
+.local-trustgrade .processing-title {
   margin: 0 0 10px 0;
   color: #333;
   font-size: 20px;
   font-weight: bold;
 }
 
-.processing-message {
+.local-trustgrade .processing-message {
   margin: 0;
   color: #666;
   font-size: 16px;
@@ -542,27 +550,27 @@
 
 /* Mobile responsiveness for processing overlay */
 @media (max-width: 768px) {
-  .processing-modal {
+  .local-trustgrade .processing-modal {
     padding: 20px;
     max-width: 320px;
   }
 
-  .processing-title {
+  .local-trustgrade .processing-title {
     font-size: 18px;
   }
 
-  .processing-message {
+  .local-trustgrade .processing-message {
     font-size: 14px;
   }
 
-  .spinner-container i {
+  .local-trustgrade .spinner-container i {
     font-size: 20px;
   }
 }
 
 /* High contrast badge colors for AI recommendation table */
 /* Override Bootstrap badge colors for better visibility and accessibility */
-.badge.bg-primary.rounded-pill {
+.local-trustgrade .badge.bg-primary.rounded-pill {
   background-color: #0056b3 !important;
   color: #ffffff !important;
   font-weight: 600;
@@ -570,7 +578,7 @@
   font-size: 13px;
 }
 
-.badge.bg-success.rounded-pill {
+.local-trustgrade .badge.bg-success.rounded-pill {
   background-color: #198754 !important;
   color: #ffffff !important;
   font-weight: 600;
@@ -578,7 +586,7 @@
   font-size: 13px;
 }
 
-.badge.bg-danger.rounded-pill {
+.local-trustgrade .badge.bg-danger.rounded-pill {
   background-color: #dc3545 !important;
   color: #ffffff !important;
   font-weight: 600;
@@ -586,7 +594,7 @@
   font-size: 13px;
 }
 
-.badge.bg-warning.rounded-pill {
+.local-trustgrade .badge.bg-warning.rounded-pill {
   background-color: #fd7e14 !important;
   color: #000000 !important;
   font-weight: 600;
@@ -595,12 +603,12 @@
 }
 
 /* Ensure badges in recommendation table have proper contrast */
-#ai-recommendation .badge {
+.local-trustgrade #ai-recommendation .badge {
   min-width: 60px;
   text-align: center;
 }
 
 /* Additional contrast for table badges */
-.modern-criteria-table .badge {
+.local-trustgrade .modern-criteria-table .badge {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
