@@ -5,6 +5,8 @@ namespace local_trustgrade;
 
 defined('MOODLE_INTERNAL') || die();
 
+require_once($CFG->libdir . '/filelib.php');
+
 /**
 * Gateway client for external AI API communication with caching support
 */
@@ -161,29 +163,25 @@ class gateway_client {
    * @return array Response data
    */
   private function makeRequest($data) {
-      $curl = curl_init();
-
-      curl_setopt_array($curl, [
-          CURLOPT_URL => $this->endpoint,
-          CURLOPT_RETURNTRANSFER => true,
-          CURLOPT_POST => true,
-          CURLOPT_POSTFIELDS => json_encode($data),
-          CURLOPT_HTTPHEADER => [
-              'Authorization: Bearer ' . $this->token,
-              'Auth: Bearer ' . $this->token, // Cloudflare compatibility
-              'Content-Type: application/json',
-              'User-Agent: Moodle TrustGrade Plugin'
-          ],
-          CURLOPT_TIMEOUT => $this->timeout,
-          CURLOPT_SSL_VERIFYPEER => true,
-          CURLOPT_FOLLOWLOCATION => true,
-          CURLOPT_MAXREDIRS => 3
+      $curl = new \curl();
+      
+      $curl->setopt([
+          'CURLOPT_TIMEOUT' => $this->timeout,
+          'CURLOPT_CONNECTTIMEOUT' => 10,
       ]);
-
-      $response = curl_exec($curl);
-      $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-      $error = curl_error($curl);
-      curl_close($curl);
+      
+      $headers = [
+          'Authorization: Bearer ' . $this->token,
+          'Auth: Bearer ' . $this->token, // Cloudflare compatibility
+          'Content-Type: application/json',
+          'User-Agent: Moodle TrustGrade Plugin'
+      ];
+      
+      $response = $curl->post($this->endpoint, json_encode($data), ['CURLOPT_HTTPHEADER' => $headers]);
+      
+      $info = $curl->get_info();
+      $httpCode = isset($info['http_code']) ? $info['http_code'] : 0;
+      $error = $curl->get_errno() ? $curl->error : '';
 
       if ($error) {
           return [
