@@ -1,0 +1,35 @@
+{{!
+    @template local_trustgrade/question_true_false_options
+
+    True/false options template for question editor.
+
+    Context variables required for this template:
+    * questionIndex - The index of the question
+    * trueSelected - Boolean if true is selected
+    * falseSelected - Boolean if false is selected
+    * trueExplanation - Explanation for true option
+    * falseExplanation - Explanation for false option
+}}
+<div class="true-false-options">
+    <label>{{#str}}correct_answer, local_trustgrade{{/str}}:</label>
+    <div class="tf-row" data-value="true">
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="tf_answer_{{questionIndex}}" value="true" {{#trueSelected}}checked{{/trueSelected}}>
+            <label class="form-check-label tf-label">{{#str}}true, local_trustgrade{{/str}}</label>
+        </div>
+        <div class="form-group mt-2">
+            <label class="form-label">{{#str}}explanation, local_trustgrade{{/str}}</label>
+            <textarea class="form-control option-explanation-input" rows="2" placeholder="{{#str}}explanation_for_true, local_trustgrade{{/str}}">{{trueExplanation}}</textarea>
+        </div>
+    </div>
+    <div class="tf-row mt-3" data-value="false">
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="tf_answer_{{questionIndex}}" value="false" {{#falseSelected}}checked{{/falseSelected}}>
+            <label class="form-check-label tf-label">{{#str}}false, local_trustgrade{{/str}}</label>
+        </div>
+        <div class="form-group mt-2">
+            <label class="form-label">{{#str}}explanation, local_trustgrade{{/str}}</label>
+            <textarea class="form-control option-explanation-input" rows="2" placeholder="{{#str}}explanation_for_false, local_trustgrade{{/str}}">{{falseExplanation}}</textarea>
+        </div>
+    </div>
+</div>
