@@ -93,4 +93,3 @@ $questions = \local_trustgrade\question_generator::get_questions($cmid);
 
 <?php
 echo $OUTPUT->footer();
-?>
