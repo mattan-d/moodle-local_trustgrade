@@ -40,7 +40,7 @@ define(["jquery", "core/templates", "core/str"], ($, Templates, Str) => {
       // Wait for DOM to be ready
       $(document).ready(() => {
         // Find assignment submission forms
-        var $forms = $('form[action*="editsubmission"], form.mform, #region-main form')
+        var $forms = $('form[action*="editsubmission"], form[action*="editmode"], form.mform, #region-main form')
 
         if ($forms.length > 0) {
           $forms.on("submit", (e) => {
