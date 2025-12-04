@@ -21,6 +21,7 @@
  * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+const define = window.define // Declare the define variable
 define(["jquery", "core/templates", "core/str"], ($, Templates, Str) => {
   var SubmissionProcessing = {
     cmid: 0,
@@ -126,7 +127,7 @@ define(["jquery", "core/templates", "core/str"], ($, Templates, Str) => {
 
       if (type === "questions") {
         overlayHtml =
-          '<div id="submission-processing-overlay" class="submission-processing-overlay">' +
+          '<div id="submission-processing-overlay" class="local-trustgrade submission-processing-overlay">' +
           '<div class="processing-modal">' +
           '<div class="spinner-container"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></div>' +
           '<h3 class="processing-title">Processing Assignment...</h3>' +
@@ -134,7 +135,7 @@ define(["jquery", "core/templates", "core/str"], ($, Templates, Str) => {
           "</div></div>"
       } else {
         overlayHtml =
-          '<div id="submission-processing-overlay" class="submission-processing-overlay">' +
+          '<div id="submission-processing-overlay" class="local-trustgrade submission-processing-overlay">' +
           '<div class="processing-modal">' +
           '<div class="spinner-container"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></div>' +
           '<h3 class="processing-title">Processing...</h3>' +
