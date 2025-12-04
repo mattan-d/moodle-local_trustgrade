@@ -499,7 +499,7 @@
 }
 
 /* Submission Processing Overlay Styles */
-.local-trustgrade .submission-processing-overlay {
+.local-trustgrade.submission-processing-overlay {
   position: fixed;
   top: 0;
   left: 0;
