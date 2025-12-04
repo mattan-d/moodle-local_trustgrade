@@ -21,11 +21,7 @@
  * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-var define = window.define // Declare define variable
-var M = window.M // Declare M variable
 var tinyMCE = window.tinyMCE // Declare tinyMCE variable
-
 define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_factory", "core/templates"], (
   $,
   Ajax,
