@@ -40,20 +40,20 @@ class submission_processor {
         if ($cmid) {
             $quiz_settings = \local_trustgrade\quiz_settings::get_settings($cmid);
             if (empty($quiz_settings['enabled'])) {
-                return ['error' => 'TrustGrade is not enabled for this activity'];
+                return ['error' => get_string('error_trustgrade_not_enabled', 'local_trustgrade')];
             }
         }
         
         // Ensure submission_content is an array with expected keys
         if (!is_array($submission_content) || (!isset($submission_content['text']) && !isset($submission_content['files']))) {
-            return ['error' => 'Submission content must be a structured array'];
+            return ['error' => get_string('error_submission_must_be_array', 'local_trustgrade')];
         }
         
         $submission_text = trim($submission_content['text'] ?? '');
         $submission_files = $submission_content['files'] ?? [];
         
         if (empty($submission_text) && empty($submission_files)) {
-            return ['error' => 'Either submission text or at least one file is required'];
+            return ['error' => get_string('error_submission_text_or_file_required', 'local_trustgrade')];
         }
         
         $instructions_text = '';

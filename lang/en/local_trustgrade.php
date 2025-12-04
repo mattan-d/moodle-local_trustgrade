@@ -99,6 +99,7 @@ $string['multiple_choice'] = 'Multiple Choice';
 $string['true_false'] = 'True/False';
 $string['short_answer'] = 'Short Answer';
 $string['options'] = 'Options';
+$string['options_label'] = 'Options:';
 $string['option_text'] = 'Option text';
 $string['optiontext'] = 'Option text';
 $string['option_placeholder'] = 'Enter option text...';
@@ -312,6 +313,8 @@ $string['saving_grade'] = 'Saving grade...';
 $string['grade_saved'] = 'Grade saved';
 $string['error_saving_grade'] = 'Error saving grade';
 $string['error_saving_grade_user'] = 'Error saving grade for user {$a}';
+$string['user_label'] = 'User';
+$string['error_calculate_grade_from_quiz'] = 'Could not calculate grade from quiz score';
 $string['unsaved_changes'] = '{$a} unsaved changes';
 $string['unsaved_changes_single'] = '1 unsaved change';
 $string['no_pending_grades'] = 'No pending grades to save.';
@@ -348,6 +351,9 @@ $string['error_parsing_grades'] = 'Error parsing grades JSON';
 $string['processing_submission'] = 'Processing Your Submission';
 $string['processing_submission_message'] = 'Please wait while we process your assignment submission...';
 $string['processing_please_wait'] = 'Please wait...';
+$string['error_trustgrade_not_enabled'] = 'TrustGrade is not enabled for this activity';
+$string['error_submission_must_be_array'] = 'Submission content must be a structured array';
+$string['error_submission_text_or_file_required'] = 'Either submission text or at least one file is required';
 
 // UI Messages.
 $string['setting_update_error'] = 'Error updating setting: {$a}';

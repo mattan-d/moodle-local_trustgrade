@@ -171,7 +171,7 @@ class grading_manager {
                 $saved_count++;
             } else {
                 $failed_count++;
-                $errors[] = "User {$userid}: " . $result['message'];
+                $errors[] = get_string('user_label', 'local_trustgrade') . " {$userid}: " . $result['message'];
             }
         }
         
@@ -259,10 +259,10 @@ class grading_manager {
                         // Store as associative array for JSON encoding
                         $applied_grades[(string)$session->userid] = (float)$quiz_grade;
                     } else {
-                        $errors[] = "User {$session->userid}: " . $result['message'];
+                        $errors[] = get_string('user_label', 'local_trustgrade') . " {$session->userid}: " . $result['message'];
                     }
                 } else {
-                    $errors[] = "User {$session->userid}: Could not calculate grade from quiz score";
+                    $errors[] = get_string('user_label', 'local_trustgrade') . " {$session->userid}: " . get_string('error_calculate_grade_from_quiz', 'local_trustgrade');
                 }
             }
             

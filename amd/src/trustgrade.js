@@ -481,8 +481,10 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           Str.get_string("points", "local_trustgrade"),
           Str.get_string("correct", "local_trustgrade"),
           Str.get_string("explanation", "local_trustgrade"),
+          Str.get_string("blooms_level_label", "local_trustgrade"),
+          Str.get_string("options_label", "local_trustgrade"),
         ]).then((strings) => {
-          const [sGeneratedQuestions, sQuestion, sPoints, sCorrect, sExplanation] = strings
+          const [sGeneratedQuestions, sQuestion, sPoints, sCorrect, sExplanation, sBloomsLevel, sOptions] = strings
 
           let html = "<h4>" + sGeneratedQuestions + ":</h4>"
 
@@ -517,14 +519,12 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
             html += `<p><strong>${trustgrade.escapeHtml(sQuestion)}:</strong> ${trustgrade.escapeHtml(qText)}</p>`
 
             if (blooms) {
-              html += `<p><strong>${trustgrade.escapeHtml("Bloom's level")}:</strong> ${trustgrade.escapeHtml(
-                blooms,
-              )}</p>`
+              html += `<p><strong>${trustgrade.escapeHtml(sBloomsLevel)}:</strong> ${trustgrade.escapeHtml(blooms)}</p>`
             }
 
             // Options with per-option explanation
             if (Array.isArray(q.options) && q.options.length > 0) {
-              html += `<div><strong>Options:</strong></div><ul style="margin:6px 0 0 20px;">`
+              html += `<div><strong>${trustgrade.escapeHtml(sOptions)}</strong></div><ul style="margin:6px 0 0 20px;">`
               q.options.forEach((opt, optIndex) => {
                 const label = String.fromCharCode(65 + optIndex) + "."
                 const optText = opt && opt.text ? String(opt.text) : ""
