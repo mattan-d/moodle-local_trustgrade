@@ -124,6 +124,11 @@ $string['blooms_applying'] = 'Apply';
 $string['blooms_analyzing'] = 'Analyze';
 $string['blooms_evaluating'] = 'Evaluate';
 $string['blooms_create'] = 'Create';
+$string['blooms_remember'] = 'Remember';
+$string['blooms_understand'] = 'Understand';
+$string['blooms_apply'] = 'Apply';
+$string['blooms_analyze'] = 'Analyze';
+$string['blooms_evaluate'] = 'Evaluate';
 
 // Question source types.
 $string['question_source_instructor'] = 'Instructor';
@@ -143,35 +148,8 @@ $string['confirm_delete_question_message'] = 'Are you sure you want to delete th
 $string['question_deleted_success'] = 'Question deleted successfully';
 $string['question_deleted_successfully'] = 'Question deleted successfully';
 $string['error_deleting_question'] = 'Error deleting question';
-
-// Debug mode and caching.
-$string['debug_mode'] = 'Debug Mode & Caching';
-$string['debug_mode_desc'] = 'Enable debug mode to cache Gateway responses and avoid repeated API calls. When enabled, identical requests will return cached responses instead of calling the Gateway. This improves performance and reduces API usage during development and testing.';
-$string['cleanup_debug_cache'] = 'Cleanup TrustGrade debug cache';
-$string['cleanup_quiz_sessions'] = 'Cleanup TrustGrade quiz sessions';
-
-// Cache management.
-$string['cache_management'] = 'Cache Management';
-$string['cache_management_widget_desc'] = 'View cache statistics and manage cached responses directly from the settings page.';
-$string['cache_disabled_message'] = 'Caching is disabled. Enable Debug Mode above to activate response caching.';
-$string['cache_stats_error'] = 'Error loading cache statistics: {$a}';
-$string['full_management'] = 'Full Management';
-$string['clear_all'] = 'Clear All';
-$string['clear_instructions'] = 'Clear Instructions';
-$string['clear_questions'] = 'Clear Questions';
-$string['clear_submissions'] = 'Clear Submissions';
-$string['cleanup_old'] = 'Cleanup Old';
-$string['confirm_clear_cache'] = 'Are you sure you want to clear all cached responses? This action cannot be undone.';
-$string['cache_hit'] = 'Cache hit - using cached response';
-
-// Cache action results.
-$string['cache_cleared_success'] = 'All cached responses have been cleared successfully.';
-$string['instructions_cache_cleared'] = 'Instruction analysis cache has been cleared.';
-$string['questions_cache_cleared'] = 'Question generation cache has been cleared.';
-$string['submissions_cache_cleared'] = 'Submission questions cache has been cleared.';
-$string['old_cache_cleaned'] = 'Old cache records have been cleaned up successfully.';
-$string['cache_clear_error'] = 'Error clearing cache: {$a}';
-$string['invalid_action'] = 'Invalid cache action requested.';
+$string['question_saved_successfully_msg'] = 'Question saved successfully';
+$string['failed_save_question'] = 'Failed to save question: {$a}';
 
 // Quiz settings.
 $string['quiz_settings_title'] = 'Quiz Settings';
@@ -219,6 +197,7 @@ $string['seconds'] = 'seconds';
 $string['text'] = 'Text';
 $string['entertext'] = 'Enter text';
 $string['enter_answer_placeholder'] = 'Enter your answer here...';
+$string['nopermission'] = 'You do not have permission to access this page';
 
 // Quiz progress and navigation.
 $string['progress_auto_saved'] = 'Your progress is automatically saved. Refreshing the page will resume from this question.';
@@ -471,6 +450,7 @@ $string['instruction_cache_cleared'] = 'Instruction analysis cache cleared';
 $string['question_cache_cleared'] = 'Question generation cache cleared';
 $string['submission_cache_cleared'] = 'Submission questions cache cleared';
 $string['old_cache_cleaned_up'] = 'Old cache records cleaned up';
+$string['cachedef_quiz_redirect'] = 'Stores quiz redirect session data to prevent duplicate quiz sessions';
 
 // Gateway test page strings
 // Gateway test page.
