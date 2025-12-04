@@ -50,7 +50,7 @@ if ($hassiteconfig) {
     ));
 
     // Add cache management widget
-    $settings->add(new \local_trustgrade\admin_setting_cache_management());
+    $settings->add(new \local_trustgrade\task\admin_setting_cache_management());
 
     // Add disclosure settings
     $settings->add(new admin_setting_heading(
@@ -104,7 +104,7 @@ if ($hassiteconfig) {
         get_string('test_gateway_connection', 'local_trustgrade'),
         ['class' => 'btn btn-outline-primary']
     );
-    
+
     $settings->add(new admin_setting_description(
         'local_trustgrade/gateway_test',
         get_string('gateway_test', 'local_trustgrade'),

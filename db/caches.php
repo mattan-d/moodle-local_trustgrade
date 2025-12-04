@@ -33,7 +33,7 @@ $definitions = [
         'staticacceleration' => true,
         'staticaccelerationsize' => 10,
     ],
-    'pending_generation' => [
+        'pending_generation' => [
         'mode' => cache_store::MODE_SESSION,
         'simplekeys' => true,
         'simpledata' => false,
