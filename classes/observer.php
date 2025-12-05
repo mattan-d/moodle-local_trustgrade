@@ -32,13 +32,47 @@ defined('MOODLE_INTERNAL') || die();
 class observer {
 
     /**
+     * Check if submission has already been processed recently to prevent duplicate processing
+     *
+     * @param int $submission_id Submission ID
+     * @param string $event_name Event name for logging
+     * @return bool True if already processed, false otherwise
+     */
+    private static function is_already_processed($submission_id, $event_name) {
+        $cache = \cache::make('local_trustgrade', 'quiz_redirect');
+        $key = 'processed_' . $submission_id;
+        
+        $processed_data = $cache->get($key);
+        
+        if ($processed_data && (time() - $processed_data['timestamp']) < 60) {
+            debugging('TrustGrade observer: Duplicate ' . $event_name . ' event detected for submission ID ' . 
+                $submission_id . ', skipping processing (already processed ' . 
+                (time() - $processed_data['timestamp']) . ' seconds ago by ' . 
+                $processed_data['event'] . ')', DEBUG_DEVELOPER);
+            return true;
+        }
+        
+        // Mark as processed
+        $cache->set($key, [
+            'timestamp' => time(),
+            'event' => $event_name
+        ]);
+        
+        return false;
+    }
+
+    /**
      * Handle submission created event
      *
      * @param \mod_assign\event\submission_created $event
      */
     public static function submission_created(\mod_assign\event\submission_created $event) {
-        debugging('TrustGrade observer: submission_created event triggered for submission ID ' . 
-            ($event->other['submissionid'] ?? 'unknown'), DEBUG_DEVELOPER);
+        $submission_id = $event->other['submissionid'];
+        debugging('TrustGrade observer: submission_created event triggered for submission ID ' . $submission_id, DEBUG_DEVELOPER);
+        
+        if (self::is_already_processed($submission_id, 'submission_created')) {
+            return;
+        }
         
         self::process_submission($event);
     }
@@ -49,8 +83,12 @@ class observer {
      * @param \mod_assign\event\submission_updated $event
      */
     public static function submission_updated(\mod_assign\event\submission_updated $event) {
-        debugging('TrustGrade observer: submission_updated event triggered for submission ID ' . 
-            ($event->other['submissionid'] ?? 'unknown'), DEBUG_DEVELOPER);
+        $submission_id = $event->other['submissionid'];
+        debugging('TrustGrade observer: submission_updated event triggered for submission ID ' . $submission_id, DEBUG_DEVELOPER);
+        
+        if (self::is_already_processed($submission_id, 'submission_updated')) {
+            return;
+        }
         
         self::process_submission($event);
     }
@@ -62,8 +100,12 @@ class observer {
      */
     public static function assessable_submitted(\mod_assign\event\assessable_submitted $event) {
         $eventdata = $event->get_data();
-        debugging('TrustGrade observer: assessable_submitted event triggered for submission ID ' . 
-            ($eventdata['objectid'] ?? 'unknown'), DEBUG_DEVELOPER);
+        $submission_id = $eventdata['objectid'];
+        debugging('TrustGrade observer: assessable_submitted event triggered for submission ID ' . $submission_id, DEBUG_DEVELOPER);
+        
+        if (self::is_already_processed($submission_id, 'assessable_submitted')) {
+            return;
+        }
         
         self::process_assessable_submission($event);
     }
