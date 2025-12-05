@@ -37,6 +37,9 @@ class observer {
      * @param \mod_assign\event\submission_created $event
      */
     public static function submission_created(\mod_assign\event\submission_created $event) {
+        debugging('TrustGrade observer: submission_created event triggered for submission ID ' . 
+            ($event->other['submissionid'] ?? 'unknown'), DEBUG_DEVELOPER);
+        
         self::process_submission($event);
     }
 
@@ -46,6 +49,9 @@ class observer {
      * @param \mod_assign\event\submission_updated $event
      */
     public static function submission_updated(\mod_assign\event\submission_updated $event) {
+        debugging('TrustGrade observer: submission_updated event triggered for submission ID ' . 
+            ($event->other['submissionid'] ?? 'unknown'), DEBUG_DEVELOPER);
+        
         self::process_submission($event);
     }
 
@@ -55,6 +61,10 @@ class observer {
      * @param \mod_assign\event\assessable_submitted $event
      */
     public static function assessable_submitted(\mod_assign\event\assessable_submitted $event) {
+        $eventdata = $event->get_data();
+        debugging('TrustGrade observer: assessable_submitted event triggered for submission ID ' . 
+            ($eventdata['objectid'] ?? 'unknown'), DEBUG_DEVELOPER);
+        
         self::process_assessable_submission($event);
     }
 
@@ -72,39 +82,50 @@ class observer {
             $context = $event->get_context();
             $cm = get_coursemodule_from_id('assign', $context->instanceid);
 
+            debugging('TrustGrade observer: Processing submission ID ' . $submission_id . 
+                ' for CM ID ' . ($cm ? $cm->id : 'unknown'), DEBUG_DEVELOPER);
+
             if (!$cm) {
+                debugging('TrustGrade observer: Course module not found, skipping processing', DEBUG_DEVELOPER);
                 return;
             }
 
             $quiz_settings = \local_trustgrade\quiz_settings::get_settings($cm->id);
             if (empty($quiz_settings['enabled'])) {
+                debugging('TrustGrade observer: TrustGrade disabled for CM ID ' . $cm->id . ', skipping processing', DEBUG_DEVELOPER);
                 return; // TrustGrade is disabled for this activity, skip processing
             }
 
             // Get submission data
             $submission = $DB->get_record('assign_submission', ['id' => $submission_id]);
             if (!$submission) {
+                debugging('TrustGrade observer: Submission record not found for ID ' . $submission_id, DEBUG_DEVELOPER);
                 return;
             }
 
             // Only process submitted submissions (not drafts)
             if ($event->other['submissionstatus'] !== 'submitted') {
+                debugging('TrustGrade observer: Submission status is "' . $event->other['submissionstatus'] . 
+                    '", skipping processing (only "submitted" status is processed)', DEBUG_DEVELOPER);
                 return;
             }
 
             // Get assignment data
             $assignment = $DB->get_record('assign', ['id' => $submission->assignment]);
             if (!$assignment) {
+                debugging('TrustGrade observer: Assignment record not found for ID ' . $submission->assignment, DEBUG_DEVELOPER);
                 return;
             }
 
             // Get quiz settings to determine how many submission questions to generate
             $questions_to_generate = $quiz_settings['submission_questions'];
+            debugging('TrustGrade observer: Generating ' . $questions_to_generate . ' questions for submission', DEBUG_DEVELOPER);
 
             // Extract submission content (text and files)
             $submission_content = submission_processor::extract_submission_content($submission, $context);
 
             if (empty($submission_content['text']) && empty($submission_content['files'])) {
+                debugging('TrustGrade observer: No content to analyze (no text or files)', DEBUG_DEVELOPER);
                 return; // No content to analyze
             }
 
@@ -120,6 +141,8 @@ class observer {
             );
 
             if ($result['success']) {
+                debugging('TrustGrade observer: Successfully generated questions, saving to database', DEBUG_DEVELOPER);
+                
                 // Save submission-based questions
                 submission_processor::save_submission_questions($submission_id, $cm->id, $result['questions']);
 
@@ -127,10 +150,15 @@ class observer {
 
                 // Set session flag to redirect to quiz
                 self::set_quiz_redirect_flag($cm->id, $submission_id);
+                
+                debugging('TrustGrade observer: Successfully completed submission processing', DEBUG_DEVELOPER);
+            } else {
+                debugging('TrustGrade observer: Question generation failed - ' . ($result['message'] ?? 'Unknown error'), DEBUG_DEVELOPER);
             }
 
         } catch (\Exception $e) {
             // Log error but don't break the submission process
+            debugging('TrustGrade observer: Exception during submission processing - ' . $e->getMessage(), DEBUG_DEVELOPER);
             error_log('TrustGrade submission processing error: ' . $e->getMessage());
         }
     }
@@ -152,36 +180,45 @@ class observer {
             $user_id = $eventdata['userid'];
             $context = $event->get_context();
 
+            debugging('TrustGrade observer: Processing assessable submission ID ' . $submission_id . 
+                ' for assignment ID ' . $assignment_id, DEBUG_DEVELOPER);
+
             // Get course module
             $cm = get_coursemodule_from_id('assign', $assignment_id);
             if (!$cm) {
+                debugging('TrustGrade observer: Course module not found for assignment ID ' . $assignment_id, DEBUG_DEVELOPER);
                 return;
             }
 
             $quiz_settings = \local_trustgrade\quiz_settings::get_settings($cm->id);
             if (empty($quiz_settings['enabled'])) {
+                debugging('TrustGrade observer: TrustGrade disabled for CM ID ' . $cm->id . ', skipping processing', DEBUG_DEVELOPER);
                 return; // TrustGrade is disabled for this activity, skip processing
             }
 
             // Get submission data
             $submission = $DB->get_record('assign_submission', ['id' => $submission_id]);
             if (!$submission) {
+                debugging('TrustGrade observer: Submission record not found for ID ' . $submission_id, DEBUG_DEVELOPER);
                 return;
             }
 
             // Get assignment data
             $assignment = $DB->get_record('assign', ['id' => $submission->assignment]);
             if (!$assignment) {
+                debugging('TrustGrade observer: Assignment record not found for ID ' . $submission->assignment, DEBUG_DEVELOPER);
                 return;
             }
 
             // Get quiz settings to determine how many submission questions to generate
             $questions_to_generate = $quiz_settings['submission_questions'];
+            debugging('TrustGrade observer: Generating ' . $questions_to_generate . ' questions for assessable submission', DEBUG_DEVELOPER);
 
             // Extract submission content (text and files)
             $submission_content = submission_processor::extract_submission_content($submission, $context);
 
             if (empty($submission_content['text']) && empty($submission_content['files'])) {
+                debugging('TrustGrade observer: No content to analyze (no text or files)', DEBUG_DEVELOPER);
                 return; // No content to analyze
             }
 
@@ -197,6 +234,8 @@ class observer {
             );
 
             if ($result['success']) {
+                debugging('TrustGrade observer: Successfully generated questions, saving to database', DEBUG_DEVELOPER);
+                
                 // Save submission-based questions
                 submission_processor::save_submission_questions($submission_id, $cm->id, $result['questions']);
 
@@ -204,10 +243,15 @@ class observer {
 
                 // Set session flag to redirect to quiz
                 self::set_quiz_redirect_flag($cm->id, $submission_id);
+                
+                debugging('TrustGrade observer: Successfully completed assessable submission processing', DEBUG_DEVELOPER);
+            } else {
+                debugging('TrustGrade observer: Question generation failed - ' . ($result['message'] ?? 'Unknown error'), DEBUG_DEVELOPER);
             }
 
         } catch (\Exception $e) {
             // Log error but don't break the submission process
+            debugging('TrustGrade observer: Exception during assessable submission processing - ' . $e->getMessage(), DEBUG_DEVELOPER);
             error_log('TrustGrade assessable submission processing error: ' . $e->getMessage());
         }
     }
@@ -220,6 +264,8 @@ class observer {
      * @param int $userid User ID
      */
     private static function create_quiz_session_for_submission($cmid, $submission_id, $userid) {
+        debugging('TrustGrade observer: Creating quiz session for CM ID ' . $cmid . 
+            ', submission ID ' . $submission_id . ', user ID ' . $userid, DEBUG_DEVELOPER);
         quiz_session::create_session_on_submission_update($cmid, $submission_id, $userid);
     }
 
@@ -230,6 +276,9 @@ class observer {
      * @param int $submission_id Submission ID
      */
     private static function set_quiz_redirect_flag($cmid, $submission_id) {
+        debugging('TrustGrade observer: Setting quiz redirect flag for CM ID ' . $cmid . 
+            ', submission ID ' . $submission_id, DEBUG_DEVELOPER);
+        
         $cache = \cache::make('local_trustgrade', 'quiz_redirect');
         
         $cache->set($cmid, [
