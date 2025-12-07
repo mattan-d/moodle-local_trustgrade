@@ -71,7 +71,7 @@ class submission_processor {
         
         $metadata = [];
         if ($cmid && $userid) {
-            global $DB;
+            global $DB, $CFG;
             
             // Get course module and course information
             $cm = get_coursemodule_from_id('assign', $cmid);
@@ -82,7 +82,8 @@ class submission_processor {
                         'course_id' => $course->id,
                         'course_name' => $course->fullname,
                         'course_module_id' => $cmid,
-                        'user_id' => $userid
+                        'user_id' => $userid,
+                        'moodle_domain' => $CFG->wwwroot
                     ];
                 }
             }

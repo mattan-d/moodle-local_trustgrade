@@ -184,6 +184,15 @@ class gateway_client {
    * @return array Response data
    */
   private function makeRequest($data) {
+      global $CFG;
+      
+      if (!isset($data['metadata'])) {
+          $data['metadata'] = [];
+      }
+      if (!isset($data['metadata']['moodle_domain'])) {
+          $data['metadata']['moodle_domain'] = $CFG->wwwroot;
+      }
+      
       $curl = new \curl();
       
       $curl->setopt([
