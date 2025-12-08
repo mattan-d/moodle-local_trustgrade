@@ -123,8 +123,10 @@ class quiz_settings {
      * @return array Default settings
      */
     public static function get_default_settings() {
+        $global_default_enabled = get_config('local_trustgrade', 'default_enabled');
+        
         return [
-            'enabled' => true,
+            'enabled' => (bool)$global_default_enabled,
             'questions_to_generate' => 5,
             'instructor_questions' => 0,
             'submission_questions' => 5,
