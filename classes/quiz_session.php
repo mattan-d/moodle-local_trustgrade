@@ -425,7 +425,7 @@ class quiz_session {
             $record->settings_data = json_encode($settings);
             $record->current_question = 0;
             $record->answers_data = json_encode([]);
-            $record->time_remaining = $settings['time_per_question'] ?? 15;
+            $record->time_remaining = $settings['time_per_question'] ?? 25;
             $record->window_blur_count = 0;
             $record->attempt_started = 0; // Attempt is created but not officially started by the user yet.
             $record->attempt_completed = 0;

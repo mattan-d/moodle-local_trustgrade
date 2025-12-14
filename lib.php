@@ -139,11 +139,11 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
 
         // Time per question
         $time_options = [
-                10 => '10 ' . get_string('seconds', 'local_trustgrade'),
                 15 => '15 ' . get_string('seconds', 'local_trustgrade'),
-                20 => '20 ' . get_string('seconds', 'local_trustgrade'),
                 25 => '25 ' . get_string('seconds', 'local_trustgrade'),
-                30 => '30 ' . get_string('seconds', 'local_trustgrade')
+                35 => '35 ' . get_string('seconds', 'local_trustgrade'),
+                45 => '45 ' . get_string('seconds', 'local_trustgrade'),
+                60 => '60 ' . get_string('seconds', 'local_trustgrade')
         ];
         $mform->addElement('select', 'trustgrade_time_per_question',
                 get_string('time_per_question', 'local_trustgrade'), $time_options);

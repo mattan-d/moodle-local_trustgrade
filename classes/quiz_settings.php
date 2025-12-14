@@ -131,7 +131,7 @@ class quiz_settings {
             'instructor_questions' => 0,
             'submission_questions' => 5,
             'randomize_answers' => true,
-            'time_per_question' => 15,
+            'time_per_question' => 25,
             'show_countdown' => true
         ];
     }
@@ -160,10 +160,9 @@ class quiz_settings {
         // Randomize answers (boolean)
         $validated['randomize_answers'] = !empty($settings['randomize_answers']);
         
-        // Time per question (10, 15, 20, 25, 30)
-        $valid_times = [10, 15, 20, 25, 30];
-        $time = intval($settings['time_per_question'] ?? 15);
-        $validated['time_per_question'] = in_array($time, $valid_times) ? $time : 15;
+        $valid_times = [15, 25, 35, 45, 60];
+        $time = intval($settings['time_per_question'] ?? 25);
+        $validated['time_per_question'] = in_array($time, $valid_times) ? $time : 25;
         
         // Show countdown (boolean)
         $validated['show_countdown'] = !empty($settings['show_countdown']);
