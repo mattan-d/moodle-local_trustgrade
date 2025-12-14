@@ -125,13 +125,6 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addHelpButton('trustgrade_instructor_questions', 'instructor_questions', 'local_trustgrade');
         $mform->setAdvanced('trustgrade_instructor_questions');
 
-        $mform->addElement('select', 'trustgrade_submission_questions',
-                get_string('submission_questions', 'local_trustgrade'), $question_count_options);
-        $default_submission = ($cmid > 0) ? $current_settings['submission_questions'] : 5;
-        $mform->setDefault('trustgrade_submission_questions', $default_submission);
-        $mform->addHelpButton('trustgrade_submission_questions', 'submission_questions', 'local_trustgrade');
-        $mform->setAdvanced('trustgrade_submission_questions');
-
         // Randomize answers
         $mform->addElement('advcheckbox', 'trustgrade_randomize_answers',
                 get_string('randomize_answers', 'local_trustgrade'),
@@ -317,7 +310,7 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
                 'enabled' => !empty($data->trustgrade_enabled), // Save activity-level enable/disable
                 'questions_to_generate' => $data->trustgrade_questions_to_generate,
                 'instructor_questions' => $data->trustgrade_instructor_questions,
-                'submission_questions' => $data->trustgrade_submission_questions,
+                'submission_questions' => 0,
                 'randomize_answers' => !empty($data->trustgrade_randomize_answers),
                 'time_per_question' => $data->trustgrade_time_per_question,
                 'show_countdown' => !empty($data->trustgrade_show_countdown)
