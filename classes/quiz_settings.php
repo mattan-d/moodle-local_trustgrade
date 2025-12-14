@@ -127,8 +127,8 @@ class quiz_settings {
         
         return [
             'enabled' => (bool)$global_default_enabled,
-            'questions_to_generate' => 0,
-            'instructor_questions' => 0,
+            'questions_to_generate' => 5,
+            'instructor_questions' => 5,
             'submission_questions' => 5,
             'randomize_answers' => true,
             'time_per_question' => 25,

@@ -114,7 +114,7 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
 
         $mform->addElement('select', 'trustgrade_instructor_questions',
                 get_string('instructor_questions', 'local_trustgrade'), $question_count_options);
-        $default_instructor = ($cmid > 0) ? $current_settings['instructor_questions'] : 0;
+        $default_instructor = ($cmid > 0) ? $current_settings['instructor_questions'] : 5;
         $mform->setDefault('trustgrade_instructor_questions', $default_instructor);
         $mform->addHelpButton('trustgrade_instructor_questions', 'instructor_questions', 'local_trustgrade');
         $mform->setAdvanced('trustgrade_instructor_questions');
