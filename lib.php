@@ -319,7 +319,7 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
 
         \local_trustgrade\quiz_settings::save_settings($cmid, $settings);
 
-        if (!empty($data->trustgrade_enabled) && !empty($data->trustgrade_instructor_questions)) {
+        if (!empty($data->trustgrade_auto_generate) && !empty($data->trustgrade_enabled)) {
             $cache = cache::make('local_trustgrade', 'pending_generation');
             
             // Get assignment instructions for question generation
