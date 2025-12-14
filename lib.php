@@ -98,7 +98,8 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addElement('advcheckbox', 'trustgrade_auto_generate',
                 get_string('auto_generate_questions', 'local_trustgrade'),
                 get_string('auto_generate_questions_desc', 'local_trustgrade'));
-        $mform->setDefault('trustgrade_auto_generate', 0);
+        $default_auto_generate = ($cmid > 0) ? $current_settings['auto_generate'] ?? 0 : 1;
+        $mform->setDefault('trustgrade_auto_generate', $default_auto_generate);
         $mform->setAdvanced('trustgrade_auto_generate');
 
         // Options for number of questions (used for instructor and submission questions)
@@ -314,7 +315,8 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
                 'submission_questions' => $data->trustgrade_submission_questions,
                 'randomize_answers' => !empty($data->trustgrade_randomize_answers),
                 'time_per_question' => $data->trustgrade_time_per_question,
-                'show_countdown' => !empty($data->trustgrade_show_countdown)
+                'show_countdown' => !empty($data->trustgrade_show_countdown),
+                'auto_generate' => !empty($data->trustgrade_auto_generate)
         ];
 
         \local_trustgrade\quiz_settings::save_settings($cmid, $settings);
