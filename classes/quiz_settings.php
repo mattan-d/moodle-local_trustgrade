@@ -127,7 +127,7 @@ class quiz_settings {
         
         return [
             'enabled' => (bool)$global_default_enabled,
-            'questions_to_generate' => 5,
+            'questions_to_generate' => 0,
             'instructor_questions' => 0,
             'submission_questions' => 5,
             'randomize_answers' => true,
@@ -148,8 +148,7 @@ class quiz_settings {
         // Enabled field validation
         $validated['enabled'] = !empty($settings['enabled']);
         
-        // Questions to generate (1-10)
-        $validated['questions_to_generate'] = max(1, min(10, intval($settings['questions_to_generate'] ?? 5)));
+        $validated['questions_to_generate'] = max(0, min(20, intval($settings['questions_to_generate'] ?? 0)));
         
         // Instructor questions (0-20)
         $validated['instructor_questions'] = max(0, min(20, intval($settings['instructor_questions'] ?? 0)));

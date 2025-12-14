@@ -420,7 +420,7 @@ class external extends \external_api {
     }
 
     $quiz_settings = quiz_settings::get_settings($cmid);
-    $questions_to_generate = $quiz_settings['questions_to_generate'];
+    $questions_to_generate = $quiz_settings['instructor_questions'];
 
     // If we have files, send them to the Gateway alongside the instructions.
     if (!empty($files)) {

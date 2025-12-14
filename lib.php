@@ -94,13 +94,7 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         for ($i = 0; $i <= 10; $i++) {
             $generate_options[$i] = $i;
         }
-        $mform->addElement('select', 'trustgrade_questions_to_generate',
-                get_string('questions_to_generate', 'local_trustgrade'), $generate_options);
-        $default_questions = ($cmid > 0) ? $current_settings['questions_to_generate'] : 0;
-        $mform->setDefault('trustgrade_questions_to_generate', $default_questions);
-        $mform->addHelpButton('trustgrade_questions_to_generate', 'questions_to_generate', 'local_trustgrade');
-        $mform->setAdvanced('trustgrade_questions_to_generate');
-
+        
         $mform->addElement('advcheckbox', 'trustgrade_auto_generate',
                 get_string('auto_generate_questions', 'local_trustgrade'),
                 get_string('auto_generate_questions_desc', 'local_trustgrade'));
@@ -176,7 +170,7 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addElement('hidden', 'trustgrade_cmid', $cmid);
         $mform->setType('trustgrade_cmid', PARAM_INT);
 
-        $mform->disabledIf('trustgrade_questions_to_generate', 'trustgrade_enabled');
+        $mform->disabledIf('trustgrade_instructor_questions', 'trustgrade_enabled');
         $mform->disabledIf('trustgrade_auto_generate', 'trustgrade_enabled');
         $mform->disabledIf('trustgrade_buttons', 'trustgrade_enabled');
 
@@ -310,12 +304,12 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
     }
 
     // Save quiz settings if they were provided
-    if (isset($data->trustgrade_questions_to_generate)) {
+    if (isset($data->trustgrade_instructor_questions)) {
         $cmid = $data->coursemodule;
 
         $settings = [
                 'enabled' => !empty($data->trustgrade_enabled), // Save activity-level enable/disable
-                'questions_to_generate' => $data->trustgrade_questions_to_generate,
+                'questions_to_generate' => $data->trustgrade_instructor_questions,
                 'instructor_questions' => $data->trustgrade_instructor_questions,
                 'submission_questions' => $data->trustgrade_submission_questions,
                 'randomize_answers' => !empty($data->trustgrade_randomize_answers),
@@ -348,7 +342,7 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
             $cache->set('trustgrade_pending_generation', [
                 'cmid' => $cmid,
                 'instructions' => $instructions,
-                'question_count' => $data->trustgrade_questions_to_generate ?? 5,
+                'question_count' => $data->trustgrade_instructor_questions ?? 0,
                 'intro_itemid' => $intro_itemid,
                 'intro_attachments_itemid' => $intro_attachments_itemid,
                 'timestamp' => time()
