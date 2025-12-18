@@ -248,7 +248,7 @@ $string['question_x_of_y'] = 'שאלה {$a->current} מתוך {$a->total}';
 $string['time_remaining'] = 'זמן שנותר: {$a}';
 
 // Quiz completion.
-$string['quiz_completed_header'] = 'الחידון הושלם';
+$string['quiz_completed_header'] = 'חידון הושלם';
 $string['quiz_completed_message'] = 'ההערכה הרשמית שלך הוגשה בהצלחה ולא ניתן לחזור עליה.';
 $string['your_answer'] = 'התשובה שלך: {$a}';
 $string['correct_answer_was'] = 'התשובה הנכונה היתה: {$a}';
