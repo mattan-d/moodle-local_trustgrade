@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+const define = window.define // Declare the define variable to fix lint error
+
 define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"], (
   $,
   Ajax,
@@ -76,11 +78,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         var questionIndex = questionItem.data("question-index")
         QuestionEditor.updateOptionsSection($(this).val(), questionIndex)
       })
-
-      $(document).on("click.questioneditor", ".form-alert-container .btn-close", function (e) {
-        e.preventDefault()
-        $(this).closest(".form-alert-container").fadeOut()
-      })
     },
 
     enterEditMode: (questionItem) => {
@@ -93,36 +90,11 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       questionItem.find(".question-display-mode").show()
     },
 
-    showFormAlert: (questionItem, message, type) => {
-      const alertContainer = questionItem.find(".form-alert-container")
-      const alert = alertContainer.find(".alert")
-
-      // Remove previous alert classes
-      alert.removeClass("alert-success alert-danger alert-warning alert-info")
-
-      // Add appropriate alert class
-      if (type === "success") {
-        alert.addClass("alert-success")
-      } else if (type === "error") {
-        alert.addClass("alert-danger")
-      } else if (type === "warning") {
-        alert.addClass("alert-warning")
-      } else {
-        alert.addClass("alert-info")
-      }
-
-      // Set message and show
-      alert.find(".alert-message").text(message)
-      alertContainer.fadeIn()
-
-      // Auto-hide success messages after 5 seconds
-      if (type === "success") {
-        setTimeout(() => alertContainer.fadeOut(), 5000)
-      }
-    },
-
     saveQuestion: (questionItem) => {
       console.log("[v0] saveQuestion called", questionItem)
+      const $validationAlert = questionItem.find(".validation-alert")
+      $validationAlert.addClass("d-none")
+
       const questionIndex = questionItem.data("question-index")
       const cmid = questionItem.data("cmid")
       console.log("[v0] Question index:", questionIndex, "CM ID:", cmid)
@@ -185,26 +157,28 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
 
       console.log("[v0] Built question data:", questionData)
 
-      // Validation
       if (!questionData.text || !questionData.text.trim()) {
-        Str.get_string("question_text_required", "local_trustgrade").then((message) =>
-          QuestionEditor.showFormAlert(questionItem, message, "error"),
-        )
+        console.log("[v0] Validation failed: question text required")
+        Str.get_string("question_text_required", "local_trustgrade").then((message) => {
+          QuestionEditor.showInlineError(questionItem, message)
+        })
         return
       }
       if (questionType === "multiple_choice") {
         const anyTextMissing = questionData.options.some((opt) => !(opt.text || "").trim())
         if (anyTextMissing) {
-          Str.get_string("all_options_required", "local_trustgrade").then((message) =>
-            QuestionEditor.showFormAlert(questionItem, message, "error"),
-          )
+          console.log("[v0] Validation failed: all options required")
+          Str.get_string("all_options_required", "local_trustgrade").then((message) => {
+            QuestionEditor.showInlineError(questionItem, message)
+          })
           return
         }
         const anyCorrect = questionData.options.some((opt) => opt.is_correct)
         if (!anyCorrect) {
-          Str.get_string("correct_answer_required", "local_trustgrade").then((message) =>
-            QuestionEditor.showFormAlert(questionItem, message, "error"),
-          )
+          console.log("[v0] Validation failed: correct answer required")
+          Str.get_string("correct_answer_required", "local_trustgrade").then((message) => {
+            QuestionEditor.showInlineError(questionItem, message)
+          })
           return
         }
       }
@@ -234,15 +208,17 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
             QuestionEditor.updateQuestionDisplay(questionItem, questionData)
             QuestionEditor.exitEditMode(questionItem)
             Str.get_string("question_saved_success", "local_trustgrade").then((message) =>
-              QuestionEditor.showFormAlert(questionItem, message, "success"),
+              Notification.addNotification({ message: message, type: "success" }),
             )
           } else {
-            QuestionEditor.showFormAlert(questionItem, response.error || "Failed to save question.", "error")
+            console.log("[v0] Server returned error:", response.error)
+            QuestionEditor.showInlineError(questionItem, response.error || "Failed to save question.")
           }
         })
         .fail((error) => {
-          const errorMsg = error.message || "An error occurred while saving the question."
-          QuestionEditor.showFormAlert(questionItem, errorMsg, "error")
+          console.log("[v0] AJAX call failed:", error)
+          const errorMessage = error.message || error.error || "An error occurred while saving the question."
+          QuestionEditor.showInlineError(questionItem, errorMessage)
         })
         .always(() => $saveBtn.prop("disabled", false))
     },
@@ -504,6 +480,22 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
           options: options,
         }
       })
+    },
+
+    showInlineError: (questionItem, message) => {
+      const $validationAlert = questionItem.find(".validation-alert")
+      const $validationMessage = questionItem.find(".validation-message")
+
+      $validationMessage.text(message)
+      $validationAlert.removeClass("d-none")
+
+      // Scroll to the alert
+      $validationAlert[0].scrollIntoView({ behavior: "smooth", block: "nearest" })
+
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        $validationAlert.addClass("d-none")
+      }, 5000)
     },
   }
 
