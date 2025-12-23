@@ -92,14 +92,18 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
     },
 
     saveQuestion: (questionItem) => {
+      console.log("[v0] saveQuestion called", questionItem)
       const questionIndex = questionItem.data("question-index")
       const cmid = questionItem.data("cmid")
+      console.log("[v0] Question index:", questionIndex, "CM ID:", cmid)
 
       // Build new JSON shape
       const questionType = questionItem.find(".question-type-input").val()
       const questionText = questionItem.find(".question-text-input").val()
       const points = Number.parseInt(questionItem.find(".question-points-input").val(), 10)
       const blooms = questionItem.find(".question-blooms-input").val() || undefined
+
+      console.log("[v0] Form values - Type:", questionType, "Text:", questionText, "Points:", points, "Blooms:", blooms)
 
       const questionData = {
         id: Number.parseInt(questionItem.data("question-id") || 0, 10) || undefined,
@@ -149,8 +153,11 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         questionData.options = []
       }
 
+      console.log("[v0] Built question data:", questionData)
+
       // Validation
       if (!questionData.text || !questionData.text.trim()) {
+        console.log("[v0] Validation failed: question text required")
         Str.get_string("question_text_required", "local_trustgrade").then((message) =>
           Notification.addNotification({ message, type: "error" }),
         )
@@ -159,6 +166,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       if (questionType === "multiple_choice") {
         const anyTextMissing = questionData.options.some((opt) => !(opt.text || "").trim())
         if (anyTextMissing) {
+          console.log("[v0] Validation failed: all options required")
           Str.get_string("all_options_required", "local_trustgrade").then((message) =>
             Notification.addNotification({ message, type: "error" }),
           )
@@ -166,12 +174,15 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         }
         const anyCorrect = questionData.options.some((opt) => opt.is_correct)
         if (!anyCorrect) {
+          console.log("[v0] Validation failed: correct answer required")
           Str.get_string("correct_answer_required", "local_trustgrade").then((message) =>
             Notification.addNotification({ message, type: "error" }),
           )
           return
         }
       }
+
+      console.log("[v0] Validation passed, calling AJAX")
 
       var $saveBtn = questionItem.find(".save-question-btn")
       $saveBtn.prop("disabled", true)
@@ -187,8 +198,11 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         },
       ])
 
+      console.log("[v0] AJAX call initiated")
+
       promises[0]
         .done((response) => {
+          console.log("[v0] AJAX response received:", response)
           if (response.success) {
             QuestionEditor.updateQuestionDisplay(questionItem, questionData)
             QuestionEditor.exitEditMode(questionItem)
@@ -196,10 +210,14 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
               Notification.addNotification({ message: message, type: "success" }),
             )
           } else {
+            console.log("[v0] Server returned error:", response.error)
             Notification.addNotification({ message: response.error || "Failed to save question.", type: "error" })
           }
         })
-        .fail(Notification.exception)
+        .fail((error) => {
+          console.log("[v0] AJAX call failed:", error)
+          Notification.exception(error)
+        })
         .always(() => $saveBtn.prop("disabled", false))
     },
 
