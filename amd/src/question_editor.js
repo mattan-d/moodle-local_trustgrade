@@ -78,6 +78,11 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         var questionIndex = questionItem.data("question-index")
         QuestionEditor.updateOptionsSection($(this).val(), questionIndex)
       })
+
+      $(document).on("click.questioneditor", ".form-alert-container .btn-close", function (e) {
+        e.preventDefault()
+        $(this).closest(".form-alert-container").fadeOut()
+      })
     },
 
     enterEditMode: (questionItem) => {
@@ -88,6 +93,34 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
     exitEditMode: (questionItem) => {
       questionItem.find(".question-edit-mode").hide()
       questionItem.find(".question-display-mode").show()
+    },
+
+    showFormAlert: (questionItem, message, type) => {
+      const alertContainer = questionItem.find(".form-alert-container")
+      const alert = alertContainer.find(".alert")
+
+      // Remove previous alert classes
+      alert.removeClass("alert-success alert-danger alert-warning alert-info")
+
+      // Add appropriate alert class
+      if (type === "success") {
+        alert.addClass("alert-success")
+      } else if (type === "error") {
+        alert.addClass("alert-danger")
+      } else if (type === "warning") {
+        alert.addClass("alert-warning")
+      } else {
+        alert.addClass("alert-info")
+      }
+
+      // Set message and show
+      alert.find(".alert-message").text(message)
+      alertContainer.fadeIn()
+
+      // Auto-hide success messages after 5 seconds
+      if (type === "success") {
+        setTimeout(() => alertContainer.fadeOut(), 5000)
+      }
     },
 
     saveQuestion: (questionItem) => {
@@ -156,26 +189,23 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
 
       // Validation
       if (!questionData.text || !questionData.text.trim()) {
-        console.log("[v0] Validation failed: question text required")
         Str.get_string("question_text_required", "local_trustgrade").then((message) =>
-          Notification.addNotification({ message, type: "error" }),
+          QuestionEditor.showFormAlert(questionItem, message, "error"),
         )
         return
       }
       if (questionType === "multiple_choice") {
         const anyTextMissing = questionData.options.some((opt) => !(opt.text || "").trim())
         if (anyTextMissing) {
-          console.log("[v0] Validation failed: all options required")
           Str.get_string("all_options_required", "local_trustgrade").then((message) =>
-            Notification.addNotification({ message, type: "error" }),
+            QuestionEditor.showFormAlert(questionItem, message, "error"),
           )
           return
         }
         const anyCorrect = questionData.options.some((opt) => opt.is_correct)
         if (!anyCorrect) {
-          console.log("[v0] Validation failed: correct answer required")
           Str.get_string("correct_answer_required", "local_trustgrade").then((message) =>
-            Notification.addNotification({ message, type: "error" }),
+            QuestionEditor.showFormAlert(questionItem, message, "error"),
           )
           return
         }
@@ -206,16 +236,15 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
             QuestionEditor.updateQuestionDisplay(questionItem, questionData)
             QuestionEditor.exitEditMode(questionItem)
             Str.get_string("question_saved_success", "local_trustgrade").then((message) =>
-              Notification.addNotification({ message: message, type: "success" }),
+              QuestionEditor.showFormAlert(questionItem, message, "success"),
             )
           } else {
-            console.log("[v0] Server returned error:", response.error)
-            Notification.addNotification({ message: response.error || "Failed to save question.", type: "error" })
+            QuestionEditor.showFormAlert(questionItem, response.error || "Failed to save question.", "error")
           }
         })
         .fail((error) => {
-          console.log("[v0] AJAX call failed:", error)
-          Notification.exception(error)
+          const errorMsg = error.message || "An error occurred while saving the question."
+          QuestionEditor.showFormAlert(questionItem, errorMsg, "error")
         })
         .always(() => $saveBtn.prop("disabled", false))
     },

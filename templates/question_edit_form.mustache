@@ -29,6 +29,14 @@
     * options - Array of option objects for multiple choice
 }}
 <div class="question-edit-form container-fluid px-0">
+    {{! Added alert container to display messages near the form }}
+    <div class="form-alert-container mb-3" style="display: none;">
+        <div class="alert alert-dismissible fade show" role="alert">
+            <span class="alert-message"></span>
+            <button type="button" class="btn-close" aria-label="Close"></button>
+        </div>
+    </div>
+
     <div class="form-group mb-3">
         <label for="question_text_{{index}}" class="form-label">{{#str}}question_text, local_trustgrade{{/str}}:</label>
         <textarea class="form-control question-text-input" id="question_text_{{index}}" rows="3" placeholder="{{#str}}enter_question_text, local_trustgrade{{/str}}">{{text}}</textarea>
