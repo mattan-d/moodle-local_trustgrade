@@ -34,6 +34,14 @@ $string['plugin_enabled'] = 'Enable TrustGrade Plugin';
 $string['plugin_enabled_desc'] = 'Enable or disable the TrustGrade plugin globally. When disabled, all TrustGrade functionality will be hidden from assignment forms and pages.';
 $string['default_enabled'] = 'Enable TrustGrade by default for new assignments';
 $string['default_enabled_desc'] = 'When enabled, TrustGrade will be automatically enabled for newly created assignments. Instructors can still disable it for individual assignments.';
+$string['course_specific'] = 'Enable course-specific availability';
+$string['course_specific_desc'] = 'When enabled, TrustGrade will only be available for specific courses selected below. When disabled, TrustGrade is available for all courses.';
+$string['enabled_courses'] = 'Enabled courses';
+$string['enabled_courses_desc'] = 'Select the courses where TrustGrade should be available. This setting only applies when course-specific availability is enabled.';
+$string['enable_course_specific_first'] = 'Please enable "Enable course-specific availability" above to select courses.';
+$string['no_courses_available'] = 'No courses available in the system.';
+$string['search_courses'] = 'Search courses...';
+$string['course_not_enabled'] = 'TrustGrade is not available for this course. Please contact your administrator.';
 
 // Assignment settings.
 $string['trustgrade_enabled'] = 'Enable TrustGrade for this assignment';

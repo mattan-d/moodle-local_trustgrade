@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_trustgrade';
-$plugin->version = 2025120400; // Incremented version for activity-level enable/disable setting
+$plugin->version = 2025120401; // Incremented version for course-specific availability feature
 $plugin->requires = 2022112800; // Moodle 4.1
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.1.2';
+$plugin->release = '1.2.0'; // Updated release version
