@@ -93,6 +93,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
     saveQuestion: (questionItem) => {
       console.log("[v0] saveQuestion called", questionItem)
       const $validationAlert = questionItem.find(".validation-alert")
+      console.log("[v0] Found validation alert:", $validationAlert.length)
       $validationAlert.addClass("d-none")
 
       const questionIndex = questionItem.data("question-index")
@@ -483,11 +484,35 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
     },
 
     showInlineError: (questionItem, message) => {
-      const $validationAlert = questionItem.find(".validation-alert")
-      const $validationMessage = questionItem.find(".validation-message")
+      let $validationAlert = questionItem.find(".question-edit-mode .validation-alert")
+
+      // If not found in edit mode, try finding it anywhere in the question item
+      if ($validationAlert.length === 0) {
+        $validationAlert = questionItem.find(".validation-alert")
+      }
+
+      console.log("[v0] showInlineError - Alert found:", $validationAlert.length, "Message:", message)
+
+      if ($validationAlert.length === 0) {
+        console.error("[v0] Validation alert element not found in question item")
+        // Fallback to notification
+        Notification.addNotification({ message: message, type: "error" })
+        return
+      }
+
+      const $validationMessage = $validationAlert.find(".validation-message")
+
+      if ($validationMessage.length === 0) {
+        console.error("[v0] Validation message element not found")
+        // Fallback to notification
+        Notification.addNotification({ message: message, type: "error" })
+        return
+      }
 
       $validationMessage.text(message)
       $validationAlert.removeClass("d-none")
+
+      console.log("[v0] Alert displayed, scrolling into view")
 
       // Scroll to the alert
       $validationAlert[0].scrollIntoView({ behavior: "smooth", block: "nearest" })
