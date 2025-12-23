@@ -208,7 +208,6 @@ class question_bank_renderer {
       $html .= '      <label for="question_blooms_' . $index . '" class="form-label">' . get_string('blooms_level_label', 'local_trustgrade') . ':</label>';
       $html .= '      <select class="form-control question-blooms-input" id="question_blooms_' . $index . '">';
 
-      // Use language strings for Bloom's levels
       $levels = [
           '' => '-',
           'Remembering' => get_string('blooms_remember', 'local_trustgrade'),
@@ -216,7 +215,7 @@ class question_bank_renderer {
           'Applying' => get_string('blooms_apply', 'local_trustgrade'),
           'Analyzing' => get_string('blooms_analyze', 'local_trustgrade'),
           'Evaluating' => get_string('blooms_evaluate', 'local_trustgrade'),
-          'Create' => get_string('blooms_create', 'local_trustgrade')
+          'Creating' => get_string('blooms_create', 'local_trustgrade')
       ];
 
       foreach ($levels as $level => $label) {

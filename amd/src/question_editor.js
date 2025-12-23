@@ -364,9 +364,10 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         },
       }
 
-      const editFormContext = QuestionEditor.prepareEditFormContext(blankQuestion, newIndex)
-
-      Templates.render("local_trustgrade/question_edit_form", editFormContext)
+      QuestionEditor.prepareEditFormContext(blankQuestion, newIndex)
+        .then((editFormContext) => {
+          return Templates.render("local_trustgrade/question_edit_form", editFormContext)
+        })
         .then((editFormHtml) => {
           const context = {
             index: newIndex,
@@ -381,6 +382,8 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
           $(".add-question-section").before(html)
 
           const newQuestionItem = $(`.editable-question-item[data-question-index="${newIndex}"]`)
+          newQuestionItem.find(".question-type-input").closest(".col-12.col-md-4").hide()
+
           QuestionEditor.updateOptionsSection("multiple_choice", newIndex)
 
           // Automatically enter edit mode for the new question
@@ -408,38 +411,34 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       const blooms = metadata.blooms_level || ""
 
       const bloomsLevels = [
-        "",
-        "blooms_remember",
-        "blooms_understand",
-        "blooms_apply",
-        "blooms_analyze",
-        "blooms_evaluate",
-        "blooms_create",
+        { value: "", key: "" },
+        { value: "Remembering", key: "blooms_remember" },
+        { value: "Understanding", key: "blooms_understand" },
+        { value: "Applying", key: "blooms_apply" },
+        { value: "Analyzing", key: "blooms_analyze" },
+        { value: "Evaluating", key: "blooms_evaluate" },
+        { value: "Create", key: "blooms_create" },
       ]
 
       // Get language strings for Bloom's levels
       const bloomsPromises = bloomsLevels.map((level) => {
-        if (level === "") return Promise.resolve("-")
-        return Str.get_string(level, "local_trustgrade").catch(() => level.replace("blooms_", ""))
+        if (level.key === "") return Promise.resolve("-")
+        return Str.get_string(level.key, "local_trustgrade").catch(() => level.value)
       })
 
       return Promise.all(bloomsPromises).then((bloomsLabels) => {
         const bloomsOptions = bloomsLevels.map((level, i) => ({
-          value:
-            level === ""
-              ? ""
-              : level.replace("blooms_", "").charAt(0).toUpperCase() + level.replace("blooms_", "").slice(1),
+          value: level.value,
           label: bloomsLabels[i],
-          selected:
-            blooms ===
-            (level === ""
-              ? ""
-              : level.replace("blooms_", "").charAt(0).toUpperCase() + level.replace("blooms_", "").slice(1)),
+          selected: blooms === level.value,
         }))
 
         const options = []
         for (let i = 0; i < 4; i++) {
-          const opt = question.options[i] || { text: "", is_correct: i === 0, explanation: "" }
+          const opt =
+            question.options && question.options[i]
+              ? question.options[i]
+              : { text: "", is_correct: i === 0, explanation: "" }
           options.push({
             index: i,
             text: opt.text,
