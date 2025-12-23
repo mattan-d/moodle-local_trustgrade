@@ -1,0 +1,87 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_trustgrade/recommendation_table
+
+    Template for rendering AI recommendation table with modern design
+
+    Context variables:
+    * title - Table title
+    * rows - Array of criteria rows with Criterion, Met, Suggestions
+    * strings - Localized strings object
+
+    @package    local_trustgrade
+    @copyright  2025 CentricApp LTD <support@centricapp.co.il>
+    @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+<div class="tg-section tg-table-section mb-4">
+    {{#title}}
+        <h4 class="mb-3 text-primary fw-semibold">{{title}}</h4>
+    {{/title}}
+
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-hover table-striped mb-0 modern-criteria-table">
+            <thead class="table-dark">
+            <tr>
+                <th scope="col" class="fw-semibold">{{strings.criterion}}</th>
+                <th scope="col" class="fw-semibold text-center" style="width: 100px;">{{strings.met}}</th>
+                <th scope="col" class="fw-semibold">{{strings.suggestions}}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#rows}}
+                <tr class="criteria-row">
+                    <td class="criterion-cell">
+                        <div class="fw-medium text-dark">{{Criterion}}</div>
+                    </td>
+                    <td class="met-cell text-center">
+                        {{#isMetYes}}
+                            <span class="badge bg-success rounded-pill">
+                            <i class="fa fa-check me-1"></i>{{Met}}
+                        </span>
+                        {{/isMetYes}}
+                        {{#isMetNo}}
+                            <span class="badge bg-danger rounded-pill">
+                            <i class="fa fa-times me-1"></i>{{Met}}
+                        </span>
+                        {{/isMetNo}}
+                        {{#isMetPartial}}
+                            <span class="badge bg-warning rounded-pill">
+                            <i class="fa fa-minus me-1"></i>{{Met}}
+                        </span>
+                        {{/isMetPartial}}
+                        {{^isMetYes}}{{^isMetNo}}{{^isMetPartial}}
+                            <span class="badge bg-secondary rounded-pill">{{Met}}</span>
+                        {{/isMetPartial}}{{/isMetNo}}{{/isMetYes}}
+                    </td>
+                    <td class="suggestions-cell">
+                        {{! Use triple braces to allow HTML/markdown in suggestions }}
+                        <div class="text-muted small">{{{Suggestions}}}</div>
+                    </td>
+                </tr>
+            {{/rows}}
+            {{^rows}}
+                <tr>
+                    <td colspan="3" class="text-center text-muted py-4">
+                        <i class="fa fa-info-circle me-2"></i>{{strings.no_criteria_provided}}
+                    </td>
+                </tr>
+            {{/rows}}
+            </tbody>
+        </table>
+    </div>
+</div>

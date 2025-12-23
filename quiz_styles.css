@@ -1,0 +1,220 @@
+/* TrustGrade Quiz Styles */
+
+/* Added .local-trustgrade-quiz namespace to all selectors to prevent conflicts with Moodle core */
+
+.local-trustgrade-quiz .ai-quiz-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.local-trustgrade-quiz .quiz-instructions {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 5px;
+}
+
+.local-trustgrade-quiz .question-counter {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #495057;
+}
+
+.local-trustgrade-quiz .question-container {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 20px;
+}
+
+.local-trustgrade-quiz .question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.local-trustgrade-quiz .question-source {
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.local-trustgrade-quiz .question-difficulty {
+  font-size: 12px;
+  padding: 4px 8px;
+}
+
+.local-trustgrade-quiz .question-points {
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: bold;
+}
+
+.local-trustgrade-quiz .question-text {
+  font-size: 18px;
+  margin-bottom: 20px;
+  color: #212529;
+  line-height: 1.5;
+}
+
+.local-trustgrade-quiz .question-options {
+  margin-top: 15px;
+}
+
+.local-trustgrade-quiz .form-check {
+  margin-bottom: 12px;
+  padding: 10px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.local-trustgrade-quiz .form-check:hover {
+  background-color: #e9ecef;
+}
+
+.local-trustgrade-quiz .form-check-input {
+  position: unset;
+  margin-right: 10px;
+}
+
+.local-trustgrade-quiz .form-check-label {
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.local-trustgrade-quiz .quiz-navigation {
+  text-align: center;
+  margin-top: 30px;
+  padding: 20px 0;
+  border-top: 1px solid #dee2e6;
+}
+
+.local-trustgrade-quiz .quiz-navigation button {
+  margin: 0 10px;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.local-trustgrade-quiz .quiz-results {
+  margin-top: 20px;
+}
+
+.local-trustgrade-quiz .results-summary {
+  margin-top: 20px;
+}
+
+.local-trustgrade-quiz .score-summary {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.local-trustgrade-quiz .score-summary h3 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.local-trustgrade-quiz .result-item {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.local-trustgrade-quiz .result-item.correct {
+  border-left: 4px solid #28a745;
+}
+
+.local-trustgrade-quiz .result-item.incorrect {
+  border-left: 4px solid #dc3545;
+}
+
+.local-trustgrade-quiz .result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.local-trustgrade-quiz .question-number {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.local-trustgrade-quiz .result-status {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.local-trustgrade-quiz .result-points {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.local-trustgrade-quiz .explanation {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  border-left: 4px solid #007bff;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .local-trustgrade-quiz .ai-quiz-container {
+    padding: 10px;
+  }
+
+  .local-trustgrade-quiz .question-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .local-trustgrade-quiz .result-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .local-trustgrade-quiz .quiz-navigation button {
+    display: block;
+    width: 100%;
+    margin: 5px 0;
+  }
+}
+
+/* Form elements */
+.local-trustgrade-quiz textarea.form-control {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.local-trustgrade-quiz .badge-primary {
+  background-color: #007bff;
+}
+
+.local-trustgrade-quiz .badge-success {
+  background-color: #28a745;
+}
+
+.local-trustgrade-quiz .badge-secondary {
+  background-color: #6c757d;
+}
+
+.local-trustgrade-quiz .text-success {
+  color: #28a745 !important;
+}
+
+.local-trustgrade-quiz .text-danger {
+  color: #dc3545 !important;
+}

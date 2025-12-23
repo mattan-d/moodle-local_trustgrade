@@ -1,0 +1,47 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_trustgrade/recommendation_section
+    
+    Template for rendering recommendation text sections
+    
+    Context variables:
+    * title - Section title
+    * content - Section content (supports HTML tags)
+    * icon - Optional icon class
+    * sectionClass - CSS class for styling
+
+    @package    local_trustgrade
+    @copyright  2025 CentricApp LTD <support@centricapp.co.il>
+    @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+}}
+<div class="tg-section {{sectionClass}} mb-4">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-light border-0 py-3">
+            <h4 class="card-title mb-0 d-flex align-items-center">
+                {{#icon}}
+                <i class="{{icon}} me-2 text-primary"></i>
+                {{/icon}}
+                {{title}}
+            </h4>
+        </div>
+        <div class="card-body">
+            {{! Use triple braces to allow HTML content rendering }}
+            <div class="recommendation-content">{{{content}}}</div>
+        </div>
+    </div>
+</div>

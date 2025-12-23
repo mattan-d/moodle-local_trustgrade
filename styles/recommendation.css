@@ -1,0 +1,83 @@
+/* Modern styling for AI recommendation display */
+.modern-criteria-table {
+  border: none;
+  font-size: 0.95rem;
+}
+
+.modern-criteria-table thead th {
+  border: none;
+  padding: 1rem 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.modern-criteria-table tbody td {
+  border: none;
+  padding: 1rem 0.75rem;
+  vertical-align: top;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.criteria-row:hover {
+  background-color: rgba(0, 123, 255, 0.02);
+  transition: background-color 0.2s ease;
+}
+
+.criterion-cell {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.met-cell .badge {
+  font-size: 0.8rem;
+  padding: 0.5rem 0.75rem;
+  font-weight: 500;
+}
+
+.suggestions-cell {
+  line-height: 1.6;
+}
+
+.recommendation-content {
+  line-height: 1.7;
+  color: #495057;
+}
+
+.recommendation-content p {
+  margin-bottom: 1rem;
+}
+
+.recommendation-content p:last-child {
+  margin-bottom: 0;
+}
+
+.tg-section .card {
+  transition: box-shadow 0.2s ease;
+}
+
+.tg-section .card:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}
+
+.table-responsive {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .modern-criteria-table {
+    font-size: 0.9rem;
+  }
+
+  .modern-criteria-table thead th,
+  .modern-criteria-table tbody td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .met-cell .badge {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.6rem;
+  }
+}
