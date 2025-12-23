@@ -214,8 +214,7 @@ class question_bank_renderer {
           'Understanding' => get_string('blooms_understand', 'local_trustgrade'),
           'Applying' => get_string('blooms_apply', 'local_trustgrade'),
           'Analyzing' => get_string('blooms_analyze', 'local_trustgrade'),
-          'Evaluating' => get_string('blooms_evaluate', 'local_trustgrade'),
-          'Creating' => get_string('blooms_create', 'local_trustgrade')
+          'Evaluating' => get_string('blooms_evaluate', 'local_trustgrade')
       ];
 
       foreach ($levels as $level => $label) {

@@ -140,7 +140,6 @@ $string['blooms_understanding'] = 'הבין';
 $string['blooms_applying'] = 'החל';
 $string['blooms_analyzing'] = 'נתח';
 $string['blooms_evaluating'] = 'העריך';
-$string['blooms_create'] = 'צור';
 
 // Question source types.
 $string['question_source_instructor'] = 'מרצה';
@@ -277,7 +276,7 @@ $string['one_attempt_only'] = 'ניסיון אחד בלבד: יש לך רק ני
 $string['no_going_back'] = 'אין חזרה: לאחר מעבר לשאלה הבאה, לא ניתן לחזור לשאלות קודמות.';
 $string['no_restarts'] = 'אין התחלה מחדש: רענון הדף לא יתחיל מחדש את החידון – הוא ישוב מאיפה שהיה.';
 $string['time_limits'] = 'הגבלות זמן: לכל שאלה יש מגבלת זמן מחמירה. החידון יעבור אוטומטית כשהזמן יפוג.';
-$string['no_cheating'] = 'אין רמאות: זוהי הערכה רשמית. כל ניסיון לרמה או לפגיעה בחידון יזוהה.';
+$string['no_cheating'] = 'אין רמאות: זוהי הערכה רשמית. כל ניסיון לרמה או לפגיעה בחידון יזוהד.';
 $string['stay_focused'] = 'השאר מרוכז: החלפות חלונות או כרטיסיות מרובות עשויות להיחשב כהתנהגות חשודה.';
 $string['cannot_restart_notice'] = 'לאחר לחיצה על "התחל חידון", לא תוכל להתחיל מחדש או לקחת את ההערכה שוב.';
 
@@ -356,7 +355,7 @@ $string['grade_exceeds_maximum'] = 'הציון לא יכול לעלות על ה�
 $string['auto_grade_by_quiz'] = 'ניקוד אוטומטי על‑פי ציון החידון';
 $string['auto_grade_by_quiz_desc'] = 'הגדר אוטומטית את ציוני המשימה על‑פי ציון החידון לכל הסטודנטים';
 $string['auto_grade_button_text'] = 'ניקוד אוטומטי על‑פי ציון החידון';
-$string['auto_grade_success'] = '{$a} סטודנטים ניקודו אוטומטית על‑פי ציון החידון';
+$string['auto_grade_success'] = '{$a} סטודנטים ניקודו אוטומטי על‑פי ציון החידון';
 $string['auto_grade_no_grades'] = 'לא ניתן להחיל ציונים. בדוק שסטודנטים השלימו חידונים.';
 $string['auto_grade_error'] = 'שגיאה בניקוד אוטומטי של סטודנטים';
 $string['auto_grade_confirmation'] = 'זה יקבע אוטומטית ציונים על‑פי ציון החידון לכל הסטודנטים. ציונים קיימים יוחלפו. להמשיך?';

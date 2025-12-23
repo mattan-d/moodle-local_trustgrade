@@ -131,7 +131,6 @@ $string['blooms_understanding'] = 'Understand';
 $string['blooms_applying'] = 'Apply';
 $string['blooms_analyzing'] = 'Analyze';
 $string['blooms_evaluating'] = 'Evaluate';
-$string['blooms_create'] = 'Create';
 
 $string['blooms_remember'] = 'Remember';
 $string['blooms_understand'] = 'Understand';
