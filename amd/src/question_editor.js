@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+const define = window.define // Declare the define variable to fix lint error
+
 define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"], (
   $,
   Ajax,
@@ -427,12 +429,11 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
 
       const bloomsLevels = [
         { value: "", key: "" },
-        { value: "Remembering", key: "blooms_remember" },
-        { value: "Understanding", key: "blooms_understand" },
-        { value: "Applying", key: "blooms_apply" },
-        { value: "Analyzing", key: "blooms_analyze" },
-        { value: "Evaluating", key: "blooms_evaluate" },
-        { value: "Create", key: "blooms_create" },
+        { value: "Remembering", key: "blooms_remembering" },
+        { value: "Understanding", key: "blooms_understanding" },
+        { value: "Applying", key: "blooms_applying" },
+        { value: "Analyzing", key: "blooms_analyzing" },
+        { value: "Evaluating", key: "blooms_evaluating" },
       ]
 
       // Get language strings for Bloom's levels

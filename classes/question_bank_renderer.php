@@ -176,25 +176,17 @@ class question_bank_renderer {
       $html .= '  <textarea class="form-control question-text-input" id="question_text_' . $index . '" rows="3" placeholder="' . get_string('entertext', 'local_trustgrade') . '">' . htmlspecialchars($text) . '</textarea>';
       $html .= '</div>';
 
-      // Row: Type | Points | Bloom's
+      // Row: Type (hidden) | Points | Bloom's
       $html .= '<div class="row g-3">';
 
-      // Type
-      $html .= '  <div class="col-12 col-md-4">';
+      $html .= '  <div class="col-12 col-md-4" style="display: none;">';
       $html .= '    <div class="form-group">';
-      $html .= '      <label for="question_type_' . $index . '" class="form-label">' . get_string('type', 'local_trustgrade') . ':</label>';
-      $html .= '      <select class="form-control question-type-input" id="question_type_' . $index . '">';
-      $types = ['multiple_choice' => 'Multiple Choice'];
-      foreach ($types as $value => $label) {
-          $selected = ($type == $value) ? 'selected' : '';
-          $html .= '        <option value="' . $value . '" ' . $selected . '>' . $label . '</option>';
-      }
-      $html .= '      </select>';
+      $html .= '      <input type="hidden" class="question-type-input" id="question_type_' . $index . '" value="multiple_choice">';
       $html .= '    </div>';
       $html .= '  </div>';
 
       // Points
-      $html .= '  <div class="col-12 col-md-4">';
+      $html .= '  <div class="col-12 col-md-6">';
       $html .= '    <div class="form-group">';
       $html .= '      <label for="question_points_' . $index . '" class="form-label">' . get_string('points', 'local_trustgrade') . ':</label>';
       $html .= '      <input type="number" class="form-control question-points-input" id="question_points_' . $index . '" value="' . $points . '" min="0" max="100" />';
@@ -202,19 +194,18 @@ class question_bank_renderer {
       $html .= '    </div>';
       $html .= '  </div>';
 
-      // Bloom's Level
-      $html .= '  <div class="col-12 col-md-4">';
+      $html .= '  <div class="col-12 col-md-6">';
       $html .= '    <div class="form-group">';
       $html .= '      <label for="question_blooms_' . $index . '" class="form-label">' . get_string('blooms_level_label', 'local_trustgrade') . ':</label>';
       $html .= '      <select class="form-control question-blooms-input" id="question_blooms_' . $index . '">';
 
       $levels = [
           '' => '-',
-          'Remembering' => get_string('blooms_remember', 'local_trustgrade'),
-          'Understanding' => get_string('blooms_understand', 'local_trustgrade'),
-          'Applying' => get_string('blooms_apply', 'local_trustgrade'),
-          'Analyzing' => get_string('blooms_analyze', 'local_trustgrade'),
-          'Evaluating' => get_string('blooms_evaluate', 'local_trustgrade')
+          'Remembering' => get_string('blooms_remembering', 'local_trustgrade'),
+          'Understanding' => get_string('blooms_understanding', 'local_trustgrade'),
+          'Applying' => get_string('blooms_applying', 'local_trustgrade'),
+          'Analyzing' => get_string('blooms_analyzing', 'local_trustgrade'),
+          'Evaluating' => get_string('blooms_evaluating', 'local_trustgrade')
       ];
 
       foreach ($levels as $level => $label) {
