@@ -7,8 +7,10 @@
   margin-bottom: 1rem;
 }
 
+/* Reduced table width and improved layout */
 .grading-table {
   margin-top: 1rem;
+  max-width: 1200px;
 }
 
 .grading-table th {
@@ -89,10 +91,50 @@
   font-style: italic;
 }
 
+/* Updated table column widths for new layout */
+/* Table column widths */
+.grading-table th:nth-child(1) {
+  width: 20%;
+} /* Student */
+.grading-table th:nth-child(2) {
+  width: 25%;
+} /* Quiz Score with date/time */
+.grading-table th:nth-child(3) {
+  width: 15%;
+} /* Final Grade */
+.grading-table th:nth-child(4) {
+  width: 10%;
+} /* Details button */
+
+/* Improved questions detail table styling */
+.questions-detail-table {
+  font-size: 0.95rem;
+}
+
+.questions-detail-table th:nth-child(1) {
+  width: 3%;
+} /* # */
+.questions-detail-table th:nth-child(2) {
+  width: 40%;
+} /* Question (with Bloom's and source) */
+.questions-detail-table th:nth-child(3) {
+  width: 20%;
+} /* Student Answer */
+.questions-detail-table th:nth-child(4) {
+  width: 20%;
+} /* Correct Answer */
+.questions-detail-table th:nth-child(5) {
+  width: 10%;
+} /* Points */
+.questions-detail-table th:nth-child(6) {
+  width: 7%;
+} /* Result */
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .grading-table {
     font-size: 0.875rem;
+    max-width: 100%;
   }
 
   .grade-input-container {
@@ -103,28 +145,12 @@
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
   }
-}
 
-/* Table column widths */
-.grading-table th:nth-child(1) {
-  width: 5%;
-} /* Student */
-.grading-table th:nth-child(2) {
-  width: 5%;
-} /* Quiz Score */
-.grading-table th:nth-child(3) {
-  width: 50%;
-} /* Completed Date */
-.grading-table th:nth-child(4) {
-  width: 5%;
-} /* Time Taken */
-.grading-table th:nth-child(5) {
-  width: 5%;
-} /* Final Grade */
-
-/* Ensure proper spacing for date/time columns */
-.grading-table td:nth-child(3),
-.grading-table td:nth-child(4) {
-  white-space: nowrap;
-  font-size: 0.9em;
+  /* Stack columns on mobile */
+  .grading-table th:nth-child(1),
+  .grading-table th:nth-child(2),
+  .grading-table th:nth-child(3),
+  .grading-table th:nth-child(4) {
+    width: auto;
+  }
 }
