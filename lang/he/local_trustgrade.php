@@ -42,24 +42,6 @@ $string['trustgrade_tab'] = 'מדד איכות אקדמית (TrustGrade)';
 $string['trustgrade_description'] = 'השתמש ב‑AI Gateway לניתוח והמלצה לשיפור הנחיות המשימה שלך.';
 $string['save_assignment_first'] = 'אנא שמור את המשימה תחילה לפני יצירת שאלות';
 
-// Plugin settings.
-$string['pluginname'] = 'TrustGrade';
-$string['plugindisabled'] = 'התוסף TrustGrade מושבת';
-$string['trustgradedisabled'] = 'TrustGrade מושבת למשימה זו';
-
-// Plugin settings.
-$string['plugin_enabled'] = 'אפשר את תוסף TrustGrade';
-$string['plugin_enabled_desc'] = 'אפשר או השבת את תוסף TrustGrade באופן גלובלי. כאשר מושבת, כל פונקציות TrustGrade יוסתרו מטפסי המשימה והדפים.';
-$string['default_enabled'] = 'הפעל את התוסף באופן אוטומטי עבור כל מטלה חדשה';
-$string['default_enabled_desc'] = 'כאשר אפשר, TrustGrade יופעל אוטומטית למשימות שנוצרו לאחרונה. המרצים עדיין יכולים להשבית אותו למשימות בודדות.';
-
-// Assignment settings.
-$string['trustgrade_enabled'] = 'הפעל את TrustGrade למשימה זו';
-$string['trustgrade_enabled_desc'] = 'הפעל את תוסף מדד איכות אקדמית (TrustGrade) עבור מטלה זו.';
-$string['trustgrade_tab'] = 'מדד איכות אקדמית (TrustGrade)';
-$string['trustgrade_description'] = 'השתמש ב‑AI Gateway לניתוח והמלצה לשיפור הנחיות המשימה שלך.';
-$string['save_assignment_first'] = 'אנא שמור את המשימה תחילה לפני יצירת שאלות';
-
 // AI Gateway Settings.
 $string['gateway_settings'] = 'הגדרות AI Gateway';
 $string['gateway_settings_desc'] = 'הגדר את ה‑AI Gateway החיצוני לעיבוד AI. ה‑Gateway מטפל בכל הגדרות API כולל מפתח OpenRouter ובחירת דגם.';
@@ -140,6 +122,8 @@ $string['blooms_understanding'] = 'הבין';
 $string['blooms_applying'] = 'החל';
 $string['blooms_analyzing'] = 'נתח';
 $string['blooms_evaluating'] = 'העריך';
+$string['mandatory_question'] = 'שאלת חובה';
+$string['mandatory_question_help'] = 'שאלה זו תמיד תופיע בחידונים לסטודנטים';
 
 // Question source types.
 $string['question_source_instructor'] = 'מרצה';

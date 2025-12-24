@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_trustgrade';
-$plugin->version = 2025120401; // Incremented version for course-specific availability feature
+$plugin->version = 2025120402; // Incremented version for mandatory questions feature
 $plugin->requires = 2022112800; // Moodle 4.1
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.2.0'; // Updated release version
+$plugin->release = '1.3.0'; // Updated release version

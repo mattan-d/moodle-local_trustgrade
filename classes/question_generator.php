@@ -111,6 +111,7 @@ class question_generator {
                 $record->cmid = $cmid;
                 $record->userid = $USER->id;
                 $record->question_data = json_encode($question);
+                $record->is_mandatory = isset($question['is_mandatory']) ? intval($question['is_mandatory']) : 0;
                 $record->timecreated = time();
                 $record->timemodified = time();
                 
@@ -138,6 +139,8 @@ class question_generator {
         foreach ($records as $record) {
             $question_data = json_decode($record->question_data, true);
             if ($question_data) {
+                $question_data['is_mandatory'] = isset($record->is_mandatory) ? intval($record->is_mandatory) : 0;
+                $question_data['db_id'] = $record->id; // Add database ID for reference
                 $questions[] = $question_data;
             }
         }

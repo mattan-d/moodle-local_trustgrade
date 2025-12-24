@@ -537,6 +537,9 @@ $string['metadata_must_be_object'] = 'Metadata must be an object';
 $string['points_must_be_1_to_100'] = 'Points must be between 1 and 100';
 $string['blooms_level_must_be_string'] = 'Metadata \'blooms_level\' must be a string';
 
+$string['mandatory_question'] = 'Mandatory Question';
+$string['mandatory_question_help'] = 'This question will always appear in student quizzes';
+
 // Quiz completion strings
 // Quiz completion messages.
 $string['quiz_already_completed'] = 'You have already completed this assessment. Only one attempt is allowed per assignment.';

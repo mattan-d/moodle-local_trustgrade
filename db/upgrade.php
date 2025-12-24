@@ -39,5 +39,22 @@ function xmldb_local_trustgrade_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025081702, 'local', 'trustgrade');
     }
 
+    if ($oldversion < 2025120402) {
+        $table = new xmldb_table('local_trustgrade_questions');
+        $field = new xmldb_field('is_mandatory', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'question_data');
+
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Add index for is_mandatory field
+        $index = new xmldb_index('is_mandatory', XMLDB_INDEX_NOTUNIQUE, ['is_mandatory']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+
+        upgrade_plugin_savepoint(true, 2025120402, 'local', 'trustgrade');
+    }
+
     return true;
 }

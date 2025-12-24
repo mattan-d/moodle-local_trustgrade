@@ -22,6 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+var define = window.define // Declare the define variable
 
 define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"], (
   $,
@@ -104,14 +105,27 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       const questionText = questionItem.find(".question-text-input").val()
       const points = Number.parseInt(questionItem.find(".question-points-input").val(), 10)
       const blooms = questionItem.find(".question-blooms-input").val() || undefined
+      const isMandatory = questionItem.find(".question-mandatory-input").is(":checked") ? 1 : 0
 
-      console.log("[v0] Form values - Type:", questionType, "Text:", questionText, "Points:", points, "Blooms:", blooms)
+      console.log(
+        "[v0] Form values - Type:",
+        questionType,
+        "Text:",
+        questionText,
+        "Points:",
+        points,
+        "Blooms:",
+        blooms,
+        "Mandatory:",
+        isMandatory,
+      )
 
       const questionData = {
         id: Number.parseInt(questionItem.data("question-id") || 0, 10) || undefined,
         type: questionType,
         text: questionText,
         options: [],
+        is_mandatory: isMandatory,
         metadata: {
           points: isNaN(points) ? 0 : points,
           ...(blooms ? { blooms_level: blooms } : {}),
@@ -277,8 +291,9 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         Str.get_string("correct", "local_trustgrade"),
         Str.get_string("explanation", "local_trustgrade"),
         Str.get_string("points", "local_trustgrade"),
+        Str.get_string("mandatory", "local_trustgrade"),
       ]).then((strings) => {
-        const [qStr, correctStr, explStr, pointsStr] = strings
+        const [qStr, correctStr, explStr, pointsStr, mandatoryStr] = strings
         let html = `<p><strong>Type:</strong> ${String(questionData.type || "").replace("_", " ")}</p>`
         if (questionData.metadata && (questionData.metadata.points != null || questionData.metadata.blooms_level)) {
           const pts = questionData.metadata.points != null ? `${pointsStr}: ${questionData.metadata.points}` : ""
@@ -286,6 +301,9 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
           html += `<p>${pts}${bloom}</p>`
         }
         html += `<p><strong>${qStr}:</strong> ${questionData.text || ""}</p>`
+        if (questionData.is_mandatory) {
+          html += `<p><strong>${mandatoryStr}:</strong> Yes</p>`
+        }
 
         if (Array.isArray(questionData.options) && questionData.options.length > 0) {
           html += "<p><strong>Options:</strong></p><ul>"
@@ -382,6 +400,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
           points: 10,
           blooms_level: "",
         },
+        is_mandatory: 0,
       }
 
       QuestionEditor.prepareEditFormContext(blankQuestion, newIndex)
@@ -429,6 +448,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       const metadata = question.metadata || {}
       const points = metadata.points || 10
       const blooms = metadata.blooms_level || ""
+      const isMandatory = question.is_mandatory || 0
 
       const bloomsLevels = [
         { value: "", key: "" },
@@ -478,6 +498,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
           isTrueFalse: type === "true_false",
           isShortAnswer: type === "short_answer",
           options: options,
+          isMandatory: isMandatory,
         }
       })
     },
