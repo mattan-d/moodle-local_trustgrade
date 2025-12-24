@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-var define = window.define // Declare the define variable
-
 define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"], (
   $,
   Ajax,
