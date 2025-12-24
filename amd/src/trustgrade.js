@@ -291,7 +291,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
 
           let metBadge = `<span class="badge bg-secondary rounded-pill">${m}</span>`
           if (metValue === "yes" || metValue === "y" || metValue === "true") {
-            metBadge = `<span class="badge bg-success rounded-pill"><i class="fa fa-check me-1"></i>${m}</span>`
+            metBadge = `<span class="badge bg-success rounded-pill text-white"><i class="fa fa-check me-1"></i>${m}</span>`
           } else if (metValue === "no" || metValue === "n" || metValue === "false") {
             metBadge = `<span class="badge bg-danger rounded-pill"><i class="fa fa-times me-1"></i>${m}</span>`
           } else if (metValue === "partial" || metValue === "partially" || metValue === "maybe") {
