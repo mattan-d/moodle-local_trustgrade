@@ -170,8 +170,21 @@ class submission_processor {
         
         // Get instructor-generated questions
         $instructor_questions = question_generator::get_questions($cmid);
-        foreach ($instructor_questions as &$question) {
+        
+        $mandatory_questions = [];
+        $optional_questions = [];
+        
+        foreach ($instructor_questions as $question) {
             $question['source'] = 'instructor';
+            if (!empty($question['is_mandatory'])) {
+                $mandatory_questions[] = $question;
+            } else {
+                $optional_questions[] = $question;
+            }
+        }
+        
+        foreach ($mandatory_questions as $mandatory_q) {
+            $selected_questions[] = $mandatory_q;
         }
         
         // Get submission-based questions if submission_id is provided
@@ -191,37 +204,52 @@ class submission_processor {
             }
         }
         
-        // Select questions based on settings
-        $instructor_count = min($settings['instructor_questions'], count($instructor_questions));
-        $submission_count = min($settings['submission_questions'], count($submission_questions));
+        $mandatory_count = count($mandatory_questions);
+        $remaining_slots = max(0, $settings['total_quiz_questions'] - $mandatory_count);
         
-        // Randomly select instructor questions
-        if ($instructor_count > 0 && !empty($instructor_questions)) {
-            $selected_instructor = array_rand($instructor_questions, min($instructor_count, count($instructor_questions)));
-            if (!is_array($selected_instructor)) {
-                $selected_instructor = [$selected_instructor];
+        if ($remaining_slots > 0) {
+            // Calculate distribution for remaining slots
+            $instructor_count = min($settings['instructor_questions'], count($optional_questions));
+            $submission_count = min($settings['submission_questions'], count($submission_questions));
+            
+            // Adjust if we don't have enough questions
+            $total_available = $instructor_count + $submission_count;
+            if ($total_available > $remaining_slots) {
+                // Scale down proportionally
+                $ratio = $remaining_slots / $total_available;
+                $instructor_count = floor($instructor_count * $ratio);
+                $submission_count = $remaining_slots - $instructor_count;
             }
-            foreach ($selected_instructor as $index) {
-                $selected_questions[] = $instructor_questions[$index];
+            
+            // Randomly select optional instructor questions
+            if ($instructor_count > 0 && !empty($optional_questions)) {
+                $selected_instructor = array_rand($optional_questions, min($instructor_count, count($optional_questions)));
+                if (!is_array($selected_instructor)) {
+                    $selected_instructor = [$selected_instructor];
+                }
+                foreach ($selected_instructor as $index) {
+                    $selected_questions[] = $optional_questions[$index];
+                }
+            }
+            
+            // Randomly select submission questions
+            if ($submission_count > 0 && !empty($submission_questions)) {
+                $selected_submission = array_rand($submission_questions, min($submission_count, count($submission_questions)));
+                if (!is_array($selected_submission)) {
+                    $selected_submission = [$selected_submission];
+                }
+                foreach ($selected_submission as $index) {
+                    $selected_questions[] = $submission_questions[$index];
+                }
             }
         }
         
-        // Randomly select submission questions
-        if ($submission_count > 0 && !empty($submission_questions)) {
-            $selected_submission = array_rand($submission_questions, min($submission_count, count($submission_questions)));
-            if (!is_array($selected_submission)) {
-                $selected_submission = [$selected_submission];
-            }
-            foreach ($selected_submission as $index) {
-                $selected_questions[] = $submission_questions[$index];
-            }
+        // Shuffle only the non-mandatory questions (keep mandatory at the beginning)
+        if (count($selected_questions) > $mandatory_count) {
+            $non_mandatory = array_slice($selected_questions, $mandatory_count);
+            shuffle($non_mandatory);
+            $selected_questions = array_merge($mandatory_questions, $non_mandatory);
         }
-        
-        // Shuffle the final question order
-        shuffle($selected_questions);
-        
-        // Limit to total quiz questions setting
-        $selected_questions = array_slice($selected_questions, 0, $settings['total_quiz_questions']);
         
         // Apply answer randomization if enabled
         if ($settings['randomize_answers']) {

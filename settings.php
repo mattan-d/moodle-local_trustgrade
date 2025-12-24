@@ -41,6 +41,21 @@ if ($hassiteconfig) {
         0
     ));
 
+    $settings->add(new admin_setting_configcheckbox(
+        'local_trustgrade/course_specific',
+        get_string('course_specific', 'local_trustgrade'),
+        get_string('course_specific_desc', 'local_trustgrade'),
+        0
+    ));
+
+    require_once($CFG->dirroot . '/local/trustgrade/classes/admin_setting_course_multiselect.php');
+    $settings->add(new \local_trustgrade\admin_setting_course_multiselect(
+        'local_trustgrade/enabled_courses',
+        get_string('enabled_courses', 'local_trustgrade'),
+        get_string('enabled_courses_desc', 'local_trustgrade'),
+        []
+    ));
+
     // Add debugging mode setting
     $settings->add(new admin_setting_configcheckbox(
         'local_trustgrade/debug_mode',

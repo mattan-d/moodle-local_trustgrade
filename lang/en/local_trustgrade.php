@@ -34,6 +34,14 @@ $string['plugin_enabled'] = 'Enable TrustGrade Plugin';
 $string['plugin_enabled_desc'] = 'Enable or disable the TrustGrade plugin globally. When disabled, all TrustGrade functionality will be hidden from assignment forms and pages.';
 $string['default_enabled'] = 'Enable TrustGrade by default for new assignments';
 $string['default_enabled_desc'] = 'When enabled, TrustGrade will be automatically enabled for newly created assignments. Instructors can still disable it for individual assignments.';
+$string['course_specific'] = 'Enable course-specific availability';
+$string['course_specific_desc'] = 'When enabled, TrustGrade will only be available for specific courses selected below. When disabled, TrustGrade is available for all courses.';
+$string['enabled_courses'] = 'Enabled courses';
+$string['enabled_courses_desc'] = 'Select the courses where TrustGrade should be available. This setting only applies when course-specific availability is enabled.';
+$string['enable_course_specific_first'] = 'Please enable "Enable course-specific availability" above to select courses.';
+$string['no_courses_available'] = 'No courses available in the system.';
+$string['search_courses'] = 'Search courses...';
+$string['course_not_enabled'] = 'TrustGrade is not available for this course. Please contact your administrator.';
 
 // Assignment settings.
 $string['trustgrade_enabled'] = 'Enable TrustGrade for this assignment';
@@ -123,7 +131,6 @@ $string['blooms_understanding'] = 'Understand';
 $string['blooms_applying'] = 'Apply';
 $string['blooms_analyzing'] = 'Analyze';
 $string['blooms_evaluating'] = 'Evaluate';
-$string['blooms_create'] = 'Create';
 
 $string['blooms_remember'] = 'Remember';
 $string['blooms_understand'] = 'Understand';
@@ -529,6 +536,9 @@ $string['at_least_one_correct_option'] = 'Multiple choice questions must have at
 $string['metadata_must_be_object'] = 'Metadata must be an object';
 $string['points_must_be_1_to_100'] = 'Points must be between 1 and 100';
 $string['blooms_level_must_be_string'] = 'Metadata \'blooms_level\' must be a string';
+
+$string['mandatory_question'] = 'Mandatory Question';
+$string['mandatory_question_help'] = 'This question will always appear in student quizzes';
 
 // Quiz completion strings
 // Quiz completion messages.

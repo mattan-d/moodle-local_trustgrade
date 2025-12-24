@@ -108,6 +108,7 @@ class question_bank_renderer {
       $metadata = isset($question['metadata']) && is_array($question['metadata']) ? $question['metadata'] : [];
       $points = isset($metadata['points']) ? intval($metadata['points']) : null;
       $blooms = isset($metadata['blooms_level']) ? $metadata['blooms_level'] : null;
+      $is_mandatory = !empty($question['is_mandatory']);
 
       $html .= '<div class="question-content">';
       $html .= '<p class="mb-1"><strong>' . get_string('type', 'local_trustgrade') . ':</strong> ' . htmlspecialchars(ucfirst(str_replace('_', ' ', $type))) . '</p>';
@@ -119,6 +120,9 @@ class question_bank_renderer {
       if (!empty($blooms)) {
           $bloomsLabel = get_string('blooms_level_label', 'local_trustgrade');
           $metaBits[] = $bloomsLabel . ': ' . htmlspecialchars($blooms);
+      }
+      if ($is_mandatory) {
+          $metaBits[] = '<span class="badge bg-danger">' . get_string('mandatory_question', 'local_trustgrade') . '</span>';
       }
       if (!empty($metaBits)) {
           $html .= '<p class="text-muted mb-2">' . implode(' | ', $metaBits) . '</p>';
@@ -167,6 +171,7 @@ class question_bank_renderer {
       $metadata = isset($question['metadata']) && is_array($question['metadata']) ? $question['metadata'] : [];
       $points = isset($metadata['points']) ? intval($metadata['points']) : 10;
       $blooms = isset($metadata['blooms_level']) ? $metadata['blooms_level'] : '';
+      $is_mandatory = !empty($question['is_mandatory']);
 
       $html .= '<div class="question-edit-form container-fluid px-0">';
 
@@ -176,20 +181,12 @@ class question_bank_renderer {
       $html .= '  <textarea class="form-control question-text-input" id="question_text_' . $index . '" rows="3" placeholder="' . get_string('entertext', 'local_trustgrade') . '">' . htmlspecialchars($text) . '</textarea>';
       $html .= '</div>';
 
-      // Row: Type | Points | Bloom's
+      // Row: Type (hidden) | Points | Bloom's
       $html .= '<div class="row g-3">';
 
-      // Type
-      $html .= '  <div class="col-12 col-md-4">';
+      $html .= '  <div class="col-12 col-md-4" style="display: none;">';
       $html .= '    <div class="form-group">';
-      $html .= '      <label for="question_type_' . $index . '" class="form-label">' . get_string('type', 'local_trustgrade') . ':</label>';
-      $html .= '      <select class="form-control question-type-input" id="question_type_' . $index . '">';
-      $types = ['multiple_choice' => 'Multiple Choice'];
-      foreach ($types as $value => $label) {
-          $selected = ($type == $value) ? 'selected' : '';
-          $html .= '        <option value="' . $value . '" ' . $selected . '>' . $label . '</option>';
-      }
-      $html .= '      </select>';
+      $html .= '      <input type="hidden" class="question-type-input" id="question_type_' . $index . '" value="multiple_choice">';
       $html .= '    </div>';
       $html .= '  </div>';
 
@@ -208,15 +205,13 @@ class question_bank_renderer {
       $html .= '      <label for="question_blooms_' . $index . '" class="form-label">' . get_string('blooms_level_label', 'local_trustgrade') . ':</label>';
       $html .= '      <select class="form-control question-blooms-input" id="question_blooms_' . $index . '">';
 
-      // Use language strings for Bloom's levels
       $levels = [
           '' => '-',
-          'Remembering' => get_string('blooms_remember', 'local_trustgrade'),
-          'Understanding' => get_string('blooms_understand', 'local_trustgrade'),
-          'Applying' => get_string('blooms_apply', 'local_trustgrade'),
-          'Analyzing' => get_string('blooms_analyze', 'local_trustgrade'),
-          'Evaluating' => get_string('blooms_evaluate', 'local_trustgrade'),
-          'Create' => get_string('blooms_create', 'local_trustgrade')
+          'Remembering' => get_string('blooms_remembering', 'local_trustgrade'),
+          'Understanding' => get_string('blooms_understanding', 'local_trustgrade'),
+          'Applying' => get_string('blooms_applying', 'local_trustgrade'),
+          'Analyzing' => get_string('blooms_analyzing', 'local_trustgrade'),
+          'Evaluating' => get_string('blooms_evaluating', 'local_trustgrade')
       ];
 
       foreach ($levels as $level => $label) {
@@ -224,6 +219,20 @@ class question_bank_renderer {
           $html .= '        <option value="' . htmlspecialchars($level) . '" ' . $sel . '>' . htmlspecialchars($label) . '</option>';
       }
       $html .= '      </select>';
+      $html .= '    </div>';
+      $html .= '  </div>';
+
+      $html .= '  <div class="col-12 col-md-4">';
+      $html .= '    <div class="form-group">';
+      $html .= '      <label class="form-label d-block">&nbsp;</label>'; // Spacer for alignment
+      $html .= '      <div class="form-check">';
+      $checked = $is_mandatory ? 'checked' : '';
+      $html .= '        <input class="form-check-input question-mandatory-input" type="checkbox" id="question_mandatory_' . $index . '" value="1" ' . $checked . '>';
+      $html .= '        <label class="form-check-label" for="question_mandatory_' . $index . '">';
+      $html .= '          ' . get_string('mandatory_question', 'local_trustgrade');
+      $html .= '        </label>';
+      $html .= '      </div>';
+      $html .= '      <small class="form-text text-muted">' . get_string('mandatory_question_help', 'local_trustgrade') . '</small>';
       $html .= '    </div>';
       $html .= '  </div>';
 

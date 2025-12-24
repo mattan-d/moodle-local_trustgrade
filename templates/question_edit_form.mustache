@@ -29,31 +29,29 @@
     * options - Array of option objects for multiple choice
 }}
 <div class="question-edit-form container-fluid px-0">
+    {{! Added inline alert container for validation messages }}
+    <div class="alert alert-danger validation-alert d-none mb-3" role="alert">
+        <i class="fa fa-exclamation-triangle me-2"></i>
+        <span class="validation-message"></span>
+    </div>
+
     <div class="form-group mb-3">
         <label for="question_text_{{index}}" class="form-label">{{#str}}question_text, local_trustgrade{{/str}}:</label>
         <textarea class="form-control question-text-input" id="question_text_{{index}}" rows="3" placeholder="{{#str}}enter_question_text, local_trustgrade{{/str}}">{{text}}</textarea>
     </div>
 
     <div class="row g-3">
-        <div class="col-12 col-md-4">
-            <div class="form-group">
-                <label for="question_type_{{index}}" class="form-label">{{#str}}type, local_trustgrade{{/str}}:</label>
-                <select class="form-control question-type-input" id="question_type_{{index}}">
-                    <option value="multiple_choice" {{#isMultipleChoice}}selected{{/isMultipleChoice}}>{{#str}}multiple_choice, local_trustgrade{{/str}}</option>
-                    <option value="true_false" {{#isTrueFalse}}selected{{/isTrueFalse}}>{{#str}}true_false, local_trustgrade{{/str}}</option>
-                    <option value="short_answer" {{#isShortAnswer}}selected{{/isShortAnswer}}>{{#str}}short_answer, local_trustgrade{{/str}}</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="col-12 col-md-4">
+        {{! Hidden field to store type as multiple_choice, no longer editable }}
+        <input type="hidden" class="question-type-input" id="question_type_{{index}}" value="multiple_choice" />
+        
+        <div class="col-12 col-md-6">
             <div class="form-group">
                 <label for="question_points_{{index}}" class="form-label">{{#str}}points, local_trustgrade{{/str}}:</label>
                 <input type="number" class="form-control question-points-input" id="question_points_{{index}}" value="{{points}}" min="0" max="100" />
             </div>
         </div>
 
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-6">
             <div class="form-group">
                 <label for="question_blooms_{{index}}" class="form-label">{{#str}}blooms_level, local_trustgrade{{/str}}:</label>
                 <select class="form-control question-blooms-input" id="question_blooms_{{index}}">

@@ -69,6 +69,7 @@ class question_editor {
               $record->cmid = $cmid;
               $record->userid = $USER->id;
               $record->question_data = json_encode($question);
+              $record->is_mandatory = isset($question['is_mandatory']) ? intval($question['is_mandatory']) : 0;
               $record->timecreated = time();
               $record->timemodified = time();
               
@@ -115,6 +116,7 @@ class question_editor {
               $record->cmid = $cmid;
               $record->userid = $USER->id;
               $record->question_data = json_encode($question);
+              $record->is_mandatory = isset($question['is_mandatory']) ? intval($question['is_mandatory']) : 0;
               $record->timecreated = time();
               $record->timemodified = time();
               

@@ -28,6 +28,7 @@
         <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="question_data" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="is_mandatory" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
       </FIELDS>
@@ -39,6 +40,7 @@
       <INDEXES>
         <INDEX NAME="cmid" UNIQUE="false" FIELDS="cmid"/>
         <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
+        <INDEX NAME="is_mandatory" UNIQUE="false" FIELDS="is_mandatory"/>
       </INDEXES>
     </TABLE>
     <TABLE NAME="local_trustgd_sub_questions" COMMENT="Stores AI generated questions based on student submissions">

@@ -21,7 +21,7 @@
  * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-const define = window.define; // Declare the define variable
+
 define(['jquery', 'core/templates', 'core/str'], ($, Templates, Str) => {
   var SubmissionProcessing = {
     cmid: 0,

@@ -28,9 +28,13 @@ defined('MOODLE_INTERNAL') || die();
  * Add TrustGrade elements to assignment form
  */
 function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
-    global $PAGE, $DB;
+    global $PAGE, $DB, $COURSE;
 
     if (!get_config('local_trustgrade', 'plugin_enabled')) {
+        return;
+    }
+
+    if (!\local_trustgrade\course_availability::is_available_for_course($COURSE->id)) {
         return;
     }
 

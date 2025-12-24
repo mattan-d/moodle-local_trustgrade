@@ -22,9 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-var define = window.define
-var M = window.M
-
 define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"], (
   $,
   Ajax,
@@ -92,20 +89,41 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
     },
 
     saveQuestion: (questionItem) => {
+      console.log("[v0] saveQuestion called", questionItem)
+      const $validationAlert = questionItem.find(".validation-alert")
+      console.log("[v0] Found validation alert:", $validationAlert.length)
+      $validationAlert.addClass("d-none")
+
       const questionIndex = questionItem.data("question-index")
       const cmid = questionItem.data("cmid")
+      console.log("[v0] Question index:", questionIndex, "CM ID:", cmid)
 
       // Build new JSON shape
       const questionType = questionItem.find(".question-type-input").val()
       const questionText = questionItem.find(".question-text-input").val()
       const points = Number.parseInt(questionItem.find(".question-points-input").val(), 10)
       const blooms = questionItem.find(".question-blooms-input").val() || undefined
+      const isMandatory = questionItem.find(".question-mandatory-input").is(":checked") ? 1 : 0
+
+      console.log(
+        "[v0] Form values - Type:",
+        questionType,
+        "Text:",
+        questionText,
+        "Points:",
+        points,
+        "Blooms:",
+        blooms,
+        "Mandatory:",
+        isMandatory,
+      )
 
       const questionData = {
         id: Number.parseInt(questionItem.data("question-id") || 0, 10) || undefined,
         type: questionType,
         text: questionText,
         options: [],
+        is_mandatory: isMandatory,
         metadata: {
           points: isNaN(points) ? 0 : points,
           ...(blooms ? { blooms_level: blooms } : {}),
@@ -149,29 +167,35 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         questionData.options = []
       }
 
-      // Validation
+      console.log("[v0] Built question data:", questionData)
+
       if (!questionData.text || !questionData.text.trim()) {
-        Str.get_string("question_text_required", "local_trustgrade").then((message) =>
-          Notification.addNotification({ message, type: "error" }),
-        )
+        console.log("[v0] Validation failed: question text required")
+        Str.get_string("question_text_required", "local_trustgrade").then((message) => {
+          QuestionEditor.showInlineError(questionItem, message)
+        })
         return
       }
       if (questionType === "multiple_choice") {
         const anyTextMissing = questionData.options.some((opt) => !(opt.text || "").trim())
         if (anyTextMissing) {
-          Str.get_string("all_options_required", "local_trustgrade").then((message) =>
-            Notification.addNotification({ message, type: "error" }),
-          )
+          console.log("[v0] Validation failed: all options required")
+          Str.get_string("all_options_required", "local_trustgrade").then((message) => {
+            QuestionEditor.showInlineError(questionItem, message)
+          })
           return
         }
         const anyCorrect = questionData.options.some((opt) => opt.is_correct)
         if (!anyCorrect) {
-          Str.get_string("correct_answer_required", "local_trustgrade").then((message) =>
-            Notification.addNotification({ message, type: "error" }),
-          )
+          console.log("[v0] Validation failed: correct answer required")
+          Str.get_string("correct_answer_required", "local_trustgrade").then((message) => {
+            QuestionEditor.showInlineError(questionItem, message)
+          })
           return
         }
       }
+
+      console.log("[v0] Validation passed, calling AJAX")
 
       var $saveBtn = questionItem.find(".save-question-btn")
       $saveBtn.prop("disabled", true)
@@ -187,8 +211,11 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         },
       ])
 
+      console.log("[v0] AJAX call initiated")
+
       promises[0]
         .done((response) => {
+          console.log("[v0] AJAX response received:", response)
           if (response.success) {
             QuestionEditor.updateQuestionDisplay(questionItem, questionData)
             QuestionEditor.exitEditMode(questionItem)
@@ -196,10 +223,15 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
               Notification.addNotification({ message: message, type: "success" }),
             )
           } else {
-            Notification.addNotification({ message: response.error || "Failed to save question.", type: "error" })
+            console.log("[v0] Server returned error:", response.error)
+            QuestionEditor.showInlineError(questionItem, response.error || "Failed to save question.")
           }
         })
-        .fail(Notification.exception)
+        .fail((error) => {
+          console.log("[v0] AJAX call failed:", error)
+          const errorMessage = error.message || error.error || "An error occurred while saving the question."
+          QuestionEditor.showInlineError(questionItem, errorMessage)
+        })
         .always(() => $saveBtn.prop("disabled", false))
     },
 
@@ -257,8 +289,9 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         Str.get_string("correct", "local_trustgrade"),
         Str.get_string("explanation", "local_trustgrade"),
         Str.get_string("points", "local_trustgrade"),
+        Str.get_string("mandatory", "local_trustgrade"),
       ]).then((strings) => {
-        const [qStr, correctStr, explStr, pointsStr] = strings
+        const [qStr, correctStr, explStr, pointsStr, mandatoryStr] = strings
         let html = `<p><strong>Type:</strong> ${String(questionData.type || "").replace("_", " ")}</p>`
         if (questionData.metadata && (questionData.metadata.points != null || questionData.metadata.blooms_level)) {
           const pts = questionData.metadata.points != null ? `${pointsStr}: ${questionData.metadata.points}` : ""
@@ -266,6 +299,9 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
           html += `<p>${pts}${bloom}</p>`
         }
         html += `<p><strong>${qStr}:</strong> ${questionData.text || ""}</p>`
+        if (questionData.is_mandatory) {
+          html += `<p><strong>${mandatoryStr}:</strong> Yes</p>`
+        }
 
         if (Array.isArray(questionData.options) && questionData.options.length > 0) {
           html += "<p><strong>Options:</strong></p><ul>"
@@ -362,11 +398,13 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
           points: 10,
           blooms_level: "",
         },
+        is_mandatory: 0,
       }
 
-      const editFormContext = QuestionEditor.prepareEditFormContext(blankQuestion, newIndex)
-
-      Templates.render("local_trustgrade/question_edit_form", editFormContext)
+      QuestionEditor.prepareEditFormContext(blankQuestion, newIndex)
+        .then((editFormContext) => {
+          return Templates.render("local_trustgrade/question_edit_form", editFormContext)
+        })
         .then((editFormHtml) => {
           const context = {
             index: newIndex,
@@ -381,6 +419,8 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
           $(".add-question-section").before(html)
 
           const newQuestionItem = $(`.editable-question-item[data-question-index="${newIndex}"]`)
+          newQuestionItem.find(".question-type-input").closest(".col-12.col-md-4").hide()
+
           QuestionEditor.updateOptionsSection("multiple_choice", newIndex)
 
           // Automatically enter edit mode for the new question
@@ -406,40 +446,36 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       const metadata = question.metadata || {}
       const points = metadata.points || 10
       const blooms = metadata.blooms_level || ""
+      const isMandatory = question.is_mandatory || 0
 
       const bloomsLevels = [
-        "",
-        "blooms_remember",
-        "blooms_understand",
-        "blooms_apply",
-        "blooms_analyze",
-        "blooms_evaluate",
-        "blooms_create",
+        { value: "", key: "" },
+        { value: "Remembering", key: "blooms_remembering" },
+        { value: "Understanding", key: "blooms_understanding" },
+        { value: "Applying", key: "blooms_applying" },
+        { value: "Analyzing", key: "blooms_analyzing" },
+        { value: "Evaluating", key: "blooms_evaluating" },
       ]
 
       // Get language strings for Bloom's levels
       const bloomsPromises = bloomsLevels.map((level) => {
-        if (level === "") return Promise.resolve("-")
-        return Str.get_string(level, "local_trustgrade").catch(() => level.replace("blooms_", ""))
+        if (level.key === "") return Promise.resolve("-")
+        return Str.get_string(level.key, "local_trustgrade").catch(() => level.value)
       })
 
       return Promise.all(bloomsPromises).then((bloomsLabels) => {
         const bloomsOptions = bloomsLevels.map((level, i) => ({
-          value:
-            level === ""
-              ? ""
-              : level.replace("blooms_", "").charAt(0).toUpperCase() + level.replace("blooms_", "").slice(1),
+          value: level.value,
           label: bloomsLabels[i],
-          selected:
-            blooms ===
-            (level === ""
-              ? ""
-              : level.replace("blooms_", "").charAt(0).toUpperCase() + level.replace("blooms_", "").slice(1)),
+          selected: blooms === level.value,
         }))
 
         const options = []
         for (let i = 0; i < 4; i++) {
-          const opt = question.options[i] || { text: "", is_correct: i === 0, explanation: "" }
+          const opt =
+            question.options && question.options[i]
+              ? question.options[i]
+              : { text: "", is_correct: i === 0, explanation: "" }
           options.push({
             index: i,
             text: opt.text,
@@ -460,8 +496,49 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
           isTrueFalse: type === "true_false",
           isShortAnswer: type === "short_answer",
           options: options,
+          isMandatory: isMandatory,
         }
       })
+    },
+
+    showInlineError: (questionItem, message) => {
+      let $validationAlert = questionItem.find(".question-edit-mode .validation-alert")
+
+      // If not found in edit mode, try finding it anywhere in the question item
+      if ($validationAlert.length === 0) {
+        $validationAlert = questionItem.find(".validation-alert")
+      }
+
+      console.log("[v0] showInlineError - Alert found:", $validationAlert.length, "Message:", message)
+
+      if ($validationAlert.length === 0) {
+        console.error("[v0] Validation alert element not found in question item")
+        // Fallback to notification
+        Notification.addNotification({ message: message, type: "error" })
+        return
+      }
+
+      const $validationMessage = $validationAlert.find(".validation-message")
+
+      if ($validationMessage.length === 0) {
+        console.error("[v0] Validation message element not found")
+        // Fallback to notification
+        Notification.addNotification({ message: message, type: "error" })
+        return
+      }
+
+      $validationMessage.text(message)
+      $validationAlert.removeClass("d-none")
+
+      console.log("[v0] Alert displayed, scrolling into view")
+
+      // Scroll to the alert
+      $validationAlert[0].scrollIntoView({ behavior: "smooth", block: "nearest" })
+
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        $validationAlert.addClass("d-none")
+      }, 5000)
     },
   }
 

@@ -56,8 +56,6 @@ class report_renderer extends \plugin_renderer_base {
         $table->head = [
                 get_string('defaultcoursestudent'),
                 get_string('quiz_score', 'local_trustgrade'),
-                get_string('completed_on', 'local_trustgrade'),
-                get_string('time_taken', 'local_trustgrade'),
                 get_string('final_grade', 'local_trustgrade'),
                 get_string('details', 'local_trustgrade')
         ];
@@ -83,7 +81,7 @@ class report_renderer extends \plugin_renderer_base {
                 // Student Name
                 $row->cells[] = fullname($session);
 
-                // Quiz Score
+                // Quiz Score with date/time info
                 $questions = (array) $session->questions_data;
                 $total_points = 0;
                 foreach ($questions as $question) {
@@ -91,15 +89,21 @@ class report_renderer extends \plugin_renderer_base {
                 }
                 $quiz_score = $session->final_score;
                 $percentage = $total_points > 0 ? round(($quiz_score / $total_points) * 100) : 0;
-                $row->cells[] = $quiz_score . '/' . $total_points . ' (' . $percentage . '%)';
-
-                // Completed Date
+                
                 $completed_date = $session->timecompleted ?: $session->timemodified;
-                $row->cells[] = userdate($completed_date, get_string('strftimedatetimeshort'));
-
-                // Time Taken
                 $time_taken = $completed_date - $session->timecreated;
-                $row->cells[] = $this->format_duration($time_taken);
+                
+                $score_html = html_writer::div($quiz_score . '/' . $total_points . ' (' . $percentage . '%)', 'font-weight-bold');
+                $score_html .= html_writer::div(
+                    html_writer::tag('small', userdate($completed_date, get_string('strftimedatetimeshort')), ['class' => 'text-muted']),
+                    'mt-1'
+                );
+                $score_html .= html_writer::div(
+                    html_writer::tag('small', get_string('time_taken', 'local_trustgrade') . ': ' . $this->format_duration($time_taken), ['class' => 'text-muted']),
+                    ''
+                );
+                
+                $row->cells[] = $score_html;
 
                 // Final Grade (manual grade input)
                 $current_grade = $this->get_current_assignment_grade($userid, $cmid);
@@ -339,14 +343,13 @@ class report_renderer extends \plugin_renderer_base {
         $table = new \html_table();
         $table->head = [
                 '#',
-                get_string('blooms_level', 'local_trustgrade'),
                 get_string('question', 'local_trustgrade'),
                 get_string('student_answer', 'local_trustgrade'),
                 get_string('correct_answer', 'local_trustgrade'),
                 get_string('points', 'local_trustgrade'),
                 get_string('result', 'local_trustgrade')
         ];
-        $table->attributes['class'] = 'table table-striped table-bordered';
+        $table->attributes['class'] = 'table table-striped table-bordered questions-detail-table';
 
         $questions = (array) $session->questions_data;
         $answers = (array) $session->answers_data;
@@ -376,15 +379,19 @@ class report_renderer extends \plugin_renderer_base {
 
             $row = new \html_table_row();
             $row->cells[] = chr(65 + $index);
-            $row->cells[] = html_writer::span($blooms_display, 'badge badge-primary');;
 
-            // Question cell with source badge
+            // Question cell with source badge, Bloom's level, and question text
+            $question_header = html_writer::div(
+                html_writer::span(
+                    $this->format_question_source($question->source ?? 'instructor'),
+                    'badge badge-' . (($question->source ?? 'instructor') === 'instructor' ? 'primary' : 'success')
+                ) . ' ' .
+                html_writer::span($blooms_display, 'badge badge-info'),
+                'mb-2'
+            );
+            
             $question_cell = html_writer::div(
-                    html_writer::span(
-                            $this->format_question_source($question->source ?? 'instructor'),
-                            'badge badge-' . (($question->source ?? 'instructor') === 'instructor' ? 'primary' : 'success') .
-                            ' mb-2'
-                    ) .
+                    $question_header .
                     html_writer::tag('div', format_text($this->get_question_text($question), FORMAT_HTML),
                             ['class' => 'question-text']) .
                     $this->render_question_options($question, $user_answer),
