@@ -10,7 +10,7 @@
 /* Reduced table width and improved layout */
 .grading-table {
   margin-top: 1rem;
-  max-width: 1200px;
+  max-width: 100%;
 }
 
 .grading-table th {
