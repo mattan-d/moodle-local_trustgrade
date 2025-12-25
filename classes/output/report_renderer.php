@@ -227,7 +227,7 @@ class report_renderer extends \plugin_renderer_base {
      * @return string HTML for grade input
      */
     protected function render_grade_input($userid, $current_grade, $cmid) {
-        $grade_value = $current_grade !== null ? number_format($current_grade, 2) : '';
+        $grade_value = ($current_grade !== null && $current_grade >= 0) ? number_format($current_grade, 2) : '';
 
         $html = html_writer::start_div('grade-input-container');
 
