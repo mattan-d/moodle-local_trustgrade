@@ -21,10 +21,6 @@
  * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-var define = window.define
-var M = window.M
-
 define(["jquery", "core/str"], ($, Str) => {
   var NavigationButtons = {
     init: function (cmid) {

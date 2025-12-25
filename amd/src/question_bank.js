@@ -22,9 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-var define = window.define
-var M = window.M
-
 define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, Notification) => {
   var QuestionBank = {
     init: function (cmid) {
