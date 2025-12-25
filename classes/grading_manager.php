@@ -362,8 +362,11 @@ class grading_manager {
         
         $result = [];
         foreach ($grades as $grade) {
-            // Store as associative array for JSON encoding
-            $result[(string)$grade->userid] = (float)$grade->grade;
+            if ($grade->grade >= 0) {
+                // Store as associative array for JSON encoding
+                $result[(string)$grade->userid] = (float)$grade->grade;
+            }
+            // If grade is < 0, don't include it in the result (will be empty/null)
         }
         
         return $result;
