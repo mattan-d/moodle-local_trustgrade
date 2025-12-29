@@ -173,30 +173,18 @@ class observer {
 
             $assignment_instructions = self::extract_assignment_instructions($assignment, $context);
 
-            // Generate questions based on submission using the configured count
-            $result = submission_processor::generate_submission_questions_with_count(
+            debugging('TrustGrade observer: Creating async task for question generation', DEBUG_DEVELOPER);
+            
+            async_task_manager::create_task(
+                $cm->id,
+                $submission_id,
+                $submission->userid,
                 $submission_content,
                 $assignment_instructions,
-                $questions_to_generate,
-                $cm->id,
-                $submission->userid
+                $questions_to_generate
             );
-
-            if ($result['success']) {
-                debugging('TrustGrade observer: Successfully generated questions, saving to database', DEBUG_DEVELOPER);
-                
-                // Save submission-based questions
-                submission_processor::save_submission_questions($submission_id, $cm->id, $result['questions']);
-
-                self::create_quiz_session_for_submission($cm->id, $submission_id, $submission->userid);
-
-                // Set session flag to redirect to quiz
-                self::set_quiz_redirect_flag($cm->id, $submission_id);
-                
-                debugging('TrustGrade observer: Successfully completed submission processing', DEBUG_DEVELOPER);
-            } else {
-                debugging('TrustGrade observer: Question generation failed - ' . ($result['message'] ?? 'Unknown error'), DEBUG_DEVELOPER);
-            }
+            
+            debugging('TrustGrade observer: Async task queued successfully', DEBUG_DEVELOPER);
 
         } catch (\Exception $e) {
             // Log error but don't break the submission process
@@ -266,30 +254,18 @@ class observer {
 
             $assignment_instructions = self::extract_assignment_instructions($assignment, $context);
 
-            // Generate questions based on submission using the configured count
-            $result = submission_processor::generate_submission_questions_with_count(
+            debugging('TrustGrade observer: Creating async task for question generation', DEBUG_DEVELOPER);
+            
+            async_task_manager::create_task(
+                $cm->id,
+                $submission_id,
+                $user_id,
                 $submission_content,
                 $assignment_instructions,
-                $questions_to_generate,
-                $cm->id,
-                $user_id
+                $questions_to_generate
             );
-
-            if ($result['success']) {
-                debugging('TrustGrade observer: Successfully generated questions, saving to database', DEBUG_DEVELOPER);
-                
-                // Save submission-based questions
-                submission_processor::save_submission_questions($submission_id, $cm->id, $result['questions']);
-
-                self::create_quiz_session_for_submission($cm->id, $submission_id, $user_id);
-
-                // Set session flag to redirect to quiz
-                self::set_quiz_redirect_flag($cm->id, $submission_id);
-                
-                debugging('TrustGrade observer: Successfully completed assessable submission processing', DEBUG_DEVELOPER);
-            } else {
-                debugging('TrustGrade observer: Question generation failed - ' . ($result['message'] ?? 'Unknown error'), DEBUG_DEVELOPER);
-            }
+            
+            debugging('TrustGrade observer: Async task queued successfully', DEBUG_DEVELOPER);
 
         } catch (\Exception $e) {
             // Log error but don't break the submission process

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Scheduled task definitions for the TrustGrade plugin.
+ * Message provider definitions for TrustGrade plugin.
  *
  * @package    local_trustgrade
  * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
@@ -24,23 +24,19 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$tasks = [
-    [
-        'classname' => 'local_trustgrade\task\cleanup_debug_cache',
-        'blocking' => 0,
-        'minute' => '0',
-        'hour' => '2',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*'
+$messageproviders = [
+    'quizready' => [
+        'capability' => 'local/trustgrade:takeaiquiz',
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED,
+        ],
     ],
-    [
-        'classname' => 'local_trustgrade\task\cleanup_quiz_sessions',
-        'blocking' => 0,
-        'minute' => '30',
-        'hour' => '3',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*'
-    ]
+    'quizfailed' => [
+        'capability' => 'local/trustgrade:takeaiquiz',
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED,
+        ],
+    ],
 ];

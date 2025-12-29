@@ -61,7 +61,24 @@ class async_task_manager {
         
         debugging('TrustGrade: Created async task ID ' . $task_id . ' for submission ' . $submission_id, DEBUG_DEVELOPER);
         
+        self::queue_adhoc_task($task_id);
+        
         return $task_id;
+    }
+
+    /**
+     * Queue an adhoc task to process a specific task
+     *
+     * @param int $task_id Task ID
+     */
+    private static function queue_adhoc_task($task_id) {
+        $task = new \local_trustgrade\task\process_async_tasks();
+        $task->set_custom_data([
+            'task_id' => $task_id
+        ]);
+        \core\task\manager::queue_adhoc_task($task);
+        
+        debugging('TrustGrade: Queued adhoc task for task ID ' . $task_id, DEBUG_DEVELOPER);
     }
 
     /**
@@ -90,7 +107,7 @@ class async_task_manager {
      *
      * @param object $task Task record
      */
-    private function process_task($task) {
+    public function process_task($task) {
         global $DB;
 
         try {
@@ -159,6 +176,24 @@ class async_task_manager {
                 $this->send_failure_notification($task);
             }
         }
+    }
+
+    /**
+     * Process a task by ID (called by adhoc task)
+     *
+     * @param int $task_id Task ID
+     */
+    public function process_task_by_id($task_id) {
+        global $DB;
+
+        $task = $DB->get_record('local_trustgd_async_tasks', ['id' => $task_id]);
+        
+        if (!$task) {
+            debugging('TrustGrade: Task ID ' . $task_id . ' not found', DEBUG_DEVELOPER);
+            return;
+        }
+
+        $this->process_task($task);
     }
 
     /**

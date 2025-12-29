@@ -208,17 +208,15 @@ $string['ai_disclosure_detail_timer'] = 'לכל שאלה בחידון יש הג�
 $string['ai_disclosure_detail_privacy'] = 'נתוני ההגשה שלך מעובדים בצורה מאובטחת ונמצאים בשימוש למטרות חינוכיות בלבד.';
 
 // Quiz interface.
-$string['ai_quiz_title'] = 'חידון שנוצר על‑ידי AI';
-$string['ai_quiz_report'] = 'דוח חידון AI';
-$string['quiz_ready_message'] = 'חידון AI שלך מוכן! חידון זה יעזור לך להרהר בהגשתך ולהעמיק את הלמידה.';
+$string['ai_quiz_title'] = 'חידון שנוצר על‑ידי AI';
+$string['ai_quiz_report'] = 'דוח חידון AI';
+$string['quiz_ready_message'] = 'חידון AI שלך מוכן! חידון זה יעזור לך להרהר בהגשתך ולהעמיק את הלמידה.';
+$string['quiz_ready_subject'] = 'חידון ה-AI שלך מוכן';
+$string['quiz_ready_message_html'] = 'חידון ה-AI שלך מוכן! לחץ <a href="{$a->quizurl}">כאן</a> כדי לגשת לחידון.';
+$string['quiz_generation_failed_subject'] = 'יצירת החידון נכשלה';
+$string['quiz_generation_failed_message'] = 'לא הצלחנו ליצור את החידון שלך. אנא פנה למרצה שלך.';
+$string['take_quiz'] = 'גש לחידון';
 $string['next'] = 'הבא';
-$string['next_question'] = 'שאלה הבאה →';
-$string['finish_quiz'] = 'סיים חידון';
-$string['submit_final_answers'] = 'שלח תשובות סופיות';
-$string['seconds'] = 'שניות';
-$string['text'] = 'טקסט';
-$string['entertext'] = 'הכנס טקסט';
-$string['enter_answer_placeholder'] = 'הכנס את תשובתך כאן…';
 
 // Quiz progress and navigation.
 $string['progress_auto_saved'] = 'ההתקדמות נשמרת אוטומטית. רענון הדף יחזור מהשאלה הזו.';

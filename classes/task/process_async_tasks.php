@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Scheduled task for processing async question generation tasks.
+ * Adhoc task for processing a single async question generation task.
  *
  * @package    local_trustgrade
  * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
@@ -27,24 +27,22 @@ namespace local_trustgrade\task;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Process pending async question generation tasks
+ * Process a single async question generation task
  */
-class process_async_tasks extends \core\task\scheduled_task {
-
-    /**
-     * Get task name
-     *
-     * @return string
-     */
-    public function get_name() {
-        return get_string('task_process_async_tasks', 'local_trustgrade');
-    }
+class process_async_tasks extends \core\task\adhoc_task {
 
     /**
      * Execute the task
      */
     public function execute() {
+        $data = $this->get_custom_data();
+        
+        if (!isset($data->task_id)) {
+            debugging('TrustGrade: Adhoc task missing task_id', DEBUG_DEVELOPER);
+            return;
+        }
+
         $manager = new \local_trustgrade\async_task_manager();
-        $manager->process_pending_tasks();
+        $manager->process_task_by_id($data->task_id);
     }
 }
