@@ -223,14 +223,14 @@ class async_task_manager {
         $message->fullmessage = get_string('quiz_ready_message', 'local_trustgrade');
         $message->fullmessageformat = FORMAT_PLAIN;
         $message->fullmessagehtml = get_string('quiz_ready_message_html', 'local_trustgrade', [
-            'quizurl' => new \moodle_url('/local/trustgrade/quiz.php', [
+            'quizurl' => new \moodle_url('/local/trustgrade/quiz_interface.php', [
                 'cmid' => $task->cmid,
                 'submissionid' => $task->submission_id
             ])
         ]);
         $message->smallmessage = get_string('quiz_ready_subject', 'local_trustgrade');
         $message->notification = 1;
-        $message->contexturl = new \moodle_url('/local/trustgrade/quiz.php', [
+        $message->contexturl = new \moodle_url('/local/trustgrade/quiz_interface.php', [
             'cmid' => $task->cmid,
             'submissionid' => $task->submission_id
         ]);
@@ -363,7 +363,7 @@ class async_task_manager {
                         'submission_id' => $session->submissionid,
                         'status' => 'ready',
                         'assignment_name' => $cm->name,
-                        'quiz_url' => (new \moodle_url('/local/trustgrade/quiz.php', [
+                        'quiz_url' => (new \moodle_url('/local/trustgrade/quiz_interface.php', [
                             'cmid' => $session->cmid,
                             'submissionid' => $session->submissionid
                         ]))->out(false),
