@@ -22,11 +22,39 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+const define = window.define // Declare the define variable
+const M = window.M // Declare the M variable
+
 define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, Notification) => {
   var QuestionBank = {
+    strings: {},
+
     init: function (cmid) {
       this.cmid = cmid || 0
-      this.bindEvents()
+      this.loadStrings().then(() => {
+        this.bindEvents()
+      })
+    },
+
+    loadStrings: function () {
+      const stringKeys = [
+        { key: "mandatory_question", component: "local_trustgrade" },
+        { key: "make_mandatory", component: "local_trustgrade" },
+        { key: "remove_mandatory", component: "local_trustgrade" },
+        { key: "question_marked_mandatory", component: "local_trustgrade" },
+        { key: "question_unmarked_mandatory", component: "local_trustgrade" },
+        { key: "error_updating_question", component: "local_trustgrade" },
+      ]
+
+      return Str.get_strings(stringKeys).then((strings) => {
+        this.strings.mandatory_question = strings[0]
+        this.strings.make_mandatory = strings[1]
+        this.strings.remove_mandatory = strings[2]
+        this.strings.question_marked_mandatory = strings[3]
+        this.strings.question_unmarked_mandatory = strings[4]
+        this.strings.error_updating_question = strings[5]
+        return strings
+      })
     },
 
     bindEvents: function () {
@@ -35,12 +63,12 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
         this.generateQuestions()
       })
 
-      $(document).on("click", ".toggle-mandatory-btn", function (e) {
+      $(document).on("click", ".toggle-mandatory-btn", (e) => {
         e.preventDefault()
-        const $btn = $(this)
+        const $btn = $(e.currentTarget)
         const $questionItem = $btn.closest(".editable-question-item")
-        const questionId = $questionItem.data("question-id")
-        const currentMandatory = $btn.data("mandatory") === 1
+        const questionId = Number.parseInt($btn.data("question-id"))
+        const currentMandatory = Number.parseInt($btn.data("mandatory")) === 1
         const newMandatory = !currentMandatory
 
         QuestionBank.toggleMandatoryQuestion(questionId, newMandatory, $questionItem)
@@ -93,7 +121,7 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
         })
     },
 
-    toggleMandatoryQuestion: (questionId, isMandatory, $questionItem) => {
+    toggleMandatoryQuestion: function (questionId, isMandatory, $questionItem) {
       const $btn = $questionItem.find(".toggle-mandatory-btn")
 
       // Disable button during request
@@ -112,36 +140,35 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
       promises[0]
         .then((response) => {
           if (response.success) {
-            // Update button and badge
-            const $displayMode = $questionItem.find(".question-display-mode")
+            const $mandatoryControls = $questionItem.find(".mandatory-controls")
 
             if (response.is_mandatory) {
               // Show badge and "Remove" button
-              $displayMode
-                .find(".d-flex.align-items-center.gap-2")
-                .html(
-                  '<span class="badge bg-danger">' +
-                    M.util.get_string("mandatory_question", "local_trustgrade") +
-                    "</span>" +
-                    '<button type="button" class="btn btn-sm btn-outline-secondary toggle-mandatory-btn" data-mandatory="1" title="' +
-                    M.util.get_string("remove_mandatory", "local_trustgrade") +
-                    '">' +
-                    '<i class="fa fa-times-circle" aria-hidden="true"></i> ' +
-                    M.util.get_string("remove_mandatory", "local_trustgrade") +
-                    "</button>",
-                )
+              $mandatoryControls.html(
+                '<span class="badge bg-danger mandatory-badge">' +
+                  this.strings.mandatory_question +
+                  "</span>" +
+                  '<button type="button" class="btn btn-sm btn-outline-secondary toggle-mandatory-btn" data-mandatory="1" data-question-id="' +
+                  questionId +
+                  '" title="' +
+                  this.strings.remove_mandatory +
+                  '">' +
+                  '<i class="fa fa-times-circle" aria-hidden="true"></i> ' +
+                  this.strings.remove_mandatory +
+                  "</button>",
+              )
             } else {
               // Show "Make mandatory" button only
-              $displayMode
-                .find(".d-flex.align-items-center.gap-2")
-                .html(
-                  '<button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" title="' +
-                    M.util.get_string("make_mandatory", "local_trustgrade") +
-                    '">' +
-                    '<i class="fa fa-star" aria-hidden="true"></i> ' +
-                    M.util.get_string("make_mandatory", "local_trustgrade") +
-                    "</button>",
-                )
+              $mandatoryControls.html(
+                '<button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" data-question-id="' +
+                  questionId +
+                  '" title="' +
+                  this.strings.make_mandatory +
+                  '">' +
+                  '<i class="fa fa-star" aria-hidden="true"></i> ' +
+                  this.strings.make_mandatory +
+                  "</button>",
+              )
             }
 
             // Also update the checkbox in edit mode
@@ -149,13 +176,13 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
 
             Notification.addNotification({
               message: response.is_mandatory
-                ? M.util.get_string("question_marked_mandatory", "local_trustgrade")
-                : M.util.get_string("question_unmarked_mandatory", "local_trustgrade"),
+                ? this.strings.question_marked_mandatory
+                : this.strings.question_unmarked_mandatory,
               type: "success",
             })
           } else {
             Notification.addNotification({
-              message: response.error || M.util.get_string("error_updating_question", "local_trustgrade"),
+              message: response.error || this.strings.error_updating_question,
               type: "error",
             })
           }
@@ -164,7 +191,7 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
         })
         .catch((error) => {
           Notification.addNotification({
-            message: M.util.get_string("error_updating_question", "local_trustgrade"),
+            message: this.strings.error_updating_question,
             type: "error",
           })
           $btn.prop("disabled", false)
