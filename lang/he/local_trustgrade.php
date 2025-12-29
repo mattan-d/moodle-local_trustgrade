@@ -228,7 +228,7 @@ $string['enter_answer_placeholder'] = 'הכנס את תשובתך כאן…';
 // Quiz progress and navigation.
 $string['progress_auto_saved'] = 'ההתקדמות נשמרת אוטומטית. רענון הדף יחזור מהשאלה הזו.';
 $string['provide_answer_warning'] = 'אנא ספק תשובה לפני המשך. זכור: לא תוכל לחזור לשאלה זו מאוחר יותר.';
-$string['quiz_started_notice'] = 'الחידון התחיל. זכור: לא תוכל לחזור לשאלות קודמות או להתחיל מחדש.';
+$string['quiz_started_notice'] = 'חידון התחיל. זכור: לא תוכל לחזור לשאלות קודמות או להתחיל מחדש.';
 $string['failed_start_session'] = 'נכשל התחלת מפגש החידון';
 $string['quiz_progress_saved'] = 'ההתקדמות בחידון נשמרה אוטומטית. החידון ישוב למקום שבו הפסקת כשתחזור.';
 $string['quiz_progress_complete'] = '{$a}% הושלם';
@@ -236,7 +236,7 @@ $string['question_x_of_y'] = 'שאלה {$a->current} מתוך {$a->total}';
 $string['time_remaining'] = 'זמן שנותר: {$a}';
 
 // Quiz completion.
-$string['quiz_completed_header'] = 'الחידון הושלם';
+$string['quiz_completed_header'] = 'חידון הושלם';
 $string['quiz_completed_message'] = 'ההערכה הרשמית שלך הוגשה בהצלחה ולא ניתן לחזור עליה.';
 $string['your_answer'] = 'התשובה שלך: {$a}';
 $string['correct_answer_was'] = 'התשובה הנכונה היתה: {$a}';
