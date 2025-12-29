@@ -56,5 +56,39 @@ function xmldb_local_trustgrade_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025120402, 'local', 'trustgrade');
     }
 
+    if ($oldversion < 2025122901) {
+        $table = new xmldb_table('local_trustgd_async_tasks');
+        
+        if (!$dbman->table_exists($table)) {
+            $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+            $table->add_field('cmid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('submission_id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('userid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('status', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'pending');
+            $table->add_field('submission_content', XMLDB_TYPE_TEXT, null, null, XMLDB_NOTNULL, null, null);
+            $table->add_field('assignment_instructions', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('questions_count', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, '3');
+            $table->add_field('result_data', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('error_message', XMLDB_TYPE_TEXT, null, null, null, null, null);
+            $table->add_field('attempts', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0');
+            $table->add_field('timecreated', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timemodified', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, null);
+            $table->add_field('timecompleted', XMLDB_TYPE_INTEGER, '10', null, null, null, null);
+
+            $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+            $table->add_key('cmid', XMLDB_KEY_FOREIGN, ['cmid'], 'course_modules', ['id']);
+            $table->add_key('submission_id', XMLDB_KEY_FOREIGN, ['submission_id'], 'assign_submission', ['id']);
+            $table->add_key('userid', XMLDB_KEY_FOREIGN, ['userid'], 'user', ['id']);
+
+            $table->add_index('status', XMLDB_INDEX_NOTUNIQUE, ['status']);
+            $table->add_index('cmid_submission', XMLDB_INDEX_NOTUNIQUE, ['cmid', 'submission_id']);
+            $table->add_index('timecreated', XMLDB_INDEX_NOTUNIQUE, ['timecreated']);
+
+            $dbman->create_table($table);
+        }
+
+        upgrade_plugin_savepoint(true, 2025122901, 'local', 'trustgrade');
+    }
+
     return true;
 }

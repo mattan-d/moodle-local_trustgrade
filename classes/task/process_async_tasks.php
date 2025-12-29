@@ -15,41 +15,36 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Scheduled task definitions for the TrustGrade plugin.
+ * Scheduled task for processing async question generation tasks.
  *
  * @package    local_trustgrade
  * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace local_trustgrade\task;
+
 defined('MOODLE_INTERNAL') || die();
 
-$tasks = [
-    [
-        'classname' => 'local_trustgrade\task\cleanup_debug_cache',
-        'blocking' => 0,
-        'minute' => '0',
-        'hour' => '2',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*'
-    ],
-    [
-        'classname' => 'local_trustgrade\task\cleanup_quiz_sessions',
-        'blocking' => 0,
-        'minute' => '30',
-        'hour' => '3',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*'
-    ],
-    [
-        'classname' => 'local_trustgrade\task\process_async_tasks',
-        'blocking' => 0,
-        'minute' => '*',
-        'hour' => '*',
-        'day' => '*',
-        'dayofweek' => '*',
-        'month' => '*'
-    ]
-];
+/**
+ * Process pending async question generation tasks
+ */
+class process_async_tasks extends \core\task\scheduled_task {
+
+    /**
+     * Get task name
+     *
+     * @return string
+     */
+    public function get_name() {
+        return get_string('task_process_async_tasks', 'local_trustgrade');
+    }
+
+    /**
+     * Execute the task
+     */
+    public function execute() {
+        $manager = new \local_trustgrade\async_task_manager();
+        $manager->process_pending_tasks();
+    }
+}

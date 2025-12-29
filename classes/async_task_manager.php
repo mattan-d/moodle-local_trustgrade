@@ -1,0 +1,271 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Async task manager for handling question generation in background.
+ *
+ * @package    local_trustgrade
+ * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace local_trustgrade;
+
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Manager class for async question generation tasks
+ */
+class async_task_manager {
+
+    /**
+     * Create a new async task
+     *
+     * @param int $cmid Course module ID
+     * @param int $submission_id Submission ID
+     * @param int $userid User ID
+     * @param array $submission_content Submission content
+     * @param array $assignment_instructions Assignment instructions
+     * @param int $questions_count Number of questions to generate
+     * @return int Task ID
+     */
+    public static function create_task($cmid, $submission_id, $userid, $submission_content, $assignment_instructions, $questions_count) {
+        global $DB;
+
+        $task = new \stdClass();
+        $task->cmid = $cmid;
+        $task->submission_id = $submission_id;
+        $task->userid = $userid;
+        $task->status = 'pending';
+        $task->submission_content = json_encode($submission_content);
+        $task->assignment_instructions = json_encode($assignment_instructions);
+        $task->questions_count = $questions_count;
+        $task->attempts = 0;
+        $task->timecreated = time();
+        $task->timemodified = time();
+
+        $task_id = $DB->insert_record('local_trustgd_async_tasks', $task);
+        
+        debugging('TrustGrade: Created async task ID ' . $task_id . ' for submission ' . $submission_id, DEBUG_DEVELOPER);
+        
+        return $task_id;
+    }
+
+    /**
+     * Process pending tasks (called by scheduled task)
+     *
+     * @param int $limit Maximum number of tasks to process
+     */
+    public function process_pending_tasks($limit = 5) {
+        global $DB;
+
+        $tasks = $DB->get_records('local_trustgd_async_tasks', 
+            ['status' => 'pending'], 
+            'timecreated ASC', 
+            '*', 
+            0, 
+            $limit
+        );
+
+        foreach ($tasks as $task) {
+            $this->process_task($task);
+        }
+    }
+
+    /**
+     * Process a single task
+     *
+     * @param object $task Task record
+     */
+    private function process_task($task) {
+        global $DB;
+
+        try {
+            debugging('TrustGrade: Processing async task ID ' . $task->id, DEBUG_DEVELOPER);
+
+            // Update status to processing
+            $task->status = 'processing';
+            $task->attempts++;
+            $task->timemodified = time();
+            $DB->update_record('local_trustgd_async_tasks', $task);
+
+            // Decode content
+            $submission_content = json_decode($task->submission_content, true);
+            $assignment_instructions = json_decode($task->assignment_instructions, true);
+
+            // Generate questions
+            $result = submission_processor::generate_submission_questions_with_count(
+                $submission_content,
+                $assignment_instructions,
+                $task->questions_count,
+                $task->cmid,
+                $task->userid
+            );
+
+            if ($result['success']) {
+                debugging('TrustGrade: Successfully generated questions for task ' . $task->id, DEBUG_DEVELOPER);
+
+                // Save questions
+                submission_processor::save_submission_questions(
+                    $task->submission_id,
+                    $task->cmid,
+                    $result['questions']
+                );
+
+                // Create quiz session
+                quiz_session::create_session_on_submission_update(
+                    $task->cmid,
+                    $task->submission_id,
+                    $task->userid
+                );
+
+                // Update task status
+                $task->status = 'completed';
+                $task->result_data = json_encode($result);
+                $task->timecompleted = time();
+                $task->timemodified = time();
+                $DB->update_record('local_trustgd_async_tasks', $task);
+
+                // Send notification to user
+                $this->send_completion_notification($task);
+
+                debugging('TrustGrade: Task ' . $task->id . ' completed successfully', DEBUG_DEVELOPER);
+            } else {
+                throw new \Exception($result['error'] ?? 'Unknown error');
+            }
+
+        } catch (\Exception $e) {
+            debugging('TrustGrade: Task ' . $task->id . ' failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
+
+            $task->status = ($task->attempts >= 3) ? 'failed' : 'pending';
+            $task->error_message = $e->getMessage();
+            $task->timemodified = time();
+            $DB->update_record('local_trustgd_async_tasks', $task);
+
+            if ($task->status === 'failed') {
+                $this->send_failure_notification($task);
+            }
+        }
+    }
+
+    /**
+     * Send notification to user when task is completed
+     *
+     * @param object $task Task record
+     */
+    private function send_completion_notification($task) {
+        global $DB;
+
+        $user = $DB->get_record('user', ['id' => $task->userid]);
+        if (!$user) {
+            return;
+        }
+
+        $cm = get_coursemodule_from_id('assign', $task->cmid);
+        if (!$cm) {
+            return;
+        }
+
+        $message = new \core\message\message();
+        $message->component = 'local_trustgrade';
+        $message->name = 'quizready';
+        $message->userfrom = \core_user::get_noreply_user();
+        $message->userto = $user;
+        $message->subject = get_string('quiz_ready_subject', 'local_trustgrade');
+        $message->fullmessage = get_string('quiz_ready_message', 'local_trustgrade');
+        $message->fullmessageformat = FORMAT_PLAIN;
+        $message->fullmessagehtml = get_string('quiz_ready_message_html', 'local_trustgrade', [
+            'quizurl' => new \moodle_url('/local/trustgrade/quiz.php', [
+                'cmid' => $task->cmid,
+                'submissionid' => $task->submission_id
+            ])
+        ]);
+        $message->smallmessage = get_string('quiz_ready_subject', 'local_trustgrade');
+        $message->notification = 1;
+        $message->contexturl = new \moodle_url('/local/trustgrade/quiz.php', [
+            'cmid' => $task->cmid,
+            'submissionid' => $task->submission_id
+        ]);
+        $message->contexturlname = get_string('take_quiz', 'local_trustgrade');
+
+        message_send($message);
+    }
+
+    /**
+     * Send notification to user when task fails
+     *
+     * @param object $task Task record
+     */
+    private function send_failure_notification($task) {
+        global $DB;
+
+        $user = $DB->get_record('user', ['id' => $task->userid]);
+        if (!$user) {
+            return;
+        }
+
+        $message = new \core\message\message();
+        $message->component = 'local_trustgrade';
+        $message->name = 'quizfailed';
+        $message->userfrom = \core_user::get_noreply_user();
+        $message->userto = $user;
+        $message->subject = get_string('quiz_generation_failed_subject', 'local_trustgrade');
+        $message->fullmessage = get_string('quiz_generation_failed_message', 'local_trustgrade');
+        $message->fullmessageformat = FORMAT_PLAIN;
+        $message->fullmessagehtml = get_string('quiz_generation_failed_message', 'local_trustgrade');
+        $message->smallmessage = get_string('quiz_generation_failed_subject', 'local_trustgrade');
+        $message->notification = 1;
+
+        message_send($message);
+    }
+
+    /**
+     * Get task status
+     *
+     * @param int $cmid Course module ID
+     * @param int $submission_id Submission ID
+     * @param int $userid User ID
+     * @return object|null Task status or null if not found
+     */
+    public static function get_task_status($cmid, $submission_id, $userid) {
+        global $DB;
+
+        $task = $DB->get_record('local_trustgd_async_tasks', [
+            'cmid' => $cmid,
+            'submission_id' => $submission_id,
+            'userid' => $userid
+        ], '*', IGNORE_MULTIPLE);
+
+        return $task;
+    }
+
+    /**
+     * Check if there's a pending or processing task
+     *
+     * @param int $cmid Course module ID
+     * @param int $submission_id Submission ID
+     * @param int $userid User ID
+     * @return bool True if task is in progress
+     */
+    public static function has_pending_task($cmid, $submission_id, $userid) {
+        global $DB;
+
+        return $DB->record_exists_select('local_trustgd_async_tasks',
+            'cmid = ? AND submission_id = ? AND userid = ? AND status IN (?, ?)',
+            [$cmid, $submission_id, $userid, 'pending', 'processing']
+        );
+    }
+}
