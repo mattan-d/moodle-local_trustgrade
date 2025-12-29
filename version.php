@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_trustgrade';
-$plugin->version = 2025123000; // Incremented version for async processing feature
+$plugin->version = 2025123001; // Incremented version for toggle_mandatory_question function
 $plugin->requires = 2022112800; // Moodle 4.1
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.4.0'; // Updated release version for async processing
+$plugin->release = '1.4.1'; // Updated release version for mandatory question toggle
