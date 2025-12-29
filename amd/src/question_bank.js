@@ -22,9 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-const define = window.define // Declare the define variable
-const M = window.M // Declare the M variable
-
 define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, Notification) => {
   var QuestionBank = {
     strings: {},
