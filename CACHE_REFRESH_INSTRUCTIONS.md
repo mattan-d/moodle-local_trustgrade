@@ -17,9 +17,9 @@ You need to refresh the Moodle cache after:
 
 ### Method 2: CLI Command
 Run this command from your Moodle root directory:
-```bash
+\`\`\`bash
 php admin/cli/purge_caches.php
-```
+\`\`\`
 
 ### Method 3: Upgrade Plugin
 1. Navigate to: **Site administration → Notifications**
@@ -29,9 +29,9 @@ php admin/cli/purge_caches.php
 ## Troubleshooting External Functions
 
 If you see an error like:
-```
+\`\`\`
 "לא ניתן למצוא את רשומת הנתון בטבלה external_functions במסד הנתונים"
-```
+\`\`\`
 
 This means the external function is not registered. Follow these steps:
 

@@ -60,12 +60,27 @@ class question_bank_renderer {
       $html = '';
 
       $qid = isset($question['id']) ? intval($question['id']) : 0;
+      $is_mandatory = isset($question['is_mandatory']) ? intval($question['is_mandatory']) : 0;
+      $db_id = isset($question['db_id']) ? intval($question['db_id']) : (isset($question['id']) ? intval($question['id']) : 0);
+      
       $html .= '<div class="editable-question-item card mb-4" data-question-index="' . $index . '" data-cmid="' . $cmid . '" data-question-id="' . $qid . '">';
 
       // Header
       $html .= '<div class="card-header d-flex align-items-center justify-content-between">';
       $html .= '<h5 class="mb-0">' . get_string('question', 'local_trustgrade') . ' ' . ($index + 1) . '</h5>';
-      $html .= '<div class="question-controls d-flex gap-2">';
+      $html .= '<div class="question-controls d-flex gap-2 align-items-center">';
+      
+      if ($is_mandatory) {
+          $html .= '<span class="badge bg-danger mandatory-badge-header">' . get_string('mandatory_question', 'local_trustgrade') . '</span>';
+          $html .= '<button type="button" class="btn btn-sm btn-outline-secondary toggle-mandatory-btn" data-mandatory="1" data-question-id="' . $db_id . '" title="' . get_string('remove_mandatory', 'local_trustgrade') . '">';
+          $html .= '<i class="fa fa-times-circle" aria-hidden="true"></i>';
+          $html .= '</button>';
+      } else {
+          $html .= '<button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" data-question-id="' . $db_id . '" title="' . get_string('make_mandatory', 'local_trustgrade') . '">';
+          $html .= '<i class="fa fa-star" aria-hidden="true"></i>';
+          $html .= '</button>';
+      }
+      
       $html .= '<button type="button" class="btn btn-sm btn-outline-secondary edit-question-btn">';
       $html .= '<i class="fa fa-edit" aria-hidden="true"></i> ' . get_string('edit', 'local_trustgrade');
       $html .= '</button>';
@@ -108,8 +123,6 @@ class question_bank_renderer {
       $metadata = isset($question['metadata']) && is_array($question['metadata']) ? $question['metadata'] : [];
       $points = isset($metadata['points']) ? intval($metadata['points']) : null;
       $blooms = isset($metadata['blooms_level']) ? $metadata['blooms_level'] : null;
-      $is_mandatory = isset($question['is_mandatory']) ? intval($question['is_mandatory']) : 0;
-      $db_id = isset($question['db_id']) ? intval($question['db_id']) : (isset($question['id']) ? intval($question['id']) : 0);
 
       $html .= '<div class="question-content">';
       $html .= '<p class="mb-1"><strong>' . get_string('type', 'local_trustgrade') . ':</strong> ' . htmlspecialchars(ucfirst(str_replace('_', ' ', $type))) . '</p>';
@@ -125,19 +138,6 @@ class question_bank_renderer {
       if (!empty($metaBits)) {
           $html .= '<p class="text-muted mb-2">' . implode(' | ', $metaBits) . '</p>';
       }
-
-      $html .= '<div class="d-flex align-items-center gap-2 mb-2 mandatory-controls" data-question-dbid="' . $db_id . '">';
-      if ($is_mandatory) {
-          $html .= '<span class="badge bg-danger mandatory-badge">' . get_string('mandatory_question', 'local_trustgrade') . '</span>';
-          $html .= '<button type="button" class="btn btn-sm btn-outline-secondary toggle-mandatory-btn" data-mandatory="1" data-question-id="' . $db_id . '" title="' . get_string('remove_mandatory', 'local_trustgrade') . '">';
-          $html .= '<i class="fa fa-times-circle" aria-hidden="true"></i> ' . get_string('remove_mandatory', 'local_trustgrade');
-          $html .= '</button>';
-      } else {
-          $html .= '<button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" data-question-id="' . $db_id . '" title="' . get_string('make_mandatory', 'local_trustgrade') . '">';
-          $html .= '<i class="fa fa-star" aria-hidden="true"></i> ' . get_string('make_mandatory', 'local_trustgrade');
-          $html .= '</button>';
-      }
-      $html .= '</div>';
 
       $html .= '<p><strong>' . get_string('question', 'local_trustgrade') . ':</strong> ' . htmlspecialchars($text) . '</p>';
 
