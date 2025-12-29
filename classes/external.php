@@ -33,6 +33,7 @@ require_once($CFG->dirroot . '/local/trustgrade/classes/question_editor.php');
 require_once($CFG->dirroot . '/local/trustgrade/classes/question_bank_renderer.php');
 require_once($CFG->dirroot . '/local/trustgrade/classes/quiz_settings.php');
 require_once($CFG->dirroot . '/local/trustgrade/classes/quiz_session.php');
+require_once($CFG->dirroot . '/local/trustgrade/classes/async_task_manager.php');
 require_once($CFG->libdir . '/externallib.php');
 
 class external extends \external_api {
@@ -692,6 +693,37 @@ class external extends \external_api {
          return ['success' => true];
      } else {
          return ['success' => false, 'error' => 'Failed to log violation'];
+     }
+ }
+
+ public static function get_pending_tasks_parameters() {
+     return new \external_function_parameters([]);
+ }
+
+ public static function get_pending_tasks_returns() {
+     return new \external_single_structure([
+             'success' => new \external_value(PARAM_BOOL, 'True if successful'),
+             'tasks' => new \external_value(PARAM_RAW, 'JSON encoded array of pending tasks', VALUE_OPTIONAL),
+             'error' => new \external_value(PARAM_TEXT, 'Error message', VALUE_OPTIONAL),
+         ]);
+     }
+
+ public static function get_pending_tasks() {
+     global $USER;
+     $context = \context_system::instance();
+     self::validate_context($context);
+     
+     try {
+         $tasks = async_task_manager::get_user_pending_tasks();
+         return [
+             'success' => true,
+             'tasks' => json_encode($tasks)
+         ];
+     } catch (\Exception $e) {
+         return [
+             'success' => false,
+             'error' => $e->getMessage()
+         ];
      }
  }
 }

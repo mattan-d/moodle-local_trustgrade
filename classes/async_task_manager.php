@@ -303,4 +303,39 @@ class async_task_manager {
             [$cmid, $submission_id, $userid, 'pending', 'processing']
         );
     }
+
+    /**
+     * Get pending tasks for current user
+     *
+     * @return array Array of pending tasks
+     */
+    public static function get_user_pending_tasks() {
+        global $DB, $USER;
+
+        $tasks = $DB->get_records_select('local_trustgd_async_tasks',
+            'userid = ? AND status IN (?, ?)',
+            [$USER->id, 'pending', 'processing'],
+            'timecreated DESC'
+        );
+
+        $result = [];
+        foreach ($tasks as $task) {
+            $cm = get_coursemodule_from_id('assign', $task->cmid);
+            if ($cm) {
+                $result[] = [
+                    'id' => $task->id,
+                    'cmid' => $task->cmid,
+                    'submission_id' => $task->submission_id,
+                    'status' => $task->status,
+                    'assignment_name' => $cm->name,
+                    'quiz_url' => (new \moodle_url('/local/trustgrade/quiz.php', [
+                        'cmid' => $task->cmid,
+                        'submissionid' => $task->submission_id
+                    ]))->out(false)
+                ];
+            }
+        }
+
+        return $result;
+    }
 }

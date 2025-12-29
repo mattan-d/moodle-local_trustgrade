@@ -194,7 +194,7 @@ $string['disclosure_settings'] = 'הגדרות גילוי לסטודנט';
 $string['disclosure_settings_desc'] = 'הגדר את אופן ההודעה לסטודנטים על פונקציות AI במשימות.';
 $string['show_disclosure'] = 'הצג הודעת גילוי AI';
 $string['show_disclosure_desc'] = 'הצג הודעת גילוי לסטודנטים לפני שליחת המשימה, שמודיעה על תכונת חידון מבוססת AI.';
-$string['custom_disclosure_message'] = 'הודעת גילוי מותאמת';
+$string['custom_disclosure_message'] = 'הודעה גילוי מותאמת';
 $string['custom_disclosure_message_desc'] = 'הודעה מותאמת להצגה במקום ההודעה המוגדרת. השאר ריקה לשימוש בהודעת ברירת מחדל.';
 
 // AI disclosure messages.
@@ -529,5 +529,14 @@ $string['return_to_assignment'] = 'חזור למשימה';
 $string['defaultcoursestudent'] = 'סטודנט';
 $string['mins_secs'] = '{$a->minutes}ד {$a->seconds}ש';
 $string['secs_only'] = '{$a}ש';
+
+$string['cachedef_quiz_redirect'] = 'שומר כתובות URL להפניה לחידון לניהול מפגש זמני';
+$string['nopermission'] = 'אין לך הרשאה לגשת לדף זה';
+
+// Async task indicator strings
+$string['quiz_preparing'] = 'החידון שלך בהכנה';
+$string['quiz_preparing_message'] = 'אנחנו יוצרים שאלות מותאמות אישית עבור {$a}. תקבל הודעה כשהחידון יהיה מוכן.';
+$string['quiz_ready_click_to_start'] = 'החידון מוכן - לחץ להתחלה';
+$string['quiz_ready_assignment'] = 'החידון שלך עבור {$a} מוכן!';
 
 ?>
