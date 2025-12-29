@@ -22,6 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+const define = window.define // Declare the define variable
+const M = window.M // Declare the M variable
+
 define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, Notification) => {
   var QuestionBank = {
     init: function (cmid) {
@@ -33,6 +36,17 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
       // Generate new questions button
       $("#generate-new-questions").on("click", () => {
         this.generateQuestions()
+      })
+
+      $(document).on("click", ".toggle-mandatory-btn", function (e) {
+        e.preventDefault()
+        const $btn = $(this)
+        const $questionItem = $btn.closest(".editable-question-item")
+        const questionId = $questionItem.data("question-id")
+        const currentMandatory = $btn.data("mandatory") === 1
+        const newMandatory = !currentMandatory
+
+        QuestionBank.toggleMandatoryQuestion(questionId, newMandatory, $questionItem)
       })
     },
 
@@ -79,6 +93,84 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
             message: M.util.get_string("error_generating_questions", "local_trustgrade"),
             type: "error",
           })
+        })
+    },
+
+    toggleMandatoryQuestion: (questionId, isMandatory, $questionItem) => {
+      const $btn = $questionItem.find(".toggle-mandatory-btn")
+
+      // Disable button during request
+      $btn.prop("disabled", true)
+
+      var promises = Ajax.call([
+        {
+          methodname: "local_trustgrade_toggle_mandatory_question",
+          args: {
+            questionid: questionId,
+            is_mandatory: isMandatory,
+          },
+        },
+      ])
+
+      promises[0]
+        .then((response) => {
+          if (response.success) {
+            // Update button and badge
+            const $displayMode = $questionItem.find(".question-display-mode")
+
+            if (response.is_mandatory) {
+              // Show badge and "Remove" button
+              $displayMode
+                .find(".d-flex.align-items-center.gap-2")
+                .html(
+                  '<span class="badge bg-danger">' +
+                    M.util.get_string("mandatory_question", "local_trustgrade") +
+                    "</span>" +
+                    '<button type="button" class="btn btn-sm btn-outline-secondary toggle-mandatory-btn" data-mandatory="1" title="' +
+                    M.util.get_string("remove_mandatory", "local_trustgrade") +
+                    '">' +
+                    '<i class="fa fa-times-circle" aria-hidden="true"></i> ' +
+                    M.util.get_string("remove_mandatory", "local_trustgrade") +
+                    "</button>",
+                )
+            } else {
+              // Show "Make mandatory" button only
+              $displayMode
+                .find(".d-flex.align-items-center.gap-2")
+                .html(
+                  '<button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" title="' +
+                    M.util.get_string("make_mandatory", "local_trustgrade") +
+                    '">' +
+                    '<i class="fa fa-star" aria-hidden="true"></i> ' +
+                    M.util.get_string("make_mandatory", "local_trustgrade") +
+                    "</button>",
+                )
+            }
+
+            // Also update the checkbox in edit mode
+            $questionItem.find(".question-mandatory-input").prop("checked", response.is_mandatory)
+
+            Notification.addNotification({
+              message: response.is_mandatory
+                ? M.util.get_string("question_marked_mandatory", "local_trustgrade")
+                : M.util.get_string("question_unmarked_mandatory", "local_trustgrade"),
+              type: "success",
+            })
+          } else {
+            Notification.addNotification({
+              message: response.error || M.util.get_string("error_updating_question", "local_trustgrade"),
+              type: "error",
+            })
+          }
+
+          $btn.prop("disabled", false)
+        })
+        .catch((error) => {
+          Notification.addNotification({
+            message: M.util.get_string("error_updating_question", "local_trustgrade"),
+            type: "error",
+          })
+          $btn.prop("disabled", false)
         })
     },
   }

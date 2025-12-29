@@ -121,12 +121,22 @@ class question_bank_renderer {
           $bloomsLabel = get_string('blooms_level_label', 'local_trustgrade');
           $metaBits[] = $bloomsLabel . ': ' . htmlspecialchars($blooms);
       }
-      if ($is_mandatory) {
-          $metaBits[] = '<span class="badge bg-danger">' . get_string('mandatory_question', 'local_trustgrade') . '</span>';
-      }
       if (!empty($metaBits)) {
           $html .= '<p class="text-muted mb-2">' . implode(' | ', $metaBits) . '</p>';
       }
+
+      $html .= '<div class="d-flex align-items-center gap-2 mb-2">';
+      if ($is_mandatory) {
+          $html .= '<span class="badge bg-danger">' . get_string('mandatory_question', 'local_trustgrade') . '</span>';
+          $html .= '<button type="button" class="btn btn-sm btn-outline-secondary toggle-mandatory-btn" data-mandatory="1" title="' . get_string('remove_mandatory', 'local_trustgrade') . '">';
+          $html .= '<i class="fa fa-times-circle" aria-hidden="true"></i> ' . get_string('remove_mandatory', 'local_trustgrade');
+          $html .= '</button>';
+      } else {
+          $html .= '<button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" title="' . get_string('make_mandatory', 'local_trustgrade') . '">';
+          $html .= '<i class="fa fa-star" aria-hidden="true"></i> ' . get_string('make_mandatory', 'local_trustgrade');
+          $html .= '</button>';
+      }
+      $html .= '</div>';
 
       $html .= '<p><strong>' . get_string('question', 'local_trustgrade') . ':</strong> ' . htmlspecialchars($text) . '</p>';
 
