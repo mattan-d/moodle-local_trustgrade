@@ -217,6 +217,13 @@ $string['quiz_generation_failed_subject'] = 'יצירת החידון נכשלה'
 $string['quiz_generation_failed_message'] = 'לא הצלחנו ליצור את החידון שלך. אנא פנה למרצה שלך.';
 $string['take_quiz'] = 'גש לחידון';
 $string['next'] = 'הבא';
+$string['next_question'] = 'שאלה הבאה →';
+$string['finish_quiz'] = 'סיים חידון';
+$string['submit_final_answers'] = 'שלח תשובות סופיות';
+$string['seconds'] = 'שניות';
+$string['text'] = 'טקסט';
+$string['entertext'] = 'הכנס טקסט';
+$string['enter_answer_placeholder'] = 'הכנס את תשובתך כאן…';
 
 // Quiz progress and navigation.
 $string['progress_auto_saved'] = 'ההתקדמות נשמרת אוטומטית. רענון הדף יחזור מהשאלה הזו.';
