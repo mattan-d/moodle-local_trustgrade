@@ -122,8 +122,14 @@ $string['blooms_understanding'] = 'הבין';
 $string['blooms_applying'] = 'החל';
 $string['blooms_analyzing'] = 'נתח';
 $string['blooms_evaluating'] = 'העריך';
+
 $string['mandatory_question'] = 'שאלת חובה';
 $string['mandatory_question_help'] = 'שאלה זו תמיד תופיע בחידונים לסטודנטים';
+$string['make_mandatory'] = 'סמן כחובה';
+$string['remove_mandatory'] = 'הסר חובת מענה';
+$string['question_marked_mandatory'] = 'השאלה סומנה כחובה';
+$string['question_unmarked_mandatory'] = 'הוסרה חובת המענה מהשאלה';
+$string['error_updating_question'] = 'שגיאה בעדכון השאלה';
 
 // Question source types.
 $string['question_source_instructor'] = 'מרצה';
