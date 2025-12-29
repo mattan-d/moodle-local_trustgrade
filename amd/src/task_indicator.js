@@ -13,6 +13,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+var define = window.define // Declare define variable
+var M = window.M // Declare M variable
+
 define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notification, Str) => {
   var TaskIndicator = {
     indicatorElement: null,
@@ -107,18 +110,20 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         return
       }
 
+      var titleKey = task.status === "ready" ? "quiz_ready" : "quiz_preparing"
+      var messageKey = task.status === "ready" ? "quiz_ready_message" : "quiz_preparing_message"
+
       // Get strings
       Str.get_strings([
-        { key: "quiz_preparing", component: "local_trustgrade" },
-        { key: "quiz_preparing_message", component: "local_trustgrade", param: task.assignment_name },
+        { key: titleKey, component: "local_trustgrade" },
+        { key: messageKey, component: "local_trustgrade", param: task.assignment_name },
       ])
         .done(
           function (strings) {
             this.indicatorElement.find(".indicator-title").text(strings[0])
             this.indicatorElement.find(".indicator-message").text(strings[1])
 
-            // Make indicator clickable if quiz is ready
-            if (task.status === "completed" && task.quiz_url) {
+            if (task.status === "ready" && task.quiz_url) {
               this.indicatorElement.addClass("clickable").css("cursor", "pointer")
               this.indicatorElement.off("click").on("click", () => {
                 window.location.href = task.quiz_url

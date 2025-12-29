@@ -237,6 +237,11 @@ $string['seconds'] = 'seconds';
 $string['text'] = 'Text';
 $string['entertext'] = 'Enter text';
 $string['enter_answer_placeholder'] = 'Enter your answer here...';
+$string['quiz_preparing'] = 'Your quiz is being prepared...';
+$string['quiz_preparing_message'] = 'Generating quiz for {$a}';
+$string['quiz_ready'] = 'Your quiz is ready!';
+$string['quiz_ready_message'] = 'Click to take the quiz for {$a}';
+$string['quiz_ready_subject'] = 'Your AI Quiz is Ready';
 
 // Quiz progress and navigation.
 $string['progress_auto_saved'] = 'Your progress is automatically saved. Refreshing the page will resume from this question.';
@@ -556,11 +561,5 @@ $string['secs_only'] = '{$a}s';
 
 $string['cachedef_quiz_redirect'] = 'Stores quiz redirect URLs for temporary session management';
 $string['nopermission'] = 'You do not have permission to access this page';
-
-// Async task indicator strings
-$string['quiz_preparing'] = 'Your Quiz is Being Prepared';
-$string['quiz_preparing_message'] = 'We are generating personalized questions for {$a}. You\'ll be notified when ready.';
-$string['quiz_ready_click_to_start'] = 'Quiz Ready - Click to Start';
-$string['quiz_ready_assignment'] = 'Your quiz for {$a} is ready!';
 
 ?>

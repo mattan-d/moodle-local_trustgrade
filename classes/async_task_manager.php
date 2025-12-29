@@ -305,20 +305,23 @@ class async_task_manager {
     }
 
     /**
-     * Get pending tasks for current user
+     * Get pending tasks and incomplete quizzes for current user
      *
-     * @return array Array of pending tasks
+     * @return array Array of pending tasks and quizzes
      */
     public static function get_user_pending_tasks() {
         global $DB, $USER;
 
+        $result = [];
+        $now = time();
+        $twentyfour_hours_ago = $now - (24 * 60 * 60);
+
         $tasks = $DB->get_records_select('local_trustgd_async_tasks',
-            'userid = ? AND status IN (?, ?)',
-            [$USER->id, 'pending', 'processing'],
+            'userid = ? AND status IN (?, ?) AND timecreated > ?',
+            [$USER->id, 'pending', 'processing', $twentyfour_hours_ago],
             'timecreated DESC'
         );
 
-        $result = [];
         foreach ($tasks as $task) {
             $cm = get_coursemodule_from_id('assign', $task->cmid);
             if ($cm) {
@@ -326,15 +329,53 @@ class async_task_manager {
                     'id' => $task->id,
                     'cmid' => $task->cmid,
                     'submission_id' => $task->submission_id,
-                    'status' => $task->status,
+                    'status' => 'preparing',
                     'assignment_name' => $cm->name,
-                    'quiz_url' => (new \moodle_url('/local/trustgrade/quiz.php', [
-                        'cmid' => $task->cmid,
-                        'submissionid' => $task->submission_id
-                    ]))->out(false)
+                    'quiz_url' => null,
+                    'timecreated' => $task->timecreated
                 ];
             }
         }
+
+        $sessions = $DB->get_records_select('local_trustgd_quiz_sessions',
+            'userid = ? AND attempt_completed = 0 AND timecreated > ?',
+            [$USER->id, $twentyfour_hours_ago],
+            'timecreated DESC'
+        );
+
+        foreach ($sessions as $session) {
+            $cm = get_coursemodule_from_id('assign', $session->cmid);
+            if ($cm) {
+                // Check if there's already a preparing task for this submission
+                $has_preparing = false;
+                foreach ($result as $item) {
+                    if ($item['submission_id'] == $session->submissionid) {
+                        $has_preparing = true;
+                        break;
+                    }
+                }
+
+                // Only add if no preparing task exists
+                if (!$has_preparing) {
+                    $result[] = [
+                        'id' => $session->id,
+                        'cmid' => $session->cmid,
+                        'submission_id' => $session->submissionid,
+                        'status' => 'ready',
+                        'assignment_name' => $cm->name,
+                        'quiz_url' => (new \moodle_url('/local/trustgrade/quiz.php', [
+                            'cmid' => $session->cmid,
+                            'submissionid' => $session->submissionid
+                        ]))->out(false),
+                        'timecreated' => $session->timecreated
+                    ];
+                }
+            }
+        }
+
+        usort($result, function($a, $b) {
+            return $b['timecreated'] - $a['timecreated'];
+        });
 
         return $result;
     }
