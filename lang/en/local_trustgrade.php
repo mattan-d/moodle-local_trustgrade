@@ -138,6 +138,14 @@ $string['blooms_apply'] = 'Apply';
 $string['blooms_analyze'] = 'Analyze';
 $string['blooms_evaluate'] = 'Evaluate';
 
+$string['mandatory_question'] = 'Mandatory Question';
+$string['mandatory_question_help'] = 'This question will always appear in student quizzes';
+$string['make_mandatory'] = 'Mark as Mandatory';
+$string['remove_mandatory'] = 'Remove Mandatory';
+$string['question_marked_mandatory'] = 'Question marked as mandatory';
+$string['question_unmarked_mandatory'] = 'Question unmarked as mandatory';
+$string['error_updating_question'] = 'Error updating question';
+
 // Question source types.
 $string['question_source_instructor'] = 'Instructor';
 $string['question_source_ai_generated'] = 'AI Generated';
@@ -224,6 +232,11 @@ $string['ai_disclosure_detail_privacy'] = 'Your submission data is processed sec
 $string['ai_quiz_title'] = 'AI-Generated Quiz';
 $string['ai_quiz_report'] = 'AI Quiz Report';
 $string['quiz_ready_message'] = 'Your AI-generated quiz is ready! This quiz will help you reflect on your submission and reinforce your learning.';
+$string['quiz_ready_subject'] = 'Your AI Quiz is Ready';
+$string['quiz_ready_message_html'] = 'Your AI-generated quiz is ready! Click <a href="{$a->quizurl}">here</a> to take the quiz.';
+$string['quiz_generation_failed_subject'] = 'Quiz Generation Failed';
+$string['quiz_generation_failed_message'] = 'We were unable to generate your quiz. Please contact your instructor.';
+$string['take_quiz'] = 'Take Quiz';
 $string['next'] = 'Next';
 $string['next_question'] = 'Next Question →';
 $string['finish_quiz'] = 'Finish Quiz';
@@ -232,6 +245,11 @@ $string['seconds'] = 'seconds';
 $string['text'] = 'Text';
 $string['entertext'] = 'Enter text';
 $string['enter_answer_placeholder'] = 'Enter your answer here...';
+$string['quiz_preparing'] = 'Your quiz is being prepared...';
+$string['quiz_preparing_message'] = 'Generating quiz for {$a}';
+$string['quiz_ready'] = 'Your quiz is ready!';
+$string['quiz_ready_message'] = 'Click to take the quiz for {$a}';
+$string['quiz_ready_subject'] = 'Your AI Quiz is Ready';
 
 // Quiz progress and navigation.
 $string['progress_auto_saved'] = 'Your progress is automatically saved. Refreshing the page will resume from this question.';
@@ -536,14 +554,6 @@ $string['at_least_one_correct_option'] = 'Multiple choice questions must have at
 $string['metadata_must_be_object'] = 'Metadata must be an object';
 $string['points_must_be_1_to_100'] = 'Points must be between 1 and 100';
 $string['blooms_level_must_be_string'] = 'Metadata \'blooms_level\' must be a string';
-
-$string['mandatory_question'] = 'Mandatory Question';
-$string['mandatory_question_help'] = 'This question will always appear in student quizzes';
-
-// Quiz completion strings
-// Quiz completion messages.
-$string['quiz_already_completed'] = 'You have already completed this assessment. Only one attempt is allowed per assignment.';
-$string['return_to_assignment'] = 'Return to Assignment';
 
 $string['defaultcoursestudent'] = 'Student';
 $string['mins_secs'] = '{$a->minutes}m {$a->seconds}s';

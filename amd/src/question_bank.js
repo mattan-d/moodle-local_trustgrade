@@ -24,15 +24,51 @@
 
 define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, Notification) => {
   var QuestionBank = {
+    strings: {},
+
     init: function (cmid) {
       this.cmid = cmid || 0
-      this.bindEvents()
+      this.loadStrings().then(() => {
+        this.bindEvents()
+      })
+    },
+
+    loadStrings: function () {
+      const stringKeys = [
+        { key: "mandatory_question", component: "local_trustgrade" },
+        { key: "make_mandatory", component: "local_trustgrade" },
+        { key: "remove_mandatory", component: "local_trustgrade" },
+        { key: "question_marked_mandatory", component: "local_trustgrade" },
+        { key: "question_unmarked_mandatory", component: "local_trustgrade" },
+        { key: "error_updating_question", component: "local_trustgrade" },
+      ]
+
+      return Str.get_strings(stringKeys).then((strings) => {
+        this.strings.mandatory_question = strings[0]
+        this.strings.make_mandatory = strings[1]
+        this.strings.remove_mandatory = strings[2]
+        this.strings.question_marked_mandatory = strings[3]
+        this.strings.question_unmarked_mandatory = strings[4]
+        this.strings.error_updating_question = strings[5]
+        return strings
+      })
     },
 
     bindEvents: function () {
       // Generate new questions button
       $("#generate-new-questions").on("click", () => {
         this.generateQuestions()
+      })
+
+      $(document).on("click", ".toggle-mandatory-btn", (e) => {
+        e.preventDefault()
+        const $btn = $(e.currentTarget)
+        const $questionItem = $btn.closest(".editable-question-item")
+        const questionId = Number.parseInt($btn.data("question-id"))
+        const currentMandatory = Number.parseInt($btn.data("mandatory")) === 1
+        const newMandatory = !currentMandatory
+
+        QuestionBank.toggleMandatoryQuestion(questionId, newMandatory, $questionItem)
       })
     },
 
@@ -79,6 +115,83 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
             message: M.util.get_string("error_generating_questions", "local_trustgrade"),
             type: "error",
           })
+        })
+    },
+
+    toggleMandatoryQuestion: function (questionId, isMandatory, $questionItem) {
+      const $btn = $questionItem.find(".toggle-mandatory-btn")
+
+      // Disable button during request
+      $btn.prop("disabled", true)
+
+      var promises = Ajax.call([
+        {
+          methodname: "local_trustgrade_toggle_mandatory_question",
+          args: {
+            questionid: questionId,
+            is_mandatory: isMandatory,
+          },
+        },
+      ])
+
+      promises[0]
+        .then((response) => {
+          if (response.success) {
+            const $mandatoryControls = $questionItem.find(".mandatory-controls")
+
+            if (response.is_mandatory) {
+              // Show badge and "Remove" button
+              $mandatoryControls.html(
+                '<span class="badge bg-danger mandatory-badge">' +
+                  this.strings.mandatory_question +
+                  "</span>" +
+                  '<button type="button" class="btn btn-sm btn-outline-secondary toggle-mandatory-btn" data-mandatory="1" data-question-id="' +
+                  questionId +
+                  '" title="' +
+                  this.strings.remove_mandatory +
+                  '">' +
+                  '<i class="fa fa-times-circle" aria-hidden="true"></i> ' +
+                  this.strings.remove_mandatory +
+                  "</button>",
+              )
+            } else {
+              // Show "Make mandatory" button only
+              $mandatoryControls.html(
+                '<button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" data-question-id="' +
+                  questionId +
+                  '" title="' +
+                  this.strings.make_mandatory +
+                  '">' +
+                  '<i class="fa fa-star" aria-hidden="true"></i> ' +
+                  this.strings.make_mandatory +
+                  "</button>",
+              )
+            }
+
+            // Also update the checkbox in edit mode
+            $questionItem.find(".question-mandatory-input").prop("checked", response.is_mandatory)
+
+            Notification.addNotification({
+              message: response.is_mandatory
+                ? this.strings.question_marked_mandatory
+                : this.strings.question_unmarked_mandatory,
+              type: "success",
+            })
+          } else {
+            Notification.addNotification({
+              message: response.error || this.strings.error_updating_question,
+              type: "error",
+            })
+          }
+
+          $btn.prop("disabled", false)
+        })
+        .catch((error) => {
+          Notification.addNotification({
+            message: this.strings.error_updating_question,
+            type: "error",
+          })
+          $btn.prop("disabled", false)
         })
     },
   }

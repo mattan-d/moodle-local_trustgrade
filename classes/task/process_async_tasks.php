@@ -15,17 +15,34 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Adhoc task for processing a single async question generation task.
  *
  * @package    local_trustgrade
  * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace local_trustgrade\task;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_trustgrade';
-$plugin->version = 2025123001; // Incremented version for toggle_mandatory_question function
-$plugin->requires = 2022112800; // Moodle 4.1
-$plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.4.1'; // Updated release version for mandatory question toggle
+/**
+ * Process a single async question generation task
+ */
+class process_async_tasks extends \core\task\adhoc_task {
+
+    /**
+     * Execute the task
+     */
+    public function execute() {
+        $data = $this->get_custom_data();
+        
+        if (!isset($data->task_id)) {
+            debugging('TrustGrade: Adhoc task missing task_id', DEBUG_DEVELOPER);
+            return;
+        }
+
+        $manager = new \local_trustgrade\async_task_manager();
+        $manager->process_task_by_id($data->task_id);
+    }
+}

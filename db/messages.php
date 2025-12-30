@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Message provider definitions for TrustGrade plugin.
  *
  * @package    local_trustgrade
  * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
@@ -24,8 +24,19 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_trustgrade';
-$plugin->version = 2025123001; // Incremented version for toggle_mandatory_question function
-$plugin->requires = 2022112800; // Moodle 4.1
-$plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.4.1'; // Updated release version for mandatory question toggle
+$messageproviders = [
+    'quizready' => [
+        'capability' => 'local/trustgrade:takeaiquiz',
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED,
+        ],
+    ],
+    'quizfailed' => [
+        'capability' => 'local/trustgrade:takeaiquiz',
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
+            'email' => MESSAGE_PERMITTED,
+        ],
+    ],
+];

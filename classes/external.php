@@ -33,6 +33,7 @@ require_once($CFG->dirroot . '/local/trustgrade/classes/question_editor.php');
 require_once($CFG->dirroot . '/local/trustgrade/classes/question_bank_renderer.php');
 require_once($CFG->dirroot . '/local/trustgrade/classes/quiz_settings.php');
 require_once($CFG->dirroot . '/local/trustgrade/classes/quiz_session.php');
+require_once($CFG->dirroot . '/local/trustgrade/classes/async_task_manager.php');
 require_once($CFG->libdir . '/externallib.php');
 
 class external extends \external_api {
@@ -692,6 +693,89 @@ class external extends \external_api {
          return ['success' => true];
      } else {
          return ['success' => false, 'error' => 'Failed to log violation'];
+     }
+ }
+
+ public static function get_pending_tasks_parameters() {
+     return new \external_function_parameters([]);
+ }
+
+ public static function get_pending_tasks_returns() {
+     return new \external_single_structure([
+             'success' => new \external_value(PARAM_BOOL, 'True if successful'),
+             'tasks' => new \external_value(PARAM_RAW, 'JSON encoded array of pending tasks', VALUE_OPTIONAL),
+             'error' => new \external_value(PARAM_TEXT, 'Error message', VALUE_OPTIONAL),
+         ]);
+     }
+
+ public static function get_pending_tasks() {
+     global $USER;
+     $context = \context_system::instance();
+     self::validate_context($context);
+     
+     try {
+         $tasks = async_task_manager::get_user_pending_tasks();
+         return [
+             'success' => true,
+             'tasks' => json_encode($tasks)
+         ];
+     } catch (\Exception $e) {
+         return [
+             'success' => false,
+             'error' => $e->getMessage()
+         ];
+     }
+ }
+
+ public static function toggle_mandatory_question_parameters() {
+     return new \external_function_parameters([
+         'questionid' => new \external_value(PARAM_INT, 'Question ID'),
+         'is_mandatory' => new \external_value(PARAM_BOOL, 'New mandatory status'),
+     ]);
+ }
+
+ public static function toggle_mandatory_question_returns() {
+     return new \external_single_structure([
+         'success' => new \external_value(PARAM_BOOL, 'True if successful'),
+         'is_mandatory' => new \external_value(PARAM_BOOL, 'New mandatory status'),
+         'error' => new \external_value(PARAM_TEXT, 'Error message', VALUE_OPTIONAL),
+     ]);
+ }
+
+ public static function toggle_mandatory_question($questionid, $is_mandatory) {
+     global $DB;
+
+     $params = self::validate_parameters(self::toggle_mandatory_question_parameters(), [
+         'questionid' => $questionid,
+         'is_mandatory' => $is_mandatory,
+     ]);
+
+     // Get question to verify access
+     $question = $DB->get_record('local_trustgrade_questions', ['id' => $params['questionid']], '*', MUST_EXIST);
+     
+     // Verify context and permissions
+     $cm = get_coursemodule_from_id('assign', $question->cmid, 0, false, MUST_EXIST);
+     $context = \context_module::instance($cm->id);
+     self::validate_context($context);
+     require_capability('mod/assign:addinstance', $context);
+
+     // Update mandatory status
+     $question->is_mandatory = $params['is_mandatory'] ? 1 : 0;
+     $question->timemodified = time();
+     
+     $success = $DB->update_record('local_trustgrade_questions', $question);
+
+     if ($success) {
+         return [
+             'success' => true,
+             'is_mandatory' => (bool)$question->is_mandatory,
+         ];
+     } else {
+         return [
+             'success' => false,
+             'is_mandatory' => (bool)$question->is_mandatory,
+             'error' => get_string('error_updating_question', 'local_trustgrade'),
+         ];
      }
  }
 }

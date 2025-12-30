@@ -122,8 +122,14 @@ $string['blooms_understanding'] = 'הבין';
 $string['blooms_applying'] = 'החל';
 $string['blooms_analyzing'] = 'נתח';
 $string['blooms_evaluating'] = 'העריך';
+
 $string['mandatory_question'] = 'שאלת חובה';
 $string['mandatory_question_help'] = 'שאלה זו תמיד תופיע בחידונים לסטודנטים';
+$string['make_mandatory'] = 'סמן כחובה';
+$string['remove_mandatory'] = 'הסר חובת מענה';
+$string['question_marked_mandatory'] = 'השאלה סומנה כחובה';
+$string['question_unmarked_mandatory'] = 'הוסרה חובת המענה מהשאלה';
+$string['error_updating_question'] = 'שגיאה בעדכון השאלה';
 
 // Question source types.
 $string['question_source_instructor'] = 'מרצה';
@@ -194,7 +200,7 @@ $string['disclosure_settings'] = 'הגדרות גילוי לסטודנט';
 $string['disclosure_settings_desc'] = 'הגדר את אופן ההודעה לסטודנטים על פונקציות AI במשימות.';
 $string['show_disclosure'] = 'הצג הודעת גילוי AI';
 $string['show_disclosure_desc'] = 'הצג הודעת גילוי לסטודנטים לפני שליחת המשימה, שמודיעה על תכונת חידון מבוססת AI.';
-$string['custom_disclosure_message'] = 'הודעת גילוי מותאמת';
+$string['custom_disclosure_message'] = 'הודעה גילוי מותאמת';
 $string['custom_disclosure_message_desc'] = 'הודעה מותאמת להצגה במקום ההודעה המוגדרת. השאר ריקה לשימוש בהודעת ברירת מחדל.';
 
 // AI disclosure messages.
@@ -208,9 +214,14 @@ $string['ai_disclosure_detail_timer'] = 'לכל שאלה בחידון יש הג�
 $string['ai_disclosure_detail_privacy'] = 'נתוני ההגשה שלך מעובדים בצורה מאובטחת ונמצאים בשימוש למטרות חינוכיות בלבד.';
 
 // Quiz interface.
-$string['ai_quiz_title'] = 'חידון שנוצר על‑ידי AI';
-$string['ai_quiz_report'] = 'דוח חידון AI';
-$string['quiz_ready_message'] = 'חידון AI שלך מוכן! חידון זה יעזור לך להרהר בהגשתך ולהעמיק את הלמידה.';
+$string['ai_quiz_title'] = 'חידון שנוצר על‑ידי AI';
+$string['ai_quiz_report'] = 'דוח חידון AI';
+$string['quiz_ready_message'] = 'חידון AI שלך מוכן! חידון זה יעזור לך להרהר בהגשתך ולהעמיק את הלמידה.';
+$string['quiz_ready_subject'] = 'חידון ה-AI שלך מוכן';
+$string['quiz_ready_message_html'] = 'חידון ה-AI שלך מוכן! לחץ <a href="{$a->quizurl}">כאן</a> כדי לגשת לחידון.';
+$string['quiz_generation_failed_subject'] = 'יצירת החידון נכשלה';
+$string['quiz_generation_failed_message'] = 'לא הצלחנו ליצור את החידון שלך. אנא פנה למרצה שלך.';
+$string['take_quiz'] = 'גש לחידון';
 $string['next'] = 'הבא';
 $string['next_question'] = 'שאלה הבאה →';
 $string['finish_quiz'] = 'סיים חידון';
@@ -223,7 +234,7 @@ $string['enter_answer_placeholder'] = 'הכנס את תשובתך כאן…';
 // Quiz progress and navigation.
 $string['progress_auto_saved'] = 'ההתקדמות נשמרת אוטומטית. רענון הדף יחזור מהשאלה הזו.';
 $string['provide_answer_warning'] = 'אנא ספק תשובה לפני המשך. זכור: לא תוכל לחזור לשאלה זו מאוחר יותר.';
-$string['quiz_started_notice'] = 'الחידון התחיל. זכור: לא תוכל לחזור לשאלות קודמות או להתחיל מחדש.';
+$string['quiz_started_notice'] = 'חידון התחיל. זכור: לא תוכל לחזור לשאלות קודמות או להתחיל מחדש.';
 $string['failed_start_session'] = 'נכשל התחלת מפגש החידון';
 $string['quiz_progress_saved'] = 'ההתקדמות בחידון נשמרה אוטומטית. החידון ישוב למקום שבו הפסקת כשתחזור.';
 $string['quiz_progress_complete'] = '{$a}% הושלם';
@@ -231,7 +242,7 @@ $string['question_x_of_y'] = 'שאלה {$a->current} מתוך {$a->total}';
 $string['time_remaining'] = 'זמן שנותר: {$a}';
 
 // Quiz completion.
-$string['quiz_completed_header'] = 'الחידון הושלם';
+$string['quiz_completed_header'] = 'חידון הושלם';
 $string['quiz_completed_message'] = 'ההערכה הרשמית שלך הוגשה בהצלחה ולא ניתן לחזור עליה.';
 $string['your_answer'] = 'התשובה שלך: {$a}';
 $string['correct_answer_was'] = 'התשובה הנכונה היתה: {$a}';
@@ -524,5 +535,14 @@ $string['return_to_assignment'] = 'חזור למשימה';
 $string['defaultcoursestudent'] = 'סטודנט';
 $string['mins_secs'] = '{$a->minutes}ד {$a->seconds}ש';
 $string['secs_only'] = '{$a}ש';
+
+$string['cachedef_quiz_redirect'] = 'שומר כתובות URL להפניה לחידון לניהול מפגש זמני';
+$string['nopermission'] = 'אין לך הרשאה לגשת לדף זה';
+
+// Async task indicator strings
+$string['quiz_preparing'] = 'החידון שלך בהכנה';
+$string['quiz_preparing_message'] = 'אנחנו יוצרים שאלות מותאמות אישית עבור {$a}. תקבל הודעה כשהחידון יהיה מוכן.';
+$string['quiz_ready_click_to_start'] = 'החידון מוכן - לחץ להתחלה';
+$string['quiz_ready_assignment'] = 'החידון שלך עבור {$a} מוכן!';
 
 ?>

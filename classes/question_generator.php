@@ -140,7 +140,8 @@ class question_generator {
             $question_data = json_decode($record->question_data, true);
             if ($question_data) {
                 $question_data['is_mandatory'] = isset($record->is_mandatory) ? intval($record->is_mandatory) : 0;
-                $question_data['db_id'] = $record->id; // Add database ID for reference
+                $question_data['db_id'] = $record->id; // Database ID for toggle functionality
+                $question_data['id'] = $record->id; // Also add as 'id' for compatibility
                 $questions[] = $question_data;
             }
         }

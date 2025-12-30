@@ -127,6 +127,15 @@ $functions = [
         'ajax' => true,
         'capabilities' => 'mod/assign:addinstance',
     ],
+    'local_trustgrade_toggle_mandatory_question' => [
+        'classname' => 'local_trustgrade\external',
+        'methodname' => 'toggle_mandatory_question',
+        'classpath' => 'local/trustgrade/classes/external.php',
+        'description' => 'Toggle mandatory status for a question.',
+        'type' => 'write',
+        'ajax' => true,
+        'capabilities' => 'mod/assign:addinstance',
+    ],
 
     // Quiz session functions
     'local_trustgrade_start_quiz_attempt' => [
@@ -165,6 +174,16 @@ $functions = [
         'ajax' => true,
         'capabilities' => 'mod/assign:submit',
     ],
+
+    'local_trustgrade_get_pending_tasks' => [
+        'classname' => 'local_trustgrade\external',
+        'methodname' => 'get_pending_tasks',
+        'classpath' => 'local/trustgrade/classes/external.php',
+        'description' => 'Get pending async tasks for current user.',
+        'type' => 'read',
+        'ajax' => true,
+        'capabilities' => 'mod/assign:submit',
+    ],
 ];
 
 $services = [
@@ -188,6 +207,8 @@ $services = [
             'local_trustgrade_update_quiz_session',
             'local_trustgrade_complete_quiz_session',
             'local_trustgrade_log_integrity_violation',
+            'local_trustgrade_get_pending_tasks',
+            'local_trustgrade_toggle_mandatory_question',
         ],
         'restrictedusers' => 0,
         'enabled' => 1,

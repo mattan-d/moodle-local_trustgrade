@@ -105,6 +105,46 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
     },
 
     /**
+     * Convert basic Markdown to HTML
+     */
+    markdownToHtml: (markdown) => {
+      if (!markdown) return ""
+
+      let html = String(markdown)
+
+      // Headers (##, ###, etc.)
+      html = html.replace(/^### (.*$)/gim, "<h3>$1</h3>")
+      html = html.replace(/^## (.*$)/gim, "<h2>$1</h2>")
+      html = html.replace(/^# (.*$)/gim, "<h1>$1</h1>")
+
+      // Bold (**text**)
+      html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+
+      // Italic (*text*)
+      html = html.replace(/\*(.+?)\*/g, "<em>$1</em>")
+
+      // Lists
+      html = html.replace(/^\* (.+)$/gim, "<li>$1</li>")
+      html = html.replace(/^- (.+)$/gim, "<li>$1</li>")
+
+      // Wrap consecutive list items in ul
+      html = html.replace(/(<li>.*<\/li>)(\s*<li>.*<\/li>)+/g, (match) => {
+        return "<ul>" + match + "</ul>"
+      })
+
+      // Line breaks
+      html = html.replace(/\n\n/g, "</p><p>")
+      html = html.replace(/\n/g, "<br>")
+
+      // Wrap in paragraphs if not already wrapped
+      if (!html.startsWith("<h") && !html.startsWith("<ul") && !html.startsWith("<p")) {
+        html = "<p>" + html + "</p>"
+      }
+
+      return html
+    },
+
+    /**
      * Render the recommendation using Mustache templates and localized strings.
      * Supports both legacy string format and structured JSON objects.
      */
@@ -215,7 +255,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
                 // Render improved assignment section
                 const improved =
                   recommendation.ImprovedAssignment && recommendation.ImprovedAssignment.content
-                    ? String(recommendation.ImprovedAssignment.content).replace(/\n/g, "<br>")
+                    ? trustgrade.markdownToHtml(recommendation.ImprovedAssignment.content)
                     : ""
 
                 if (improved) {
@@ -260,7 +300,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           : ""
       const improved =
         recommendation.ImprovedAssignment && recommendation.ImprovedAssignment.content
-          ? String(recommendation.ImprovedAssignment.content)
+          ? trustgrade.markdownToHtml(recommendation.ImprovedAssignment.content)
           : ""
 
       let html = ""
@@ -289,7 +329,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           const s = r["Suggestions"] ?? ""
           const metValue = m.toLowerCase()
 
-          let metBadge = `<span class="badge bg-secondary rounded-pill">${m}</span>`
+          let metBadge = `<span class="badge bg-secondary rounded-pill text-white">${m}</span>`
           if (metValue === "yes" || metValue === "y" || metValue === "true") {
             metBadge = `<span class="badge bg-success rounded-pill text-white"><i class="fa fa-check me-1"></i>${m}</span>`
           } else if (metValue === "no" || metValue === "n" || metValue === "false") {
@@ -350,7 +390,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
               </h4>
             </div>
             <div class="card-body">
-              <div class="recommendation-content">${improved.replace(/\n/g, "<br>")}</div>
+              <div class="recommendation-content">${trustgrade.markdownToHtml(improved)}</div>
             </div>
           </div>
         </div>`
@@ -556,6 +596,41 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
 
     getInstructions: () => {
       var instructions = ""
+
+      // Try Atto editor first (contenteditable div inside editor wrapper)
+      var $attoEditable = $("#id_introeditoreditable")
+      if ($attoEditable.length && $attoEditable.attr("contenteditable") === "true") {
+        instructions = $attoEditable.html()
+        if (instructions && instructions.trim().length > 0) {
+          // Strip HTML tags to get plain text
+          var tempDiv = document.createElement("div")
+          tempDiv.innerHTML = instructions
+          instructions = tempDiv.textContent || tempDiv.innerText || ""
+          return instructions.trim()
+        }
+      }
+
+      // Fallback: try finding any contenteditable div within introeditor container
+      var $attoFallback = $("#id_introeditor [contenteditable='true']")
+      if ($attoFallback.length) {
+        instructions = $attoFallback.html()
+        if (instructions && instructions.trim().length > 0) {
+          var stripDiv = document.createElement("div")
+          stripDiv.innerHTML = instructions
+          instructions = stripDiv.textContent || stripDiv.innerText || ""
+          return instructions.trim()
+        }
+      }
+
+      // Try TinyMCE editor
+      if (typeof tinyMCE !== "undefined" && tinyMCE.get("id_introeditor")) {
+        instructions = tinyMCE.get("id_introeditor").getContent({ format: "text" })
+        if (instructions && instructions.trim().length > 0) {
+          return instructions.trim()
+        }
+      }
+
+      // Try iframe-based editors
       var instructionSelectors = ["#id_introeditor_ifr", "#id_intro", 'textarea[name="intro"]']
       for (var i = 0; i < instructionSelectors.length; i++) {
         var $element = $(instructionSelectors[i])
@@ -565,9 +640,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
               var iframeDoc = $element[0].contentDocument || $element[0].contentWindow.document
               instructions = $("<div>").html(iframeDoc.body.innerHTML).text()
             } catch (e) {
-              if (typeof tinyMCE !== "undefined" && tinyMCE.get("id_introeditor")) {
-                instructions = tinyMCE.get("id_introeditor").getContent({ format: "text" })
-              }
+              // Fallback already handled above
             }
           } else {
             instructions = $element.val() || ""
@@ -575,6 +648,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           if (instructions && instructions.trim().length > 0) break
         }
       }
+
       return typeof instructions === "string" ? instructions.trim() : ""
     },
 
