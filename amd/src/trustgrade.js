@@ -557,11 +557,27 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
     getInstructions: () => {
       var instructions = ""
 
-      // Try Atto editor first (contenteditable div)
-      var $attoEditor = $("#id_introeditor")
-      if ($attoEditor.length && $attoEditor.attr("contenteditable") === "true") {
-        instructions = $attoEditor.text() || $attoEditor.html()
+      // Try Atto editor first (contenteditable div inside editor wrapper)
+      var $attoEditable = $("#id_introeditoreditable")
+      if ($attoEditable.length && $attoEditable.attr("contenteditable") === "true") {
+        instructions = $attoEditable.html()
         if (instructions && instructions.trim().length > 0) {
+          // Strip HTML tags to get plain text
+          var tempDiv = document.createElement("div")
+          tempDiv.innerHTML = instructions
+          instructions = tempDiv.textContent || tempDiv.innerText || ""
+          return instructions.trim()
+        }
+      }
+
+      // Fallback: try finding any contenteditable div within introeditor container
+      var $attoFallback = $("#id_introeditor [contenteditable='true']")
+      if ($attoFallback.length) {
+        instructions = $attoFallback.html()
+        if (instructions && instructions.trim().length > 0) {
+          var stripDiv = document.createElement("div")
+          stripDiv.innerHTML = instructions
+          instructions = stripDiv.textContent || stripDiv.innerText || ""
           return instructions.trim()
         }
       }
