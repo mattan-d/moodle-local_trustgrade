@@ -105,6 +105,46 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
     },
 
     /**
+     * Convert basic Markdown to HTML
+     */
+    markdownToHtml: (markdown) => {
+      if (!markdown) return ""
+
+      let html = String(markdown)
+
+      // Headers (##, ###, etc.)
+      html = html.replace(/^### (.*$)/gim, "<h3>$1</h3>")
+      html = html.replace(/^## (.*$)/gim, "<h2>$1</h2>")
+      html = html.replace(/^# (.*$)/gim, "<h1>$1</h1>")
+
+      // Bold (**text**)
+      html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+
+      // Italic (*text*)
+      html = html.replace(/\*(.+?)\*/g, "<em>$1</em>")
+
+      // Lists
+      html = html.replace(/^\* (.+)$/gim, "<li>$1</li>")
+      html = html.replace(/^- (.+)$/gim, "<li>$1</li>")
+
+      // Wrap consecutive list items in ul
+      html = html.replace(/(<li>.*<\/li>)(\s*<li>.*<\/li>)+/g, (match) => {
+        return "<ul>" + match + "</ul>"
+      })
+
+      // Line breaks
+      html = html.replace(/\n\n/g, "</p><p>")
+      html = html.replace(/\n/g, "<br>")
+
+      // Wrap in paragraphs if not already wrapped
+      if (!html.startsWith("<h") && !html.startsWith("<ul") && !html.startsWith("<p")) {
+        html = "<p>" + html + "</p>"
+      }
+
+      return html
+    },
+
+    /**
      * Render the recommendation using Mustache templates and localized strings.
      * Supports both legacy string format and structured JSON objects.
      */
@@ -215,7 +255,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
                 // Render improved assignment section
                 const improved =
                   recommendation.ImprovedAssignment && recommendation.ImprovedAssignment.content
-                    ? String(recommendation.ImprovedAssignment.content).replace(/\n/g, "<br>")
+                    ? trustgrade.markdownToHtml(recommendation.ImprovedAssignment.content)
                     : ""
 
                 if (improved) {
@@ -260,7 +300,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           : ""
       const improved =
         recommendation.ImprovedAssignment && recommendation.ImprovedAssignment.content
-          ? String(recommendation.ImprovedAssignment.content)
+          ? trustgrade.markdownToHtml(recommendation.ImprovedAssignment.content)
           : ""
 
       let html = ""
@@ -350,7 +390,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
               </h4>
             </div>
             <div class="card-body">
-              <div class="recommendation-content">${improved.replace(/\n/g, "<br>")}</div>
+              <div class="recommendation-content">${trustgrade.markdownToHtml(improved)}</div>
             </div>
           </div>
         </div>`
