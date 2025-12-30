@@ -556,6 +556,25 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
 
     getInstructions: () => {
       var instructions = ""
+
+      // Try Atto editor first (contenteditable div)
+      var $attoEditor = $("#id_introeditor")
+      if ($attoEditor.length && $attoEditor.attr("contenteditable") === "true") {
+        instructions = $attoEditor.text() || $attoEditor.html()
+        if (instructions && instructions.trim().length > 0) {
+          return instructions.trim()
+        }
+      }
+
+      // Try TinyMCE editor
+      if (typeof tinyMCE !== "undefined" && tinyMCE.get("id_introeditor")) {
+        instructions = tinyMCE.get("id_introeditor").getContent({ format: "text" })
+        if (instructions && instructions.trim().length > 0) {
+          return instructions.trim()
+        }
+      }
+
+      // Try iframe-based editors
       var instructionSelectors = ["#id_introeditor_ifr", "#id_intro", 'textarea[name="intro"]']
       for (var i = 0; i < instructionSelectors.length; i++) {
         var $element = $(instructionSelectors[i])
@@ -565,9 +584,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
               var iframeDoc = $element[0].contentDocument || $element[0].contentWindow.document
               instructions = $("<div>").html(iframeDoc.body.innerHTML).text()
             } catch (e) {
-              if (typeof tinyMCE !== "undefined" && tinyMCE.get("id_introeditor")) {
-                instructions = tinyMCE.get("id_introeditor").getContent({ format: "text" })
-              }
+              // Fallback already handled above
             }
           } else {
             instructions = $element.val() || ""
@@ -575,6 +592,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           if (instructions && instructions.trim().length > 0) break
         }
       }
+
       return typeof instructions === "string" ? instructions.trim() : ""
     },
 
