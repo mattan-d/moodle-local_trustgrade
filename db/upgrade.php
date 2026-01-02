@@ -90,7 +90,7 @@ function xmldb_local_trustgrade_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2025122901, 'local', 'trustgrade');
     }
 
-    if ($oldversion < 2025123002) {
+    if ($oldversion < 2026010200) {
         $table = new xmldb_table('local_trustgd_async_tasks');
         $field = new xmldb_field('next_retry_time', XMLDB_TYPE_INTEGER, '10', null, null, null, null, 'attempts');
 
@@ -104,7 +104,7 @@ function xmldb_local_trustgrade_upgrade($oldversion) {
             $dbman->add_index($table, $index);
         }
 
-        upgrade_plugin_savepoint(true, 2025123002, 'local', 'trustgrade');
+        upgrade_plugin_savepoint(true, 2026010200, 'local', 'trustgrade');
     }
 
     return true;
