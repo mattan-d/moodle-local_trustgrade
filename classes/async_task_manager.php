@@ -111,7 +111,7 @@ class async_task_manager {
         global $DB;
 
         try {
-            debugging('TrustGrade: Processing async task ID ' . $task->id, DEBUG_DEVELOPER);
+            debugging('TrustGrade: Processing async task ID ' . $task->id . ' (attempt ' . ($task->attempts + 1) . '/3)', DEBUG_DEVELOPER);
 
             // Update status to processing
             $task->status = 'processing';
@@ -149,9 +149,9 @@ class async_task_manager {
                     $task->userid
                 );
 
-                // Update task status
                 $task->status = 'completed';
                 $task->result_data = json_encode($result);
+                $task->error_message = null; // Clear any previous error
                 $task->timecompleted = time();
                 $task->timemodified = time();
                 $DB->update_record('local_trustgd_async_tasks', $task);
@@ -165,14 +165,29 @@ class async_task_manager {
             }
 
         } catch (\Exception $e) {
-            debugging('TrustGrade: Task ' . $task->id . ' failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            debugging('TrustGrade: Task ' . $task->id . ' failed on attempt ' . $task->attempts . ': ' . $e->getMessage(), DEBUG_DEVELOPER);
 
-            $task->status = ($task->attempts >= 3) ? 'failed' : 'pending';
-            $task->error_message = $e->getMessage();
-            $task->timemodified = time();
-            $DB->update_record('local_trustgd_async_tasks', $task);
+            if ($task->attempts < 3) {
+                // Set status back to pending for retry
+                $task->status = 'pending';
+                $task->error_message = $e->getMessage();
+                $task->timemodified = time();
+                $DB->update_record('local_trustgd_async_tasks', $task);
 
-            if ($task->status === 'failed') {
+                // Attempt 1: immediate, Attempt 2: 1 minute delay, Attempt 3: 2 minutes delay
+                $delay = ($task->attempts - 1) * 60; // 0, 60, 120 seconds
+                $this->queue_retry_task($task->id, $delay);
+
+                debugging('TrustGrade: Task ' . $task->id . ' will retry (attempt ' . ($task->attempts + 1) . '/3) in ' . $delay . ' seconds', DEBUG_DEVELOPER);
+            } else {
+                $task->status = 'failed';
+                $task->error_message = $e->getMessage();
+                $task->timemodified = time();
+                $DB->update_record('local_trustgd_async_tasks', $task);
+
+                debugging('TrustGrade: Task ' . $task->id . ' failed permanently after 3 attempts', DEBUG_DEVELOPER);
+                
+                // Send failure notification
                 $this->send_failure_notification($task);
             }
         }
@@ -378,5 +393,60 @@ class async_task_manager {
         });
 
         return $result;
+    }
+
+    /**
+     * Queue a retry adhoc task with optional delay
+     *
+     * @param int $task_id Task ID
+     * @param int $delay Delay in seconds before processing
+     */
+    private function queue_retry_task($task_id, $delay = 0) {
+        $task = new \local_trustgrade\task\process_async_tasks();
+        $task->set_custom_data([
+            'task_id' => $task_id
+        ]);
+        
+        if ($delay > 0) {
+            $task->set_next_run_time(time() + $delay);
+        }
+        
+        \core\task\manager::queue_adhoc_task($task);
+        
+        debugging('TrustGrade: Queued retry adhoc task for task ID ' . $task_id . ' with ' . $delay . 's delay', DEBUG_DEVELOPER);
+    }
+
+    /**
+     * Retry failed tasks (can be called manually or by cron)
+     * This method finds tasks with error_message that are not completed and retries them
+     */
+    public static function retry_failed_tasks() {
+        global $DB;
+
+        $sql = "SELECT * FROM {local_trustgd_async_tasks}
+                WHERE status IN ('pending', 'processing')
+                  AND error_message IS NOT NULL
+                  AND attempts < 3
+                  AND timemodified < ?
+                ORDER BY timecreated ASC";
+        
+        // Only retry tasks that haven't been modified in the last 5 minutes
+        $five_minutes_ago = time() - (5 * 60);
+        $tasks = $DB->get_records_sql($sql, [$five_minutes_ago]);
+
+        debugging('TrustGrade: Found ' . count($tasks) . ' tasks to retry', DEBUG_DEVELOPER);
+
+        $manager = new self();
+        foreach ($tasks as $task) {
+            // Reset status to pending for retry
+            $task->status = 'pending';
+            $task->timemodified = time();
+            $DB->update_record('local_trustgd_async_tasks', $task);
+            
+            // Queue retry task
+            $manager->queue_retry_task($task->id);
+        }
+
+        return count($tasks);
     }
 }
