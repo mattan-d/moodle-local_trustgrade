@@ -42,5 +42,14 @@ $tasks = [
         'day' => '*',
         'dayofweek' => '*',
         'month' => '*'
+    ],
+    [
+        'classname' => 'local_trustgrade\task\retry_failed_async_tasks',
+        'blocking' => 0,
+        'minute' => '*/5',
+        'hour' => '*',
+        'day' => '*',
+        'dayofweek' => '*',
+        'month' => '*'
     ]
 ];

@@ -170,6 +170,7 @@ $string['debug_mode'] = 'Debug Mode & Caching';
 $string['debug_mode_desc'] = 'Enable debug mode to cache Gateway responses and avoid repeated API calls. When enabled, identical requests will return cached responses instead of calling the Gateway. This improves performance and reduces API usage during development and testing.';
 $string['cleanup_debug_cache'] = 'Cleanup TrustGrade debug cache';
 $string['cleanup_quiz_sessions'] = 'Cleanup TrustGrade quiz sessions';
+$string['task_retry_failed_async_tasks'] = 'Retry failed TrustGrade async tasks';
 
 // Cache management.
 $string['cache_management'] = 'Cache Management';
