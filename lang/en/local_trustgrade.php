@@ -249,8 +249,6 @@ $string['enter_answer_placeholder'] = 'Enter your answer here...';
 $string['quiz_preparing'] = 'Your quiz is being prepared...';
 $string['quiz_preparing_message'] = 'Generating quiz for {$a}';
 $string['quiz_ready'] = 'Your quiz is ready!';
-$string['quiz_ready_message'] = 'Click to take the quiz for {$a}';
-$string['quiz_ready_subject'] = 'Your AI Quiz is Ready';
 
 // Quiz progress and navigation.
 $string['progress_auto_saved'] = 'Your progress is automatically saved. Refreshing the page will resume from this question.';

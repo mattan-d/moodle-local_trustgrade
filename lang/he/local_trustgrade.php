@@ -230,6 +230,9 @@ $string['seconds'] = 'שניות';
 $string['text'] = 'טקסט';
 $string['entertext'] = 'הכנס טקסט';
 $string['enter_answer_placeholder'] = 'הכנס את תשובתך כאן…';
+$string['quiz_preparing'] = 'החידון שלך נמצא בהכנה...';
+$string['quiz_preparing_message'] = 'נוצר חידון עבור {$a}';
+$string['quiz_ready'] = 'החידון שלך מוכן!';
 
 // Quiz progress and navigation.
 $string['progress_auto_saved'] = 'ההתקדמות נשמרת אוטומטית. רענון הדף יחזור מהשאלה הזו.';

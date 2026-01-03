@@ -47,9 +47,10 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       indicator.html(
         '<div class="indicator-content">' +
           '   <div class="indicator-icon">' +
-          '       <img src="' +
-          M.cfg.wwwroot +
-          '/local/trustgrade/public/icon-light-32x32.png" alt="TrustGrade">' +
+          '       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+          '         <circle cx="16" cy="16" r="14" fill="#4CAF50" stroke="#fff" stroke-width="2"/>' +
+          '         <path d="M9 16L14 21L23 11" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+          "       </svg>" +
           "   </div>" +
           '   <div class="indicator-text">' +
           '       <div class="indicator-title"></div>' +
