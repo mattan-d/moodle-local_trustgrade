@@ -56,17 +56,6 @@ if ($hassiteconfig) {
         []
     ));
 
-    // Add debugging mode setting
-    $settings->add(new admin_setting_configcheckbox(
-        'local_trustgrade/debug_mode',
-        get_string('debug_mode', 'local_trustgrade'),
-        get_string('debug_mode_desc', 'local_trustgrade'),
-        0
-    ));
-
-    // Add cache management widget
-    $settings->add(new \local_trustgrade\task\admin_setting_cache_management());
-
     // Add disclosure settings
     $settings->add(new admin_setting_heading(
         'local_trustgrade/disclosure_heading',
@@ -102,7 +91,7 @@ if ($hassiteconfig) {
         'local_trustgrade/gateway_endpoint',
         get_string('gateway_endpoint', 'local_trustgrade'),
         get_string('gateway_endpoint_desc', 'local_trustgrade'),
-        'http://trustgrade.cloud/', // Set default gateway endpoint to trustgrade.cloud
+        'https://trustgrade.cloud/', // Updated default to https://trustgrade.cloud/
         PARAM_URL
     ));
 
@@ -110,7 +99,7 @@ if ($hassiteconfig) {
         'local_trustgrade/gateway_token',
         get_string('gateway_token', 'local_trustgrade'),
         get_string('gateway_token_desc', 'local_trustgrade'),
-        'Demo123'
+        '' // Changed default to empty string
     ));
 
     // Gateway test link

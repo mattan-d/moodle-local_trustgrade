@@ -107,5 +107,18 @@ function xmldb_local_trustgrade_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026010200, 'local', 'trustgrade');
     }
 
+    if ($oldversion < 2026010201) {
+        // Drop the debug cache table if it exists
+        $table = new xmldb_table('local_trustgrade_debug');
+        if ($dbman->table_exists($table)) {
+            $dbman->drop_table($table);
+        }
+
+        // Remove debug_mode configuration setting
+        unset_config('debug_mode', 'local_trustgrade');
+
+        upgrade_plugin_savepoint(true, 2026010201, 'local', 'trustgrade');
+    }
+
     return true;
 }

@@ -64,27 +64,6 @@
         <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="local_trustgrade_debug" COMMENT="Debug cache for AI API responses">
-      <FIELDS>
-        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="request_type" TYPE="char" LENGTH="50" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="request_data" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="raw_response" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
-        <FIELD NAME="parsed_response" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
-      </FIELDS>
-      <KEYS>
-        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
-      </KEYS>
-      <INDEXES>
-        <INDEX NAME="request_type" UNIQUE="false" FIELDS="request_type"/>
-        <INDEX NAME="timecreated" UNIQUE="false" FIELDS="timecreated"/>
-        <INDEX NAME="cmid" UNIQUE="false" FIELDS="cmid"/>
-      </INDEXES>
-    </TABLE>
     <TABLE NAME="local_trustgd_quiz_settings" COMMENT="Quiz configuration settings for assignments">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
