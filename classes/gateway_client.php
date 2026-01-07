@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Gateway client for external AI API communication with caching support.
+ * Gateway client for external AI API communication.
  *
  * @package    local_trustgrade
  * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
@@ -29,20 +29,18 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filelib.php');
 
 /**
-* Gateway client for external AI API communication with caching support
+* Gateway client for external AI API communication
 */
 class gateway_client {
 
   private $endpoint;
   private $token;
   private $timeout;
-  private $debugMode;
 
   public function __construct() {
       $this->endpoint = get_config('local_trustgrade', 'gateway_endpoint');
       $this->token = get_config('local_trustgrade', 'gateway_token');
       $this->timeout = 30;
-      $this->debugMode = get_config('local_trustgrade', 'debug_mode');
 
       if (empty($this->endpoint)) {
           throw new \Exception('Gateway endpoint not configured. Please configure the Gateway endpoint in plugin settings.');
@@ -54,11 +52,11 @@ class gateway_client {
   }
 
   /**
-   * Check instructions via Gateway with caching support
+   * Check instructions via Gateway
    *
    * @param string $instructions Assignment instructions
    * @param array $files Array of attachments to send to the gateway
-   * @return array Response from Gateway or cache
+   * @return array Response from Gateway
    */
   public function checkInstructions($instructions, array $files = []) {
       $requestData = [
@@ -67,16 +65,16 @@ class gateway_client {
           'files' => $files,
       ];
 
-      return $this->makeRequestWithCache('check_instructions', $requestData);
+      return $this->makeRequest($requestData);
   }
 
   /**
-   * Generate questions via Gateway with caching support
+   * Generate questions via Gateway
    *
    * @param string $instructions Assignment instructions
    * @param int $questionCount Number of questions to generate
    * @param array $files Array of file data (filename, mimetype, size, content[base64])
-   * @return array Response from Gateway or cache
+   * @return array Response from Gateway
    */
   public function generateQuestions($instructions, $questionCount = 5, array $files = []) {
       $requestData = [
@@ -86,18 +84,18 @@ class gateway_client {
               'files' => $files,
       ];
 
-      return $this->makeRequestWithCache('generate_questions', $requestData);
+      return $this->makeRequest($requestData);
   }
 
   /**
-   * Generate submission questions via Gateway with caching support
+   * Generate submission questions via Gateway
    *
    * @param string $submissionText Student submission content
    * @param string $instructions Assignment instructions
    * @param int $questionCount Number of questions to generate
    * @param array $files Array of file data (filename, mimetype, content)
    * @param array $metadata Additional metadata (course_id, course_name, course_module_id, user_id)
-   * @return array Response from Gateway or cache
+   * @return array Response from Gateway
    */
   public function generateSubmissionQuestions($submissionText, $instructions = '', $questionCount = 3, $files = [], $metadata = []) {
       $requestData = [
@@ -109,72 +107,7 @@ class gateway_client {
           'metadata' => $metadata
       ];
 
-      return $this->makeRequestWithCache('generate_submission_questions', $requestData);
-  }
-
-  /**
-   * Make request with caching support
-   *
-   * @param string $requestType Type of request for caching
-   * @param array $requestData Request data
-   * @return array Response data
-   */
-  private function makeRequestWithCache($requestType, $requestData) {
-      // Check cache first if debug mode is enabled
-      if ($this->debugMode) {
-          $cachedResponse = debug_cache::get_cached_response($requestType, $requestData);
-          if ($cachedResponse !== null) {
-              // Add cache indicators to response
-              $cachedResponse['from_cache'] = true;
-              $cachedResponse['cache_source'] = 'debug_cache';
-
-              return [
-                  'success' => true,
-                  'data' => $cachedResponse
-              ];
-          }
-      }
-
-      // Make actual Gateway request
-      $result = $this->makeRequest($requestData);
-
-      // Cache the response if debug mode is enabled and request was successful
-      if ($this->debugMode && $result['success']) {
-          $this->cacheResponse($requestType, $requestData, $result);
-      }
-
-      return $result;
-  }
-
-  /**
-   * Cache successful Gateway response
-   *
-   * @param string $requestType Type of request
-   * @param array $requestData Original request data
-   * @param array $response Gateway response
-   */
-  private function cacheResponse($requestType, $requestData, $response) {
-      try {
-          // Prepare response data for caching
-          $responseData = $response['data'];
-
-          // Add metadata
-          $responseData['gateway_response'] = true;
-          $responseData['cached_at'] = time();
-
-          // Use debug_cache to store the response
-          debug_cache::save_debug_data(
-              $requestType,
-              $requestData,
-              json_encode($response), // Raw response
-              $responseData, // Parsed response for caching
-              0 // No specific cmid for Gateway requests
-          );
-
-      } catch (\Exception $e) {
-          // Log error but don't fail the request
-          error_log('Failed to cache Gateway response: ' . $e->getMessage());
-      }
+      return $this->makeRequest($requestData);
   }
 
   /**
@@ -271,7 +204,7 @@ class gateway_client {
   }
 
   /**
-   * Test Gateway connection (bypasses cache)
+   * Test Gateway connection
    *
    * @return array Test result
    */
@@ -282,7 +215,6 @@ class gateway_client {
               'instructions' => 'Test connection to Gateway'
           ];
 
-          // Always bypass cache for connection tests
           $result = $this->makeRequest($testData);
 
           if ($result['success']) {
@@ -303,50 +235,5 @@ class gateway_client {
               'error' => 'Connection test failed: ' . $e->getMessage()
           ];
       }
-  }
-
-  /**
-   * Clear cached responses for debugging
-   *
-   * @param string $requestType Optional: specific request type to clear
-   * @return bool Success status
-   */
-  public function clearCache($requestType = null) {
-      if (!$this->debugMode) {
-          return false;
-      }
-
-      try {
-          if ($requestType) {
-              // Clear specific request type cache
-              global $DB;
-              $DB->delete_records('local_trustgrade_debug', ['request_type' => $requestType]);
-          } else {
-              // Clear all cache
-              debug_cache::cleanup_old_records();
-          }
-
-          return true;
-      } catch (\Exception $e) {
-          error_log('Failed to clear Gateway cache: ' . $e->getMessage());
-          return false;
-      }
-  }
-
-  /**
-   * Get cache statistics
-   *
-   * @return array Cache statistics
-   */
-  public function getCacheStats() {
-      if (!$this->debugMode) {
-          return ['cache_enabled' => false];
-      }
-
-      $stats = debug_cache::get_debug_stats();
-      $stats['cache_enabled'] = true;
-      $stats['debug_mode'] = $this->debugMode;
-
-      return $stats;
   }
 }

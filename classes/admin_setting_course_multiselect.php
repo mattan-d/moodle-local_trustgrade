@@ -89,7 +89,8 @@ class admin_setting_course_multiselect extends \admin_setting {
      * @return string HTML
      */
     public function output_html($data, $query = '') {
-        global $DB, $OUTPUT;
+        global $DB, $OUTPUT, $PAGE;
+
 
         // Check if course-specific mode is enabled
         $course_specific = get_config('local_trustgrade', 'course_specific');
@@ -112,65 +113,176 @@ class admin_setting_course_multiselect extends \admin_setting {
             $selected_courses = [];
         }
 
-        // Build the multi-select HTML
-        $html = \html_writer::start_tag('div', ['class' => 'form-multicheckbox']);
+        $html = \html_writer::start_tag('div', ['class' => 'trustgrade-course-selector']);
         
         if (empty($courses)) {
-            $html .= \html_writer::div(get_string('no_courses_available', 'local_trustgrade'), 'alert alert-warning');
+            $html .= $OUTPUT->notification(
+                get_string('no_courses_available', 'local_trustgrade'),
+                \core\output\notification::NOTIFY_WARNING
+            );
         } else {
-            // Add "Select All" / "Deselect All" buttons
+            // Statistics bar
+            $total = count($courses);
+            $selected = count($selected_courses);
             $html .= \html_writer::div(
-                \html_writer::tag('button', get_string('selectall'), [
-                    'type' => 'button',
-                    'class' => 'btn btn-sm btn-secondary mr-2',
-                    'onclick' => 'document.querySelectorAll(\'input[name="' . $this->get_full_name() . '[]\"]").forEach(cb => cb.checked = true);'
-                ]) .
-                \html_writer::tag('button', get_string('deselectall'), [
-                    'type' => 'button',
-                    'class' => 'btn btn-sm btn-secondary',
-                    'onclick' => 'document.querySelectorAll(\'input[name="' . $this->get_full_name() . '[]\"]").forEach(cb => cb.checked = false);'
-                ]),
+                \html_writer::tag('span', 
+                    get_string('courses_selected', 'local_trustgrade', ['selected' => $selected, 'total' => $total]),
+                    ['class' => 'badge badge-info']
+                ),
                 'mb-2'
             );
             
-            // Add search box
-            $html .= \html_writer::div(
-                \html_writer::tag('input', '', [
-                    'type' => 'text',
-                    'class' => 'form-control mb-2',
-                    'placeholder' => get_string('search_courses', 'local_trustgrade'),
-                    'onkeyup' => 'this.nextElementSibling.querySelectorAll(\'label\').forEach(label => {
-                        const text = label.textContent.toLowerCase();
-                        const search = this.value.toLowerCase();
-                        label.style.display = text.includes(search) ? \'block\' : \'none\';
-                    });'
-                ]),
-                'mb-2'
+            // Action buttons with better styling
+            $html .= \html_writer::start_tag('div', ['class' => 'btn-group mb-3', 'role' => 'group']);
+            $html .= \html_writer::tag('button', 
+                $OUTPUT->pix_icon('t/check', '') . ' ' . get_string('selectall'),
+                [
+                    'type' => 'button',
+                    'class' => 'btn btn-secondary btn-sm',
+                    'id' => 'selectall_courses',
+                ]
             );
+            $html .= \html_writer::tag('button',
+                $OUTPUT->pix_icon('t/delete', '') . ' ' . get_string('deselectall'),
+                [
+                    'type' => 'button',
+                    'class' => 'btn btn-secondary btn-sm',
+                    'id' => 'deselectall_courses',
+                ]
+            );
+            $html .= \html_writer::end_tag('div');
             
-            // Container for checkboxes
+            // Search box with icon
+            $search_id = 'course_search_' . uniqid();
+            $container_id = 'course_container_' . uniqid();
+            
+            $html .= \html_writer::start_tag('div', ['class' => 'form-group']);
+            $html .= \html_writer::tag('label', 
+                $OUTPUT->pix_icon('i/search', '') . ' ' . get_string('search'),
+                ['for' => $search_id, 'class' => 'font-weight-bold']
+            );
+            $html .= \html_writer::tag('input', '', [
+                'type' => 'text',
+                'id' => $search_id,
+                'class' => 'form-control',
+                'placeholder' => get_string('search_courses', 'local_trustgrade'),
+            ]);
+            $html .= \html_writer::end_tag('div');
+            
+            // Scrollable container with better styling
             $html .= \html_writer::start_tag('div', [
-                'class' => 'course-checkbox-container',
-                'style' => 'max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; border-radius: 4px;'
+                'id' => $container_id,
+                'class' => 'border rounded p-3 bg-light',
+                'style' => 'max-height: 450px; overflow-y: auto;'
             ]);
             
+            // Course checkboxes with improved layout
             foreach ($courses as $course) {
                 $checked = in_array($course->id, $selected_courses);
                 $checkbox_id = 'course_' . $course->id;
                 
-                $html .= \html_writer::div(
-                    \html_writer::checkbox(
-                        $this->get_full_name() . '[]',
-                        $course->id,
-                        $checked,
-                        $course->fullname . ' (' . $course->shortname . ')',
-                        ['id' => $checkbox_id]
-                    ),
-                    'form-check'
+                $html .= \html_writer::start_tag('div', [
+                    'class' => 'custom-control custom-checkbox course-item mb-2',
+                    'data-coursename' => strtolower($course->fullname . ' ' . $course->shortname)
+                ]);
+                
+                $html .= \html_writer::empty_tag('input', [
+                    'type' => 'checkbox',
+                    'class' => 'custom-control-input course-checkbox',
+                    'id' => $checkbox_id,
+                    'name' => $this->get_full_name() . '[]',
+                    'value' => $course->id,
+                    'checked' => $checked ? 'checked' : null,
+                ]);
+                
+                $html .= \html_writer::tag('label',
+                    \html_writer::tag('strong', $course->fullname) . 
+                    \html_writer::tag('small', ' (' . $course->shortname . ')', ['class' => 'text-muted ml-1']),
+                    ['class' => 'custom-control-label', 'for' => $checkbox_id]
                 );
+                
+                $html .= \html_writer::end_tag('div');
             }
             
             $html .= \html_writer::end_tag('div');
+            
+            $html .= \html_writer::script("
+                (function() {
+                    function init() {
+                        var searchInput = document.getElementById('{$search_id}');
+                        var selectAllBtn = document.getElementById('selectall_courses');
+                        var deselectAllBtn = document.getElementById('deselectall_courses');
+                        var courseItems = document.querySelectorAll('.course-item');
+                        var checkboxes = document.querySelectorAll('.course-checkbox');
+                        var badge = document.querySelector('.trustgrade-course-selector .badge');
+                        
+                        // Search functionality
+                        if (searchInput) {
+                            searchInput.addEventListener('keyup', function() {
+                                var searchTerm = this.value.toLowerCase();
+                                courseItems.forEach(function(item) {
+                                    var courseName = item.getAttribute('data-coursename');
+                                    if (courseName && courseName.indexOf(searchTerm) !== -1) {
+                                        item.style.display = '';
+                                    } else {
+                                        item.style.display = 'none';
+                                    }
+                                });
+                                updateStats();
+                            });
+                        }
+                        
+                        // Select all visible courses
+                        if (selectAllBtn) {
+                            selectAllBtn.addEventListener('click', function() {
+                                courseItems.forEach(function(item) {
+                                    if (item.style.display !== 'none') {
+                                        var checkbox = item.querySelector('.course-checkbox');
+                                        if (checkbox) checkbox.checked = true;
+                                    }
+                                });
+                                updateStats();
+                            });
+                        }
+                        
+                        // Deselect all visible courses
+                        if (deselectAllBtn) {
+                            deselectAllBtn.addEventListener('click', function() {
+                                courseItems.forEach(function(item) {
+                                    if (item.style.display !== 'none') {
+                                        var checkbox = item.querySelector('.course-checkbox');
+                                        if (checkbox) checkbox.checked = false;
+                                    }
+                                });
+                                updateStats();
+                            });
+                        }
+                        
+                        // Update statistics when checkboxes change
+                        checkboxes.forEach(function(checkbox) {
+                            checkbox.addEventListener('change', updateStats);
+                        });
+                        
+                        function updateStats() {
+                            var total = checkboxes.length;
+                            var selected = document.querySelectorAll('.course-checkbox:checked').length;
+                            if (badge) {
+                                badge.textContent = selected + ' / ' + total + ' " . get_string('courses_selected_short', 'local_trustgrade') . "';
+                            }
+                        }
+                        
+                        // Initial stats update
+                        updateStats();
+                    }
+                    
+                    // Run when DOM is ready
+                    if (document.readyState === 'loading') {
+                        document.addEventListener('DOMContentLoaded', init);
+                    } else {
+                        init();
+                    }
+                })();
+            ");
         }
         
         $html .= \html_writer::end_tag('div');

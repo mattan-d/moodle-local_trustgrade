@@ -70,7 +70,7 @@ $string['questions_generated_successfully'] = 'השאלות נוצרו בהצל�
 $string['error_saving_questions'] = 'שגיאה בשמירת השאלות שנוצרו';
 $string['error_generating_questions'] = 'שגיאה ביצירת שאלות';
 $string['processing_question_generation'] = 'מעבד יצירת שאלות';
-$string['processing_question_generation_message'] = 'אנא המתן בזמן שאנו יוצרים שאלות למשימה שלך…';
+$string['processing_question_generation_message'] = 'אנא המ��ן בזמן שאנו יוצרים שאלות למשימה שלך…';
 
 // Auto‑generate questions.
 $string['auto_generate_questions'] = 'צור בנק שאלות עבור מטלה זו בעזרת AI';
@@ -335,6 +335,8 @@ $string['error_saving_grades'] = 'שגיאה בשמירת הציונים';
 $string['clearing_grades'] = 'מנקה…';
 $string['all_grades_cleared'] = 'כל הציונים נמחקו בהצלחה';
 $string['error_clearing_grades'] = 'שגיאה במחיקת הציונים';
+$string['grade_is_overridden'] = 'ציון זה נדרס ידנית בספר הציונים ולא ניתן לעדכן אותו באופן אוטומטי';
+$string['auto_grade_skipped_overridden'] = '{$a} ציונים דולגו כי הם נדרסו ידנית';
 
 // Bulk grading.
 $string['bulk_grades_saved'] = ' {$a} ציונים נשמרו בהצלחה';

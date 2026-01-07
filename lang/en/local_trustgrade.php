@@ -35,12 +35,16 @@ $string['plugin_enabled_desc'] = 'Enable or disable the TrustGrade plugin global
 $string['default_enabled'] = 'Enable TrustGrade by default for new assignments';
 $string['default_enabled_desc'] = 'When enabled, TrustGrade will be automatically enabled for newly created assignments. Instructors can still disable it for individual assignments.';
 $string['course_specific'] = 'Enable course-specific availability';
-$string['course_specific_desc'] = 'When enabled, TrustGrade will only be available for specific courses selected below. When disabled, TrustGrade is available for all courses.';
+$string['course_specific_desc'] = 'When enabled, you can choose which courses have access to TrustGrade features';
 $string['enabled_courses'] = 'Enabled courses';
 $string['enabled_courses_desc'] = 'Select the courses where TrustGrade should be available. This setting only applies when course-specific availability is enabled.';
-$string['enable_course_specific_first'] = 'Please enable "Enable course-specific availability" above to select courses.';
-$string['no_courses_available'] = 'No courses available in the system.';
+$string['select_courses'] = 'Select courses';
+$string['select_courses_desc'] = 'Choose which courses can use TrustGrade';
+$string['enable_course_specific_first'] = 'Please enable "Course-specific availability" first to select courses';
+$string['no_courses_available'] = 'No courses available';
 $string['search_courses'] = 'Search courses...';
+$string['courses_selected'] = '{$a->selected} of {$a->total} courses selected';
+$string['courses_selected_short'] = 'courses selected'; // Added short version for statistics badge
 $string['course_not_enabled'] = 'TrustGrade is not available for this course. Please contact your administrator.';
 
 // Assignment settings.
@@ -165,35 +169,9 @@ $string['question_deleted_success'] = 'Question deleted successfully';
 $string['question_deleted_successfully'] = 'Question deleted successfully';
 $string['error_deleting_question'] = 'Error deleting question';
 
-// Debug mode and caching.
-$string['debug_mode'] = 'Debug Mode & Caching';
-$string['debug_mode_desc'] = 'Enable debug mode to cache Gateway responses and avoid repeated API calls. When enabled, identical requests will return cached responses instead of calling the Gateway. This improves performance and reduces API usage during development and testing.';
-$string['cleanup_debug_cache'] = 'Cleanup TrustGrade debug cache';
+// Scheduled tasks
 $string['cleanup_quiz_sessions'] = 'Cleanup TrustGrade quiz sessions';
 $string['task_retry_failed_async_tasks'] = 'Retry failed TrustGrade async tasks';
-
-// Cache management.
-$string['cache_management'] = 'Cache Management';
-$string['cache_management_widget_desc'] = 'View cache statistics and manage cached responses directly from the settings page.';
-$string['cache_disabled_message'] = 'Caching is disabled. Enable Debug Mode above to activate response caching.';
-$string['cache_stats_error'] = 'Error loading cache statistics: {$a}';
-$string['full_management'] = 'Full Management';
-$string['clear_all'] = 'Clear All';
-$string['clear_instructions'] = 'Clear Instructions';
-$string['clear_questions'] = 'Clear Questions';
-$string['clear_submissions'] = 'Clear Submissions';
-$string['cleanup_old'] = 'Cleanup Old';
-$string['confirm_clear_cache'] = 'Are you sure you want to clear all cached responses? This action cannot be undone.';
-$string['cache_hit'] = 'Cache hit - using cached response';
-
-// Cache action results.
-$string['cache_cleared_success'] = 'All cached responses have been cleared successfully.';
-$string['instructions_cache_cleared'] = 'Instruction analysis cache has been cleared.';
-$string['questions_cache_cleared'] = 'Question generation cache has been cleared.';
-$string['submissions_cache_cleared'] = 'Submission questions cache has been cleared.';
-$string['old_cache_cleaned'] = 'Old cache records have been cleaned up successfully.';
-$string['cache_clear_error'] = 'Error clearing cache: {$a}';
-$string['invalid_action'] = 'Invalid cache action requested.';
 
 // Quiz settings.
 $string['quiz_settings_title'] = 'Quiz Settings';
@@ -343,15 +321,12 @@ $string['saving_grade'] = 'Saving grade...';
 $string['grade_saved'] = 'Grade saved';
 $string['error_saving_grade'] = 'Error saving grade';
 $string['error_saving_grade_user'] = 'Error saving grade for user {$a}';
-$string['user_label'] = 'User';
-$string['error_calculate_grade_from_quiz'] = 'Could not calculate grade from quiz score';
-$string['unsaved_changes'] = '{$a} unsaved changes';
-$string['unsaved_changes_single'] = '1 unsaved change';
-$string['no_pending_grades'] = 'No pending grades to save.';
-$string['saving_grades'] = 'Saving...';
-$string['grades_saved_success'] = '{$a} grades saved successfully';
-$string['error_saving_grades'] = 'Error saving grades';
-$string['clearing_grades'] = 'Clearing...';
+$string['grade_feedback_trustgrade'] = 'This grade was set by TrustGrade plugin';
+$string['grade_is_locked'] = 'This grade has been locked in the gradebook and cannot be updated';
+$string['grade_is_overridden'] = 'This grade has been manually overridden in the gradebook and cannot be updated automatically';
+$string['grade_is_locked_or_overridden'] = 'This grade has been locked or manually overridden in the gradebook and cannot be updated';
+$string['auto_grade_skipped_locked'] = '{$a} grades were skipped because they are locked or overridden';
+$string['auto_grade_skipped_overridden'] = '{$a} grades were skipped because they have been manually overridden';
 
 // Bulk grading.
 $string['bulk_grades_saved'] = 'Successfully saved {$a} grades';
@@ -423,15 +398,6 @@ $string['privacy:metadata:local_trustgd_sub_questions:userid'] = 'The ID of the 
 $string['privacy:metadata:local_trustgd_sub_questions:question_data'] = 'The personalized question data generated from the submission.';
 $string['privacy:metadata:local_trustgd_sub_questions:timecreated'] = 'The time when the questions were generated.';
 $string['privacy:metadata:local_trustgd_sub_questions:timemodified'] = 'The time when the questions were last modified.';
-
-$string['privacy:metadata:local_trustgrade_debug'] = 'Stores debug information and cached API responses for development purposes.';
-$string['privacy:metadata:local_trustgrade_debug:userid'] = 'The ID of the user who triggered the API request.';
-$string['privacy:metadata:local_trustgrade_debug:cmid'] = 'The course module ID associated with the request.';
-$string['privacy:metadata:local_trustgrade_debug:request_type'] = 'The type of API request made.';
-$string['privacy:metadata:local_trustgrade_debug:request_data'] = 'The data sent in the API request.';
-$string['privacy:metadata:local_trustgrade_debug:raw_response'] = 'The raw response received from the API.';
-$string['privacy:metadata:local_trustgrade_debug:parsed_response'] = 'The parsed API response data.';
-$string['privacy:metadata:local_trustgrade_debug:timecreated'] = 'The time when the request was made.';
 
 $string['privacy:metadata:local_trustgd_quiz_sessions'] = 'Stores quiz session state including student answers and integrity monitoring data.';
 $string['privacy:metadata:local_trustgd_quiz_sessions:cmid'] = 'The course module ID for the quiz.';
