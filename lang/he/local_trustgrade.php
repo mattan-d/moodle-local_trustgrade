@@ -44,11 +44,11 @@ $string['save_assignment_first'] = 'אנא שמור את המשימה תחילה
 
 // AI Gateway Settings.
 $string['gateway_settings'] = 'הגדרות AI Gateway';
-$string['gateway_settings_desc'] = 'הגדר את ה‑AI Gateway החיצוני לעיבוד AI. ה‑Gateway מטפל בכל הגדרות API כולל מפתח OpenRouter ובחירת דגם.';
-$string['gateway_endpoint'] = 'כתובת URL של Endpoint ה‑Gateway';
-$string['gateway_endpoint_desc'] = 'כתובת URL של נקודת הקצה של ה‑API של ה‑Gateway החיצוני (למשל: https://your-gateway.com/api)';
+$string['gateway_settings_desc'] = 'הגדר את ה‑AI Gateway החיצוני לעיבוד AI. ה‑Gateway מטפל בכל הגדרות API כולל מפתח TrustGrade ובחירת דגם.';
+$string['gateway_endpoint'] = 'כתובת URL של Endpoint ה‑Gateway';
+$string['gateway_endpoint_desc'] = 'כתובת URL של נקודת הקצה של ה‑API של ה‑Gateway החיצוני (למשל: https://trustgrade.cloud/api)';
 $string['gateway_token'] = 'אסימון אימות ל‑Gateway';
-$string['gateway_token_desc'] = 'אסימון אימות לתקשורת מאובטחת עם ה‑Gateway (ברירת מחדל: Demo123 לצורך בדיקה)';
+$string['gateway_token_desc'] = 'אסימון אימות לתקשורת מאובטחת עם ה‑Gateway';
 $string['gateway_test'] = 'בדיקת חיבור ל‑Gateway';
 $string['test_gateway_connection'] = 'בדוק חיבור ל‑Gateway';
 
@@ -62,7 +62,7 @@ $string['no_instructions_or_files'] = 'נדרש או הנחיות או לפחו�
 $string['no_instructions_questions_error'] = 'לא נמצאו הנחיות ליצירת שאלות';
 
 // Question generation.
-$string['generate_questions'] = 'צור מאגר שאלות עם AI';
+$string['generate_questions'] = 'צור מאגר שאלות עם AI';
 $string['generated_questions'] = 'שאלות שנוצרו';
 $string['generating_questions'] = 'יוצרים שאלות דרך ה‑Gateway…';
 $string['questions_generated_success'] = 'השאלות נוצרו ונשמרו בהצלחה!';
@@ -81,7 +81,7 @@ $string['questions_will_be_generated'] = 'שאלות ייווצרו אוטומט
 
 // Question bank.
 $string['question_bank'] = 'מאגר שאלות';
-$string['question_bank_description'] = 'נהל את השאלות שנוצרו על‑ידי AI. ניתן לצפות, לערוך, למחוק שאלות קיימות, או ליצור חדשות.';
+$string['question_bank_description'] = 'נהל את השאלות שנוצרו על‑ידי AI. ניתן לצפות, לערוך, למחוק שאלות קיימות, או ליצור חדשות.';
 $string['question_bank_title'] = 'מאגר שאלות';
 $string['loading_question_bank'] = 'טוען מאגר שאלות…';
 $string['no_questions_available'] = 'אין שאלות זמינות עבור משימה זו.';
@@ -96,7 +96,7 @@ $string['enter_question_text'] = 'הכנס טקסט שאלה…';
 $string['click_edit_add_question'] = 'לחץ ערוך להוספת טקסט שאלה';
 $string['type'] = 'סוג';
 $string['multiple_choice'] = 'בחירה מרובה';
-$string['true_false'] = 'נכון/לא נכון';
+$string['true_false'] = 'נכון/לא נכון';
 $string['short_answer'] = 'תשובה קצרה';
 $string['options'] = 'אפשרויות';
 $string['option_text'] = 'טקסט אפשרות';
@@ -109,7 +109,7 @@ $string['correct_answer_required'] = 'נדרשת לפחות תשובה נכונ�
 $string['explanation'] = 'הסבר';
 $string['enter_explanation_option'] = 'הכנס הסבר לאפשרויות זו…';
 $string['explanation_for_true'] = 'הסבר ל‑נכון';
-$string['explanation_for_false'] = 'הסבר ל‑לא נכון';
+$string['explanation_for_false'] = 'הסבר ל‑לא נכון';
 $string['points'] = 'נקודות';
 $string['points_help'] = 'נקודות המוענקות עבור שאלה זו';
 $string['level'] = 'רמה';
@@ -133,10 +133,10 @@ $string['error_updating_question'] = 'שגיאה בעדכון השאלה';
 
 // Question source types.
 $string['question_source_instructor'] = 'מרצה';
-$string['question_source_ai_generated'] = 'נוצר על‑ידי AI';
-$string['question_source_submission'] = 'מבוסס על הגשה';
+$string['question_source_ai_generated'] = 'נוצר על‑ידי AI';
+$string['question_source_submission'] = 'מבוסס על הגשה';
 $string['instructor_question'] = 'שאלה של המרצה';
-$string['based_on_submission'] = 'מבוסס על ההגשה שלך';
+$string['based_on_submission'] = 'מבוסס על ההגשה שלך';
 
 // Question actions.
 $string['edit'] = 'ערוך';
@@ -151,7 +151,7 @@ $string['question_deleted_successfully'] = 'השאלה נמחקה בהצלחה';
 $string['error_deleting_question'] = 'שגיאה במחיקת השאלה';
 
 // Debug mode and caching.
-$string['debug_mode'] = 'מצב דיבוג & מטמון';
+$string['debug_mode'] = 'מצב דיבוג & מטמון';
 $string['debug_mode_desc'] = 'הפעל מצב דיבוג כדי לשמור תגובות של ה‑Gateway במטמון ולהימנע מקריאות API חוזרות. כאשר מופעל, בקשות זהות יחזרו מתגובה שמורה במקום לקרוא שוב ל‑Gateway. זה משפר ביצועים ומפחית שימוש ב‑API במהלך פיתוח ובדיקה.';
 $string['cleanup_debug_cache'] = 'נקה מטמון דיבוג של TrustGrade';
 $string['cleanup_quiz_sessions'] = 'נקה מפגשי חידונים של TrustGrade';
@@ -197,11 +197,11 @@ $string['show_countdown_desc'] = 'הצג טיימר ירידה לכל שאלה. 
 
 // Disclosure settings.
 $string['disclosure_settings'] = 'הגדרות גילוי לסטודנט';
-$string['disclosure_settings_desc'] = 'הגדר את אופן ההודעה לסטודנטים על פונקציות AI במשימות.';
-$string['show_disclosure'] = 'הצג הודעת גילוי AI';
-$string['show_disclosure_desc'] = 'הצג הודעת גילוי לסטודנטים לפני שליחת המשימה, שמודיעה על תכונת חידון מבוססת AI.';
+$string['disclosure_settings_desc'] = 'הגדר את אופן ההודעה לסטודנטים על פונקציות AI במשימות.';
+$string['show_disclosure'] = 'הצג הודעת גילוי AI';
+$string['show_disclosure_desc'] = 'הצג הודעת גילוי לסטודנטים לפני שליחת המשימה, שמודיעה על תכונת חידון מבוססת AI.';
 $string['custom_disclosure_message'] = 'הודעה גילוי מותאמת';
-$string['custom_disclosure_message_desc'] = 'הודעה מותאמת להצגה במקום ההודעה המוגדרת. השאר ריקה לשימוש בהודעת ברירת מחדל.';
+$string['custom_disclosure_message_desc'] = 'הודעה מותאמת להצגה במקום ההודעה המוגדרת. השאר ריקה לשימוש בהודעת ברירת מחדל.';
 
 // AI disclosure messages.
 $string['ai_disclosure_title'] = 'חוויה לימודית משולבת AI';
@@ -232,7 +232,7 @@ $string['entertext'] = 'הכנס טקסט';
 $string['enter_answer_placeholder'] = 'הכנס את תשובתך כאן…';
 $string['quiz_preparing'] = 'החידון שלך נמצא בהכנה...';
 $string['quiz_preparing_message'] = 'נוצר חידון עבור {$a}';
-$string['quiz_ready'] = 'החידון שלך מוכן!';
+$string['quiz_ready'] = 'החידון שלך מוכן. לחץ/י כאן להתחלה!';
 
 // Quiz progress and navigation.
 $string['progress_auto_saved'] = 'ההתקדמות נשמרת אוטומטית. רענון הדף יחזור מהשאלה הזו.';
@@ -280,9 +280,9 @@ $string['cannot_restart_notice'] = 'לאחר לחיצה על "התחל חידו�
 
 // Quiz report.
 $string['quiz_report'] = 'דוח חידון';
-$string['quiz_report_assignment_desc'] = 'דוח חידון AI עבור משימה זו';
-$string['quiz_report_course_desc'] = 'דוח חידון AI עבור כל המשימות בקורס זה';
-$string['quiz_report_all_desc'] = 'דוח חידון AI עבור כל המשימות בכל הקורסים';
+$string['quiz_report_assignment_desc'] = 'דוח חידון AI עבור משימה זו';
+$string['quiz_report_course_desc'] = 'דוח חידון AI עבור כל המשימות בקורס זה';
+$string['quiz_report_all_desc'] = 'דוח חידון AI עבור כל המשימות בכל הקורסים';
 $string['back_to_assignment'] = 'חזרה למשימה';
 $string['back_to_course'] = 'חזרה לקורס';
 $string['quiz_score'] = 'ציון חידון';
@@ -291,22 +291,22 @@ $string['view_details'] = 'הצג פרטים';
 
 // Quiz details.
 $string['quiz_details'] = 'פרטי חידון';
-$string['session_info'] = 'מידע על המפגש';
+$string['session_info'] = 'מידע על המפגש';
 $string['completed_on'] = 'הושלם ב‑';
 $string['time_taken'] = 'זמן שנדרש';
 $string['student_answer'] = 'תשובה הסטודנט';
 $string['result'] = 'תוצאה';
 $string['correct'] = 'נכון';
-$string['incorrect'] = 'לא נכון';
-$string['no_completed_quizzes'] = 'לא ישנם סטודנטים שהשלימו את חידון AI למשימה זו עדיין.';
+$string['incorrect'] = 'לא נכון';
+$string['no_completed_quizzes'] = 'לא ישנם סטודנטים שהשלימו את חידון AI למשימה זו עדיין.';
 $string['integrity_summary'] = 'סיכום יושרה';
 $string['window_blur_events'] = 'אירועי Blur של חלונות';
 $string['no_answer'] = 'אין תשובה';
 $string['true'] = 'נכון';
-$string['false'] = 'לא נכון';
-$string['not_available'] = 'לא זמין';
+$string['false'] = 'לא נכון';
+$string['not_available'] = 'לא זמין';
 $string['manual_grading_required'] = 'נדרש ניקוד ידני';
-$string['integrity_violations_count'] = 'סך כל הפרות היושרה: {$a}';
+$string['integrity_violations_count'] = 'סך כל הפרות היושרה: {$a}';
 
 // Answer display strings.
 $string['raw_answer_value'] = 'תשובה גולמית';
@@ -318,7 +318,7 @@ $string['unknown_question_type'] = 'סוג שאלה לא ידוע';
 $string['final_grade'] = 'ציון סופי';
 $string['save_all_pending'] = 'שמור הכל בהמתנה';
 $string['clear_all_grades'] = 'נקה את כל הציונים';
-$string['grading_instructions'] = 'הכנס ציונים ישירות בטבלה למטה. שינויים נשמרים אוטומטית לאחר 2 שניות או כאשר אתה עובר לשדה אחר.';
+$string['grading_instructions'] = 'הכנס ציונים ישירות בטבלה למטה. שינויים נשמרים אוטומטית לאחר 2 שניות או כאשר אתה עובר לשדה אחר.';
 $string['grade_status'] = 'סטטוס ציון';
 $string['grade_saved_successfully'] = 'הציון נשמר בהצלחה';
 $string['grade_save_error'] = 'שגיאה בשמירת הציון: {$a}';
@@ -360,18 +360,18 @@ $string['auto_grade_no_grades'] = 'לא ניתן להחיל ציונים. בדו
 $string['auto_grade_error'] = 'שגיאה בניקוד אוטומטי של סטודנטים';
 $string['auto_grade_confirmation'] = 'זה יקבע אוטומטית ציונים על‑פי ציון החידון לכל הסטודנטים. ציונים קיימים יוחלפו. להמשיך?';
 $string['auto_grading_progress'] = 'ניקוד אוטומטי…';
-$string['error_parsing_grades'] = 'שגיאה בפיענוח JSON של ציונים';
+$string['error_parsing_grades'] = 'שגיאה בפענוח JSON של ציונים';
 
 // Submission processing.
 $string['processing_submission'] = 'מעבד את ההגשה שלך';
-$string['processing_submission_message'] = 'אנא המתן בזמן שאנו מעבדים את ההגשת המשימה שלך…';
+$string['processing_submission_message'] = 'אנא המתן בזמן שאנו מעבדים את הגשת המשימה שלך…';
 $string['processing_please_wait'] = 'אנא המתן…';
 
 // UI Messages.
 $string['setting_update_error'] = 'שגיאה בעדכון ההגדרה: {$a}';
 $string['setting_updated_success'] = 'ההגדרה "{$a}" עודכנה בהצלחה.';
 $string['input_validation_error'] = 'שגיאת אימות קלט: {$a}';
-$string['gateway_error'] = 'שגיאת Gateway';
+$string['gateway_error'] = 'שגיאת Gateway';
 
 // Recommendation rendering.
 $string['criteria_evaluation'] = 'הערכת קריטריונים';
@@ -384,21 +384,21 @@ $string['no_criteria_provided'] = 'לא נמסרו קריטריונים.';
 $string['recommendation_error'] = 'שגיאה בהצגת ההמלצה.';
 
 // Privacy API metadata descriptions.
-$string['privacy:metadata:local_trustgrade_logs'] = 'שומר יומני ניתוח הנחיות TrustGrade והמלצות AI.';
+$string['privacy:metadata:local_trustgrade_logs'] = 'שומר יומני ניתוח הנחיות TrustGrade והמלצות AI.';
 $string['privacy:metadata:local_trustgrade_logs:userid'] = 'מספר המשתמש שביקש את ניתוח ההנחיות.';
 $string['privacy:metadata:local_trustgrade_logs:cmid'] = 'מספר מודול הקורס שבו בוצע הניתוח.';
 $string['privacy:metadata:local_trustgrade_logs:instructions'] = 'הנחיות המשימה שנבחנו.';
-$string['privacy:metadata:local_trustgrade_logs:recommendation'] = 'ההמלצה שנוצרה על‑ידי AI עבור ההנחיות.';
+$string['privacy:metadata:local_trustgrade_logs:recommendation'] = 'ההמלצה שנוצרה על‑ידי AI עבור ההנחיות.';
 $string['privacy:metadata:local_trustgrade_logs:timecreated'] = 'הזמן בו בוצע בקשת הניתוח.';
 
-$string['privacy:metadata:local_trustgrade_questions'] = 'שומר שאלות שנוצרו על‑ידי AI עבור משימות שנוצרו על‑ידי מרצים.';
+$string['privacy:metadata:local_trustgrade_questions'] = 'שומר שאלות שנוצרו על‑ידי AI עבור משימות שנוצרו על‑ידי מרצים.';
 $string['privacy:metadata:local_trustgrade_questions:cmid'] = 'מספר מודול הקורס עבורו יוצרו שאלות.';
 $string['privacy:metadata:local_trustgrade_questions:userid'] = 'מספר המרצה שייצר את השאלות.';
 $string['privacy:metadata:local_trustgrade_questions:question_data'] = 'נתוני השאלה כולל טקסט, סוג, אפשרויות ותשובות נכונות.';
 $string['privacy:metadata:local_trustgrade_questions:timecreated'] = 'הזמן בו נוצרו השאלות.';
 $string['privacy:metadata:local_trustgrade_questions:timemodified'] = 'הזמן בו השאלות שונו לאחרונה.';
 
-$string['privacy:metadata:local_trustgd_sub_questions'] = 'שומר שאלות שנוצרו על‑ידי AI המבוססות על הגשות סטודנטים.';
+$string['privacy:metadata:local_trustgd_sub_questions'] = 'שומר שאלות שנוצרו על‑ידי AI המבוססות על הגשות סטודנטים.';
 $string['privacy:metadata:local_trustgd_sub_questions:submission_id'] = 'מספר ההגשה שעליה מבוססות השאלות.';
 $string['privacy:metadata:local_trustgd_sub_questions:cmid'] = 'מספר מודול הקורס הקשור להגשה.';
 $string['privacy:metadata:local_trustgd_sub_questions:userid'] = 'מספר הסטודנט שההגשה שלו נבחנו.';
@@ -406,11 +406,11 @@ $string['privacy:metadata:local_trustgd_sub_questions:question_data'] = 'נתו�
 $string['privacy:metadata:local_trustgd_sub_questions:timecreated'] = 'הזמן בו יוצרו השאלות.';
 $string['privacy:metadata:local_trustgd_sub_questions:timemodified'] = 'הזמן בו השאלות שונו לאחרונה.';
 
-$string['privacy:metadata:local_trustgrade_debug'] = 'שומר מידע דיבוג ותגובות API שמורות לטובת פיתוח.';
-$string['privacy:metadata:local_trustgrade_debug:userid'] = 'מספר המשתמש שהפעיל את בקשת API.';
+$string['privacy:metadata:local_trustgrade_debug'] = 'שומר מידע דיבוג ותגובות API שמורות לטובת פיתוח.';
+$string['privacy:metadata:local_trustgrade_debug:userid'] = 'מספר המשתמש שהפעיל את בקשת API.';
 $string['privacy:metadata:local_trustgrade_debug:cmid'] = 'מספר מודול הקורס הקשור לבקשה.';
-$string['privacy:metadata:local_trustgrade_debug:request_type'] = 'סוג בקשת API שבוצעה.';
-$string['privacy:metadata:local_trustgrade_debug:request_data'] = 'הנתונים שנשלחו בבקשת API.';
+$string['privacy:metadata:local_trustgrade_debug:request_type'] = 'סוג בקשת API שבוצעה.';
+$string['privacy:metadata:local_trustgrade_debug:request_data'] = 'הנתונים שנשלחו בבקשת API.';
 $string['privacy:metadata:local_trustgrade_debug:raw_response'] = 'תגובה גולמית שהתקבלה מ‑API.';
 $string['privacy:metadata:local_trustgrade_debug:parsed_response'] = 'נתוני התגובה מ‑API לאחר פיענוח.';
 $string['privacy:metadata:local_trustgrade_debug:timecreated'] = 'הזמן בו בוצעה הבקשה.';
@@ -433,28 +433,28 @@ $string['privacy:metadata:local_trustgd_quiz_sessions:timecreated'] = 'הזמן 
 $string['privacy:metadata:local_trustgd_quiz_sessions:timemodified'] = 'הזמן בו שונה מפגש החידון לאחרונה.';
 $string['privacy:metadata:local_trustgd_quiz_sessions:timecompleted'] = 'הזמן בו הושלם החידון.';
 
-$string['privacy:metadata:ai_gateway'] = 'נתונים אישיים נשלחים לשירות AI Gateway חיצוני לעיבוד הנחיות משימה ויצירת שאלות אישיות.';
+$string['privacy:metadata:ai_gateway'] = 'נתונים אישיים נשלחים לשירות AI Gateway חיצוני לעיבוד הנחיות משימה ויצירת שאלות אישיות.';
 $string['privacy:metadata:ai_gateway:userid'] = 'מספר המשתמש עשוי להיכלל במטא‑נתונים למעקב.';
-$string['privacy:metadata:ai_gateway:instructions'] = 'הנחיות המשימה נשלחות ל‑AI Gateway לניתוח.';
+$string['privacy:metadata:ai_gateway:instructions'] = 'הנחיות המשימה נשלחות ל‑AI Gateway לניתוח.';
 $string['privacy:metadata:ai_gateway:submission_text'] = 'טקסט ההגשה של הסטודנט נשלח ליצירת שאלות מותאמות אישית.';
 $string['privacy:metadata:ai_gateway:files'] = 'קבצים מצורפים עשויים להישלח לניתוח וליצירת שאלות.';
-$string['privacy:metadata:ai_gateway:metadata'] = 'מידע נוסף (קורס, שם קורס, מודול ID) נשלח עם הבקשות.';
+$string['privacy:metadata:ai_gateway:metadata'] = 'מידע נוסף (קורס, שם קורס, מודול ID) נשלח עם הבקשות.';
 
 // Privacy export paths.
-$string['privacy:path:logs'] = 'יומני ניתוח הנחיות TrustGrade';
-$string['privacy:path:questions'] = 'שאלות שנוצרו על‑ידי TrustGrade';
-$string['privacy:path:submission_questions'] = 'שאלות מבוססות הגשה של TrustGrade';
-$string['privacy:path:debug'] = 'נתוני דיבוג של TrustGrade';
+$string['privacy:path:logs'] = 'יומני ניתוח הנחיות TrustGrade';
+$string['privacy:path:questions'] = 'שאלות שנוצרו על‑ידי TrustGrade';
+$string['privacy:path:submission_questions'] = 'שאלות מבוססות הגשה של TrustGrade';
+$string['privacy:path:debug'] = 'נתוני דיבוג של TrustGrade';
 
 // Cache management page strings
 // Cache management page.
-$string['cache_management_title'] = 'ניהול מטמון של TrustGrade';
-$string['cache_management_heading'] = 'ניהול מטמון של TrustGrade';
+$string['cache_management_title'] = 'ניהול מטמון של TrustGrade';
+$string['cache_management_heading'] = 'ניהול מטמון של TrustGrade';
 $string['debug_mode_disabled_info'] = 'מצב דיבוג כרגע מושבת. הפעל את מצב הדיבוג בהגדרות התוסף כדי להשתמש בתכונות המטמון.';
-$string['debug_mode_enabled_info'] = 'מצב דיבוג מופעל. תגובות Gateway נשמרות במטמון לשיפור ביצועים.';
+$string['debug_mode_enabled_info'] = 'מצב דיבוג מופעל. תגובות Gateway נשמרות במטמון לשיפור ביצועים.';
 $string['cache_statistics'] = 'סטטיסטיקות מטמון';
 $string['total_cached_responses'] = 'סה”כ תגובות שמורות';
-$string['last_24_hours'] = '24 השעות האחרונות';
+$string['last_24_hours'] = '24 השעות האחרונות';
 $string['cacheable_responses'] = 'תגובות שניתנות לשמירה';
 $string['cache_efficiency'] = 'יעילות מטמון';
 $string['cache_by_type'] = 'מטמון לפי סוג בקשה';
@@ -470,10 +470,10 @@ $string['not_cached'] = 'לא נשמר';
 $string['error_loading_cache_stats'] = 'שגיאה בטעינת סטטיסטיקות המטמון: {$a}';
 $string['cache_management_actions'] = 'פעולות ניהול מטמון';
 $string['clear_all_cache_title'] = 'נקה את כל המטמון';
-$string['clear_all_cache_desc'] = 'הסר את כל תגובות Gateway שמורות. זה יצמצם קריאות חדשות ל‑Gateway.';
+$string['clear_all_cache_desc'] = 'הסר את כל תגובות Gateway שמורות. זה יצמצם קריאות חדשות ל‑Gateway.';
 $string['clear_all_cache_button'] = 'נקה את כל המטמון';
 $string['cleanup_old_records_title'] = 'נקה רשומות ישנות';
-$string['cleanup_old_records_desc'] = 'הסר רשומות מטמון שגילן עולה על 7 ימים כדי לפנות מקום בבסיס נתונים.';
+$string['cleanup_old_records_desc'] = 'הסר רשומות מטמון שגילן עולה על 7 ימים כדי לפנות מקום בבסיס נתונים.';
 $string['cleanup_old_records_button'] = 'נקה רשומות ישנות';
 $string['related_pages'] = 'דפים קשורים';
 $string['plugin_settings'] = 'הגדרות תוסף';
@@ -485,27 +485,27 @@ $string['old_cache_cleaned_up'] = 'רשומות מטמון ישנות נוקו';
 
 // Gateway test page strings
 // Gateway test page.
-$string['gateway_test_title'] = 'בדיקת AI Gateway';
-$string['gateway_test_heading'] = 'בדיקת חיבור לנקודת API של AI Gateway';
+$string['gateway_test_title'] = 'בדיקת AI Gateway';
+$string['gateway_test_heading'] = 'בדיקת חיבור לנקודת API של AI Gateway';
 $string['gateway_connection_success'] = 'החיבור הצליח';
 $string['gateway_connection_failed'] = 'החיבור נכשל: {$a}';
-$string['gateway_configuration'] = 'הגדרות Gateway';
+$string['gateway_configuration'] = 'הגדרות Gateway';
 $string['gateway_endpoint_label'] = 'נקודת קצה';
 $string['gateway_token_label'] = 'אסימון';
 $string['gateway_token_configured'] = 'הוגדר';
 $string['gateway_token_not_configured'] = 'לא הוגדר';
-$string['gateway_openrouter_note'] = 'הערה: מפתח API של OpenRouter והדגם מוגדרים בשרת Gateway, לא בתוסף.';
+$string['gateway_openrouter_note'] = 'הערה: מפתח API של TrustGrade והדגם מוגדרים בשרת Gateway, לא בתוסף.';
 $string['gateway_troubleshooting'] = 'פתרון תקלות';
 $string['gateway_verify_url'] = 'אמת שה‑URL של נקודת הקצה נכון ונגישה';
-$string['gateway_check_token'] = 'בדוק שהאסימון לאימות ה‑Gateway תקף';
-$string['gateway_ensure_running'] = 'וודא שהשרת Gateway פועל ומגיב';
-$string['gateway_verify_apikey'] = 'אמת שה‑Gateway מחזיק מפתח API חוקי של OpenRouter';
+$string['gateway_check_token'] = 'בדוק שהאסימון לאימות ה‑Gateway תקף';
+$string['gateway_ensure_running'] = 'וודא שהשרת Gateway פועל ומגיב';
+$string['gateway_verify_apikey'] = 'אמת שה‑Gateway מחזיק מפתח API חוקי של TrustGrade';
 $string['gateway_config_error'] = 'שגיאת הגדרה: {$a}';
 $string['gateway_config_required'] = 'הגדרה נדרשת';
-$string['gateway_config_endpoint'] = 'הגדר את כתובת ה‑Endpoint של Gateway בהגדרות התוסף';
-$string['gateway_config_token'] = 'הגדר את אסימון האימות של Gateway (השתמש ב‑"Demo123" לצורך בדיקה)';
-$string['gateway_config_openrouter'] = 'ודא שלשרת Gateway מוגדר מפתח API חוקי של OpenRouter';
-$string['configure_gateway_settings'] = 'הגדר את הגדרות Gateway';
+$string['gateway_config_endpoint'] = 'הגדר את כתובת ה‑Endpoint של Gateway בהגדרות התוסף';
+$string['gateway_config_token'] = 'הגדר את אסימון האימות של Gateway';
+$string['gateway_config_openrouter'] = 'ודא שלשרת Gateway מוגדר מפתח API חוקי של TrustGrade';
+$string['configure_gateway_settings'] = 'הגדר את הגדרות Gateway';
 
 // Question editor validation strings
 // Question editor validation.
@@ -529,7 +529,7 @@ $string['option_is_correct_invalid'] = 'אפשרות באינדקס {$a} מכי�
 $string['option_explanation_invalid'] = 'אפשרות באינדקס {$a} מכילה \'explanation\' לא חוקי (חייב להיות מחרוזת)';
 $string['at_least_one_correct_option'] = 'שאלות בחירה מרובה חייבות לכלול לפחות אפשרות נכונה אחת';
 $string['metadata_must_be_object'] = 'מטא‑נתונים חייבים להיות אובייקט';
-$string['points_must_be_1_to_100'] = 'נקודות חייבות להיות בין 1 ל‑100';
+$string['points_must_be_1_to_100'] = 'נקודות חייבות להיות בין 1 ל‑100';
 $string['blooms_level_must_be_string'] = 'ה‑metadata \'blooms_level\' חייבת להיות מחרוזת';
 
 // Quiz completion strings
@@ -549,5 +549,3 @@ $string['quiz_preparing'] = 'החידון שלך בהכנה';
 $string['quiz_preparing_message'] = 'אנחנו יוצרים שאלות מותאמות אישית עבור {$a}. תקבל הודעה כשהחידון יהיה מוכן.';
 $string['quiz_ready_click_to_start'] = 'החידון מוכן - לחץ להתחלה';
 $string['quiz_ready_assignment'] = 'החידון שלך עבור {$a} מוכן!';
-
-?>
