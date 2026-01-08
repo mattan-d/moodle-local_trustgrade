@@ -51,20 +51,14 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         // Get current settings
         $current_settings = \local_trustgrade\quiz_settings::get_settings($cmid);
 
-        $default_enabled = ($cmid > 0) 
-            ? ($current_settings['enabled'] ? 1 : 0) 
-            : get_config('local_trustgrade', 'default_enabled');
+        $default_enabled = ($cmid > 0)
+                ? ($current_settings['enabled'] ? 1 : 0)
+                : get_config('local_trustgrade', 'default_enabled');
 
         $mform->addElement('advcheckbox', 'trustgrade_enabled',
                 get_string('trustgrade_enabled', 'local_trustgrade'),
                 get_string('trustgrade_enabled_desc', 'local_trustgrade'));
         $mform->setDefault('trustgrade_enabled', $default_enabled);
-
-        // Add description
-        $mform->addElement('static', 'trustgrade_description', '',
-                get_string('trustgrade_description', 'local_trustgrade'));
-        $mform->setAdvanced('trustgrade_description');
-        $mform->disabledIf('trustgrade_description', 'trustgrade_enabled');
 
         // Keep Check Instructions button for manual instruction checking
         $buttonarray = array();
@@ -98,7 +92,7 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         for ($i = 0; $i <= 10; $i++) {
             $generate_options[$i] = $i;
         }
-        
+
         $mform->addElement('advcheckbox', 'trustgrade_auto_generate',
                 get_string('auto_generate_questions', 'local_trustgrade'),
                 get_string('auto_generate_questions_desc', 'local_trustgrade'));
@@ -200,14 +194,14 @@ function local_trustgrade_before_standard_html_head() {
     $pending = $cache->get('trustgrade_pending_generation');
 
     if ($pending) {
-        
+
         // Only process if this is the assignment view page and it matches the pending cmid
         if ($PAGE->pagetype === 'mod-assign-view') {
             $current_cmid = optional_param('id', 0, PARAM_INT);
-            
+
             if ($current_cmid == $pending['cmid']) {
                 $cache->delete('trustgrade_pending_generation');
-                
+
                 // Now process the question generation with proper course module validation
                 try {
                     // Verify course module exists before proceeding
@@ -215,19 +209,19 @@ function local_trustgrade_before_standard_html_head() {
                     if (!$cm) {
                         throw new Exception('Course module not found');
                     }
-                    
+
                     // Collect files using the external class method
                     $files = \local_trustgrade\external::collect_intro_files(
-                        $pending['intro_itemid'], 
-                        $pending['intro_attachments_itemid']
+                            $pending['intro_itemid'],
+                            $pending['intro_attachments_itemid']
                     );
 
                     // Trigger question generation
                     $gateway_client = new \local_trustgrade\gateway_client();
                     $result = $gateway_client->generateQuestions(
-                        $pending['instructions'], 
-                        $pending['question_count'], 
-                        $files
+                            $pending['instructions'],
+                            $pending['question_count'],
+                            $files
                     );
 
                     if ($result && isset($result['success']) && $result['success']) {
@@ -293,8 +287,8 @@ function local_trustgrade_before_standard_html_head() {
             \local_trustgrade\disclosure_handler::init_disclosure($cmid);
 
             $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [
-                $cmid, 
-                $settings['questions_to_generate']
+                    $cmid,
+                    $settings['questions_to_generate']
             ]);
         }
     }
@@ -331,7 +325,7 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
 
         if (!empty($data->trustgrade_auto_generate) && !empty($data->trustgrade_enabled)) {
             $cache = cache::make('local_trustgrade', 'pending_generation');
-            
+
             // Get assignment instructions for question generation
             $instructions = '';
             if (isset($data->intro)) {
@@ -350,14 +344,14 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
             }
 
             $cache->set('trustgrade_pending_generation', [
-                'cmid' => $cmid,
-                'instructions' => $instructions,
-                'question_count' => $data->trustgrade_instructor_questions ?? 0,
-                'intro_itemid' => $intro_itemid,
-                'intro_attachments_itemid' => $intro_attachments_itemid,
-                'timestamp' => time()
+                    'cmid' => $cmid,
+                    'instructions' => $instructions,
+                    'question_count' => $data->trustgrade_instructor_questions ?? 0,
+                    'intro_itemid' => $intro_itemid,
+                    'intro_attachments_itemid' => $intro_attachments_itemid,
+                    'timestamp' => time()
             ]);
-            
+
             // Add notification that questions will be generated
             \core\notification::success(get_string('questions_will_be_generated', 'local_trustgrade'));
         }
