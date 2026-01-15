@@ -52,8 +52,8 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $current_settings = \local_trustgrade\quiz_settings::get_settings($cmid);
 
         $default_enabled = ($cmid > 0)
-                ? ($current_settings['enabled'] ? 1 : 0)
-                : get_config('local_trustgrade', 'default_enabled');
+            ? ($current_settings['enabled'] ? 1 : 0)
+            : get_config('local_trustgrade', 'default_enabled');
 
         $mform->addElement('advcheckbox', 'trustgrade_enabled',
                 get_string('trustgrade_enabled', 'local_trustgrade'),
@@ -89,7 +89,7 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
 
         // Questions to generate
         $generate_options = [];
-        for ($i = 0; $i <= 10; $i++) {
+        for ($i = 0; $i <= 50; $i++) { // Increased maximum from 10 to 50 to allow more questions
             $generate_options[$i] = $i;
         }
 
@@ -102,7 +102,7 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
 
         // Options for number of questions (used for instructor and submission questions)
         $question_count_options = [];
-        for ($i = 0; $i <= 20; $i++) {
+        for ($i = 0; $i <= 50; $i++) { // Increased maximum from 10 to 50 to allow more questions
             $question_count_options[$i] = $i;
         }
 
@@ -212,16 +212,16 @@ function local_trustgrade_before_standard_html_head() {
 
                     // Collect files using the external class method
                     $files = \local_trustgrade\external::collect_intro_files(
-                            $pending['intro_itemid'],
-                            $pending['intro_attachments_itemid']
+                        $pending['intro_itemid'],
+                        $pending['intro_attachments_itemid']
                     );
 
                     // Trigger question generation
                     $gateway_client = new \local_trustgrade\gateway_client();
                     $result = $gateway_client->generateQuestions(
-                            $pending['instructions'],
-                            $pending['question_count'],
-                            $files
+                        $pending['instructions'],
+                        $pending['question_count'],
+                        $files
                     );
 
                     if ($result && isset($result['success']) && $result['success']) {
@@ -287,8 +287,8 @@ function local_trustgrade_before_standard_html_head() {
             \local_trustgrade\disclosure_handler::init_disclosure($cmid);
 
             $PAGE->requires->js_call_amd('local_trustgrade/submission_processing', 'init', [
-                    $cmid,
-                    $settings['questions_to_generate']
+                $cmid,
+                $settings['questions_to_generate']
             ]);
         }
     }
@@ -344,12 +344,12 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
             }
 
             $cache->set('trustgrade_pending_generation', [
-                    'cmid' => $cmid,
-                    'instructions' => $instructions,
-                    'question_count' => $data->trustgrade_instructor_questions ?? 0,
-                    'intro_itemid' => $intro_itemid,
-                    'intro_attachments_itemid' => $intro_attachments_itemid,
-                    'timestamp' => time()
+                'cmid' => $cmid,
+                'instructions' => $instructions,
+                'question_count' => $data->trustgrade_instructor_questions ?? 0,
+                'intro_itemid' => $intro_itemid,
+                'intro_attachments_itemid' => $intro_attachments_itemid,
+                'timestamp' => time()
             ]);
 
             // Add notification that questions will be generated

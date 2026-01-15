@@ -70,8 +70,8 @@ class question_generator {
             return ['error' => get_string('no_instructions', 'local_trustgrade')];
         }
         
-        // Validate questions count
-        $questions_count = max(1, min(10, intval($questions_count)));
+        // Validate questions count (minimum 1, no maximum)
+        $questions_count = max(1, intval($questions_count));
         
         try {
             $gateway = new gateway_client();

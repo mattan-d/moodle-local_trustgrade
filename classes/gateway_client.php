@@ -29,211 +29,211 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filelib.php');
 
 /**
- * Gateway client for external AI API communication
- */
+* Gateway client for external AI API communication
+*/
 class gateway_client {
 
-    private $endpoint;
-    private $token;
-    private $timeout;
+  private $endpoint;
+  private $token;
+  private $timeout;
 
-    public function __construct() {
-        $this->endpoint = get_config('local_trustgrade', 'gateway_endpoint');
-        $this->token = get_config('local_trustgrade', 'gateway_token');
-        $this->timeout = 30000;
+  public function __construct() {
+      $this->endpoint = get_config('local_trustgrade', 'gateway_endpoint');
+      $this->token = get_config('local_trustgrade', 'gateway_token');
+      $this->timeout = 30000;
 
-        if (empty($this->endpoint)) {
-            throw new \Exception('Gateway endpoint not configured. Please configure the Gateway endpoint in plugin settings.');
-        }
+      if (empty($this->endpoint)) {
+          throw new \Exception('Gateway endpoint not configured. Please configure the Gateway endpoint in plugin settings.');
+      }
 
-        if (empty($this->token)) {
-            throw new \Exception('Gateway token not configured. Please configure the Gateway authentication token in plugin settings.');
-        }
-    }
+      if (empty($this->token)) {
+          throw new \Exception('Gateway token not configured. Please configure the Gateway authentication token in plugin settings.');
+      }
+  }
 
-    /**
-     * Check instructions via Gateway
-     *
-     * @param string $instructions Assignment instructions
-     * @param array $files Array of attachments to send to the gateway
-     * @return array Response from Gateway
-     */
-    public function checkInstructions($instructions, array $files = []) {
-        $requestData = [
-                'action' => 'check_instructions',
-                'instructions' => $instructions,
-                'files' => $files,
-        ];
+  /**
+   * Check instructions via Gateway
+   *
+   * @param string $instructions Assignment instructions
+   * @param array $files Array of attachments to send to the gateway
+   * @return array Response from Gateway
+   */
+  public function checkInstructions($instructions, array $files = []) {
+      $requestData = [
+          'action' => 'check_instructions',
+          'instructions' => $instructions,
+          'files' => $files,
+      ];
 
-        return $this->makeRequest($requestData);
-    }
+      return $this->makeRequest($requestData);
+  }
 
-    /**
-     * Generate questions via Gateway
-     *
-     * @param string $instructions Assignment instructions
-     * @param int $questionCount Number of questions to generate
-     * @param array $files Array of file data (filename, mimetype, size, content[base64])
-     * @return array Response from Gateway
-     */
-    public function generateQuestions($instructions, $questionCount = 5, array $files = []) {
-        $requestData = [
-                'action' => 'generate_questions',
-                'instructions' => $instructions,
-                'question_count' => $questionCount,
-                'files' => $files,
-        ];
+  /**
+   * Generate questions via Gateway
+   *
+   * @param string $instructions Assignment instructions
+   * @param int $questionCount Number of questions to generate
+   * @param array $files Array of file data (filename, mimetype, size, content[base64])
+   * @return array Response from Gateway
+   */
+  public function generateQuestions($instructions, $questionCount = 5, array $files = []) {
+      $requestData = [
+              'action' => 'generate_questions',
+              'instructions' => $instructions,
+              'question_count' => $questionCount,
+              'files' => $files,
+      ];
 
-        return $this->makeRequest($requestData);
-    }
+      return $this->makeRequest($requestData);
+  }
 
-    /**
-     * Generate submission questions via Gateway
-     *
-     * @param string $submissionText Student submission content
-     * @param string $instructions Assignment instructions
-     * @param int $questionCount Number of questions to generate
-     * @param array $files Array of file data (filename, mimetype, content)
-     * @param array $metadata Additional metadata (course_id, course_name, course_module_id, user_id)
-     * @return array Response from Gateway
-     */
-    public function generateSubmissionQuestions($submissionText, $instructions = '', $questionCount = 3, $files = [], $metadata = []) {
-        $requestData = [
-                'action' => 'generate_submission_questions',
-                'submission_text' => $submissionText,
-                'instructions' => $instructions,
-                'question_count' => $questionCount,
-                'files' => $files,
-                'metadata' => $metadata
-        ];
+  /**
+   * Generate submission questions via Gateway
+   *
+   * @param string $submissionText Student submission content
+   * @param string $instructions Assignment instructions
+   * @param int $questionCount Number of questions to generate
+   * @param array $files Array of file data (filename, mimetype, content)
+   * @param array $metadata Additional metadata (course_id, course_name, course_module_id, user_id)
+   * @return array Response from Gateway
+   */
+  public function generateSubmissionQuestions($submissionText, $instructions = '', $questionCount = 3, $files = [], $metadata = []) {
+      $requestData = [
+          'action' => 'generate_submission_questions',
+          'submission_text' => $submissionText,
+          'instructions' => $instructions,
+          'question_count' => $questionCount,
+          'files' => $files,
+          'metadata' => $metadata
+      ];
 
-        return $this->makeRequest($requestData);
-    }
+      return $this->makeRequest($requestData);
+  }
 
-    /**
-     * Make HTTP request to Gateway
-     *
-     * @param array $data Request data
-     * @return array Response data
-     */
-    private function makeRequest($data) {
-        global $CFG;
+  /**
+   * Make HTTP request to Gateway
+   *
+   * @param array $data Request data
+   * @return array Response data
+   */
+  private function makeRequest($data) {
+      global $CFG;
+      
+      if (!isset($data['metadata'])) {
+          $data['metadata'] = [];
+      }
+      if (!isset($data['metadata']['moodle_domain'])) {
+          $data['metadata']['moodle_domain'] = $CFG->wwwroot;
+      }
+      
+      $curl = new \curl();
+      
+      $curl->setopt([
+          'CURLOPT_TIMEOUT' => $this->timeout,
+          'CURLOPT_CONNECTTIMEOUT' => 10,
+      ]);
+      
+      $headers = [
+          'Authorization: Bearer ' . $this->token,
+          'Auth: Bearer ' . $this->token, // Cloudflare compatibility
+          'Content-Type: application/json',
+          'User-Agent: Moodle TrustGrade Plugin'
+      ];
+      
+      $response = $curl->post($this->endpoint, json_encode($data), ['CURLOPT_HTTPHEADER' => $headers]);
+      
+      $info = $curl->get_info();
+      $httpCode = isset($info['http_code']) ? $info['http_code'] : 0;
+      $error = $curl->get_errno() ? $curl->error : '';
 
-        if (!isset($data['metadata'])) {
-            $data['metadata'] = [];
-        }
-        if (!isset($data['metadata']['moodle_domain'])) {
-            $data['metadata']['moodle_domain'] = $CFG->wwwroot;
-        }
+      if ($error) {
+          return [
+              'success' => false,
+              'error' => 'Gateway connection error: ' . $error . '. Please check your Gateway endpoint configuration.'
+          ];
+      }
 
-        $curl = new \curl();
+      if ($httpCode === 401) {
+          return [
+              'success' => false,
+              'error' => 'Gateway authentication failed. Please check your Gateway token configuration.'
+          ];
+      }
 
-        $curl->setopt([
-                'CURLOPT_TIMEOUT' => $this->timeout,
-                'CURLOPT_CONNECTTIMEOUT' => 10,
-        ]);
+      if ($httpCode === 404) {
+          return [
+              'success' => false,
+              'error' => 'Gateway endpoint not found. Please verify your Gateway endpoint URL.'
+          ];
+      }
 
-        $headers = [
-                'Authorization: Bearer ' . $this->token,
-                'Auth: Bearer ' . $this->token, // Cloudflare compatibility
-                'Content-Type: application/json',
-                'User-Agent: Moodle TrustGrade Plugin'
-        ];
+      if ($httpCode !== 200) {
+          return [
+              'success' => false,
+              'error' => 'Gateway HTTP error: ' . $httpCode . '. Response: ' . substr($response, 0, 200)
+          ];
+      }
 
-        $response = $curl->post($this->endpoint, json_encode($data), ['CURLOPT_HTTPHEADER' => $headers]);
+      $decoded = json_decode($response, true);
 
-        $info = $curl->get_info();
-        $httpCode = isset($info['http_code']) ? $info['http_code'] : 0;
-        $error = $curl->get_errno() ? $curl->error : '';
+      if (json_last_error() !== JSON_ERROR_NONE) {
+          return [
+              'success' => false,
+              'error' => 'Invalid Gateway response format. Please check Gateway configuration.'
+          ];
+      }
 
-        if ($error) {
-            return [
-                    'success' => false,
-                    'error' => 'Gateway connection error: ' . $error . '. Please check your Gateway endpoint configuration.'
-            ];
-        }
+      if (!isset($decoded['success'])) {
+          return [
+              'success' => false,
+              'error' => 'Invalid Gateway response structure.'
+          ];
+      }
 
-        if ($httpCode === 401) {
-            return [
-                    'success' => false,
-                    'error' => 'Gateway authentication failed. Please check your Gateway token configuration.'
-            ];
-        }
+      if (!$decoded['success']) {
+          return [
+              'success' => false,
+              'error' => $decoded['error'] ?? 'Unknown Gateway error'
+          ];
+      }
 
-        if ($httpCode === 404) {
-            return [
-                    'success' => false,
-                    'error' => 'Gateway endpoint not found. Please verify your Gateway endpoint URL.'
-            ];
-        }
+      return [
+          'success' => true,
+          'data' => $decoded['data']
+      ];
+  }
 
-        if ($httpCode !== 200) {
-            return [
-                    'success' => false,
-                    'error' => 'Gateway HTTP error: ' . $httpCode . '. Response: ' . substr($response, 0, 200)
-            ];
-        }
+  /**
+   * Test Gateway connection
+   *
+   * @return array Test result
+   */
+  public function testConnection() {
+      try {
+          $testData = [
+              'action' => 'check_instructions',
+              'instructions' => 'Test connection to Gateway'
+          ];
 
-        $decoded = json_decode($response, true);
+          $result = $this->makeRequest($testData);
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return [
-                    'success' => false,
-                    'error' => 'Invalid Gateway response format. Please check Gateway configuration.'
-            ];
-        }
+          if ($result['success']) {
+              return [
+                  'success' => true,
+                  'message' => 'Gateway connection successful'
+              ];
+          } else {
+              return [
+                  'success' => false,
+                  'error' => $result['error']
+              ];
+          }
 
-        if (!isset($decoded['success'])) {
-            return [
-                    'success' => false,
-                    'error' => 'Invalid Gateway response structure.'
-            ];
-        }
-
-        if (!$decoded['success']) {
-            return [
-                    'success' => false,
-                    'error' => $decoded['error'] ?? 'Unknown Gateway error'
-            ];
-        }
-
-        return [
-                'success' => true,
-                'data' => $decoded['data']
-        ];
-    }
-
-    /**
-     * Test Gateway connection
-     *
-     * @return array Test result
-     */
-    public function testConnection() {
-        try {
-            $testData = [
-                    'action' => 'check_instructions',
-                    'instructions' => 'Test connection to Gateway'
-            ];
-
-            $result = $this->makeRequest($testData);
-
-            if ($result['success']) {
-                return [
-                        'success' => true,
-                        'message' => 'Gateway connection successful'
-                ];
-            } else {
-                return [
-                        'success' => false,
-                        'error' => $result['error']
-                ];
-            }
-
-        } catch (\Exception $e) {
-            return [
-                    'success' => false,
-                    'error' => 'Connection test failed: ' . $e->getMessage()
-            ];
-        }
-    }
+      } catch (\Exception $e) {
+          return [
+              'success' => false,
+              'error' => 'Connection test failed: ' . $e->getMessage()
+          ];
+      }
+  }
 }

@@ -66,8 +66,8 @@ class submission_processor {
             $instructions_text = trim($assignment_instructions);
         }
         
-        // Validate questions count
-        $questions_count = max(1, min(10, intval($questions_count)));
+        // Validate questions count (minimum 1, no maximum)
+        $questions_count = max(1, intval($questions_count));
         
         $metadata = [];
         if ($cmid && $userid) {

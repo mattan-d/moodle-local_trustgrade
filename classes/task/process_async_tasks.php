@@ -37,9 +37,9 @@ class process_async_tasks extends \core\task\adhoc_task {
     public function execute() {
         \core_php_time_limit::raise(300);
         raise_memory_limit(MEMORY_HUGE);
-
+        
         $data = $this->get_custom_data();
-
+        
         if (!isset($data->task_id)) {
             debugging('TrustGrade: Adhoc task missing task_id', DEBUG_DEVELOPER);
             return;
