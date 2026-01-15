@@ -111,6 +111,9 @@ class async_task_manager {
     public function process_task($task) {
         global $DB;
 
+        \core_php_time_limit::raise(HOURSECS);
+        raise_memory_limit(MEMORY_EXTRA);
+
         try {
             debugging('TrustGrade: Processing async task ID ' . $task->id . ' (attempt ' . ($task->attempts + 1) . '/3)', DEBUG_DEVELOPER);
 

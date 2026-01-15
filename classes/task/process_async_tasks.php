@@ -35,6 +35,9 @@ class process_async_tasks extends \core\task\adhoc_task {
      * Execute the task
      */
     public function execute() {
+        \core_php_time_limit::raise(HOURSECS);
+        raise_memory_limit(MEMORY_EXTRA);
+        
         $data = $this->get_custom_data();
         
         if (!isset($data->task_id)) {
