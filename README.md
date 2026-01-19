@@ -4,9 +4,9 @@
 
 TrustGrade is an AI-powered assessment plugin for Moodle that enhances the grading experience by automatically generating personalized quiz questions based on student submissions. The plugin helps instructors create fair, comprehensive assessments while saving time and ensuring academic integrity.
 
-**⚠️ IMPORTANT: This plugin requires a subscription to the TrustGrade AI Gateway service, which is a paid third-party service operated by CentricApp LTD.**
+**⚠️ IMPORTANT: This plugin requires a subscription to the TrustGrade AI Gateway service, which is a paid third-party service operated by Originality LTD.**
 
-**Powered by [CentricApp LTD](https://centricapp.co)**
+**Powered by [Originality LTD](https://centricapp.co)**
 
 ---
 
@@ -19,21 +19,21 @@ This plugin **requires** access to the **TrustGrade AI Gateway**, a cloud-based 
 - Processes student submissions to create contextual assessments
 - Provides question generation and management APIs
 
-**Service Provider:** CentricApp LTD  
+**Service Provider:** Originality LTD  
 **Website:** https://centricapp.co  
-**Support Email:** support@centricapp.co.il
+**Support Email:** support@originality.com
 
 ### Obtaining Credentials
 
 To use this plugin, you must:
 
-1. **Contact CentricApp LTD** to request access to the TrustGrade AI Gateway service
-   - Email: support@centricapp.co.il
+1. **Contact Originality LTD** to request access to the TrustGrade AI Gateway service
+   - Email: support@originality.com
    - Website: https://centricapp.co
 
 2. **Subscribe to a service plan** that meets your institution's needs
    - Pricing and plans vary based on usage and number of users
-   - Contact CentricApp LTD for detailed pricing information
+   - Contact Originality LTD for detailed pricing information
 
 3. **Receive your credentials** after subscription approval:
    - **Gateway Endpoint URL** - The API endpoint for your region/instance
@@ -43,9 +43,9 @@ To use this plugin, you must:
 
 ### Data Privacy Notice
 
-By using this plugin, student submissions and assessment data will be transmitted to the TrustGrade AI Gateway service operated by CentricApp LTD. Please ensure this complies with your institution's data privacy policies and applicable regulations (GDPR, FERPA, etc.).
+By using this plugin, student submissions and assessment data will be transmitted to the TrustGrade AI Gateway service operated by Originality LTD. Please ensure this complies with your institution's data privacy policies and applicable regulations (GDPR, FERPA, etc.).
 
-For detailed information about data handling, privacy policies, and terms of service, contact CentricApp LTD at support@centricapp.co.il.
+For detailed information about data handling, privacy policies, and terms of service, contact Originality LTD at support@originality.com.
 
 ---
 
@@ -118,13 +118,13 @@ After installation, you must configure your API credentials before the plugin wi
 - **Field name:** Gateway Endpoint
 - **Description:** The API endpoint URL for the TrustGrade AI Gateway service
 - **Default:** `http://trustgrade.cloud/`
-- **What to enter:** The Gateway Endpoint URL provided by CentricApp LTD when you subscribed to the service
+- **What to enter:** The Gateway Endpoint URL provided by Originality LTD when you subscribed to the service
 - **Example:** `https://api.trustgrade.cloud/v1/` or your institution-specific endpoint
 
 #### API Key
 - **Field name:** API Key
 - **Description:** Your unique authentication key for accessing the TrustGrade API
-- **What to enter:** The API Key provided by CentricApp LTD
+- **What to enter:** The API Key provided by Originality LTD
 - **Security note:** Keep this key confidential and do not share it publicly
 - **Example:** `tg_abc123def456ghi789jkl012mno345pqr`
 
@@ -145,7 +145,7 @@ After installation, you must configure your API credentials before the plugin wi
    - Verify your API Key is valid
    - Ensure your server can make outbound HTTPS requests
    - Check firewall settings allow connections to the TrustGrade Gateway
-   - Contact support@centricapp.co.il for assistance
+   - Contact support@originality.com for assistance
 
 ### Step 3: Assignment-Level Configuration
 
@@ -319,7 +319,7 @@ Track individual student performance:
 - **Solution:**
   - Verify API Key is entered correctly (no extra spaces)
   - Check that your subscription is active
-  - Contact support@centricapp.co.il to verify your credentials
+  - Contact support@originality.com to verify your credentials
 
 #### Questions not generating
 - **Cause:** Multiple possible causes
@@ -351,8 +351,8 @@ If you encounter issues:
    - Use the built-in Gateway Test page
    - Verify connectivity and credentials
 
-3. **Contact CentricApp LTD Support:**
-   - Email: support@centricapp.co.il
+3. **Contact Originality LTD Support:**
+   - Email: support@originality.com
    - Include:
      - Your Moodle version
      - Plugin version
@@ -389,7 +389,7 @@ The following data is transmitted to the TrustGrade AI Gateway:
 - Generated quiz questions and answers
 - User IDs (pseudonymized)
 
-**Privacy Policy:** Contact support@centricapp.co.il for detailed privacy policy
+**Privacy Policy:** Contact support@originality.com for detailed privacy policy
 
 ### Compliance
 
@@ -490,26 +490,26 @@ local/trustgrade/
 
 This plugin is licensed under the GNU General Public License v3.0 or later.
 
-**Copyright:** 2025 CentricApp LTD <support@centricapp.co.il>  
+**Copyright:** 2025 Originality LTD <support@originality.com>  
 **License:** http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
 
 ---
 
 ## Credits
 
-**Developed and maintained by:** CentricApp LTD  
+**Developed and maintained by:** Originality LTD  
 **Website:** https://centricapp.co  
-**Support:** support@centricapp.co.il
+**Support:** support@originality.com
 
 ---
 
 ## Additional Resources
 
 - **Moodle Plugins Directory:** [TrustGrade Plugin Page](https://moodle.org/plugins/local_trustgrade)
-- **CentricApp Website:** https://centricapp.co
-- **Support Email:** support@centricapp.co.il
+- **Originality Website:** https://centricapp.co
+- **Support Email:** support@originality.com
 - **Documentation:** See this README file
 
 ---
 
-**Questions? Need help?** Contact CentricApp LTD support at support@centricapp.co.il
+**Questions? Need help?** Contact Originality LTD support at support@originality.com
