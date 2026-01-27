@@ -42,11 +42,8 @@ define(["jquery", "core/notification"], ($, Notification) => {
     },
 
     insertDisclosureIntoForm: function () {
-      console.log("[AI Disclosure] Running insertDisclosureIntoForm...")
-      
       // Find all forms
       var $forms = $("form.mform, form[data-form-type='submission'], #region-main form")
-      console.log("[AI Disclosure] Total forms found:", $forms.length)
       
       // Filter out navigation and search forms, and find the right form
       var $form = $forms.not(".searchform-navbar, .form-inline, .navbar-form").filter(function() {
@@ -58,64 +55,37 @@ define(["jquery", "core/notification"], ($, Notification) => {
       if ($form.length === 0) {
         $form = $forms.not(".searchform-navbar, .form-inline, .navbar-form").first()
       }
-      
-      console.log("[AI Disclosure] Selected form:", $form.attr("id") || $form.attr("class") || "unknown")
-      console.log("[AI Disclosure] Form found:", $form.length > 0)
 
       if ($form.length > 0) {
         // Check if disclosure already exists
         if ($form.find(".ai-disclosure-container").length > 0) {
-          console.log("[AI Disclosure] Disclosure already exists — skipping")
           return // Already inserted
         }
-
-        console.log("[AI Disclosure] Disclosure not found — inserting...")
         
         // Strategy 1: Try to find .fitem
         var $insertionPoint = $form.find(".fitem").first()
-        console.log("[AI Disclosure] Looking for .fitem - found:", $insertionPoint.length)
 
         // Strategy 2: Try to find .form-group
         if ($insertionPoint.length === 0) {
-          console.log("[AI Disclosure] No .fitem found, checking .form-group...")
           $insertionPoint = $form.find(".form-group").first()
-          console.log("[AI Disclosure] Looking for .form-group - found:", $insertionPoint.length)
         }
 
         // Strategy 3: Try fieldset > div (common Moodle form structure)
         if ($insertionPoint.length === 0) {
-          console.log("[AI Disclosure] No .form-group found, trying fieldset > div...")
           $insertionPoint = $form.find("fieldset > div").first()
-          console.log("[AI Disclosure] Looking for fieldset > div - found:", $insertionPoint.length)
         }
 
         // Strategy 4: Try any direct form children
         if ($insertionPoint.length === 0) {
-          console.log("[AI Disclosure] No fieldset > div found, trying first child...")
           $insertionPoint = $form.children().first()
-          console.log("[AI Disclosure] Form children found:", $insertionPoint.length)
         }
 
         // Insert the disclosure
         if ($insertionPoint.length > 0) {
-          console.log("[AI Disclosure] Inserting before insertion point")
-          console.log("[AI Disclosure] Target form ID:", $form.attr("id"))
-          console.log("[AI Disclosure] Insertion point:", $insertionPoint.get(0))
           $insertionPoint.before(this.disclosureHtml)
         } else {
-          console.log("[AI Disclosure] Prepending to form")
-          console.log("[AI Disclosure] Target form ID:", $form.attr("id"))
           $form.prepend(this.disclosureHtml)
         }
-        
-        // Verify insertion
-        var $inserted = $form.find(".ai-disclosure-container")
-        console.log("[AI Disclosure] Verification - disclosure inserted:", $inserted.length > 0)
-        if ($inserted.length > 0) {
-          console.log("[AI Disclosure] Disclosure successfully visible in form:", $form.attr("id") || "no-id")
-        }
-      } else {
-        console.log("[AI Disclosure] No form found")
       }
     },
 
