@@ -44,8 +44,22 @@ define(["jquery", "core/notification"], ($, Notification) => {
     insertDisclosureIntoForm: function () {
       console.log("[AI Disclosure] Running insertDisclosureIntoForm...")
       
-      // Find the submission form
-      var $form = $("form.mform, form[data-form-type='submission'], #region-main form").first()
+      // Find all forms
+      var $forms = $("form.mform, form[data-form-type='submission'], #region-main form")
+      console.log("[AI Disclosure] Total forms found:", $forms.length)
+      
+      // Filter out navigation and search forms, and find the right form
+      var $form = $forms.not(".searchform-navbar, .form-inline, .navbar-form").filter(function() {
+        // Prioritize forms with fieldset (typical question/answer forms)
+        return $(this).find("fieldset").length > 0
+      }).first()
+      
+      // Fallback: if no form with fieldset, get the first non-search form
+      if ($form.length === 0) {
+        $form = $forms.not(".searchform-navbar, .form-inline, .navbar-form").first()
+      }
+      
+      console.log("[AI Disclosure] Selected form:", $form.attr("id") || $form.attr("class") || "unknown")
       console.log("[AI Disclosure] Form found:", $form.length > 0)
 
       if ($form.length > 0) {
@@ -85,15 +99,21 @@ define(["jquery", "core/notification"], ($, Notification) => {
         // Insert the disclosure
         if ($insertionPoint.length > 0) {
           console.log("[AI Disclosure] Inserting before insertion point")
+          console.log("[AI Disclosure] Target form ID:", $form.attr("id"))
+          console.log("[AI Disclosure] Insertion point:", $insertionPoint.get(0))
           $insertionPoint.before(this.disclosureHtml)
         } else {
           console.log("[AI Disclosure] Prepending to form")
+          console.log("[AI Disclosure] Target form ID:", $form.attr("id"))
           $form.prepend(this.disclosureHtml)
         }
         
         // Verify insertion
         var $inserted = $form.find(".ai-disclosure-container")
         console.log("[AI Disclosure] Verification - disclosure inserted:", $inserted.length > 0)
+        if ($inserted.length > 0) {
+          console.log("[AI Disclosure] Disclosure successfully visible in form:", $form.attr("id") || "no-id")
+        }
       } else {
         console.log("[AI Disclosure] No form found")
       }
