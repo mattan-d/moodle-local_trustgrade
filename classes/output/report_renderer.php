@@ -379,15 +379,29 @@ class report_renderer extends \plugin_renderer_base {
             $row = new \html_table_row();
             $row->cells[] = $index + 1;
 
-            // Question cell with source badge, Bloom's level, and question text
-            $question_header = html_writer::div(
-                html_writer::span(
-                    $this->format_question_source($question->source ?? 'instructor'),
-                    'badge badge-' . (($question->source ?? 'instructor') === 'instructor' ? 'primary' : 'success')
-                ) . ' ' .
-                html_writer::span($blooms_display, 'badge badge-info'),
-                'mb-2'
-            );
+            // Question cell with source badge, Bloom's level, required badge, and question text
+            $badges = html_writer::span(
+                $this->format_question_source($question->source ?? 'instructor'),
+                'badge badge-' . (($question->source ?? 'instructor') === 'instructor' ? 'primary' : 'success')
+            ) . ' ' .
+            html_writer::span($blooms_display, 'badge badge-info');
+            
+            // Add required badge if question is required
+            $is_required = false;
+            if (isset($question->metadata->is_required)) {
+                $is_required = (bool) $question->metadata->is_required;
+            } else if (isset($question->is_required)) {
+                $is_required = (bool) $question->is_required;
+            }
+            
+            if ($is_required) {
+                $badges .= ' ' . html_writer::span(
+                    get_string('required_question', 'local_trustgrade'),
+                    'badge badge-danger'
+                );
+            }
+            
+            $question_header = html_writer::div($badges, 'mb-2');
             
             $question_cell = html_writer::div(
                     $question_header .

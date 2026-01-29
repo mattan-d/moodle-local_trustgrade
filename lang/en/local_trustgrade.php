@@ -519,6 +519,7 @@ $string['at_least_one_correct_option'] = 'Multiple choice questions must have at
 $string['metadata_must_be_object'] = 'Metadata must be an object';
 $string['points_must_be_1_to_100'] = 'Points must be between 1 and 100';
 $string['blooms_level_must_be_string'] = 'Metadata \'blooms_level\' must be a string';
+$string['required_question'] = 'Required Question';
 
 $string['defaultcoursestudent'] = 'Student';
 $string['mins_secs'] = '{$a->minutes}m {$a->seconds}s';
