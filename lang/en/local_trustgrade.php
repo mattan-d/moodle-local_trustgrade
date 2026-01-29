@@ -245,6 +245,8 @@ $string['final_grade_notice'] = 'This is your final grade for this assessment.';
 $string['final_score'] = 'Final Score: {$a->score}/{$a->total} ({$a->percentage}%)';
 $string['failed_save_results'] = 'Failed to save quiz results: {$a}';
 $string['failed_save_contact_instructor'] = 'Failed to save final results. Please contact your instructor.';
+$string['quiz_already_completed'] = 'You have already completed this assessment. Only one attempt is allowed for this assignment.';
+$string['return_to_assignment'] = 'Return to Assignment';
 
 // Quiz integrity.
 $string['integrity_report_header'] = 'Integrity Report';
