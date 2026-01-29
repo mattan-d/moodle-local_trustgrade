@@ -125,12 +125,7 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addHelpButton('trustgrade_submission_questions', 'submission_questions', 'local_trustgrade');
         $mform->setAdvanced('trustgrade_submission_questions');
 
-        // Randomize answers
-        $mform->addElement('advcheckbox', 'trustgrade_randomize_answers',
-                get_string('randomize_answers', 'local_trustgrade'),
-                get_string('randomize_answers_desc', 'local_trustgrade'));
-        $mform->setDefault('trustgrade_randomize_answers', $current_settings['randomize_answers']);
-        $mform->setAdvanced('trustgrade_randomize_answers');
+        // Note: Randomize answers is always enabled (removed from UI)
 
         // Time per question
         $time_options = [
@@ -315,7 +310,7 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
                 'questions_to_generate' => $data->trustgrade_instructor_questions,
                 'instructor_questions' => $data->trustgrade_instructor_questions,
                 'submission_questions' => $data->trustgrade_submission_questions,
-                'randomize_answers' => !empty($data->trustgrade_randomize_answers),
+                'randomize_answers' => true, // Always enabled
                 'time_per_question' => $data->trustgrade_time_per_question,
                 'show_countdown' => !empty($data->trustgrade_show_countdown),
                 'auto_generate' => !empty($data->trustgrade_auto_generate)
