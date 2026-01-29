@@ -185,9 +185,7 @@ $string['submission_questions_help'] = 'Number of questions to generate based on
 $string['randomize_answers'] = 'Randomize answer order';
 $string['randomize_answers_desc'] = 'Randomly shuffle the order of answer choices for multiple choice questions.';
 $string['time_per_question'] = 'Time per question';
-$string['time_per_question_help'] = 'Maximum time allowed per question in seconds';
-$string['show_countdown'] = 'Show countdown timer';
-$string['show_countdown_desc'] = 'Display a countdown timer for each question. When time expires, the quiz automatically moves to the next question.';
+$string['time_per_question_help'] = 'Maximum time allowed per question in seconds. A countdown timer will be displayed for each question.';
 
 // Disclosure settings.
 $string['disclosure_settings'] = 'Student Disclosure Settings';

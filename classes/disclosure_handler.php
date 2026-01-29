@@ -89,9 +89,7 @@ class disclosure_handler {
             $html .= '<li>' . get_string('ai_disclosure_detail_analysis', 'local_trustgrade') . '</li>';
             $html .= '<li>' . get_string('ai_disclosure_detail_questions', 'local_trustgrade', $quiz_settings['submission_questions']) . '</li>';
             $html .= '<li>' . get_string('ai_disclosure_detail_quiz', 'local_trustgrade', $quiz_settings['total_quiz_questions']) . '</li>';
-            if ($quiz_settings['show_countdown']) {
-                $html .= '<li>' . get_string('ai_disclosure_detail_timer', 'local_trustgrade', $quiz_settings['time_per_question']) . '</li>';
-            }
+            $html .= '<li>' . get_string('ai_disclosure_detail_timer', 'local_trustgrade', $quiz_settings['time_per_question']) . '</li>';
             $html .= '<li>' . get_string('ai_disclosure_detail_privacy', 'local_trustgrade') . '</li>';
             $html .= '</ul>';
             $html .= '</div>';

@@ -191,9 +191,7 @@ $string['submission_questions_help'] = 'מספר שאלות ליצור על‑פ
 $string['randomize_answers'] = 'Shuffle סדר התשובות';
 $string['randomize_answers_desc'] = 'ערבב באופן אקראי את סדר אפשרויות התשובה לשאלות בחירה מרובה.';
 $string['time_per_question'] = 'זמן לכל שאלה';
-$string['time_per_question_help'] = 'הזמן המרבי המותר לכל שאלה בשניות';
-$string['show_countdown'] = 'הצג טיימר ירידה';
-$string['show_countdown_desc'] = 'הצג טיימר ירידה לכל שאלה. כשהזמן פג, החידון יעבור אוטומטית לשאלה הבאה.';
+$string['time_per_question_help'] = 'הזמן המרבי המותר לכל שאלה בשניות. טיימר ירידה יוצג עבור כל שאלה.';
 
 // Disclosure settings.
 $string['disclosure_settings'] = 'הגדרות גילוי לסטודנט';

@@ -132,7 +132,7 @@ class quiz_settings {
             'submission_questions' => 5,
             'randomize_answers' => true, // Always enabled
             'time_per_question' => 25,
-            'show_countdown' => true
+            'show_countdown' => true // Always enabled
         ];
     }
     
@@ -163,8 +163,8 @@ class quiz_settings {
         $time = intval($settings['time_per_question'] ?? 25);
         $validated['time_per_question'] = in_array($time, $valid_times) ? $time : 25;
         
-        // Show countdown (boolean)
-        $validated['show_countdown'] = !empty($settings['show_countdown']);
+        // Show countdown (always enabled)
+        $validated['show_countdown'] = true;
         
         return $validated;
     }

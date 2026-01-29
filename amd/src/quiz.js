@@ -443,14 +443,13 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         $(".question-counter").show()
         $(".quiz-navigation").show()
         this.updateNavigationButtons()
-        if (this.settings.show_countdown) {
-          this.startTimer()
-        }
+        // Always show countdown timer
+        this.startTimer()
       })
     },
 
     startTimer: function () {
-      if (!this.settings.show_countdown) return
+      // Timer is always enabled
       if (this.timer) clearInterval(this.timer)
       if (this.timeRemaining <= 0 || this.timeRemaining > this.settings.time_per_question) {
         this.timeRemaining = this.settings.time_per_question

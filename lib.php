@@ -141,13 +141,6 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addHelpButton('trustgrade_time_per_question', 'time_per_question', 'local_trustgrade');
         $mform->setAdvanced('trustgrade_time_per_question');
 
-        // Show countdown
-        $mform->addElement('advcheckbox', 'trustgrade_show_countdown',
-                get_string('show_countdown', 'local_trustgrade'),
-                get_string('show_countdown_desc', 'local_trustgrade'));
-        $mform->setDefault('trustgrade_show_countdown', $current_settings['show_countdown']);
-        $mform->setAdvanced('trustgrade_show_countdown');
-
         // Add question bank section placeholder (will be loaded via AJAX)
         $mform->addElement('static', 'trustgrade_question_bank_placeholder', get_string('generated_questions', 'local_trustgrade'),
                 '<div id="ai-questions-container" style="display: none;">' .
@@ -309,11 +302,11 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
                 'enabled' => !empty($data->trustgrade_enabled), // Save activity-level enable/disable
                 'questions_to_generate' => $data->trustgrade_instructor_questions,
                 'instructor_questions' => $data->trustgrade_instructor_questions,
-                'submission_questions' => $data->trustgrade_submission_questions,
-                'randomize_answers' => true, // Always enabled
-                'time_per_question' => $data->trustgrade_time_per_question,
-                'show_countdown' => !empty($data->trustgrade_show_countdown),
-                'auto_generate' => !empty($data->trustgrade_auto_generate)
+            'submission_questions' => $data->trustgrade_submission_questions,
+            'randomize_answers' => true, // Always enabled
+            'time_per_question' => $data->trustgrade_time_per_question,
+            'show_countdown' => true, // Always enabled
+            'auto_generate' => !empty($data->trustgrade_auto_generate)
         ];
 
         \local_trustgrade\quiz_settings::save_settings($cmid, $settings);
