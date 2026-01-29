@@ -117,11 +117,11 @@ $string['blooms_level'] = 'רמת בלום';
 $string['blooms_level_label'] = 'רמת בלום';
 
 // Bloom’s taxonomy levels.
-$string['blooms_remembering'] = 'זכור';
-$string['blooms_understanding'] = 'הבין';
-$string['blooms_applying'] = 'החל';
-$string['blooms_analyzing'] = 'נתח';
-$string['blooms_evaluating'] = 'העריך';
+$string['blooms_remembering'] = 'זכרון';
+$string['blooms_understanding'] = 'הבנה';
+$string['blooms_applying'] = 'יישום';
+$string['blooms_analyzing'] = 'ניתוח';
+$string['blooms_evaluating'] = 'הערכה';
 
 $string['mandatory_question'] = 'שאלת חובה';
 $string['mandatory_question_help'] = 'שאלה זו תמיד תופיע בחידונים לסטודנטים';
@@ -538,7 +538,7 @@ $string['return_to_assignment'] = 'חזור למשימה';
 $string['defaultcoursestudent'] = 'סטודנט';
 $string['mins_secs'] = '{$a->minutes}ד {$a->seconds}ש';
 $string['secs_only'] = '{$a}ש';
-
+ß
 $string['cachedef_quiz_redirect'] = 'שומר כתובות URL להפניה לחידון לניהול מפגש זמני';
 $string['nopermission'] = 'אין לך הרשאה לגשת לדף זה';
 
