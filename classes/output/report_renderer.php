@@ -387,19 +387,27 @@ class report_renderer extends \plugin_renderer_base {
             html_writer::span($blooms_display, 'badge badge-info');
             
             // Add required badge if question is required
+            echo "<script>console.log('[v0] Question object:', " . json_encode($question) . ");</script>";
+            echo "<script>console.log('[v0] Question metadata:', " . json_encode($question->metadata ?? null) . ");</script>";
+            
             $is_required = false;
             if (isset($question->metadata->is_required)) {
                 $is_required = (bool) $question->metadata->is_required;
+                echo "<script>console.log('[v0] is_required from metadata:', " . json_encode($is_required) . ");</script>";
             } else if (isset($question->is_required)) {
                 $is_required = (bool) $question->is_required;
+                echo "<script>console.log('[v0] is_required from question:', " . json_encode($is_required) . ");</script>";
+            } else {
+                echo "<script>console.log('[v0] is_required not found in question');</script>";
             }
             
-            if ($is_required) {
-                $badges .= ' ' . html_writer::span(
-                    get_string('required_question', 'local_trustgrade'),
-                    'badge badge-danger'
-                );
-            }
+            // Temporary: Always show the badge to test display
+            $badges .= ' ' . html_writer::span(
+                get_string('required_question', 'local_trustgrade'),
+                'badge badge-danger'
+            );
+            
+            echo "<script>console.log('[v0] Badge HTML generated');</script>";
             
             $question_header = html_writer::div($badges, 'mb-2');
             
