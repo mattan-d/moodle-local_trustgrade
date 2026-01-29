@@ -195,7 +195,7 @@ $string['time_per_question_help'] = 'הזמן המרבי המותר לכל שא�
 
 // Disclosure settings.
 $string['disclosure_settings'] = 'הגדרות גילוי לסטודנט';
-$string['disclosure_settings_desc'] = 'הגדר את אופן ההודעה לסטודנטים על פונקציות AI במ��ימו��.';
+$string['disclosure_settings_desc'] = 'הגדר את אופן ההודעה לסטודנטים על פונקציות AI במשימות.';
 $string['show_disclosure'] = 'הצג הודעת גילוי AI';
 $string['show_disclosure_desc'] = 'הצג הודעת גילוי לסטודנטים לפני שליחת המשימה, שמודיעה על תכונת חידון מבוססת AI.';
 $string['custom_disclosure_message'] = 'הודעה גילוי מותאמת';
@@ -228,7 +228,7 @@ $string['seconds'] = 'שניות';
 $string['text'] = 'טקסט';
 $string['entertext'] = 'הכנס טקסט';
 $string['enter_answer_placeholder'] = 'הכנס את תשובתך כאן…';
-$string['quiz_preparing'] = 'ה��י��ון שלך נמצא בהכנה...';
+$string['quiz_preparing'] = 'החידון שלך נמצא בהכנה...';
 $string['quiz_preparing_message'] = 'נוצר חידון עבור {$a}';
 $string['quiz_ready'] = 'החידון שלך מוכן. לחץ/י כאן להתחלה!';
 
@@ -539,7 +539,7 @@ $string['return_to_assignment'] = 'חזור למשימה';
 $string['defaultcoursestudent'] = 'סטודנט';
 $string['mins_secs'] = '{$a->minutes}ד {$a->seconds}ש';
 $string['secs_only'] = '{$a}ש';
-ß
+
 $string['cachedef_quiz_redirect'] = 'שומר כתובות URL להפניה לחידון לניהול מפגש זמני';
 $string['nopermission'] = 'אין לך הרשאה לגשת לדף זה';
 
