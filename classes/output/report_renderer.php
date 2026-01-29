@@ -377,7 +377,7 @@ class report_renderer extends \plugin_renderer_base {
                             ['class' => 'text-danger']);
 
             $row = new \html_table_row();
-            $row->cells[] = chr(65 + $index);
+            $row->cells[] = $index + 1;
 
             // Question cell with source badge, Bloom's level, and question text
             $question_header = html_writer::div(
