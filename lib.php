@@ -60,28 +60,6 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
                 get_string('trustgrade_enabled_desc', 'local_trustgrade'));
         $mform->setDefault('trustgrade_enabled', $default_enabled);
 
-        // Keep Check Instructions button for manual instruction checking
-        $buttonarray = array();
-        $buttonarray[] = $mform->createElement('button', 'check_instructions_btn',
-                get_string('check_instructions', 'local_trustgrade'),
-                array('id' => 'check-instructions-btn', 'class' => ''));
-        $mform->addGroup($buttonarray, 'trustgrade_buttons', ' ', ' ', false);
-        $mform->setAdvanced('trustgrade_buttons');
-
-        // Add recommendation display area (hidden by default)
-        $mform->addElement('static', 'trustgrade_recommendation', '',
-                '<div id="ai-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
-                get_string('processing', 'local_trustgrade') . '</div>' .
-                '<div id="ai-recommendation-container" style="display: none;">' .
-                '<div id="ai-recommendation" class="alert alert-info"></div></div>');
-        $mform->setAdvanced('trustgrade_recommendation');
-
-        // Add question generation loading indicator (hidden by default)
-        $mform->addElement('static', 'trustgrade_question_loading', '',
-                '<div id="ai-question-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
-                get_string('generating_questions', 'local_trustgrade') . '</div>');
-        $mform->setAdvanced('trustgrade_question_loading');
-
         // Add quiz settings section FIRST
         $mform->addElement('static', 'trustgrade_quiz_settings_title', '',
                 '<h4>' . get_string('quiz_settings_title', 'local_trustgrade') . '</h4>');
@@ -140,6 +118,28 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->setDefault('trustgrade_time_per_question', $current_settings['time_per_question']);
         $mform->addHelpButton('trustgrade_time_per_question', 'time_per_question', 'local_trustgrade');
         $mform->setAdvanced('trustgrade_time_per_question');
+
+        // Check Instructions button (placed after settings)
+        $buttonarray = array();
+        $buttonarray[] = $mform->createElement('button', 'check_instructions_btn',
+                get_string('check_instructions', 'local_trustgrade'),
+                array('id' => 'check-instructions-btn', 'class' => ''));
+        $mform->addGroup($buttonarray, 'trustgrade_buttons', ' ', ' ', false);
+        $mform->setAdvanced('trustgrade_buttons');
+
+        // Add recommendation display area (hidden by default)
+        $mform->addElement('static', 'trustgrade_recommendation', '',
+                '<div id="ai-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
+                get_string('processing', 'local_trustgrade') . '</div>' .
+                '<div id="ai-recommendation-container" style="display: none;">' .
+                '<div id="ai-recommendation" class="alert alert-info"></div></div>');
+        $mform->setAdvanced('trustgrade_recommendation');
+
+        // Add question generation loading indicator (hidden by default)
+        $mform->addElement('static', 'trustgrade_question_loading', '',
+                '<div id="ai-question-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
+                get_string('generating_questions', 'local_trustgrade') . '</div>');
+        $mform->setAdvanced('trustgrade_question_loading');
 
         // Add question bank section placeholder (will be loaded via AJAX)
         $mform->addElement('static', 'trustgrade_question_bank_placeholder', get_string('generated_questions', 'local_trustgrade'),
