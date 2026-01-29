@@ -41,7 +41,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
     attemptStarted: false,
     attemptCompleted: false,
     windowBlurCount: 0,
-    maxWindowBlurs: 3,
+    maxWindowBlurs: 50,
     autoSaveInterval: null,
 
     init: function (session) {
