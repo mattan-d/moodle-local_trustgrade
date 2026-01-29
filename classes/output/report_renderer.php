@@ -396,7 +396,7 @@ class report_renderer extends \plugin_renderer_base {
             
             if ($is_mandatory) {
                 $badges .= ' ' . html_writer::span(
-                    get_string('required_question', 'local_trustgrade'),
+                    get_string('mandatory_question', 'local_trustgrade'),
                     'badge badge-danger'
                 );
             }
