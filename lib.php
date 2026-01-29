@@ -65,7 +65,7 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $buttonarray[] = $mform->createElement('button', 'check_instructions_btn',
                 get_string('check_instructions', 'local_trustgrade'),
                 array('id' => 'check-instructions-btn', 'class' => ''));
-        $mform->addGroup($buttonarray, 'trustgrade_buttons', get_string('ai_recommendation', 'local_trustgrade'), ' ', false);
+        $mform->addGroup($buttonarray, 'trustgrade_buttons', ' ', ' ', false);
         $mform->setAdvanced('trustgrade_buttons');
 
         // Add recommendation display area (hidden by default)
