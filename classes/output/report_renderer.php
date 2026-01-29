@@ -345,7 +345,6 @@ class report_renderer extends \plugin_renderer_base {
                 '#',
                 get_string('question', 'local_trustgrade'),
                 get_string('student_answer', 'local_trustgrade'),
-                get_string('correct_answer', 'local_trustgrade'),
                 get_string('points', 'local_trustgrade'),
                 get_string('result', 'local_trustgrade')
         ];
@@ -400,7 +399,6 @@ class report_renderer extends \plugin_renderer_base {
             $row->cells[] = $question_cell;
 
             $row->cells[] = $student_answer_display;
-            $row->cells[] = $correct_answer_display;
             $row->cells[] = $earned_points . '/' . $question_points;
             $row->cells[] = $result_icon;
 
