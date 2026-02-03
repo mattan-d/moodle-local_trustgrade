@@ -198,7 +198,7 @@ $string['time_per_question_help'] = 'הזמן המרבי המותר לכל שא�
 
 // Disclosure settings.
 $string['disclosure_settings'] = 'הגדרות גילוי לסטודנט';
-$string['disclosure_settings_desc'] = 'הגדר את אופן ההודעה לסטודנטים על פונקציות AI במשימות.';
+$string['disclosure_settings_desc'] = 'הגדר את אופן ההודעה לסטודנטים על פונקציות AI במשימו��.';
 $string['show_disclosure'] = 'הצג הודעת גילוי AI';
 $string['show_disclosure_desc'] = 'הצג הודעת גילוי לסטודנטים לפני שליחת המשימה, שמודיעה על תכונת חידון מבוססת AI.';
 $string['custom_disclosure_message'] = 'הודעה גילוי מותאמת';
@@ -231,10 +231,13 @@ $string['seconds'] = 'שניות';
 $string['text'] = 'טקסט';
 $string['entertext'] = 'הכנס טקסט';
 $string['enter_answer_placeholder'] = 'הכנס את תשובתך כאן…';
-$string['quiz_preparing'] = 'החידון שלך נמצא בהכנה...';
+$string['quiz_preparing'] = 'החי��ון שלך נמצא בהכנה...';
 $string['quiz_preparing_message'] = 'נוצר חידון עבור {$a}';
 $string['quiz_ready'] = 'החידון שלך מוכן. לחץ/י כאן להתחלה!';
-
+$string['quiz_failed'] = 'יצירת החידון נכשלה';
+$string['quiz_failed_message'] = 'נתקלנו בבעיה ביצירת החידון שלך עבור {$a}';
+$string['invalid_file_type_error'] = 'לא ניתן לעבד את ההגשה שלך: נתמכים רק קבצי טקסט (PDF, DOC, DOCX, TXT) וקבצי תמונה (JPEG, PNG, GIF). אנא שלח מחדש את העבודה שלך בפורמט קובץ מתאים.';
+	
 // Quiz progress and navigation.
 $string['progress_auto_saved'] = 'ההתקדמות נשמרת אוטומטית. רענון הדף יחזור מהשאלה הזו.';
 $string['provide_answer_warning'] = 'אנא ספק תשובה לפני המשך. זכור: לא תוכל לחזור לשאלה זו מאוחר יותר.';
@@ -429,7 +432,7 @@ $string['privacy:metadata:local_trustgd_quiz_sessions:answers_data'] = 'תשוב
 $string['privacy:metadata:local_trustgd_quiz_sessions:time_remaining'] = 'הזמן שנותר לשאלה הנוכחית.';
 $string['privacy:metadata:local_trustgd_quiz_sessions:window_blur_count'] = 'מספר הפעמים שהסטודנט החליף חלונות/כרטיסיות במהלך החידון.';
 $string['privacy:metadata:local_trustgd_quiz_sessions:attempt_started'] = 'האם ניסיון החידון התחיל.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:attempt_completed'] = 'האם ניסיון החידון הושלם.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:attempt_completed'] = 'האם ניסיון החידון הוש������ם.';
 $string['privacy:metadata:local_trustgd_quiz_sessions:integrity_violations'] = 'הפרות יושרה שנרשמו במהלך החידון.';
 $string['privacy:metadata:local_trustgd_quiz_sessions:final_score'] = 'הציון הסופי שהושג בחידון.';
 $string['privacy:metadata:local_trustgd_quiz_sessions:timecreated'] = 'הזמן בו נוצר מפגש החידון.';
@@ -527,7 +530,7 @@ $string['at_least_2_options_required'] = 'נדרשות לפחות שתי אפש�
 $string['option_must_be_object'] = 'כל אפשרות חייבת להיות אובייקט';
 $string['option_non_numeric_id'] = 'אפשרות באינדקס {$a} מכילה מזהה לא מספרי';
 $string['option_text_required'] = 'אפשרות באינדקס {$a} חייבת לכלול \'text\' לא ריקה';
-$string['option_is_correct_required'] = 'אפשרות באינדקס {$a} חייבת לכלול \'is_correct\'';
+$string['option_is_correct_required'] = 'אפשרות בא��נדקס {$a} חייבת לכלול \'is_correct\'';
 $string['option_is_correct_invalid'] = 'אפשרות באינדקס {$a} מכילה \'is_correct\' לא חוקי (חייב להיות בוליאני)';
 $string['option_explanation_invalid'] = 'אפשרות באינדקס {$a} מכילה \'explanation\' לא חוקי (חייב להיות מחרוזת)';
 $string['at_least_one_correct_option'] = 'שאלות בחירה מרובה חייבות לכלול לפחות אפשרות נכונה אחת';

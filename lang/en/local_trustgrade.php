@@ -228,6 +228,9 @@ $string['enter_answer_placeholder'] = 'Enter your answer here...';
 $string['quiz_preparing'] = 'Your quiz is being prepared...';
 $string['quiz_preparing_message'] = 'Generating quiz for {$a}';
 $string['quiz_ready'] = 'Your quiz is ready!';
+$string['quiz_failed'] = 'Quiz Generation Failed';
+$string['quiz_failed_message'] = 'We encountered an issue while generating your quiz for {$a}';
+$string['invalid_file_type_error'] = 'Unable to process your submission: Only text files (PDF, DOC, DOCX, TXT) and image files (JPEG, PNG, GIF) are supported. Please resubmit your work using an accepted file format.';
 
 // Quiz progress and navigation.
 $string['progress_auto_saved'] = 'Your progress is automatically saved. Refreshing the page will resume from this question.';

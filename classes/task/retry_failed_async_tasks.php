@@ -53,7 +53,7 @@ class retry_failed_async_tasks extends \core\task\scheduled_task {
         // Find tasks that are ready for retry
         $now = time();
         $sql = "SELECT * FROM {local_trustgd_async_tasks}
-                WHERE status IN ('pending', 'processing')
+                WHERE status IN ('pending', 'processing','failed')
                   AND error_message IS NOT NULL
                   AND attempts < 3
                   AND (next_retry_time IS NULL OR next_retry_time <= :now)

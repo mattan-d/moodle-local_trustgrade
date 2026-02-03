@@ -244,13 +244,59 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         return
       }
 
-      var titleKey = task.status === "ready" ? "quiz_ready" : "quiz_preparing"
-      var messageKey = task.status === "ready" ? "quiz_ready_message" : "quiz_preparing_message"
+      console.log('[TrustGrade] Showing indicator for task:', task)
+
+      var titleKey, messageKey, messageParam
+      
+      // Check if task has error_message (from AI Gateway or other errors)
+      if (task.error_message && task.error_message.trim() !== '') {
+        console.log('[TrustGrade] Task has error_message:', task.error_message)
+        
+        // Load the failed title string and show error message
+        Str.get_strings([
+          { key: "quiz_failed", component: "local_trustgrade" }
+        ]).done(function(strings) {
+          this.indicatorElement.find(".indicator-title").text(strings[0])
+          this.indicatorElement.find(".indicator-message").text(task.error_message)
+          this.indicatorElement.removeClass("clickable").css("cursor", "default")
+          this.indicatorElement.off("click")
+          this.indicatorElement.find(".indicator-spinner").hide()
+          this.indicatorElement.find(".indicator-icon").css("background", "#f44336")
+          this.indicatorElement.removeClass("hidden").addClass("visible")
+          
+          // Stop polling since task has failed with error
+          console.log('[TrustGrade] Task has error message, stopping polling')
+          this.stopPolling()
+          
+          // Auto-hide after 15 seconds
+          setTimeout(() => {
+            this.hideIndicator()
+          }, 15000)
+        }.bind(this)).fail(function(error) {
+          console.error("[TrustGrade] Error loading failed string:", error)
+        })
+        
+        return
+      }
+      
+      if (task.status === "failed") {
+        titleKey = "quiz_failed"
+        messageKey = "quiz_failed_message"
+        messageParam = task.assignment_name
+      } else if (task.status === "ready") {
+        titleKey = "quiz_ready"
+        messageKey = "quiz_ready_message"
+        messageParam = task.assignment_name
+      } else {
+        titleKey = "quiz_preparing"
+        messageKey = "quiz_preparing_message"
+        messageParam = task.assignment_name
+      }
 
       // Get strings
       Str.get_strings([
         { key: titleKey, component: "local_trustgrade" },
-        { key: messageKey, component: "local_trustgrade", param: task.assignment_name },
+        { key: messageKey, component: "local_trustgrade", param: messageParam },
       ])
         .done(
           function (strings) {
@@ -263,10 +309,26 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
                 window.location.href = task.quiz_url
               })
               this.indicatorElement.find(".indicator-spinner").hide()
+              this.indicatorElement.find(".indicator-icon").css("background", "#4CAF50")
+            } else if (task.status === "failed") {
+              this.indicatorElement.removeClass("clickable").css("cursor", "default")
+              this.indicatorElement.off("click")
+              this.indicatorElement.find(".indicator-spinner").hide()
+              this.indicatorElement.find(".indicator-icon").css("background", "#f44336")
+              
+              // Stop polling since task has failed
+              console.log('[TrustGrade] Task failed, stopping polling')
+              this.stopPolling()
+              
+              // Auto-hide after 10 seconds
+              setTimeout(() => {
+                this.hideIndicator()
+              }, 10000)
             } else {
               this.indicatorElement.removeClass("clickable").css("cursor", "default")
               this.indicatorElement.off("click")
               this.indicatorElement.find(".indicator-spinner").show()
+              this.indicatorElement.find(".indicator-icon").css("background", "#4CAF50")
             }
 
             this.indicatorElement.removeClass("hidden").addClass("visible")

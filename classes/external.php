@@ -748,10 +748,10 @@ class external extends \external_api {
          $now = time();
          $twentyfour_hours_ago = $now - (24 * 60 * 60);
          
-         // Check for pending/processing tasks
+         // Check for pending/processing/failed tasks
          $has_tasks = $DB->record_exists_select('local_trustgd_async_tasks',
-             'userid = ? AND status IN (?, ?) AND timecreated > ?',
-             [$USER->id, 'pending', 'processing', $twentyfour_hours_ago]
+             'userid = ? AND status IN (?, ?, ?) AND timecreated > ?',
+             [$USER->id, 'pending', 'processing', 'failed', $twentyfour_hours_ago]
          );
          
          // If no pending tasks, check for incomplete quiz sessions

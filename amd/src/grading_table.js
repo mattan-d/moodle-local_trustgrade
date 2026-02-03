@@ -26,7 +26,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
     
     return {
         init: function(cmid) {
-            console.log('TrustGrade: TrustGrade grading table column loaded for cmid:', cmid);
+            console.log('[TrustGrade] TrustGrade grading table column loaded for cmid:', cmid);
             
             // Load required strings
             var strings = [
@@ -51,7 +51,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         var gradingTable = $('table.flexible.table.table-striped');
         
         if (gradingTable.length === 0) {
-            console.log('TrustGrade: Grading table not found, retrying...');
+            console.log('[TrustGrade] Grading table not found, retrying...');
             // Retry after a short delay
             setTimeout(function() {
                 addTrustGradeColumn(cmid, pluginNameStr, timeTakenStr);
@@ -59,7 +59,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             return;
         }
         
-        console.log('TrustGrade: Grading table found');
+        console.log('[TrustGrade] Grading table found');
         
         // Add header
         var headerRow = gradingTable.find('thead tr');
@@ -81,11 +81,11 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                         cmid: cmid
                     }
                 }])[0].done(function(response) {
-                    console.log('TrustGrade: Quiz grades response:', response);
+                    console.log('[TrustGrade] Quiz grades response:', response);
                     
                     if (response.success) {
                         var grades = JSON.parse(response.grades);
-                        console.log('TrustGrade: Parsed grades:', grades);
+                        console.log('[TrustGrade] Parsed grades:', grades);
                         
                         // Add grades to each row
                         var bodyRows = gradingTable.find('tbody tr');
@@ -136,7 +136,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                             }
                         });
                     } else {
-                        console.error('TrustGrade: Failed to fetch quiz grades:', response.error);
+                        console.error('[TrustGrade] Failed to fetch quiz grades:', response.error);
                         // Add empty cells
                         var bodyRows = gradingTable.find('tbody tr');
                         bodyRows.each(function() {
@@ -144,7 +144,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                         });
                     }
                 }).fail(function(error) {
-                    console.error('TrustGrade: AJAX error fetching quiz grades:', error);
+                    console.error('[TrustGrade] AJAX error fetching quiz grades:', error);
                     Notification.exception(error);
                     // Add empty cells
                     var bodyRows = gradingTable.find('tbody tr');

@@ -89,14 +89,14 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
     },
 
     saveQuestion: (questionItem) => {
-      console.log("TrustGrade: saveQuestion called", questionItem)
+      console.log("[TrustGrade] saveQuestion called", questionItem)
       const $validationAlert = questionItem.find(".validation-alert")
-      console.log("TrustGrade: Found validation alert:", $validationAlert.length)
+      console.log("[TrustGrade] Found validation alert:", $validationAlert.length)
       $validationAlert.addClass("d-none")
 
       const questionIndex = questionItem.data("question-index")
       const cmid = questionItem.data("cmid")
-      console.log("TrustGrade: Question index:", questionIndex, "CM ID:", cmid)
+      console.log("[TrustGrade] Question index:", questionIndex, "CM ID:", cmid)
 
       // Build new JSON shape
       const questionType = questionItem.find(".question-type-input").val()
@@ -106,7 +106,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       const isMandatory = questionItem.find(".question-mandatory-input").is(":checked") ? 1 : 0
 
       console.log(
-        "TrustGrade: Form values - Type:",
+        "[TrustGrade] Form values - Type:",
         questionType,
         "Text:",
         questionText,
@@ -167,10 +167,10 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         questionData.options = []
       }
 
-      console.log("TrustGrade: Built question data:", questionData)
+      console.log("[TrustGrade] Built question data:", questionData)
 
       if (!questionData.text || !questionData.text.trim()) {
-        console.log("TrustGrade: Validation failed: question text required")
+        console.log("[TrustGrade] Validation failed: question text required")
         Str.get_string("question_text_required", "local_trustgrade").then((message) => {
           QuestionEditor.showInlineError(questionItem, message)
         })
@@ -179,7 +179,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       if (questionType === "multiple_choice") {
         const anyTextMissing = questionData.options.some((opt) => !(opt.text || "").trim())
         if (anyTextMissing) {
-          console.log("TrustGrade: Validation failed: all options required")
+          console.log("[TrustGrade] Validation failed: all options required")
           Str.get_string("all_options_required", "local_trustgrade").then((message) => {
             QuestionEditor.showInlineError(questionItem, message)
           })
@@ -187,7 +187,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         }
         const anyCorrect = questionData.options.some((opt) => opt.is_correct)
         if (!anyCorrect) {
-          console.log("TrustGrade: Validation failed: correct answer required")
+          console.log("[TrustGrade] Validation failed: correct answer required")
           Str.get_string("correct_answer_required", "local_trustgrade").then((message) => {
             QuestionEditor.showInlineError(questionItem, message)
           })
@@ -195,7 +195,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         }
       }
 
-      console.log("TrustGrade: Validation passed, calling AJAX")
+      console.log("[TrustGrade] Validation passed, calling AJAX")
 
       var $saveBtn = questionItem.find(".save-question-btn")
       $saveBtn.prop("disabled", true)
@@ -211,11 +211,11 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         },
       ])
 
-      console.log("TrustGrade: AJAX call initiated")
+      console.log("[TrustGrade] AJAX call initiated")
 
       promises[0]
         .done((response) => {
-          console.log("TrustGrade: AJAX response received:", response)
+          console.log("[TrustGrade] AJAX response received:", response)
           if (response.success) {
             QuestionEditor.updateQuestionDisplay(questionItem, questionData)
             QuestionEditor.exitEditMode(questionItem)
@@ -223,12 +223,12 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
               Notification.addNotification({ message: message, type: "success" }),
             )
           } else {
-            console.log("TrustGrade: Server returned error:", response.error)
+            console.log("[TrustGrade] Server returned error:", response.error)
             QuestionEditor.showInlineError(questionItem, response.error || "Failed to save question.")
           }
         })
         .fail((error) => {
-          console.log("TrustGrade: AJAX call failed:", error)
+          console.log("[TrustGrade] AJAX call failed:", error)
           const errorMessage = error.message || error.error || "An error occurred while saving the question."
           QuestionEditor.showInlineError(questionItem, errorMessage)
         })
@@ -509,10 +509,10 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         $validationAlert = questionItem.find(".validation-alert")
       }
 
-      console.log("TrustGrade: showInlineError - Alert found:", $validationAlert.length, "Message:", message)
+      console.log("[TrustGrade] showInlineError - Alert found:", $validationAlert.length, "Message:", message)
 
       if ($validationAlert.length === 0) {
-        console.error("TrustGrade: Validation alert element not found in question item")
+        console.error("[TrustGrade] Validation alert element not found in question item")
         // Fallback to notification
         Notification.addNotification({ message: message, type: "error" })
         return
@@ -521,7 +521,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       const $validationMessage = $validationAlert.find(".validation-message")
 
       if ($validationMessage.length === 0) {
-        console.error("TrustGrade: Validation message element not found")
+        console.error("[TrustGrade] Validation message element not found")
         // Fallback to notification
         Notification.addNotification({ message: message, type: "error" })
         return
@@ -530,7 +530,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
       $validationMessage.text(message)
       $validationAlert.removeClass("d-none")
 
-      console.log("TrustGrade: Alert displayed, scrolling into view")
+      console.log("[TrustGrade] Alert displayed, scrolling into view")
 
       // Scroll to the alert
       $validationAlert[0].scrollIntoView({ behavior: "smooth", block: "nearest" })

@@ -168,9 +168,24 @@ class gateway_client {
       }
 
       if ($httpCode !== 200) {
+          // Try to parse the error response for more specific error messages
+          $decoded = json_decode($response, true);
+          $error_message = 'Gateway HTTP error: ' . $httpCode;
+          
+          if ($decoded && isset($decoded['error'])) {
+              // Check for specific error types
+              if (strpos($decoded['error'], 'Invalid file type') !== false) {
+                  $error_message = get_string('invalid_file_type_error', 'local_trustgrade');
+              } else {
+                  $error_message = $decoded['error'];
+              }
+          } else {
+              $error_message .= '. Response: ' . substr($response, 0, 200);
+          }
+          
           return [
               'success' => false,
-              'error' => 'Gateway HTTP error: ' . $httpCode . '. Response: ' . substr($response, 0, 200)
+              'error' => $error_message
           ];
       }
 

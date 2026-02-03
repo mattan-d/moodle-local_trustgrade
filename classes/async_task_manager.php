@@ -42,7 +42,8 @@ class async_task_manager {
      * @param int $questions_count Number of questions to generate
      * @return int Task ID
      */
-    public static function create_task($cmid, $submission_id, $userid, $submission_content, $assignment_instructions, $questions_count) {
+    public static function create_task($cmid, $submission_id, $userid, $submission_content, $assignment_instructions,
+            $questions_count) {
         global $DB;
 
         $task = new \stdClass();
@@ -59,11 +60,11 @@ class async_task_manager {
         $task->next_retry_time = null; // Initialize retry time
 
         $task_id = $DB->insert_record('local_trustgd_async_tasks', $task);
-        
+
         debugging('TrustGrade: Created async task ID ' . $task_id . ' for submission ' . $submission_id, DEBUG_DEVELOPER);
-        
+
         self::queue_adhoc_task($task_id);
-        
+
         return $task_id;
     }
 
@@ -75,10 +76,10 @@ class async_task_manager {
     private static function queue_adhoc_task($task_id) {
         $task = new \local_trustgrade\task\process_async_tasks();
         $task->set_custom_data([
-            'task_id' => $task_id
+                'task_id' => $task_id
         ]);
         \core\task\manager::queue_adhoc_task($task);
-        
+
         debugging('TrustGrade: Queued adhoc task for task ID ' . $task_id, DEBUG_DEVELOPER);
     }
 
@@ -90,12 +91,12 @@ class async_task_manager {
     public function process_pending_tasks($limit = 5) {
         global $DB;
 
-        $tasks = $DB->get_records('local_trustgd_async_tasks', 
-            ['status' => 'pending'], 
-            'timecreated ASC', 
-            '*', 
-            0, 
-            $limit
+        $tasks = $DB->get_records('local_trustgd_async_tasks',
+                ['status' => 'pending'],
+                'timecreated ASC',
+                '*',
+                0,
+                $limit
         );
 
         foreach ($tasks as $task) {
@@ -115,7 +116,8 @@ class async_task_manager {
         raise_memory_limit(MEMORY_EXTRA);
 
         try {
-            debugging('TrustGrade: Processing async task ID ' . $task->id . ' (attempt ' . ($task->attempts + 1) . '/3)', DEBUG_DEVELOPER);
+            debugging('TrustGrade: Processing async task ID ' . $task->id . ' (attempt ' . ($task->attempts + 1) . '/3)',
+                    DEBUG_DEVELOPER);
 
             $task->status = 'processing';
             $task->attempts++;
@@ -129,11 +131,11 @@ class async_task_manager {
 
             // Generate questions
             $result = submission_processor::generate_submission_questions_with_count(
-                $submission_content,
-                $assignment_instructions,
-                $task->questions_count,
-                $task->cmid,
-                $task->userid
+                    $submission_content,
+                    $assignment_instructions,
+                    $task->questions_count,
+                    $task->cmid,
+                    $task->userid
             );
 
             if ($result['success']) {
@@ -141,16 +143,16 @@ class async_task_manager {
 
                 // Save questions
                 submission_processor::save_submission_questions(
-                    $task->submission_id,
-                    $task->cmid,
-                    $result['questions']
+                        $task->submission_id,
+                        $task->cmid,
+                        $result['questions']
                 );
 
                 // Create quiz session
                 quiz_session::create_session_on_submission_update(
-                    $task->cmid,
-                    $task->submission_id,
-                    $task->userid
+                        $task->cmid,
+                        $task->submission_id,
+                        $task->userid
                 );
 
                 $task->status = 'completed';
@@ -172,14 +174,37 @@ class async_task_manager {
             }
 
         } catch (\Exception $e) {
-            debugging('TrustGrade: Task ' . $task->id . ' failed on attempt ' . $task->attempts . ': ' . $e->getMessage(), DEBUG_DEVELOPER);
+            debugging('TrustGrade: Task ' . $task->id . ' failed on attempt ' . $task->attempts . ': ' . $e->getMessage(),
+                    DEBUG_DEVELOPER);
 
-            if ($task->attempts < 3) {
-                // Retry delays: Attempt 1->2: 1 minute, Attempt 2->3: 2 minutes
-                $delay = $task->attempts * 60; // 60, 120 seconds
-                
+            // Check if this is a non-retryable error (e.g., gateway 400 errors)
+            $error_message = $e->getMessage();
+            $is_retryable = true;
+
+            // Non-retryable errors: Gateway 400 errors, invalid file types, etc.
+            $non_retryable_patterns = [
+                    'Gateway HTTP error: 400',
+                    'Invalid file type',
+                    'invalid_file_type_error',
+                    'Only text files',
+                    'Only .* files .* are supported'
+            ];
+
+            foreach ($non_retryable_patterns as $pattern) {
+                if (stripos($error_message, $pattern) !== false) {
+                    $is_retryable = false;
+                    debugging('TrustGrade: Task ' . $task->id . ' has non-retryable error: ' . $pattern, DEBUG_DEVELOPER);
+                    break;
+                }
+            }
+
+            // Retry delays: Attempt 1->2: 1 minute, Attempt 2->3: 2 minutes
+            $delay = $task->attempts * 60; // 60, 120 seconds
+
+            if ($is_retryable && $task->attempts < 3) {
+
                 $task->status = 'pending';
-                $task->error_message = $e->getMessage();
+                $task->error_message = $error_message;
                 $task->next_retry_time = time() + $delay;
                 $task->timemodified = time();
                 $DB->update_record('local_trustgd_async_tasks', $task);
@@ -187,19 +212,25 @@ class async_task_manager {
                 // Trigger event for task retry
                 $this->trigger_task_status_event($task, 'pending');
 
-                debugging('TrustGrade: Task ' . $task->id . ' scheduled for retry (attempt ' . ($task->attempts + 1) . '/3) at ' . userdate($task->next_retry_time), DEBUG_DEVELOPER);
+                debugging('TrustGrade: Task ' . $task->id . ' scheduled for retry (attempt ' . ($task->attempts + 1) . '/3) at ' .
+                        userdate($task->next_retry_time), DEBUG_DEVELOPER);
             } else {
+                // Fail permanently (either non-retryable or exceeded attempts)
                 $task->status = 'failed';
-                $task->error_message = $e->getMessage();
-                $task->next_retry_time = null;
+                $task->error_message = $error_message;
+                $task->next_retry_time = time() + $delay;;
                 $task->timemodified = time();
                 $DB->update_record('local_trustgd_async_tasks', $task);
 
                 // Trigger event for task failure
                 $this->trigger_task_status_event($task, 'failed');
 
-                debugging('TrustGrade: Task ' . $task->id . ' failed permanently after 3 attempts', DEBUG_DEVELOPER);
-                
+                if (!$is_retryable) {
+                    debugging('TrustGrade: Task ' . $task->id . ' failed permanently (non-retryable error)', DEBUG_DEVELOPER);
+                } else {
+                    debugging('TrustGrade: Task ' . $task->id . ' failed permanently after 3 attempts', DEBUG_DEVELOPER);
+                }
+
                 // Send failure notification
                 $this->send_failure_notification($task);
             }
@@ -215,7 +246,7 @@ class async_task_manager {
         global $DB;
 
         $task = $DB->get_record('local_trustgd_async_tasks', ['id' => $task_id]);
-        
+
         if (!$task) {
             debugging('TrustGrade: Task ID ' . $task_id . ' not found', DEBUG_DEVELOPER);
             return;
@@ -251,16 +282,16 @@ class async_task_manager {
         $message->fullmessage = get_string('quiz_ready_message', 'local_trustgrade');
         $message->fullmessageformat = FORMAT_PLAIN;
         $message->fullmessagehtml = get_string('quiz_ready_message_html', 'local_trustgrade', [
-            'quizurl' => new \moodle_url('/local/trustgrade/quiz_interface.php', [
-                'cmid' => $task->cmid,
-                'submissionid' => $task->submission_id
-            ])
+                'quizurl' => new \moodle_url('/local/trustgrade/quiz_interface.php', [
+                        'cmid' => $task->cmid,
+                        'submissionid' => $task->submission_id
+                ])
         ]);
         $message->smallmessage = get_string('quiz_ready_subject', 'local_trustgrade');
         $message->notification = 1;
         $message->contexturl = new \moodle_url('/local/trustgrade/quiz_interface.php', [
-            'cmid' => $task->cmid,
-            'submissionid' => $task->submission_id
+                'cmid' => $task->cmid,
+                'submissionid' => $task->submission_id
         ]);
         $message->contexturlname = get_string('take_quiz', 'local_trustgrade');
 
@@ -307,9 +338,9 @@ class async_task_manager {
         global $DB;
 
         $task = $DB->get_record('local_trustgd_async_tasks', [
-            'cmid' => $cmid,
-            'submission_id' => $submission_id,
-            'userid' => $userid
+                'cmid' => $cmid,
+                'submission_id' => $submission_id,
+                'userid' => $userid
         ], '*', IGNORE_MULTIPLE);
 
         return $task;
@@ -327,8 +358,8 @@ class async_task_manager {
         global $DB;
 
         return $DB->record_exists_select('local_trustgd_async_tasks',
-            'cmid = ? AND submission_id = ? AND userid = ? AND status IN (?, ?)',
-            [$cmid, $submission_id, $userid, 'pending', 'processing']
+                'cmid = ? AND submission_id = ? AND userid = ? AND status IN (?, ?)',
+                [$cmid, $submission_id, $userid, 'pending', 'processing']
         );
     }
 
@@ -344,31 +375,34 @@ class async_task_manager {
         $now = time();
         $twentyfour_hours_ago = $now - (24 * 60 * 60);
 
+        // Get pending, processing, and failed tasks (exclude failed tasks with attempts > 2)
         $tasks = $DB->get_records_select('local_trustgd_async_tasks',
-            'userid = ? AND status IN (?, ?) AND timecreated > ?',
-            [$USER->id, 'pending', 'processing', $twentyfour_hours_ago],
-            'timecreated DESC'
+                'userid = ? AND status IN (?, ?, ?) AND timecreated > ? AND NOT (status = ? AND attempts > ?)',
+                [$USER->id, 'pending', 'processing', 'failed', $twentyfour_hours_ago, 'failed', 2],
+                'timecreated DESC'
         );
 
         foreach ($tasks as $task) {
             $cm = get_coursemodule_from_id('assign', $task->cmid);
             if ($cm) {
+                $task_status = $task->status === 'failed' ? 'failed' : 'preparing';
                 $result[] = [
-                    'id' => $task->id,
-                    'cmid' => $task->cmid,
-                    'submission_id' => $task->submission_id,
-                    'status' => 'preparing',
-                    'assignment_name' => $cm->name,
-                    'quiz_url' => null,
-                    'timecreated' => $task->timecreated
+                        'id' => $task->id,
+                        'cmid' => $task->cmid,
+                        'submission_id' => $task->submission_id,
+                        'status' => $task_status,
+                        'assignment_name' => $cm->name,
+                        'quiz_url' => null,
+                        'error_message' => $task->error_message ?? null,
+                        'timecreated' => $task->timecreated
                 ];
             }
         }
 
         $sessions = $DB->get_records_select('local_trustgd_quiz_sessions',
-            'userid = ? AND attempt_completed = 0 AND timecreated > ?',
-            [$USER->id, $twentyfour_hours_ago],
-            'timecreated DESC'
+                'userid = ? AND attempt_completed = 0 AND timecreated > ?',
+                [$USER->id, $twentyfour_hours_ago],
+                'timecreated DESC'
         );
 
         foreach ($sessions as $session) {
@@ -386,16 +420,16 @@ class async_task_manager {
                 // Only add if no preparing task exists
                 if (!$has_preparing) {
                     $result[] = [
-                        'id' => $session->id,
-                        'cmid' => $session->cmid,
-                        'submission_id' => $session->submissionid,
-                        'status' => 'ready',
-                        'assignment_name' => $cm->name,
-                        'quiz_url' => (new \moodle_url('/local/trustgrade/quiz_interface.php', [
+                            'id' => $session->id,
                             'cmid' => $session->cmid,
-                            'submissionid' => $session->submissionid
-                        ]))->out(false),
-                        'timecreated' => $session->timecreated
+                            'submission_id' => $session->submissionid,
+                            'status' => 'ready',
+                            'assignment_name' => $cm->name,
+                            'quiz_url' => (new \moodle_url('/local/trustgrade/quiz_interface.php', [
+                                    'cmid' => $session->cmid,
+                                    'submissionid' => $session->submissionid
+                            ]))->out(false),
+                            'timecreated' => $session->timecreated
                     ];
                 }
             }
@@ -418,7 +452,7 @@ class async_task_manager {
         global $DB;
 
         $now = time();
-        
+
         $sql = "SELECT * FROM {local_trustgd_async_tasks}
                 WHERE status = 'pending'
                   AND error_message IS NOT NULL
@@ -427,17 +461,17 @@ class async_task_manager {
                   AND next_retry_time IS NOT NULL
                   AND next_retry_time <= :now
                 ORDER BY next_retry_time ASC";
-        
+
         $tasks = $DB->get_records_sql($sql, ['now' => $now]);
 
         debugging('TrustGrade: Found ' . count($tasks) . ' tasks ready for retry', DEBUG_DEVELOPER);
 
         foreach ($tasks as $task) {
             debugging('TrustGrade: Queueing adhoc task for retry of task ID ' . $task->id, DEBUG_DEVELOPER);
-            
+
             $adhoctask = new \local_trustgrade\task\process_async_tasks();
             $adhoctask->set_custom_data([
-                'task_id' => $task->id
+                    'task_id' => $task->id
             ]);
             \core\task\manager::queue_adhoc_task($adhoctask);
         }
@@ -453,15 +487,15 @@ class async_task_manager {
      */
     private function trigger_task_status_event($task, $status) {
         $event = \local_trustgrade\event\task_status_changed::create([
-            'objectid' => $task->id,
-            'relateduserid' => $task->userid,
-            'context' => \context_system::instance(),
-            'other' => [
-                'status' => $status,
-                'cmid' => $task->cmid,
-                'submission_id' => $task->submission_id,
-                'assignment_name' => $task->assignment_name ?? ''
-            ]
+                'objectid' => $task->id,
+                'relateduserid' => $task->userid,
+                'context' => \context_system::instance(),
+                'other' => [
+                        'status' => $status,
+                        'cmid' => $task->cmid,
+                        'submission_id' => $task->submission_id,
+                        'assignment_name' => $task->assignment_name ?? ''
+                ]
         ]);
         $event->trigger();
     }
