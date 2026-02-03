@@ -106,6 +106,9 @@ $string['all_options_required'] = 'כל אפשרויות התשובה נדרשו
 $string['click_edit_add_options'] = 'לחץ ערוך להוספת אפשרויות תשובה';
 $string['correct_answer'] = 'תשובה נכונה';
 $string['correct_answer_required'] = 'נדרשת לפחות תשובה נכונה אחת';
+
+// Events
+$string['event_task_status_changed'] = 'סטטוס משימת TrustGrade השתנה';
 $string['explanation'] = 'הסבר';
 $string['enter_explanation_option'] = 'הכנס הסבר לאפשרויות זו…';
 $string['explanation_for_true'] = 'הסבר ל‑נכון';
@@ -343,6 +346,8 @@ $string['grades_cleared_success'] = 'כל הציונים נמחקו בהצלחה
 $string['grade_clear_error'] = 'שגיאה במחיקת הציונים: {$a}';
 $string['confirm_clear_all_grades'] = 'נקה את כל הציונים';
 $string['confirm_clear_all_grades_body'] = 'האם אתה בטוח שברצונך לנקות את כל הציונים? פעולה זו אינה ניתנת לביטול.';
+$string['no_quiz_attempt'] = 'אין חידון';
+$string['view_quiz_report'] = 'צפה בדוח החידון';
 
 // Grade validation.
 $string['grade_not_numeric'] = 'הציון חייב להיות מספר';

@@ -160,6 +160,9 @@ class async_task_manager {
                 $task->timemodified = time();
                 $DB->update_record('local_trustgd_async_tasks', $task);
 
+                // Trigger event for task completion
+                $this->trigger_task_status_event($task, 'completed');
+
                 // Send notification to user
                 $this->send_completion_notification($task);
 
@@ -181,6 +184,9 @@ class async_task_manager {
                 $task->timemodified = time();
                 $DB->update_record('local_trustgd_async_tasks', $task);
 
+                // Trigger event for task retry
+                $this->trigger_task_status_event($task, 'pending');
+
                 debugging('TrustGrade: Task ' . $task->id . ' scheduled for retry (attempt ' . ($task->attempts + 1) . '/3) at ' . userdate($task->next_retry_time), DEBUG_DEVELOPER);
             } else {
                 $task->status = 'failed';
@@ -188,6 +194,9 @@ class async_task_manager {
                 $task->next_retry_time = null;
                 $task->timemodified = time();
                 $DB->update_record('local_trustgd_async_tasks', $task);
+
+                // Trigger event for task failure
+                $this->trigger_task_status_event($task, 'failed');
 
                 debugging('TrustGrade: Task ' . $task->id . ' failed permanently after 3 attempts', DEBUG_DEVELOPER);
                 
@@ -434,5 +443,26 @@ class async_task_manager {
         }
 
         return count($tasks);
+    }
+
+    /**
+     * Trigger event when task status changes
+     *
+     * @param object $task Task record
+     * @param string $status New status
+     */
+    private function trigger_task_status_event($task, $status) {
+        $event = \local_trustgrade\event\task_status_changed::create([
+            'objectid' => $task->id,
+            'relateduserid' => $task->userid,
+            'context' => \context_system::instance(),
+            'other' => [
+                'status' => $status,
+                'cmid' => $task->cmid,
+                'submission_id' => $task->submission_id,
+                'assignment_name' => $task->assignment_name ?? ''
+            ]
+        ]);
+        $event->trigger();
     }
 }

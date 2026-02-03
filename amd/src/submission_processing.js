@@ -46,6 +46,11 @@ define(['jquery', 'core/templates', 'core/str'], ($, Templates, Str) => {
         if ($forms.length > 0) {
           $forms.on('submit', (e) => {
             if (this.questionsToGenerate > 0) {
+              // Set flag to indicate there's an active task
+              // This will trigger the task_indicator to start polling
+              localStorage.setItem('trustgrade_has_active_task', 'true');
+              console.log('[TrustGrade] Assignment submitted, active task flag set');
+              
               this.showProcessingMessage('submission');
             }
             // Allow form to submit normally
@@ -72,6 +77,10 @@ define(['jquery', 'core/templates', 'core/str'], ($, Templates, Str) => {
                 $trustgradeEnabled.length > 0 &&
                 $trustgradeEnabled.is(':checked')
             ) {
+              // Set flag to indicate there's an active task
+              localStorage.setItem('trustgrade_has_active_task', 'true');
+              console.log('[TrustGrade] Question generation requested, active task flag set');
+              
               this.showProcessingMessage('questions');
             }
             // Allow form to submit normally

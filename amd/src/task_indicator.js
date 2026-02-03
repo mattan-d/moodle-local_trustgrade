@@ -16,23 +16,108 @@
 define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notification, Str) => {
   var TaskIndicator = {
     indicatorElement: null,
-    checkInterval: null,
-    CHECK_FREQUENCY: 10000, // Check every 10 seconds
+    lastCheckTime: null,
+    recheckTimeout: null,
+    visibilityChangeHandler: null,
+    isPolling: false,
 
     /**
      * Initialize the task indicator
      */
     init: function () {
       this.createIndicatorElement()
+      
+      // Do a lightweight check to see if user has any pending tasks
+      this.checkHasPendingTasks()
+      
+      // Listen for storage events (when another tab/window sets the flag)
+      $(window).on('storage.trustgrade', (e) => {
+        if (e.originalEvent.key === 'trustgrade_has_active_task' && e.originalEvent.newValue === 'true') {
+          console.log('[TrustGrade] Active task detected in another tab, starting polling')
+          this.startPolling()
+        }
+      })
+    },
+    
+    /**
+     * Check if user has any pending tasks (lightweight check)
+     */
+    checkHasPendingTasks: function() {
+      Ajax.call([
+        {
+          methodname: "local_trustgrade_has_pending_tasks",
+          args: {},
+          done: function (response) {
+            if (response.success && response.has_tasks) {
+              console.log('[TrustGrade] User has pending tasks, starting polling')
+              this.startPolling()
+            } else {
+              console.log('[TrustGrade] No pending tasks found, will not poll')
+              // Clear localStorage flag if set
+              localStorage.removeItem('trustgrade_has_active_task')
+            }
+          }.bind(this),
+          fail: ((error) => {
+            console.error("[TrustGrade] Error checking for pending tasks:", error)
+          }).bind(this),
+        },
+      ])
+    },
+    
+    /**
+     * Start polling for pending tasks
+     */
+    startPolling: function() {
+      if (this.isPolling) {
+        return // Already polling
+      }
+      
+      this.isPolling = true
+      this.lastCheckTime = Math.floor(Date.now() / 1000)
+      
+      // Start checking immediately
       this.checkPendingTasks()
-
-      // Set up periodic checking
-      this.checkInterval = setInterval(
-        function () {
-          this.checkPendingTasks()
-        }.bind(this),
-        this.CHECK_FREQUENCY,
-      )
+      
+      // Listen for visibility changes (when user returns to tab)
+      this.visibilityChangeHandler = () => {
+        if (!document.hidden) {
+          console.log('[TrustGrade] Tab became visible, checking for updates')
+          this.handleTaskStatusChange()
+        }
+      }
+      document.addEventListener('visibilitychange', this.visibilityChangeHandler)
+      
+      // Listen for focus events (when user clicks on window)
+      $(window).on('focus.trustgrade', () => {
+        console.log('[TrustGrade] Window focused, checking for updates')
+        this.handleTaskStatusChange()
+      })
+      
+      // Schedule regular checks
+      this.scheduleNextCheck(60000) // Check every 60 seconds
+    },
+    
+    /**
+     * Stop polling for pending tasks
+     */
+    stopPolling: function() {
+      console.log('[TrustGrade] Stopping polling')
+      this.isPolling = false
+      
+      if (this.recheckTimeout) {
+        clearTimeout(this.recheckTimeout)
+        this.recheckTimeout = null
+      }
+      
+      // Remove event listeners
+      if (this.visibilityChangeHandler) {
+        document.removeEventListener('visibilitychange', this.visibilityChangeHandler)
+        this.visibilityChangeHandler = null
+      }
+      $(window).off('focus.trustgrade')
+      
+      // Clear the active task flag
+      localStorage.removeItem('trustgrade_has_active_task')
     },
 
     /**
@@ -67,9 +152,46 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     },
 
     /**
-     * Check for pending tasks
+     * Handle task status change (triggered by visibility/focus events)
      */
-    checkPendingTasks: function () {
+    handleTaskStatusChange: function() {
+      console.log('[TrustGrade] Checking for task updates')
+      
+      // Clear any pending recheck
+      if (this.recheckTimeout) {
+        clearTimeout(this.recheckTimeout)
+        this.recheckTimeout = null
+      }
+      
+      // Immediately check for pending tasks
+      this.checkPendingTasks()
+      
+      // Reschedule next check
+      this.scheduleNextCheck(60000)
+    },
+
+    /**
+     * Schedule next check
+     *
+     * @param {Number} delay Delay in milliseconds
+     */
+    scheduleNextCheck: function(delay) {
+      if (this.recheckTimeout) {
+        clearTimeout(this.recheckTimeout)
+      }
+      
+      this.recheckTimeout = setTimeout(() => {
+        this.checkPendingTasks()
+        this.scheduleNextCheck(60000) // Schedule next fallback check (60 seconds)
+      }, delay)
+    },
+
+    /**
+     * Check for pending tasks
+     * 
+     * @param {Boolean} singleCheck If true, only do one check and don't continue polling
+     */
+    checkPendingTasks: function (singleCheck = false) {
       Ajax.call([
         {
           methodname: "local_trustgrade_get_pending_tasks",
@@ -79,9 +201,19 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
               try {
                 var tasks = JSON.parse(response.tasks)
                 if (tasks && tasks.length > 0) {
+                  // Tasks found - start polling if not already
+                  if (!this.isPolling && !singleCheck) {
+                    console.log('[TrustGrade] Tasks found, starting polling')
+                    this.startPolling()
+                  }
                   this.showIndicator(tasks[0]) // Show first pending task
                 } else {
+                  // No tasks found
                   this.hideIndicator()
+                  if (this.isPolling && !singleCheck) {
+                    // Stop polling when no more tasks
+                    this.stopPolling()
+                  }
                 }
               } catch (e) {
                 console.error("[TrustGrade] Error parsing tasks:", e)
@@ -89,6 +221,10 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
               }
             } else {
               this.hideIndicator()
+              if (this.isPolling && !singleCheck) {
+                // Stop polling when no more tasks
+                this.stopPolling()
+              }
             }
           }.bind(this),
           fail: ((error) => {
@@ -154,10 +290,18 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
      * Destroy the indicator and stop checking
      */
     destroy: function () {
-      if (this.checkInterval) {
-        clearInterval(this.checkInterval)
-        this.checkInterval = null
+      if (this.recheckTimeout) {
+        clearTimeout(this.recheckTimeout)
+        this.recheckTimeout = null
       }
+      
+      // Remove event listeners
+      if (this.visibilityChangeHandler) {
+        document.removeEventListener('visibilitychange', this.visibilityChangeHandler)
+        this.visibilityChangeHandler = null
+      }
+      $(window).off('focus.trustgrade')
+      
       if (this.indicatorElement) {
         this.indicatorElement.remove()
         this.indicatorElement = null

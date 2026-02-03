@@ -184,6 +184,24 @@ $functions = [
         'ajax' => true,
         'capabilities' => 'mod/assign:submit',
     ],
+    'local_trustgrade_has_pending_tasks' => [
+        'classname' => 'local_trustgrade\external',
+        'methodname' => 'has_pending_tasks',
+        'classpath' => 'local/trustgrade/classes/external.php',
+        'description' => 'Check if current user has any pending async tasks.',
+        'type' => 'read',
+        'ajax' => true,
+        'capabilities' => 'mod/assign:submit',
+    ],
+    'local_trustgrade_get_quiz_grades_for_grading' => [
+        'classname' => 'local_trustgrade\external',
+        'methodname' => 'get_quiz_grades_for_grading',
+        'classpath' => 'local/trustgrade/classes/external.php',
+        'description' => 'Get TrustGrade quiz grades for assignment grading table.',
+        'type' => 'read',
+        'ajax' => true,
+        'capabilities' => 'mod/assign:grade',
+    ],
 ];
 
 $services = [
@@ -208,6 +226,8 @@ $services = [
             'local_trustgrade_complete_quiz_session',
             'local_trustgrade_log_integrity_violation',
             'local_trustgrade_get_pending_tasks',
+            'local_trustgrade_has_pending_tasks',
+            'local_trustgrade_get_quiz_grades_for_grading',
             'local_trustgrade_toggle_mandatory_question',
         ],
         'restrictedusers' => 0,

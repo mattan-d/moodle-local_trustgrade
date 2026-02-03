@@ -347,3 +347,33 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
 
     return $data;
 }
+
+/**
+ * Add TrustGrade quiz grade column to assignment grading page
+ */
+function local_trustgrade_before_footer() {
+    global $PAGE;
+
+    // Check if plugin is globally enabled
+    if (!get_config('local_trustgrade', 'plugin_enabled')) {
+        return;
+    }
+
+    // Only run on assignment grading page
+    if ($PAGE->pagetype === 'mod-assign-grading' || 
+        (strpos($PAGE->url->get_path(), '/mod/assign/view.php') !== false && 
+         optional_param('action', '', PARAM_ALPHA) === 'grading')) {
+        
+        // Get the assignment course module ID
+        $cmid = optional_param('id', 0, PARAM_INT);
+        
+        if ($cmid > 0) {
+            // Check if TrustGrade is enabled for this specific assignment
+            $settings = \local_trustgrade\quiz_settings::get_settings($cmid);
+            
+            if (!empty($settings['enabled'])) {
+                $PAGE->requires->js_call_amd('local_trustgrade/grading_table', 'init', [$cmid]);
+            }
+        }
+    }
+}

@@ -173,6 +173,9 @@ $string['error_deleting_question'] = 'Error deleting question';
 $string['cleanup_quiz_sessions'] = 'Cleanup TrustGrade quiz sessions';
 $string['task_retry_failed_async_tasks'] = 'Retry failed TrustGrade async tasks';
 
+// Events
+$string['event_task_status_changed'] = 'TrustGrade task status changed';
+
 // Quiz settings.
 $string['quiz_settings_title'] = 'Quiz Settings';
 $string['questions_to_generate'] = 'Number of questions to generate';
@@ -344,6 +347,8 @@ $string['grade_exceeds_maximum'] = 'Grade cannot exceed maximum ({$a})';
 // Auto-grading.
 $string['auto_grade_by_quiz'] = 'Auto-grade by Quiz Score';
 $string['auto_grade_by_quiz_desc'] = 'Automatically set assignment grades based on quiz scores for all students';
+$string['no_quiz_attempt'] = 'No Quiz';
+$string['view_quiz_report'] = 'View quiz report';
 $string['auto_grade_button_text'] = 'Auto-grade by Quiz Score';
 $string['auto_grade_success'] = '{$a} students auto-graded based on quiz scores';
 $string['auto_grade_no_grades'] = 'No grades could be applied. Check that students have completed quizzes.';

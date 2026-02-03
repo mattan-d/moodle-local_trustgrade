@@ -727,6 +727,146 @@ class external extends \external_api {
      }
  }
 
+ public static function has_pending_tasks_parameters() {
+     return new \external_function_parameters([]);
+ }
+ 
+ public static function has_pending_tasks_returns() {
+     return new \external_single_structure([
+         'success' => new \external_value(PARAM_BOOL, 'True if successful'),
+         'has_tasks' => new \external_value(PARAM_BOOL, 'True if user has pending tasks'),
+         'error' => new \external_value(PARAM_TEXT, 'Error message', VALUE_OPTIONAL),
+     ]);
+ }
+ 
+ public static function has_pending_tasks() {
+     global $USER, $DB;
+     $context = \context_system::instance();
+     self::validate_context($context);
+     
+     try {
+         $now = time();
+         $twentyfour_hours_ago = $now - (24 * 60 * 60);
+         
+         // Check for pending/processing tasks
+         $has_tasks = $DB->record_exists_select('local_trustgd_async_tasks',
+             'userid = ? AND status IN (?, ?) AND timecreated > ?',
+             [$USER->id, 'pending', 'processing', $twentyfour_hours_ago]
+         );
+         
+         // If no pending tasks, check for incomplete quiz sessions
+         if (!$has_tasks) {
+             $has_tasks = $DB->record_exists_select('local_trustgd_quiz_sessions',
+                 'userid = ? AND attempt_completed = 0 AND timecreated > ?',
+                 [$USER->id, $twentyfour_hours_ago]
+             );
+         }
+         
+         return [
+             'success' => true,
+             'has_tasks' => $has_tasks
+         ];
+     } catch (\Exception $e) {
+         return [
+             'success' => false,
+             'has_tasks' => false,
+             'error' => $e->getMessage()
+         ];
+     }
+ }
+
+ public static function get_quiz_grades_for_grading_parameters() {
+     return new \external_function_parameters([
+         'cmid' => new \external_value(PARAM_INT, 'Course module ID (assignment)'),
+     ]);
+ }
+
+ public static function get_quiz_grades_for_grading_returns() {
+     return new \external_single_structure([
+         'success' => new \external_value(PARAM_BOOL, 'True if successful'),
+         'grades' => new \external_value(PARAM_RAW, 'Quiz grades data (JSON encoded)'),
+         'error' => new \external_value(PARAM_TEXT, 'Error message', VALUE_OPTIONAL),
+     ]);
+ }
+
+ public static function get_quiz_grades_for_grading($cmid) {
+     global $DB;
+
+     $params = self::validate_parameters(self::get_quiz_grades_for_grading_parameters(), [
+         'cmid' => $cmid,
+     ]);
+
+     try {
+         // Check if plugin is globally enabled
+         if (!get_config('local_trustgrade', 'plugin_enabled')) {
+             return [
+                 'success' => false,
+                 'grades' => '{}',
+                 'error' => 'TrustGrade plugin is not enabled'
+             ];
+         }
+
+         $cm = get_coursemodule_from_id('assign', $params['cmid'], 0, false, MUST_EXIST);
+         $context = \context_module::instance($cm->id);
+         self::validate_context($context);
+         require_capability('mod/assign:grade', $context);
+
+         // Check if TrustGrade is enabled for this assignment
+         $settings = \local_trustgrade\quiz_settings::get_settings($params['cmid']);
+         if (empty($settings['enabled'])) {
+             return [
+                 'success' => false,
+                 'grades' => '{}',
+                 'error' => 'TrustGrade is not enabled for this assignment'
+             ];
+         }
+
+         // Get all completed quiz sessions for this assignment using the same method as quiz_report
+         $sessions = \local_trustgrade\quiz_session::get_completed_sessions_for_assignment($params['cmid']);
+
+         $grades = [];
+         foreach ($sessions as $session) {
+             // Only keep the latest session per user
+             if (!isset($grades[$session->userid])) {
+                 // Calculate total points from questions (same as report_renderer)
+                 $questions = (array) $session->questions_data;
+                 $total_points = 0;
+                 foreach ($questions as $question) {
+                     $total_points += isset($question->points) ? $question->points : 10;
+                 }
+                 
+                 // final_score is the earned points
+                 $earned_points = $session->final_score;
+                 $percentage = $total_points > 0 ? round(($earned_points / $total_points) * 100) : 0;
+                 
+                 // Calculate duration
+                 $completed_date = $session->timecompleted ?: $session->timemodified;
+                 $duration = $completed_date - $session->timecreated;
+                 
+                 $grades[$session->userid] = [
+                     'userid' => (int)$session->userid,
+                     'earned_points' => (int)$earned_points,
+                     'total_points' => (int)$total_points,
+                     'percentage' => (int)$percentage,
+                     'duration' => (int)$duration,
+                     'completed' => (int)$completed_date
+                 ];
+             }
+         }
+
+         return [
+             'success' => true,
+             'grades' => json_encode($grades)
+         ];
+     } catch (\Exception $e) {
+         return [
+             'success' => false,
+             'grades' => '{}',
+             'error' => $e->getMessage()
+         ];
+     }
+ }
+
  public static function toggle_mandatory_question_parameters() {
      return new \external_function_parameters([
          'questionid' => new \external_value(PARAM_INT, 'Question ID'),
