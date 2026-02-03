@@ -261,7 +261,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
           this.indicatorElement.removeClass("clickable").css("cursor", "default")
           this.indicatorElement.off("click")
           this.indicatorElement.find(".indicator-spinner").hide()
-          this.indicatorElement.find(".indicator-icon").css("background", "#f44336")
           this.indicatorElement.removeClass("hidden").addClass("visible")
           
           // Stop polling since task has failed with error
