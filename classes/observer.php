@@ -111,6 +111,122 @@ class observer {
     }
 
     /**
+     * Handle course module created event (for duplicating settings)
+     *
+     * @param \core\event\course_module_created $event
+     */
+    public static function course_module_created(\core\event\course_module_created $event) {
+        global $DB;
+        
+        try {
+            $eventdata = $event->get_data();
+            $new_cmid = $eventdata['objectid'];
+            
+            // Only process assignment modules
+            if ($eventdata['other']['modulename'] !== 'assign') {
+                return;
+            }
+            
+            debugging('TrustGrade observer: course_module_created event triggered for CM ID ' . $new_cmid, DEBUG_DEVELOPER);
+            
+            // Check if this is a duplicate by looking for the originalcmid in the event's other data
+            // When duplicating, Moodle stores the original CM ID in the context
+            $context = $event->get_context();
+            
+            // Try to find the original course module ID from the session or request
+            // In Moodle's duplicate process, we need to look at the course backup/restore data
+            $course_id = $eventdata['courseid'];
+            
+            // Get all assignment CMs in the course ordered by time created (descending)
+            $cms = $DB->get_records('course_modules', 
+                ['course' => $course_id, 'module' => $eventdata['other']['instanceid']], 
+                'added DESC', 
+                'id, instance, added', 
+                0, 
+                10
+            );
+            
+            if (count($cms) < 2) {
+                // No source module to copy from
+                debugging('TrustGrade observer: No source module found for duplication', DEBUG_DEVELOPER);
+                return;
+            }
+            
+            // The new module is the first one (most recent), try to find a source with settings
+            $source_cmid = null;
+            $cms_array = array_values($cms);
+            
+            // Skip the first one (new module) and find the first one with TrustGrade settings
+            for ($i = 1; $i < count($cms_array); $i++) {
+                $potential_source = $cms_array[$i]->id;
+                if ($DB->record_exists('local_trustgd_quiz_settings', ['cmid' => $potential_source])) {
+                    $source_cmid = $potential_source;
+                    debugging('TrustGrade observer: Found source CM ID ' . $source_cmid . ' with settings', DEBUG_DEVELOPER);
+                    break;
+                }
+            }
+            
+            if (!$source_cmid) {
+                debugging('TrustGrade observer: No source module with TrustGrade settings found', DEBUG_DEVELOPER);
+                return;
+            }
+            
+            // Copy settings from source to new module
+            self::copy_quiz_settings($source_cmid, $new_cmid);
+            
+        } catch (\Exception $e) {
+            debugging('TrustGrade observer: Exception during course_module_created processing - ' . $e->getMessage(), DEBUG_DEVELOPER);
+            error_log('TrustGrade course_module_created error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Copy quiz settings from one course module to another
+     *
+     * @param int $source_cmid Source course module ID
+     * @param int $target_cmid Target course module ID
+     */
+    private static function copy_quiz_settings($source_cmid, $target_cmid) {
+        global $DB;
+        
+        try {
+            $source_settings = $DB->get_record('local_trustgd_quiz_settings', ['cmid' => $source_cmid]);
+            
+            if (!$source_settings) {
+                debugging('TrustGrade observer: No settings found for source CM ID ' . $source_cmid, DEBUG_DEVELOPER);
+                return;
+            }
+            
+            // Check if target already has settings
+            if ($DB->record_exists('local_trustgd_quiz_settings', ['cmid' => $target_cmid])) {
+                debugging('TrustGrade observer: Target CM ID ' . $target_cmid . ' already has settings, skipping copy', DEBUG_DEVELOPER);
+                return;
+            }
+            
+            // Create new settings record for target
+            $new_settings = new \stdClass();
+            $new_settings->cmid = $target_cmid;
+            $new_settings->enabled = $source_settings->enabled;
+            $new_settings->questions_to_generate = $source_settings->questions_to_generate;
+            $new_settings->instructor_questions = $source_settings->instructor_questions;
+            $new_settings->submission_questions = $source_settings->submission_questions;
+            $new_settings->randomize_answers = $source_settings->randomize_answers;
+            $new_settings->time_per_question = $source_settings->time_per_question;
+            $new_settings->show_countdown = $source_settings->show_countdown;
+            $new_settings->timecreated = time();
+            $new_settings->timemodified = time();
+            
+            $DB->insert_record('local_trustgd_quiz_settings', $new_settings);
+            
+            debugging('TrustGrade observer: Successfully copied settings from CM ID ' . $source_cmid . ' to CM ID ' . $target_cmid, DEBUG_DEVELOPER);
+            
+        } catch (\Exception $e) {
+            debugging('TrustGrade observer: Error copying quiz settings - ' . $e->getMessage(), DEBUG_DEVELOPER);
+            error_log('TrustGrade copy_quiz_settings error: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Process submission and generate AI questions
      *
      * @param \core\event\base $event

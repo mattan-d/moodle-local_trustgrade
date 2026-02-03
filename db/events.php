@@ -37,4 +37,8 @@ $observers = [
         'eventname' => '\mod_assign\event\assessable_submitted',
         'callback' => '\local_trustgrade\observer::assessable_submitted',
     ],
+    [
+        'eventname' => '\core\event\course_module_created',
+        'callback' => '\local_trustgrade\observer::course_module_created',
+    ],
 ];
