@@ -26,10 +26,10 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
      */
     init: function () {
       this.createIndicatorElement()
-      
+
       // Do a lightweight check to see if user has any pending tasks
       this.checkHasPendingTasks()
-      
+
       // Listen for storage events (when another tab/window sets the flag)
       $(window).on('storage.trustgrade', (e) => {
         if (e.originalEvent.key === 'trustgrade_has_active_task' && e.originalEvent.newValue === 'true') {
@@ -38,7 +38,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         }
       })
     },
-    
+
     /**
      * Check if user has any pending tasks (lightweight check)
      */
@@ -63,7 +63,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         },
       ])
     },
-    
+
     /**
      * Start polling for pending tasks
      */
@@ -71,13 +71,13 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       if (this.isPolling) {
         return // Already polling
       }
-      
+
       this.isPolling = true
       this.lastCheckTime = Math.floor(Date.now() / 1000)
-      
+
       // Start checking immediately
       this.checkPendingTasks()
-      
+
       // Listen for visibility changes (when user returns to tab)
       this.visibilityChangeHandler = () => {
         if (!document.hidden) {
@@ -86,36 +86,36 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         }
       }
       document.addEventListener('visibilitychange', this.visibilityChangeHandler)
-      
+
       // Listen for focus events (when user clicks on window)
       $(window).on('focus.trustgrade', () => {
         console.log('[TrustGrade] Window focused, checking for updates')
         this.handleTaskStatusChange()
       })
-      
+
       // Schedule regular checks
       this.scheduleNextCheck(60000) // Check every 60 seconds
     },
-    
+
     /**
      * Stop polling for pending tasks
      */
     stopPolling: function() {
       console.log('[TrustGrade] Stopping polling')
       this.isPolling = false
-      
+
       if (this.recheckTimeout) {
         clearTimeout(this.recheckTimeout)
         this.recheckTimeout = null
       }
-      
+
       // Remove event listeners
       if (this.visibilityChangeHandler) {
         document.removeEventListener('visibilitychange', this.visibilityChangeHandler)
         this.visibilityChangeHandler = null
       }
       $(window).off('focus.trustgrade')
-      
+
       // Clear the active task flag
       localStorage.removeItem('trustgrade_has_active_task')
     },
@@ -156,16 +156,16 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
      */
     handleTaskStatusChange: function() {
       console.log('[TrustGrade] Checking for task updates')
-      
+
       // Clear any pending recheck
       if (this.recheckTimeout) {
         clearTimeout(this.recheckTimeout)
         this.recheckTimeout = null
       }
-      
+
       // Immediately check for pending tasks
       this.checkPendingTasks()
-      
+
       // Reschedule next check
       this.scheduleNextCheck(60000)
     },
@@ -179,7 +179,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       if (this.recheckTimeout) {
         clearTimeout(this.recheckTimeout)
       }
-      
+
       this.recheckTimeout = setTimeout(() => {
         this.checkPendingTasks()
         this.scheduleNextCheck(60000) // Schedule next fallback check (60 seconds)
@@ -188,7 +188,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
 
     /**
      * Check for pending tasks
-     * 
+     *
      * @param {Boolean} singleCheck If true, only do one check and don't continue polling
      */
     checkPendingTasks: function (singleCheck = false) {
@@ -247,11 +247,11 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       console.log('[TrustGrade] Showing indicator for task:', task)
 
       var titleKey, messageKey, messageParam
-      
+
       // Check if task has error_message (from AI Gateway or other errors)
       if (task.error_message && task.error_message.trim() !== '') {
         console.log('[TrustGrade] Task has error_message:', task.error_message)
-        
+
         // Load the failed title string and show error message
         Str.get_strings([
           { key: "quiz_failed", component: "local_trustgrade" }
@@ -262,11 +262,11 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
           this.indicatorElement.off("click")
           this.indicatorElement.find(".indicator-spinner").hide()
           this.indicatorElement.removeClass("hidden").addClass("visible")
-          
+
           // Stop polling since task has failed with error
           console.log('[TrustGrade] Task has error message, stopping polling')
           this.stopPolling()
-          
+
           // Auto-hide after 15 seconds
           setTimeout(() => {
             this.hideIndicator()
@@ -274,10 +274,10 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         }.bind(this)).fail(function(error) {
           console.error("[TrustGrade] Error loading failed string:", error)
         })
-        
+
         return
       }
-      
+
       if (task.status === "failed") {
         titleKey = "quiz_failed"
         messageKey = "quiz_failed_message"
@@ -308,17 +308,15 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
                 window.location.href = task.quiz_url
               })
               this.indicatorElement.find(".indicator-spinner").hide()
-              this.indicatorElement.find(".indicator-icon").css("background", "#4CAF50")
             } else if (task.status === "failed") {
               this.indicatorElement.removeClass("clickable").css("cursor", "default")
               this.indicatorElement.off("click")
               this.indicatorElement.find(".indicator-spinner").hide()
-              this.indicatorElement.find(".indicator-icon").css("background", "#f44336")
-              
+
               // Stop polling since task has failed
               console.log('[TrustGrade] Task failed, stopping polling')
               this.stopPolling()
-              
+
               // Auto-hide after 10 seconds
               setTimeout(() => {
                 this.hideIndicator()
@@ -327,7 +325,6 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
               this.indicatorElement.removeClass("clickable").css("cursor", "default")
               this.indicatorElement.off("click")
               this.indicatorElement.find(".indicator-spinner").show()
-              this.indicatorElement.find(".indicator-icon").css("background", "#4CAF50")
             }
 
             this.indicatorElement.removeClass("hidden").addClass("visible")
@@ -355,14 +352,14 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         clearTimeout(this.recheckTimeout)
         this.recheckTimeout = null
       }
-      
+
       // Remove event listeners
       if (this.visibilityChangeHandler) {
         document.removeEventListener('visibilitychange', this.visibilityChangeHandler)
         this.visibilityChangeHandler = null
       }
       $(window).off('focus.trustgrade')
-      
+
       if (this.indicatorElement) {
         this.indicatorElement.remove()
         this.indicatorElement = null
