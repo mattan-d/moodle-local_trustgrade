@@ -173,9 +173,9 @@ class gateway_client {
           $error_message = 'Gateway HTTP error: ' . $httpCode;
           
           if ($decoded && isset($decoded['error'])) {
-              // Check for specific error types
+              // Check for specific error types (store key for frontend to resolve via core/str)
               if (strpos($decoded['error'], 'Invalid file type') !== false) {
-                  $error_message = get_string('invalid_file_type_error', 'local_trustgrade');
+                  $error_message = 'invalid_file_type_error';
               } else {
                   $error_message = $decoded['error'];
               }

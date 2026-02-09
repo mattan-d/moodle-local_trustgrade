@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
 class async_task_manager {
 
     /**
-     * Create a new async task
+     * Create a new async task, or update existing one when user resubmits (same submission_id).
      *
      * @param int $cmid Course module ID
      * @param int $submission_id Submission ID
@@ -46,22 +46,53 @@ class async_task_manager {
             $questions_count) {
         global $DB;
 
-        $task = new \stdClass();
-        $task->cmid = $cmid;
-        $task->submission_id = $submission_id;
-        $task->userid = $userid;
-        $task->status = 'pending';
-        $task->submission_content = json_encode($submission_content);
-        $task->assignment_instructions = json_encode($assignment_instructions);
-        $task->questions_count = $questions_count;
-        $task->attempts = 0;
-        $task->timecreated = time();
-        $task->timemodified = time();
-        $task->next_retry_time = null; // Initialize retry time
+        $existing = $DB->get_record('local_trustgd_async_tasks', [
+            'cmid' => $cmid,
+            'submission_id' => $submission_id,
+            'userid' => $userid
+        ], '*', IGNORE_MULTIPLE);
 
-        $task_id = $DB->insert_record('local_trustgd_async_tasks', $task);
+        if ($existing) {
+            // Resubmission: update existing row instead of inserting.
+            $task = new \stdClass();
+            $task->id = $existing->id;
+            $task->cmid = $cmid;
+            $task->submission_id = $submission_id;
+            $task->userid = $userid;
+            $task->status = 'pending';
+            $task->submission_content = json_encode($submission_content);
+            $task->assignment_instructions = json_encode($assignment_instructions);
+            $task->questions_count = $questions_count;
+            $task->attempts = 0;
+            $task->next_retry_time = null;
+            $task->result_data = null;
+            $task->error_message = null;
+            $task->timecompleted = null;
+            $task->timemodified = time();
 
-        debugging('TrustGrade: Created async task ID ' . $task_id . ' for submission ' . $submission_id, DEBUG_DEVELOPER);
+            $DB->update_record('local_trustgd_async_tasks', $task);
+            $task_id = $existing->id;
+
+            debugging('TrustGrade: Updated existing async task ID ' . $task_id . ' for resubmission ' . $submission_id, DEBUG_DEVELOPER);
+        } else {
+            // First submission: insert new row.
+            $task = new \stdClass();
+            $task->cmid = $cmid;
+            $task->submission_id = $submission_id;
+            $task->userid = $userid;
+            $task->status = 'pending';
+            $task->submission_content = json_encode($submission_content);
+            $task->assignment_instructions = json_encode($assignment_instructions);
+            $task->questions_count = $questions_count;
+            $task->attempts = 0;
+            $task->timecreated = time();
+            $task->timemodified = time();
+            $task->next_retry_time = null;
+
+            $task_id = $DB->insert_record('local_trustgd_async_tasks', $task);
+
+            debugging('TrustGrade: Created async task ID ' . $task_id . ' for submission ' . $submission_id, DEBUG_DEVELOPER);
+        }
 
         self::queue_adhoc_task($task_id);
 

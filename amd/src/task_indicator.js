@@ -252,12 +252,13 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
       if (task.error_message && task.error_message.trim() !== '') {
         console.log('[TrustGrade] Task has error_message:', task.error_message)
 
-        // Load the failed title string and show error message
+        // Load the failed title and error message via core/str (error_message may be a string key e.g. invalid_file_type_error)
         Str.get_strings([
-          { key: "quiz_failed", component: "local_trustgrade" }
+          { key: "quiz_failed", component: "local_trustgrade" },
+          { key: task.error_message, component: "local_trustgrade" }
         ]).done(function(strings) {
           this.indicatorElement.find(".indicator-title").text(strings[0])
-          this.indicatorElement.find(".indicator-message").text(task.error_message)
+          this.indicatorElement.find(".indicator-message").text(strings[1] || task.error_message)
           this.indicatorElement.removeClass("clickable").css("cursor", "default")
           this.indicatorElement.off("click")
           this.indicatorElement.find(".indicator-spinner").hide()
