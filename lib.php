@@ -282,7 +282,11 @@ function local_trustgrade_before_standard_html_head() {
     }
 
     if (isloggedin() && !isguestuser()) {
-        $PAGE->requires->js_call_amd('local_trustgrade/task_indicator', 'init');
+        // Don't show task indicator on the quiz interface page (user is already in the quiz).
+        $path = $PAGE->url->get_path();
+        if (strpos($path, 'quiz_interface.php') === false) {
+            $PAGE->requires->js_call_amd('local_trustgrade/task_indicator', 'init');
+        }
     }
 }
 
