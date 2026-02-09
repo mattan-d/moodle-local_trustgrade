@@ -198,7 +198,7 @@ $string['time_per_question_help'] = 'הזמן המרבי המותר לכל שא�
 
 // Disclosure settings.
 $string['disclosure_settings'] = 'הגדרות גילוי לסטודנט';
-$string['disclosure_settings_desc'] = 'הגדר את אופן ההודעה לסטודנטים על פונקציות AI במשימו��.';
+$string['disclosure_settings_desc'] = 'הגדר כיצד התלמידים יקבלו מידע על תכונות בינה מלאכותית במשימות.';
 $string['show_disclosure'] = 'הצג הודעת גילוי AI';
 $string['show_disclosure_desc'] = 'הצג הודעת גילוי לסטודנטים לפני שליחת המשימה, שמודיעה על תכונת חידון מבוססת AI.';
 $string['custom_disclosure_message'] = 'הודעה גילוי מותאמת';
