@@ -96,7 +96,7 @@ echo $OUTPUT->header();
 echo html_writer::tag('h2', get_string('ai_quiz_title', 'local_trustgrade'));
 
 // The main quiz container will be populated by JavaScript.
-echo html_writer::start_div('ai-quiz-container');
+echo html_writer::start_div('ai-quiz-container local-trustgrade-quiz');
 
 // Question counter (populated by JS).
 echo html_writer::div('', 'question-counter');

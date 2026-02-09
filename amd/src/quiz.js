@@ -439,9 +439,14 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
           </div>`
         }
         html += `</div>`
+        /* Return nav to container so it is not removed when we replace quiz-content */
+        var $nav = $(".quiz-navigation").detach()
+        $(".ai-quiz-container").append($nav)
         $(".quiz-content").html(html)
         $(".question-counter").show()
         $(".quiz-navigation").show()
+        /* Place Next/Finish button inside the question card, right below the options */
+        $(".quiz-content .question-container").append($(".quiz-navigation").detach())
         this.updateNavigationButtons()
         // Always show countdown timer
         this.startTimer()
