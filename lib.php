@@ -347,6 +347,11 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
             // Add notification that questions will be generated
             \core\notification::success(get_string('questions_will_be_generated', 'local_trustgrade'));
         }
+
+        // When TrustGrade is enabled, redirect to question bank after save.
+        if (!empty($data->trustgrade_enabled)) {
+            redirect(new \moodle_url('/local/trustgrade/question_bank.php', ['cmid' => $cmid]));
+        }
     }
 
     return $data;
