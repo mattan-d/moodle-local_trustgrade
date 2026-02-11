@@ -133,7 +133,10 @@ class restore_local_trustgrade_plugin extends restore_local_plugin {
     }
 
     /**
-     * Process quiz session restoration
+     * Process quiz session restoration.
+     * Uses replace (insert or update) to avoid duplicate key on (cmid, submissionid, userid)
+     * when duplicating/restoring, since multiple backup rows can map to the same triple
+     * (e.g. submissionid 0 / userid 0) or a session may already exist for the new cmid.
      */
     public function process_trustgrade_quiz_session($data) {
         global $DB;
@@ -141,12 +144,26 @@ class restore_local_trustgrade_plugin extends restore_local_plugin {
         $data = (object)$data;
         $oldid = $data->id;
         $data->cmid = $this->task->get_moduleid();
-        $data->userid = $this->get_mappingid('user', $data->userid);
-        $data->submissionid = $this->get_mappingid('submission', $data->submissionid);
+        $mappeduser = $this->get_mappingid('user', $data->userid);
+        $mappedsub = $this->get_mappingid('submission', $data->submissionid);
+        $data->userid = ($mappeduser !== false && $mappeduser !== null) ? (int) $mappeduser : 0;
+        $data->submissionid = ($mappedsub !== false && $mappedsub !== null) ? (int) $mappedsub : 0;
+
+        $existing = $DB->get_record('local_trustgd_quiz_sessions', [
+            'cmid' => $data->cmid,
+            'submissionid' => $data->submissionid,
+            'userid' => $data->userid,
+        ]);
 
         unset($data->id);
-        $newid = $DB->insert_record('local_trustgd_quiz_sessions', $data);
-        
+        if ($existing) {
+            $data->id = $existing->id;
+            $DB->update_record('local_trustgd_quiz_sessions', $data);
+            $newid = $existing->id;
+        } else {
+            $newid = $DB->insert_record('local_trustgd_quiz_sessions', $data);
+        }
+
         $this->set_mapping('trustgrade_quiz_session', $oldid, $newid);
     }
 
