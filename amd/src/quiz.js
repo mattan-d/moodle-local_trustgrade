@@ -516,7 +516,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         Str.get_string("submit_final_answers", "local_trustgrade"),
       ]).then((strings) => {
         if (this.currentQuestion < this.questions.length - 1) {
-          $("#next-btn").show().text(strings[0])
+          $("#next-btn").show().html(strings[0] + ' <span dir="ltr" class="quiz-nav-arrow" aria-hidden="true">→</span>')
           $("#finish-btn").hide()
         } else {
           $("#next-btn").hide()
