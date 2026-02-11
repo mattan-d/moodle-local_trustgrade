@@ -24,6 +24,8 @@
 define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification) => {
   var POLL_INTERVAL_MS = 3000;
   var pollTimer = null;
+  /** True when we have been polling for pending/processing; only then do we reload on "ready". */
+  var wasPolling = false;
 
   function renderStatus(html) {
     var $el = $("#instructor-generation-status");
@@ -48,6 +50,7 @@ define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification) => 
         if (!data.has_task) {
           renderStatus(null);
           stopPolling();
+          wasPolling = false;
           return;
         }
 
@@ -56,6 +59,7 @@ define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification) => 
         var error = data.error || "";
 
         if (status === "pending" || status === "processing") {
+          wasPolling = true;
           renderStatus(
             '<div class="alert alert-info mb-4">' +
               '<i class="fa fa-spinner fa-spin"></i> ' +
@@ -71,9 +75,13 @@ define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification) => 
               "</div>"
           );
           stopPolling();
-          setTimeout(function () {
-            window.location.reload();
-          }, 1500);
+          // Reload only if we just transitioned to ready while polling (not on initial load with old "ready").
+          if (wasPolling) {
+            wasPolling = false;
+            setTimeout(function () {
+              window.location.reload();
+            }, 1500);
+          }
         } else if (status === "failed") {
           renderStatus(
             '<div class="alert alert-danger mb-4">' +
@@ -83,13 +91,16 @@ define(["jquery", "core/ajax", "core/notification"], ($, Ajax, Notification) => 
               "</div>"
           );
           stopPolling();
+          wasPolling = false;
         } else {
           renderStatus(null);
           stopPolling();
+          wasPolling = false;
         }
       })
       .catch(function () {
         stopPolling();
+        wasPolling = false;
       });
   }
 

@@ -112,7 +112,6 @@ class question_bank_renderer {
       $db_id = isset($question['db_id']) ? intval($question['db_id']) : (isset($question['id']) ? intval($question['id']) : 0);
 
       $html .= '<div class="question-content">';
-      $html .= '<p class="mb-1"><strong>' . get_string('type', 'local_trustgrade') . ':</strong> ' . htmlspecialchars(ucfirst(str_replace('_', ' ', $type))) . '</p>';
 
       $metaBits = [];
       if ($points !== null) {
