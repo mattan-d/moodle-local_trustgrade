@@ -97,11 +97,12 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                             
                             if (userId && grades[userId]) {
                                 var gradeData = grades[userId];
+                                var pct = parseInt(gradeData.percentage, 10) || 0;
+                                var scoreColor = pct >= 80 ? '#0d6832' : (pct < 50 ? '#b02a37' : '#0f6cbf');
                                 // Format: 10/60 (17%) 3/02/2026 03:43 זמן שנדרש: 39s
                                 var gradeHtml = '<div style="white-space: nowrap; text-align: right; direction: rtl;">';
-                                
-                                // Score: 10/60 (17%)
-                                gradeHtml += '<div style="font-weight: bold; color: #0f6cbf;">';
+                                // Score: red <50%, green >=80%, blue otherwise
+                                gradeHtml += '<div style="font-weight: bold; color: ' + scoreColor + ';">';
                                 gradeHtml += gradeData.earned_points + '/' + gradeData.total_points;
                                 gradeHtml += ' (' + gradeData.percentage + '%)';
                                 gradeHtml += '</div>';
