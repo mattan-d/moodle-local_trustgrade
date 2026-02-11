@@ -15,17 +15,34 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Adhoc task to process one instructor question generation (from files).
  *
  * @package    local_trustgrade
  * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace local_trustgrade\task;
+
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_trustgrade';
-$plugin->version = 2026021001;
-$plugin->requires = 2022112800; // Moodle 4.1
-$plugin->maturity = MATURITY_STABLE;
-$plugin->release = '2.7';
+/**
+ * Process a single instructor generation task.
+ */
+class process_instructor_generation extends \core\task\adhoc_task {
+
+    /**
+     * Execute the task.
+     */
+    public function execute() {
+        \core_php_time_limit::raise(300);
+        raise_memory_limit(MEMORY_HUGE);
+
+        $data = $this->get_custom_data();
+        if (empty($data->task_id)) {
+            return;
+        }
+
+        \local_trustgrade\instructor_generation_manager::process_task_by_id($data->task_id);
+    }
+}

@@ -24,6 +24,7 @@
 
 require_once('../../config.php');
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
+require_once($CFG->dirroot . '/local/trustgrade/classes/form/generate_from_files_form.php');
 
 $cmid = required_param('cmid', PARAM_INT);
 
@@ -56,17 +57,64 @@ $PAGE->set_title(get_string('question_bank', 'local_trustgrade'));
 $PAGE->set_heading($course->fullname);
 $PAGE->set_context($context);
 
+// Form for generating questions from uploaded files.
+$form = new \local_trustgrade\form\generate_from_files_form(null, ['cmid' => $cmid]);
+$draftitemid = file_get_submitted_draft_itemid('generatefiles');
+if (empty($draftitemid)) {
+    $draftitemid = file_get_unused_draft_itemid();
+}
+$form->set_data(['generatefiles' => $draftitemid, 'cmid' => $cmid]);
+
+if ($form->is_cancelled()) {
+    redirect(new moodle_url('/local/trustgrade/question_bank.php', ['cmid' => $cmid]));
+}
+
+if ($data = $form->get_data()) {
+    $instructions = isset($data->instructions) ? trim($data->instructions) : '';
+    $files = \local_trustgrade\external::collect_intro_files((int) $data->generatefiles, 0);
+    if (empty($files) && $instructions === '') {
+        \core\notification::error(get_string('no_instructions_or_files', 'local_trustgrade'));
+    } else {
+        $questioncount = isset($data->questioncount) ? (int) $data->questioncount : 5;
+        $questioncount = max(1, min(50, $questioncount));
+        try {
+            \local_trustgrade\instructor_generation_manager::create_task(
+                $cmid,
+                $USER->id,
+                $instructions,
+                $questioncount,
+                $files
+            );
+            \core\notification::success(get_string('generation_started', 'local_trustgrade'));
+            redirect(new moodle_url('/local/trustgrade/question_bank.php', ['cmid' => $cmid]));
+        } catch (\Throwable $e) {
+            \core\notification::error(get_string('error_generating_questions', 'local_trustgrade') . ': ' . $e->getMessage());
+        }
+    }
+}
+
 // Add CSS and JavaScript
 $PAGE->requires->css('/local/trustgrade/styles.css');
 $PAGE->requires->js_call_amd('local_trustgrade/question_bank', 'init', [$cmid]);
 $PAGE->requires->js_call_amd('local_trustgrade/question_editor', 'init', [$cmid]);
+$PAGE->requires->js_call_amd('local_trustgrade/question_bank_status', 'init', [$cmid]);
 
 echo $OUTPUT->header();
 
 echo $OUTPUT->heading(get_string('question_bank', 'local_trustgrade'));
 
-$questions = \local_trustgrade\question_generator::get_questions($cmid);
+// Status of instructor question generation (adhoc).
+echo html_writer::div('', 'instructor-generation-status', ['id' => 'instructor-generation-status']);
 
+// Show "Create questions from files" form in a box.
+echo html_writer::start_div('card mb-4');
+echo html_writer::div(get_string('generate_from_files', 'local_trustgrade'), 'card-header');
+echo html_writer::start_div('card-body');
+$form->display();
+echo html_writer::end_div();
+echo html_writer::end_div();
+
+$questions = \local_trustgrade\question_generator::get_questions($cmid);
 ?>
 
 <div class="question-bank-container">

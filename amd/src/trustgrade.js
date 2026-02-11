@@ -35,7 +35,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
   var trustgrade = {
     init: function () {
       this.bindEvents()
-      this.loadQuestionBank() // Load existing questions on page load
+      // Question bank is shown on question_bank.php only; no inline bank on assignment edit form.
     },
 
     bindEvents: () => {

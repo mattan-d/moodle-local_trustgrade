@@ -100,6 +100,17 @@ $string['no_questions_available'] = 'No questions are available for this assignm
 $string['no_questions_found'] = 'No questions found. Generate some questions to get started.';
 $string['add_new_question'] = 'Add New Question';
 
+// Generate questions from files (question bank page).
+$string['generate_from_files'] = 'Create questions from files';
+$string['upload_files_for_questions'] = 'Upload files';
+$string['upload_files_for_questions_help'] = 'Add one or more files (e.g. PDF, Word, text). Questions will be generated based on their content. You can also add optional instructions below.';
+$string['number_of_questions'] = 'Number of questions';
+$string['optional_instructions'] = 'Optional instructions';
+$string['optional_instructions_help'] = 'Optional text to guide question generation (e.g. focus on key concepts, difficulty level). Leave empty to use only file content.';
+$string['generate_questions_from_files'] = 'Generate questions';
+$string['generation_status_preparing'] = 'Generating questions… Please wait.';
+$string['generation_started'] = 'Question generation has started. Status will update below.';
+
 // Question fields.
 $string['question'] = 'Question';
 $string['question_text'] = 'Question Text';

@@ -71,13 +71,6 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
             $generate_options[$i] = $i;
         }
 
-        $mform->addElement('advcheckbox', 'trustgrade_auto_generate',
-                get_string('auto_generate_questions', 'local_trustgrade'),
-                get_string('auto_generate_questions_desc', 'local_trustgrade'));
-        $default_auto_generate = ($cmid > 0) ? $current_settings['auto_generate'] ?? 0 : 1;
-        $mform->setDefault('trustgrade_auto_generate', $default_auto_generate);
-        $mform->setAdvanced('trustgrade_auto_generate');
-
         // Options for number of questions (used for instructor and submission questions)
         $question_count_options = [];
         for ($i = 0; $i <= 50; $i++) { // Increased maximum from 10 to 50 to allow more questions
@@ -135,35 +128,15 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
                 '<div id="ai-recommendation" class="alert alert-info"></div></div>');
         $mform->setAdvanced('trustgrade_recommendation');
 
-        // Add question generation loading indicator (hidden by default)
-        $mform->addElement('static', 'trustgrade_question_loading', '',
-                '<div id="ai-question-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
-                get_string('generating_questions', 'local_trustgrade') . '</div>');
-        $mform->setAdvanced('trustgrade_question_loading');
-
-        // Add question bank section placeholder (will be loaded via AJAX)
-        $mform->addElement('static', 'trustgrade_question_bank_placeholder', get_string('generated_questions', 'local_trustgrade'),
-                '<div id="ai-questions-container" style="display: none;">' .
-                '<div id="ai-questions" class="alert alert-success"></div></div>' .
-                '<div id="question-bank-section">' .
-                '<div id="question-bank-loading" style="display: none;">' .
-                '<i class="fa fa-spinner fa-spin"></i> ' . get_string('loading_question_bank', 'local_trustgrade') .
-                '</div>' .
-                '<div id="question-bank-container"></div>' .
-                '</div>');
-        $mform->setAdvanced('trustgrade_question_bank_placeholder');
-
         // Add hidden field to store assignment ID for AJAX calls
         $mform->addElement('hidden', 'trustgrade_cmid', $cmid);
         $mform->setType('trustgrade_cmid', PARAM_INT);
 
         $mform->disabledIf('trustgrade_instructor_questions', 'trustgrade_enabled');
-        $mform->disabledIf('trustgrade_auto_generate', 'trustgrade_enabled');
         $mform->disabledIf('trustgrade_buttons', 'trustgrade_enabled');
 
-        // Add JavaScript for AJAX functionality
+        // Add JavaScript for AJAX functionality (check instructions only; question bank is on question_bank.php)
         $PAGE->requires->js_call_amd('local_trustgrade/trustgrade', 'init');
-        $PAGE->requires->js_call_amd('local_trustgrade/question_editor', 'init', [$cmid]);
         $PAGE->requires->css('/local/trustgrade/styles.css');
     }
 }
@@ -310,43 +283,10 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
             'randomize_answers' => true, // Always enabled
             'time_per_question' => $data->trustgrade_time_per_question,
             'show_countdown' => true, // Always enabled
-            'auto_generate' => !empty($data->trustgrade_auto_generate)
+            'auto_generate' => false, // No longer used; question bank is managed via question_bank.php
         ];
 
         \local_trustgrade\quiz_settings::save_settings($cmid, $settings);
-
-        if (!empty($data->trustgrade_auto_generate) && !empty($data->trustgrade_enabled)) {
-            $cache = cache::make('local_trustgrade', 'pending_generation');
-
-            // Get assignment instructions for question generation
-            $instructions = '';
-            if (isset($data->intro)) {
-                $instructions = $data->intro ?? '';
-            }
-
-            $intro_itemid = 0;
-            $intro_attachments_itemid = 0;
-
-            // Extract file item IDs from form data
-            if (isset($data->intro) && isset($data->intro['itemid'])) {
-                $intro_itemid = (int)$data->intro['itemid'];
-            }
-            if (isset($data->introattachments)) {
-                $intro_attachments_itemid = (int)$data->introattachments;
-            }
-
-            $cache->set('trustgrade_pending_generation', [
-                'cmid' => $cmid,
-                'instructions' => $instructions,
-                'question_count' => $data->trustgrade_instructor_questions ?? 0,
-                'intro_itemid' => $intro_itemid,
-                'intro_attachments_itemid' => $intro_attachments_itemid,
-                'timestamp' => time()
-            ]);
-
-            // Add notification that questions will be generated
-            \core\notification::success(get_string('questions_will_be_generated', 'local_trustgrade'));
-        }
 
         // When TrustGrade is enabled, redirect to question bank after save.
         if (!empty($data->trustgrade_enabled)) {

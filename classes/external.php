@@ -34,6 +34,7 @@ require_once($CFG->dirroot . '/local/trustgrade/classes/question_bank_renderer.p
 require_once($CFG->dirroot . '/local/trustgrade/classes/quiz_settings.php');
 require_once($CFG->dirroot . '/local/trustgrade/classes/quiz_session.php');
 require_once($CFG->dirroot . '/local/trustgrade/classes/async_task_manager.php');
+require_once($CFG->dirroot . '/local/trustgrade/classes/instructor_generation_manager.php');
 require_once($CFG->libdir . '/externallib.php');
 
 class external extends \external_api {
@@ -773,6 +774,27 @@ class external extends \external_api {
              'error' => $e->getMessage()
          ];
      }
+ }
+
+ public static function get_instructor_generation_status_parameters() {
+     return new \external_function_parameters([
+         'cmid' => new \external_value(PARAM_INT, 'Course module ID'),
+     ]);
+ }
+
+ public static function get_instructor_generation_status_returns() {
+     return new \external_single_structure([
+         'has_task' => new \external_value(PARAM_BOOL, 'Whether there is a task for this cmid'),
+         'status' => new \external_value(PARAM_ALPHA, 'pending, processing, ready, or failed'),
+         'message' => new \external_value(PARAM_TEXT, 'Display message'),
+         'error' => new \external_value(PARAM_TEXT, 'Error message if failed', VALUE_OPTIONAL),
+     ]);
+ }
+
+ public static function get_instructor_generation_status($cmid) {
+     self::validate_parameters(self::get_instructor_generation_status_parameters(), ['cmid' => $cmid]);
+     self::validate_editing_context($cmid);
+     return instructor_generation_manager::get_status_for_cmid($cmid);
  }
 
  public static function get_quiz_grades_for_grading_parameters() {

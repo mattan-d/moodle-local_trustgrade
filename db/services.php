@@ -202,6 +202,15 @@ $functions = [
         'ajax' => true,
         'capabilities' => 'mod/assign:grade',
     ],
+    'local_trustgrade_get_instructor_generation_status' => [
+        'classname' => 'local_trustgrade\external',
+        'methodname' => 'get_instructor_generation_status',
+        'classpath' => 'local/trustgrade/classes/external.php',
+        'description' => 'Get status of instructor question generation from files for question bank.',
+        'type' => 'read',
+        'ajax' => true,
+        'capabilities' => 'mod/assign:grade',
+    ],
 ];
 
 $services = [
@@ -228,6 +237,7 @@ $services = [
             'local_trustgrade_get_pending_tasks',
             'local_trustgrade_has_pending_tasks',
             'local_trustgrade_get_quiz_grades_for_grading',
+            'local_trustgrade_get_instructor_generation_status',
             'local_trustgrade_toggle_mandatory_question',
         ],
         'restrictedusers' => 0,

@@ -88,6 +88,17 @@ $string['no_questions_available'] = 'אין שאלות זמינות עבור מ�
 $string['no_questions_found'] = 'לא נמצאו שאלות. צור כמה שאלות כדי להתחיל.';
 $string['add_new_question'] = 'הוסף שאלה חדשה';
 
+// Generate questions from files (question bank page).
+$string['generate_from_files'] = 'צור שאלות מקבצים';
+$string['upload_files_for_questions'] = 'העלאת קבצים';
+$string['upload_files_for_questions_help'] = 'הוסף קובץ אחד או יותר (למשל PDF, Word, טקסט). השאלות ייווצרו על בסיס התוכן. ניתן גם להוסיף הוראות אופציונליות למטה.';
+$string['number_of_questions'] = 'כמות שאלות';
+$string['optional_instructions'] = 'הוראות אופציונליות (לא חובה)';
+$string['optional_instructions_help'] = 'טקסט אופציונלי להנחיית יצירת השאלות (למשל התמקדות בנושאים מרכזיים, רמת קושי). השאר ריק לשימוש בתוכן הקבצים בלבד.';
+$string['generate_questions_from_files'] = 'צור שאלות';
+$string['generation_status_preparing'] = 'מייצר שאלות… אנא המתן.';
+$string['generation_started'] = 'יצירת השאלות החלה. הסטטוס יתעדכן למטה.';
+
 // Question fields.
 $string['question'] = 'שאלה';
 $string['question_text'] = 'טקסט השאלה';
