@@ -151,6 +151,18 @@ function local_trustgrade_before_standard_html_head() {
         return;
     }
 
+    // Redirect to question bank after save (new or update) when TrustGrade is enabled.
+    if (!empty($_SESSION['local_trustgrade_redirect_cmid'])) {
+        $cmid = (int) $_SESSION['local_trustgrade_redirect_cmid'];
+        unset($_SESSION['local_trustgrade_redirect_cmid']);
+        if ($cmid > 0) {
+            $cm = get_coursemodule_from_id('assign', $cmid, 0, false, IGNORE_MISSING);
+            if ($cm) {
+                redirect(new \moodle_url('/local/trustgrade/question_bank.php', ['cmid' => $cmid]));
+            }
+        }
+    }
+
     $cache = cache::make('local_trustgrade', 'pending_generation');
     $pending = $cache->get('trustgrade_pending_generation');
 
@@ -288,9 +300,9 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
 
         \local_trustgrade\quiz_settings::save_settings($cmid, $settings);
 
-        // When TrustGrade is enabled, redirect to question bank after save.
-        if (!empty($data->trustgrade_enabled)) {
-            redirect(new \moodle_url('/local/trustgrade/question_bank.php', ['cmid' => $cmid]));
+        // Schedule redirect to question bank after the next page load (avoids redirect inside DB transaction).
+        if (!empty($data->trustgrade_enabled) && $cmid > 0) {
+            $_SESSION['local_trustgrade_redirect_cmid'] = (int) $cmid;
         }
     }
 

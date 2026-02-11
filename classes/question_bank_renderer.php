@@ -95,6 +95,32 @@ class question_bank_renderer {
   }
 
   /**
+   * Map raw blooms_level value to plugin get_string for display (core str support).
+   *
+   * @param string $raw Raw value e.g. "Understanding", "Analyze"
+   * @return string Translated label from local_trustgrade strings
+   */
+  private static function get_blooms_level_string($raw) {
+      $keyMap = [
+          'Remembering' => 'blooms_remembering',
+          'Remember'    => 'blooms_remembering',
+          'Understanding' => 'blooms_understanding',
+          'Understand'  => 'blooms_understanding',
+          'Applying'    => 'blooms_applying',
+          'Apply'       => 'blooms_applying',
+          'Analyzing'   => 'blooms_analyzing',
+          'Analyze'     => 'blooms_analyzing',
+          'Evaluating'  => 'blooms_evaluating',
+          'Evaluate'    => 'blooms_evaluating',
+      ];
+      $key = isset($keyMap[$raw]) ? $keyMap[$raw] : null;
+      if ($key !== null) {
+          return get_string($key, 'local_trustgrade');
+      }
+      return s($raw);
+  }
+
+  /**
    * Render question in display mode using new JSON pattern
    *
    * @param array $question Question data
@@ -119,7 +145,7 @@ class question_bank_renderer {
       }
       if (!empty($blooms)) {
           $bloomsLabel = get_string('blooms_level_label', 'local_trustgrade');
-          $metaBits[] = $bloomsLabel . ': ' . htmlspecialchars($blooms);
+          $metaBits[] = $bloomsLabel . ': ' . self::get_blooms_level_string($blooms);
       }
       if (!empty($metaBits)) {
           $html .= '<p class="text-muted mb-2">' . implode(' | ', $metaBits) . '</p>';

@@ -111,6 +111,14 @@ $string['generate_questions_from_files'] = 'Generate questions';
 $string['generation_status_preparing'] = 'Generating questions… Please wait.';
 $string['generation_started'] = 'Question generation has started. Status will update below.';
 
+$string['generate_from_files_help'] = '<h3>Creating quiz questions by uploading files</h3>
+<p>You can create quiz questions automatically by uploading files to the system. The system will analyse the file content and generate questions based on the material in them.</p>
+<h4>How does it work?</h4>
+<p><strong>Uploading files</strong><br>You can upload files by dragging and dropping from your computer into the upload area.<br>Maximum number of files: up to 20 files.<br>Maximum file size: no limit.</p>
+<p><strong>Choosing the number of questions</strong><br>Set how many questions you want to generate (e.g. 5 questions).</p>
+<p><strong>Optional instructions</strong><br>You can add general instructions for the AI, such as content focus, main topics to emphasise, desired depth, or points to include.</p>
+<p><strong>Generating questions from files</strong><br>After uploading files and setting the quantity (and instructions if added), the system will generate questions based on the uploaded content.</p>';
+
 // Question fields.
 $string['question'] = 'Question';
 $string['question_text'] = 'Question Text';

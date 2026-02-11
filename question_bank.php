@@ -106,6 +106,11 @@ echo $OUTPUT->heading(get_string('question_bank', 'local_trustgrade'));
 // Status of instructor question generation (adhoc).
 echo html_writer::div('', 'instructor-generation-status', ['id' => 'instructor-generation-status']);
 
+// Help text for creating questions from files.
+echo html_writer::start_div('card mb-4');
+echo html_writer::div(get_string('generate_from_files_help', 'local_trustgrade'), 'card-body');
+echo html_writer::end_div();
+
 // Show "Create questions from files" form in a box.
 echo html_writer::start_div('card mb-4');
 echo html_writer::div(get_string('generate_from_files', 'local_trustgrade'), 'card-header');

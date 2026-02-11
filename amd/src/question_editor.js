@@ -290,13 +290,33 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
         Str.get_string("explanation", "local_trustgrade"),
         Str.get_string("points", "local_trustgrade"),
         Str.get_string("mandatory", "local_trustgrade"),
+        Str.get_string("blooms_level_label", "local_trustgrade"),
+        Str.get_string("blooms_remembering", "local_trustgrade"),
+        Str.get_string("blooms_understanding", "local_trustgrade"),
+        Str.get_string("blooms_applying", "local_trustgrade"),
+        Str.get_string("blooms_analyzing", "local_trustgrade"),
+        Str.get_string("blooms_evaluating", "local_trustgrade"),
       ]).then((strings) => {
-        const [qStr, correctStr, explStr, pointsStr, mandatoryStr] = strings
-        let html = `<p><strong>Type:</strong> ${String(questionData.type || "").replace("_", " ")}</p>`
+        const [qStr, correctStr, explStr, pointsStr, mandatoryStr, bloomsLabel, sRemember, sUnderstand, sApply, sAnalyze, sEvaluate] = strings
+        const bloomsMap = {
+          Remembering: sRemember,
+          Remember: sRemember,
+          Understanding: sUnderstand,
+          Understand: sUnderstand,
+          Applying: sApply,
+          Apply: sApply,
+          Analyzing: sAnalyze,
+          Analyze: sAnalyze,
+          Evaluating: sEvaluate,
+          Evaluate: sEvaluate,
+        }
+        let html = ""
         if (questionData.metadata && (questionData.metadata.points != null || questionData.metadata.blooms_level)) {
           const pts = questionData.metadata.points != null ? `${pointsStr}: ${questionData.metadata.points}` : ""
-          const bloom = questionData.metadata.blooms_level ? ` | Bloom's: ${questionData.metadata.blooms_level}` : ""
-          html += `<p>${pts}${bloom}</p>`
+          const rawBloom = questionData.metadata.blooms_level || ""
+          const bloomStr = bloomsMap[rawBloom] || rawBloom
+          const bloom = rawBloom ? ` | ${bloomsLabel}: ${bloomStr}` : ""
+          html += `<p class="text-muted mb-2">${pts}${bloom}</p>`
         }
         html += `<p><strong>${qStr}:</strong> ${questionData.text || ""}</p>`
         if (questionData.is_mandatory) {

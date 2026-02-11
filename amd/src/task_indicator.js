@@ -15,17 +15,26 @@
 
 define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notification, Str) => {
   var TaskIndicator = {
-    indicatorElement: null,
+    /** @type {Object.<string, jQuery>} key (cmid_submissionid) -> indicator element */
+    indicatorElements: {},
+    containerElement: null,
     lastCheckTime: null,
     recheckTimeout: null,
     visibilityChangeHandler: null,
     isPolling: false,
 
     /**
-     * Initialize the task indicator
+     * Unique key for a task (one indicator per submission)
+     */
+    getTaskKey: function (task) {
+      return (task.cmid || '') + '_' + (task.submission_id ?? '')
+    },
+
+    /**
+     * Initialize the task indicator (one modal/indicator per submission)
      */
     init: function () {
-      this.createIndicatorElement()
+      this.ensureContainer()
 
       // Do a lightweight check to see if user has any pending tasks
       this.checkHasPendingTasks()
@@ -121,34 +130,67 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     },
 
     /**
-     * Create the floating indicator element
+     * Ensure the container for multiple indicators exists
      */
-    createIndicatorElement: function () {
-      var indicator = $("<div>", {
-        id: "trustgrade-task-indicator",
-        class: "trustgrade-task-indicator hidden",
+    ensureContainer: function () {
+      if (this.containerElement && this.containerElement.length) {
+        return
+      }
+      this.containerElement = $('<div>', {
+        id: 'trustgrade-task-indicators',
+        class: 'trustgrade-task-indicators-container',
       })
+      $('body').append(this.containerElement)
+    },
 
+    /**
+     * Create one indicator element for a task key (one per submission)
+     */
+    createIndicatorElement: function (taskKey) {
+      var indicator = $('<div>', {
+        class: 'trustgrade-task-indicator hidden',
+        'data-task-key': taskKey,
+      })
       indicator.html(
         '<div class="indicator-content">' +
           '   <div class="indicator-icon">' +
           '       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">' +
           '         <circle cx="16" cy="16" r="14" fill="#4CAF50" stroke="#fff" stroke-width="2"/>' +
           '         <path d="M9 16L14 21L23 11" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
-          "       </svg>" +
-          "   </div>" +
+          '       </svg>' +
+          '   </div>' +
           '   <div class="indicator-text">' +
           '       <div class="indicator-title"></div>' +
           '       <div class="indicator-message"></div>' +
-          "   </div>" +
+          '   </div>' +
           '   <div class="indicator-spinner">' +
           '       <i class="fa fa-spinner fa-spin"></i>' +
-          "   </div>" +
-          "</div>",
+          '   </div>' +
+          '</div>'
       )
+      this.containerElement.append(indicator)
+      this.indicatorElements[taskKey] = indicator
+      return indicator
+    },
 
-      $("body").append(indicator)
-      this.indicatorElement = indicator
+    /**
+     * Remove one indicator and forget it
+     */
+    removeIndicator: function (taskKey) {
+      var el = this.indicatorElements[taskKey]
+      if (el) {
+        el.remove()
+        delete this.indicatorElements[taskKey]
+      }
+    },
+
+    /**
+     * Hide all indicators (keep in DOM for next poll)
+     */
+    hideAllIndicators: function () {
+      Object.keys(this.indicatorElements).forEach(function (key) {
+        this.indicatorElements[key].removeClass('visible').addClass('hidden')
+      }.bind(this))
     },
 
     /**
@@ -187,7 +229,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     },
 
     /**
-     * Check for pending tasks
+     * Check for pending tasks (one indicator per submission)
      *
      * @param {Boolean} singleCheck If true, only do one check and don't continue polling
      */
@@ -201,28 +243,44 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
               try {
                 var tasks = JSON.parse(response.tasks)
                 if (tasks && tasks.length > 0) {
-                  // Tasks found - start polling if not already
                   if (!this.isPolling && !singleCheck) {
                     console.log('[TrustGrade] Tasks found, starting polling')
                     this.startPolling()
                   }
-                  this.showIndicator(tasks[0]) // Show first pending task
+                  var currentKeys = {}
+                  tasks.forEach(function (task) {
+                    var key = this.getTaskKey(task)
+                    currentKeys[key] = true
+                    var el = this.indicatorElements[key]
+                    if (!el || !el.length) {
+                      el = this.createIndicatorElement(key)
+                    }
+                    this.updateIndicatorForTask(task, el)
+                  }.bind(this))
+                  Object.keys(this.indicatorElements).forEach(function (key) {
+                    if (!currentKeys[key]) {
+                      this.removeIndicator(key)
+                    }
+                  }.bind(this))
                 } else {
-                  // No tasks found
-                  this.hideIndicator()
+                  Object.keys(this.indicatorElements).slice().forEach(function (key) {
+                    this.removeIndicator(key)
+                  }.bind(this))
                   if (this.isPolling && !singleCheck) {
-                    // Stop polling when no more tasks
                     this.stopPolling()
                   }
                 }
               } catch (e) {
                 console.error("[TrustGrade] Error parsing tasks:", e)
-                this.hideIndicator()
+                Object.keys(this.indicatorElements).slice().forEach(function (key) {
+                  this.removeIndicator(key)
+                }.bind(this))
               }
             } else {
-              this.hideIndicator()
+              Object.keys(this.indicatorElements).slice().forEach(function (key) {
+                this.removeIndicator(key)
+              }.bind(this))
               if (this.isPolling && !singleCheck) {
-                // Stop polling when no more tasks
                 this.stopPolling()
               }
             }
@@ -235,47 +293,30 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
     },
 
     /**
-     * Show the indicator with task info
+     * Update one indicator element with task info (one modal per submission)
      *
      * @param {Object} task Task object
+     * @param {jQuery} element Indicator DOM element
      */
-    showIndicator: function (task) {
-      if (!this.indicatorElement) {
+    updateIndicatorForTask: function (task, element) {
+      if (!element || !element.length) {
         return
       }
 
-      console.log('[TrustGrade] Showing indicator for task:', task)
-
       var titleKey, messageKey, messageParam
 
-      // Check if task has error_message (from AI Gateway or other errors)
       if (task.error_message && task.error_message.trim() !== '') {
-        console.log('[TrustGrade] Task has error_message:', task.error_message)
-
-        // Load the failed title and error message via core/str (error_message may be a string key e.g. invalid_file_type_error)
         Str.get_strings([
           { key: "quiz_failed", component: "local_trustgrade" },
           { key: task.error_message, component: "local_trustgrade" }
-        ]).done(function(strings) {
-          this.indicatorElement.find(".indicator-title").text(strings[0])
-          this.indicatorElement.find(".indicator-message").text(strings[1] || task.error_message)
-          this.indicatorElement.removeClass("clickable").css("cursor", "default")
-          this.indicatorElement.off("click")
-          this.indicatorElement.find(".indicator-spinner").hide()
-          this.indicatorElement.removeClass("hidden").addClass("visible")
-
-          // Stop polling since task has failed with error
-          console.log('[TrustGrade] Task has error message, stopping polling')
-          this.stopPolling()
-
-          // Auto-hide after 15 seconds
-          setTimeout(() => {
-            this.hideIndicator()
-          }, 15000)
-        }.bind(this)).fail(function(error) {
-          console.error("[TrustGrade] Error loading failed string:", error)
-        })
-
+        ]).done(function (strings) {
+          element.find(".indicator-title").text(strings[0])
+          element.find(".indicator-message").text(strings[1] || task.error_message)
+          element.removeClass("clickable").css("cursor", "default")
+          element.off("click")
+          element.find(".indicator-spinner").hide()
+          element.removeClass("hidden").addClass("visible")
+        }.bind(this)).fail(function () {})
         return
       }
 
@@ -293,60 +334,37 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         messageParam = task.assignment_name
       }
 
-      // Get strings
       Str.get_strings([
         { key: titleKey, component: "local_trustgrade" },
         { key: messageKey, component: "local_trustgrade", param: messageParam },
       ])
-        .done(
-          function (strings) {
-            this.indicatorElement.find(".indicator-title").text(strings[0])
-            this.indicatorElement.find(".indicator-message").text(strings[1])
+        .done(function (strings) {
+          element.find(".indicator-title").text(strings[0])
+          element.find(".indicator-message").text(strings[1])
 
-            if (task.status === "ready" && task.quiz_url) {
-              this.indicatorElement.addClass("clickable").css("cursor", "pointer")
-              this.indicatorElement.off("click").on("click", () => {
-                window.location.href = task.quiz_url
-              })
-              this.indicatorElement.find(".indicator-spinner").hide()
-            } else if (task.status === "failed") {
-              this.indicatorElement.removeClass("clickable").css("cursor", "default")
-              this.indicatorElement.off("click")
-              this.indicatorElement.find(".indicator-spinner").hide()
+          if (task.status === "ready" && task.quiz_url) {
+            element.addClass("clickable").css("cursor", "pointer")
+            element.off("click").on("click", () => {
+              window.location.href = task.quiz_url
+            })
+            element.find(".indicator-spinner").hide()
+          } else if (task.status === "failed") {
+            element.removeClass("clickable").css("cursor", "default")
+            element.off("click")
+            element.find(".indicator-spinner").hide()
+          } else {
+            element.removeClass("clickable").css("cursor", "default")
+            element.off("click")
+            element.find(".indicator-spinner").show()
+          }
 
-              // Stop polling since task has failed
-              console.log('[TrustGrade] Task failed, stopping polling')
-              this.stopPolling()
-
-              // Auto-hide after 10 seconds
-              setTimeout(() => {
-                this.hideIndicator()
-              }, 10000)
-            } else {
-              this.indicatorElement.removeClass("clickable").css("cursor", "default")
-              this.indicatorElement.off("click")
-              this.indicatorElement.find(".indicator-spinner").show()
-            }
-
-            this.indicatorElement.removeClass("hidden").addClass("visible")
-          }.bind(this),
-        )
-        .fail((error) => {
-          console.error("[TrustGrade] Error loading strings:", error)
-        })
+          element.removeClass("hidden").addClass("visible")
+        }.bind(this))
+        .fail(function () {})
     },
 
     /**
-     * Hide the indicator
-     */
-    hideIndicator: function () {
-      if (this.indicatorElement) {
-        this.indicatorElement.removeClass("visible").addClass("hidden")
-      }
-    },
-
-    /**
-     * Destroy the indicator and stop checking
+     * Destroy all indicators and stop checking
      */
     destroy: function () {
       if (this.recheckTimeout) {
@@ -354,16 +372,18 @@ define(["jquery", "core/ajax", "core/notification", "core/str"], ($, Ajax, Notif
         this.recheckTimeout = null
       }
 
-      // Remove event listeners
       if (this.visibilityChangeHandler) {
         document.removeEventListener('visibilitychange', this.visibilityChangeHandler)
         this.visibilityChangeHandler = null
       }
       $(window).off('focus.trustgrade')
 
-      if (this.indicatorElement) {
-        this.indicatorElement.remove()
-        this.indicatorElement = null
+      Object.keys(this.indicatorElements).slice().forEach(function (key) {
+        this.removeIndicator(key)
+      }.bind(this))
+      if (this.containerElement && this.containerElement.length) {
+        this.containerElement.remove()
+        this.containerElement = null
       }
     },
   }
