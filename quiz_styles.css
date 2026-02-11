@@ -138,6 +138,12 @@
   border-color: #047857;
 }
 
+/* Keep "Next" arrow pointing right in RTL (counter page mirroring) */
+[dir="rtl"] .local-trustgrade-quiz .quiz-nav-arrow {
+  display: inline-block;
+  transform: scaleX(-1);
+}
+
 .local-trustgrade-quiz .quiz-results {
   margin-top: 20px;
 }
