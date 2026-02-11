@@ -28,4 +28,4 @@ $plugin->component = 'local_trustgrade';
 $plugin->version = 2026021001;
 $plugin->requires = 2022112800; // Moodle 4.1
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '2.7';
+$plugin->release = '2.8';
