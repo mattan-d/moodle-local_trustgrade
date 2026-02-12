@@ -70,7 +70,7 @@ if ($hassiteconfig) {
         1
     ));
 
-    $settings->add(new admin_setting_configtextarea(
+    $settings->add(new admin_setting_confightmleditor(
         'local_trustgrade/custom_disclosure_message',
         get_string('custom_disclosure_message', 'local_trustgrade'),
         get_string('custom_disclosure_message_desc', 'local_trustgrade'),
