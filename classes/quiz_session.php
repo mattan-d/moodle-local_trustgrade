@@ -30,7 +30,20 @@ defined('MOODLE_INTERNAL') || die();
  * Quiz session manager for maintaining quiz state across page refreshes
  */
 class quiz_session {
-    
+
+    /**
+     * SQL fragment for user name fields (for fullname() / fullnamedisplay support e.g. phonetic).
+     *
+     * @param string $useralias Table alias for user, e.g. 'u'
+     * @return string e.g. "u.firstname, u.lastname, u.firstnamephonetic, u.lastnamephonetic, u.middlename, u.alternatename"
+     */
+    private static function get_user_name_fields_sql(string $useralias = 'u'): string {
+        $fields = \core_user\fields::get_name_fields();
+        return implode(', ', array_map(function ($f) use ($useralias) {
+            return $useralias . '.' . $f;
+        }, $fields));
+    }
+
     /**
      * Get an existing session or create a new one if it doesn't exist.
      * This is the primary entry point for starting a quiz.
@@ -276,7 +289,7 @@ class quiz_session {
     public static function get_completed_sessions_for_assignment($cmid) {
         global $DB;
         
-        $sql = "SELECT s.*, u.firstname, u.lastname, u.email
+        $sql = "SELECT s.*, " . self::get_user_name_fields_sql('u') . ", u.email
                 FROM {local_trustgd_quiz_sessions} s
                 JOIN {user} u ON s.userid = u.id
                 WHERE s.cmid = :cmid AND s.attempt_completed = 1
@@ -308,7 +321,7 @@ class quiz_session {
     public static function get_completed_sessions_for_course($courseid) {
         global $DB;
         
-        $sql = "SELECT s.*, u.firstname, u.lastname, u.email, cm.id as cmid, a.name as assignmentname
+        $sql = "SELECT s.*, " . self::get_user_name_fields_sql('u') . ", u.email, cm.id as cmid, a.name as assignmentname
                 FROM {local_trustgd_quiz_sessions} s
                 JOIN {user} u ON s.userid = u.id
                 JOIN {course_modules} cm ON s.cmid = cm.id
@@ -341,8 +354,8 @@ class quiz_session {
     public static function get_all_completed_sessions() {
         global $DB;
         
-        $sql = "SELECT s.*, u.firstname, u.lastname, u.email, 
-                       cm.id as cmid, a.name as assignmentname, 
+        $sql = "SELECT s.*, " . self::get_user_name_fields_sql('u') . ", u.email,
+                       cm.id as cmid, a.name as assignmentname,
                        c.id as courseid, c.fullname as coursename
                 FROM {local_trustgd_quiz_sessions} s
                 JOIN {user} u ON s.userid = u.id
