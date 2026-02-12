@@ -48,6 +48,30 @@ class disclosure_handler {
     }
 
     /**
+     * Format custom disclosure message: replace placeholders and render as HTML.
+     * Placeholders: {questions_count}, {time_per_question} (seconds per question).
+     *
+     * @param string $message Raw message (may contain HTML)
+     * @param array $quiz_settings Quiz settings (total_quiz_questions, time_per_question)
+     * @param int $cmid Course module ID (for context)
+     * @return string Filtered HTML
+     */
+    public static function format_custom_disclosure_message($message, array $quiz_settings, $cmid) {
+        $questions_count = (int) ($quiz_settings['total_quiz_questions'] ?? 0);
+        $time_per_question = (int) ($quiz_settings['time_per_question'] ?? 0);
+        $message = str_replace(
+            ['{questions_count}', '{time_per_question}'],
+            [$questions_count, $time_per_question],
+            $message
+        );
+        $context = \context_module::instance($cmid);
+        return format_text($message, FORMAT_HTML, [
+            'context' => $context,
+            'noclean' => false,
+        ]);
+    }
+
+    /**
      * Get the disclosure message HTML
      * 
      * @param int $cmid Course module ID
@@ -60,11 +84,11 @@ class disclosure_handler {
         
         $quiz_settings = \local_trustgrade\quiz_settings::get_settings($cmid);
         
-        // Check for custom disclosure message
+        // Check for custom disclosure message (supports HTML and placeholders)
         $custom_message = get_config('local_trustgrade', 'custom_disclosure_message');
         
         if (!empty($custom_message)) {
-            $disclosure_content = $custom_message;
+            $disclosure_content = self::format_custom_disclosure_message($custom_message, $quiz_settings, $cmid);
         } else {
             $disclosure_content = get_string('ai_disclosure_message', 'local_trustgrade');
         }

@@ -215,7 +215,7 @@ $string['disclosure_settings_desc'] = 'Configure how students are informed about
 $string['show_disclosure'] = 'Show AI disclosure message';
 $string['show_disclosure_desc'] = 'Display a disclosure message to students before they submit assignments, informing them about the AI-powered quiz feature.';
 $string['custom_disclosure_message'] = 'Custom disclosure message';
-$string['custom_disclosure_message_desc'] = 'Optional custom message to display instead of the default disclosure. Leave empty to use the default message.';
+$string['custom_disclosure_message_desc'] = 'Optional custom message to display instead of the default disclosure. HTML is supported. You can use placeholders: {questions_count} (number of quiz questions), {time_per_question} (time per question in seconds). Leave empty to use the default message.';
 
 // AI disclosure messages.
 $string['ai_disclosure_title'] = 'AI-Enhanced Learning Experience';

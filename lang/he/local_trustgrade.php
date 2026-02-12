@@ -221,7 +221,7 @@ $string['disclosure_settings_desc'] = 'הגדר כיצד התלמידים יקב
 $string['show_disclosure'] = 'הצג הודעת גילוי AI';
 $string['show_disclosure_desc'] = 'הצג הודעת גילוי לסטודנטים לפני שליחת המשימה, שמודיעה על תכונת חידון מבוססת AI.';
 $string['custom_disclosure_message'] = 'הודעה גילוי מותאמת';
-$string['custom_disclosure_message_desc'] = 'הודעה מותאמת להצגה במקום ההודעה המוגדרת. השאר ריקה לשימוש בהודעת ברירת מחדל.';
+$string['custom_disclosure_message_desc'] = 'הודעה מותאמת להצגה במקום ההודעה המוגדרת. תמיכה ב-HTML. ניתן להשתמש במשתנים: {questions_count} (כמות השאלות בחידון), {time_per_question} (זמן לכל שאלה בשניות). השאר ריקה לשימוש בהודעת ברירת מחדל.';
 
 // AI disclosure messages.
 $string['ai_disclosure_title'] = 'חוויה לימודית משולבת AI';

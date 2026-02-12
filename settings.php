@@ -75,9 +75,9 @@ if ($hassiteconfig) {
         get_string('custom_disclosure_message', 'local_trustgrade'),
         get_string('custom_disclosure_message_desc', 'local_trustgrade'),
         '',
-        PARAM_TEXT,
+        PARAM_RAW,
         60,
-        4
+        6
     ));
 
     // Add Gateway settings section
