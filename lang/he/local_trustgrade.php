@@ -34,6 +34,11 @@ $string['plugin_enabled'] = 'אפשר את תוסף TrustGrade';
 $string['plugin_enabled_desc'] = 'אפשר או השבת את תוסף TrustGrade באופן גלובלי. כאשר מושבת, כל פונקציות TrustGrade יוסתרו מטפסי המשימה והדפים.';
 $string['default_enabled'] = 'הפעל את התוסף באופן אוטומטי עבור כל מטלה חדשה';
 $string['default_enabled_desc'] = 'כאשר אפשר, TrustGrade יופעל אוטומטית למשימות שנוצרו לאחרונה. המרצים עדיין יכולים להשבית אותו למשימות בודדות.';
+$string['course_specific'] = 'הפעלת זמינות לפי קורס';
+$string['course_specific_desc'] = 'כאשר מופעל, ניתן לבחור באילו קורסים TrustGrade יהיה זמין.';
+$string['enabled_courses'] = 'קורסים מופעלים';
+$string['enabled_courses_desc'] = 'בחר את הקורסים שבהם TrustGrade יהיה זמין. ההגדרה חלה רק כאשר "זמינות לפי קורס" מופעלת.';
+$string['enable_course_specific_first'] = 'יש להפעיל תחילה "זמינות לפי קורס" כדי לבחור קורסים';
 
 // Assignment settings.
 $string['trustgrade_enabled'] = 'הפעל את TrustGrade למשימה זו';
