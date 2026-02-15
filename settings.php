@@ -163,7 +163,7 @@ if ($hassiteconfig) {
                 }
                 if (!empty($u['limits'])) {
                     $lim = $u['limits'];
-                    $has_limits = isset($lim['daily']) || isset($lim['monthly']) || isset($lim['trial']) || isset($lim['tokens']);
+                    $has_limits = isset($lim['daily']) || isset($lim['monthly']) || isset($lim['credit']) || isset($lim['tokens']);
                     if ($has_limits) {
                         $usage_html .= html_writer::tag('p', html_writer::tag('strong', get_string('gateway_usage_limits', 'local_trustgrade') . ': '));
                         $usage_html .= html_writer::start_tag('ul');
@@ -173,8 +173,8 @@ if ($hassiteconfig) {
                         if (isset($lim['monthly'])) {
                             $usage_html .= html_writer::tag('li', get_string('gateway_usage_monthly', 'local_trustgrade') . ': ' . (int)$lim['monthly']);
                         }
-                        if (isset($lim['trial'])) {
-                            $usage_html .= html_writer::tag('li', get_string('gateway_usage_trial', 'local_trustgrade') . ': ' . (int)$lim['trial']);
+                        if (isset($lim['credit'])) {
+                            $usage_html .= html_writer::tag('li', get_string('gateway_usage_credit', 'local_trustgrade') . ': ' . (int)$lim['credit']);
                         }
                         if (isset($lim['tokens'])) {
                             $usage_html .= html_writer::tag('li', get_string('gateway_usage_tokens', 'local_trustgrade') . ': ' . number_format((int)$lim['tokens']));
@@ -184,7 +184,7 @@ if ($hassiteconfig) {
                 }
                 if (!empty($u['remaining'])) {
                     $rem = $u['remaining'];
-                    $has_remaining = isset($rem['daily']) || isset($rem['monthly']) || isset($rem['trial']) || isset($rem['tokens']);
+                    $has_remaining = isset($rem['daily']) || isset($rem['monthly']) || isset($rem['credit']) || isset($rem['tokens']);
                     if ($has_remaining) {
                         $usage_html .= html_writer::tag('p', html_writer::tag('strong', get_string('gateway_usage_remaining', 'local_trustgrade') . ': '));
                         $usage_html .= html_writer::start_tag('ul');
@@ -194,8 +194,8 @@ if ($hassiteconfig) {
                         if (isset($rem['monthly'])) {
                             $usage_html .= html_writer::tag('li', get_string('gateway_usage_monthly', 'local_trustgrade') . ': ' . (int)$rem['monthly']);
                         }
-                        if (isset($rem['trial'])) {
-                            $usage_html .= html_writer::tag('li', get_string('gateway_usage_trial', 'local_trustgrade') . ': ' . (int)$rem['trial']);
+                        if (isset($rem['credit'])) {
+                            $usage_html .= html_writer::tag('li', get_string('gateway_usage_credit', 'local_trustgrade') . ': ' . (int)$rem['credit']);
                         }
                         if (isset($rem['tokens'])) {
                             $usage_html .= html_writer::tag('li', get_string('gateway_usage_tokens', 'local_trustgrade') . ': ' . number_format((int)$rem['tokens']));

@@ -81,6 +81,7 @@ $string['gateway_usage_year'] = 'This year';
 $string['gateway_usage_daily'] = 'Daily';
 $string['gateway_usage_monthly'] = 'Monthly';
 $string['gateway_usage_trial'] = 'Trial';
+$string['gateway_usage_credit'] = 'Credit';
 $string['gateway_usage_tokens'] = 'Tokens';
 $string['gateway_usage_tokens_used'] = 'Tokens used';
 $string['gateway_usage_last_request'] = 'Last request';
