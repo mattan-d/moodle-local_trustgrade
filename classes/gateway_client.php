@@ -251,4 +251,72 @@ class gateway_client {
           ];
       }
   }
+
+  /**
+   * Fetch usage data from Gateway (GET {endpoint}/usage?api_key=...).
+   *
+   * @return array { success: bool, usage: array|null, error: string|null }
+   */
+  public function getUsage() {
+      $base = rtrim($this->endpoint, '/');
+      $url = $base . '/usage?api_key=' . rawurlencode($this->token);
+
+      $curl = new \curl();
+      $curl->setopt([
+          'CURLOPT_TIMEOUT' => 15,
+          'CURLOPT_CONNECTTIMEOUT' => 10,
+      ]);
+      $response = $curl->get($url);
+      $info = $curl->get_info();
+      $httpCode = isset($info['http_code']) ? (int) $info['http_code'] : 0;
+      $errno = $curl->get_errno();
+      $error = $errno ? $curl->error : '';
+
+      if ($errno || $error) {
+          return [
+              'success' => false,
+              'usage' => null,
+              'error' => get_string('gateway_usage_connection_error', 'local_trustgrade') . ' ' . $error,
+          ];
+      }
+
+      if ($httpCode === 401) {
+          return [
+              'success' => false,
+              'usage' => null,
+              'error' => get_string('gateway_usage_auth_error', 'local_trustgrade'),
+          ];
+      }
+
+      if ($httpCode !== 200) {
+          return [
+              'success' => false,
+              'usage' => null,
+              'error' => get_string('gateway_usage_http_error', 'local_trustgrade', $httpCode),
+          ];
+      }
+
+      $decoded = json_decode($response, true);
+      if (json_last_error() !== JSON_ERROR_NONE || !is_array($decoded)) {
+          return [
+              'success' => false,
+              'usage' => null,
+              'error' => get_string('gateway_usage_invalid_response', 'local_trustgrade'),
+          ];
+      }
+
+      if (empty($decoded['success']) || !isset($decoded['usage'])) {
+          return [
+              'success' => false,
+              'usage' => null,
+              'error' => $decoded['error'] ?? get_string('gateway_usage_invalid_response', 'local_trustgrade'),
+          ];
+      }
+
+      return [
+          'success' => true,
+          'usage' => $decoded['usage'],
+          'error' => null,
+      ];
+  }
 }
