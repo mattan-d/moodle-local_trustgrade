@@ -457,4 +457,29 @@ class quiz_session {
             return null;
         }
     }
+
+    /**
+     * Reset attempt_completed for the quiz session matching (cmid, submissionid, userid).
+     * Used when a student resubmits and the async task is updated instead of creating a new one.
+     *
+     * @param int $cmid Course module ID
+     * @param int $submissionid Submission ID
+     * @param int $userid User ID
+     * @return bool True if a record was updated, false otherwise
+     */
+    public static function reset_session_attempt_completed($cmid, $submissionid, $userid) {
+        global $DB;
+        $record = $DB->get_record('local_trustgd_quiz_sessions', [
+            'cmid' => $cmid,
+            'submissionid' => $submissionid,
+            'userid' => $userid
+        ]);
+        if (!$record) {
+            return false;
+        }
+        $record->attempt_completed = 0;
+        $record->timemodified = time();
+        $DB->update_record('local_trustgd_quiz_sessions', $record);
+        return true;
+    }
 }

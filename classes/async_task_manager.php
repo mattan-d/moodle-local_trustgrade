@@ -73,6 +73,9 @@ class async_task_manager {
             $DB->update_record('local_trustgd_async_tasks', $task);
             $task_id = $existing->id;
 
+            // Resubmission: reset the corresponding quiz session so attempt_completed is not still 1.
+            quiz_session::reset_session_attempt_completed($cmid, $submission_id, $userid);
+
             debugging('TrustGrade: Updated existing async task ID ' . $task_id . ' for resubmission ' . $submission_id, DEBUG_DEVELOPER);
         } else {
             // First submission: insert new row.
