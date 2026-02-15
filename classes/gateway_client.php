@@ -253,20 +253,28 @@ class gateway_client {
   }
 
   /**
-   * Fetch usage data from Gateway (GET {endpoint}/usage?api_key=...).
+   * Fetch usage data from Gateway (POST {endpoint}/usage with Authorization: Bearer or api_key in body).
+   * Response includes request counts (total, today, week, month, year), limits, and remaining balance.
    *
    * @return array { success: bool, usage: array|null, error: string|null }
    */
   public function getUsage() {
       $base = rtrim($this->endpoint, '/');
-      $url = $base . '/usage?api_key=' . rawurlencode($this->token);
+      $url = $base . '/usage';
 
       $curl = new \curl();
       $curl->setopt([
           'CURLOPT_TIMEOUT' => 15,
           'CURLOPT_CONNECTTIMEOUT' => 10,
       ]);
-      $response = $curl->get($url);
+      $headers = [
+          'Authorization: Bearer ' . $this->token,
+          'Auth: Bearer ' . $this->token, // Cloudflare compatibility
+          'Content-Type: application/json',
+          'User-Agent: Moodle TrustGrade Plugin',
+      ];
+      $body = json_encode(['api_key' => $this->token]);
+      $response = $curl->post($url, $body, ['CURLOPT_HTTPHEADER' => $headers]);
       $info = $curl->get_info();
       $httpCode = isset($info['http_code']) ? (int) $info['http_code'] : 0;
       $errno = $curl->get_errno();
