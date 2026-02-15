@@ -125,6 +125,9 @@ class gateway_client {
       if (!isset($data['metadata']['moodle_domain'])) {
           $data['metadata']['moodle_domain'] = $CFG->wwwroot;
       }
+      if (!isset($data['metadata']['plugin_version'])) {
+          $data['metadata']['plugin_version'] = (string) get_config('local_trustgrade', 'version');
+      }
       
       $curl = new \curl();
       
