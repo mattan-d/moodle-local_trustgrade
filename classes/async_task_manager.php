@@ -127,7 +127,7 @@ class async_task_manager {
 
         $tasks = $DB->get_records('local_trustgd_async_tasks',
                 ['status' => 'pending'],
-                'timecreated ASC',
+                'timemodified ASC',
                 '*',
                 0,
                 $limit
@@ -409,11 +409,11 @@ class async_task_manager {
         $now = time();
         $twentyfour_hours_ago = $now - (24 * 60 * 60);
 
-        // Get pending, processing, and failed tasks (exclude failed tasks with attempts > 2)
+        // Get pending, processing, and failed tasks (timemodified so resubmissions after several days count; exclude failed with attempts > 2)
         $tasks = $DB->get_records_select('local_trustgd_async_tasks',
-                'userid = ? AND status IN (?, ?, ?) AND timecreated > ? AND NOT (status = ? AND attempts > ?)',
+                'userid = ? AND status IN (?, ?, ?) AND timemodified > ? AND NOT (status = ? AND attempts > ?)',
                 [$USER->id, 'pending', 'processing', 'failed', $twentyfour_hours_ago, 'failed', 2],
-                'timecreated DESC'
+                'timemodified DESC'
         );
 
         foreach ($tasks as $task) {
@@ -428,7 +428,7 @@ class async_task_manager {
                         'assignment_name' => $cm->name,
                         'quiz_url' => null,
                         'error_message' => $task->error_message ?? null,
-                        'timecreated' => $task->timecreated
+                        'timecreated' => $task->timemodified
                 ];
             }
         }

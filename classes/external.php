@@ -749,9 +749,9 @@ class external extends \external_api {
          $now = time();
          $twentyfour_hours_ago = $now - (24 * 60 * 60);
          
-         // Check for pending/processing/failed tasks
+         // Check for pending/processing/failed tasks (timemodified so resubmissions after several days count)
          $has_tasks = $DB->record_exists_select('local_trustgd_async_tasks',
-             'userid = ? AND status IN (?, ?, ?) AND timecreated > ?',
+             'userid = ? AND status IN (?, ?, ?) AND timemodified > ?',
              [$USER->id, 'pending', 'processing', 'failed', $twentyfour_hours_ago]
          );
          
