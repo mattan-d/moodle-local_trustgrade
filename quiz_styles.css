@@ -221,9 +221,12 @@
   height: 8px;
   border-radius: 8px;
   background-color: #e2e8f0;
+  width: 100%;
 }
 
+/* Override any global max-width on .progress-bar so quiz progress displays full width */
 .local-trustgrade-quiz .quiz-progress .progress-bar {
+  max-width: 100%;
   border-radius: 8px;
 }
 
