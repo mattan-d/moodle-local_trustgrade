@@ -264,6 +264,7 @@ $string['ai_disclosure_detail_privacy'] = 'נתוני ההגשה שלך מעוב
 // Quiz interface.
 $string['ai_quiz_title'] = 'חידון שנוצר על‑ידי AI';
 $string['ai_quiz_report'] = 'דוח חידון AI';
+$string['trustgrade_report'] = 'דוח TrustGrade';
 $string['quiz_ready_message'] = 'חידון AI שלך מוכן! חידון זה יעזור לך להרהר בהגשתך ולהעמיק את הלמידה.';
 $string['quiz_ready_subject'] = 'חידון ה-AI שלך מוכן';
 $string['quiz_ready_message_html'] = 'חידון ה-AI שלך מוכן! לחץ <a href="{$a->quizurl}">כאן</a> כדי לגשת לחידון.';

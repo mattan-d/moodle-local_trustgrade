@@ -241,8 +241,6 @@ function local_trustgrade_before_standard_html_head() {
 
             // Check if user should be redirected to quiz
             \local_trustgrade\redirect_handler::check_and_handle_redirect($cmid);
-
-            $PAGE->requires->js_call_amd('local_trustgrade/navigation_buttons', 'init', [$cmid]);
         }
     }
 
@@ -273,6 +271,53 @@ function local_trustgrade_before_standard_html_head() {
             $PAGE->requires->js_call_amd('local_trustgrade/task_indicator', 'init');
         }
     }
+}
+
+/**
+ * Add TrustGrade links to the assignment module settings menu (gear menu).
+ * Adds "Question bank" and "TrustGrade Report" when viewing an assignment with TrustGrade enabled.
+ *
+ * @param settings_navigation $settingsnav The settings navigation object
+ * @param context $context The current context
+ */
+function local_trustgrade_extend_settings_navigation($settingsnav, $context) {
+    if (!get_config('local_trustgrade', 'plugin_enabled')) {
+        return;
+    }
+    if ($context->contextlevel != CONTEXT_MODULE) {
+        return;
+    }
+    $page = $settingsnav->get_page();
+    if (!$page->cm || $page->activityname !== 'assign') {
+        return;
+    }
+    $cmid = $page->cm->id;
+    $settings = \local_trustgrade\quiz_settings::get_settings($cmid);
+    if (empty($settings['enabled'])) {
+        return;
+    }
+    $modulenode = $settingsnav->get('modulesettings');
+    if (!$modulenode) {
+        return;
+    }
+    $reporturl = new moodle_url('/local/trustgrade/quiz_report.php', ['cmid' => $cmid]);
+    $modulenode->add(
+        get_string('trustgrade_report', 'local_trustgrade'),
+        $reporturl,
+        navigation_node::TYPE_SETTING,
+        null,
+        'trustgrade_report',
+        new pix_icon('i/report', '')
+    );
+    $questionbankurl = new moodle_url('/local/trustgrade/question_bank.php', ['cmid' => $cmid]);
+    $modulenode->add(
+        get_string('question_bank', 'local_trustgrade'),
+        $questionbankurl,
+        navigation_node::TYPE_SETTING,
+        null,
+        'trustgrade_question_bank',
+        new pix_icon('i/question', '')
+    );
 }
 
 /**
@@ -321,17 +366,17 @@ function local_trustgrade_before_footer() {
     }
 
     // Only run on assignment grading page
-    if ($PAGE->pagetype === 'mod-assign-grading' || 
-        (strpos($PAGE->url->get_path(), '/mod/assign/view.php') !== false && 
+    if ($PAGE->pagetype === 'mod-assign-grading' ||
+        (strpos($PAGE->url->get_path(), '/mod/assign/view.php') !== false &&
          optional_param('action', '', PARAM_ALPHA) === 'grading')) {
-        
+
         // Get the assignment course module ID
         $cmid = optional_param('id', 0, PARAM_INT);
-        
+
         if ($cmid > 0) {
             // Check if TrustGrade is enabled for this specific assignment
             $settings = \local_trustgrade\quiz_settings::get_settings($cmid);
-            
+
             if (!empty($settings['enabled'])) {
                 $PAGE->requires->js_call_amd('local_trustgrade/grading_table', 'init', [$cmid]);
             }

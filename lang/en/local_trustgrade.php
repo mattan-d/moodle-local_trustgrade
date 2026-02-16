@@ -253,6 +253,7 @@ $string['ai_disclosure_detail_privacy'] = 'Your submission data is processed sec
 // Quiz interface.
 $string['ai_quiz_title'] = 'AI-Generated Quiz';
 $string['ai_quiz_report'] = 'AI Quiz Report';
+$string['trustgrade_report'] = 'TrustGrade Report';
 $string['quiz_ready_message'] = 'Your AI-generated quiz is ready! This quiz will help you reflect on your submission and reinforce your learning.';
 $string['quiz_ready_subject'] = 'Your AI Quiz is Ready';
 $string['quiz_ready_message_html'] = 'Your AI-generated quiz is ready! Click <a href="{$a->quizurl}">here</a> to take the quiz.';
