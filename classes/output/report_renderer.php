@@ -81,19 +81,17 @@ class report_renderer extends \plugin_renderer_base {
                 // Student Name
                 $row->cells[] = fullname($session);
 
-                // Quiz Score with date/time info
+                // Quiz score: correct answers / total questions
                 $questions = (array) $session->questions_data;
-                $total_points = 0;
-                foreach ($questions as $question) {
-                    $total_points += isset($question->points) ? $question->points : 10;
-                }
-                $quiz_score = $session->final_score;
-                $percentage = $total_points > 0 ? round(($quiz_score / $total_points) * 100) : 0;
+                $answers = (array) $session->answers_data;
+                $total_questions = count($questions);
+                $correct_count = $this->count_correct_answers($questions, $answers);
+                $percentage = $total_questions > 0 ? round(($correct_count / $total_questions) * 100) : 0;
                 
                 $completed_date = $session->timecompleted ?: $session->timemodified;
                 $time_taken = $completed_date - $session->timecreated;
                 
-                $score_html = html_writer::div($quiz_score . '/' . $total_points . ' (' . $percentage . '%)', 'font-weight-bold');
+                $score_html = html_writer::div($correct_count . '/' . $total_questions . ' (' . $percentage . '%)', 'font-weight-bold');
                 $score_html .= html_writer::div(
                     html_writer::tag('small', userdate($completed_date, get_string('strftimedatetimeshort')), ['class' => 'text-muted']),
                     'mt-1'
@@ -292,15 +290,13 @@ class report_renderer extends \plugin_renderer_base {
 
         $html .= html_writer::start_div('col-md-4');
         $questions = (array) $session->questions_data;
-        $total_points = 0;
-        foreach ($questions as $question) {
-            $total_points += isset($question->points) ? $question->points : 10;
-        }
-        $score = $session->final_score;
-        $percentage = $total_points > 0 ? round(($session->final_score / $total_points) * 100) : 0;
+        $answers = (array) $session->answers_data;
+        $total_questions = count($questions);
+        $correct_count = $this->count_correct_answers($questions, $answers);
+        $percentage = $total_questions > 0 ? round(($correct_count / $total_questions) * 100) : 0;
 
         $html .= html_writer::tag('strong', get_string('quiz_score', 'local_trustgrade') . ': ');
-        $html .= $score . '/' . $total_points . ' (' . $percentage . '%)';
+        $html .= $correct_count . '/' . $total_questions . ' (' . $percentage . '%)';
         $html .= html_writer::end_div();
 
         $html .= html_writer::end_div();
@@ -345,7 +341,6 @@ class report_renderer extends \plugin_renderer_base {
                 '#',
                 get_string('question', 'local_trustgrade'),
                 get_string('student_answer', 'local_trustgrade'),
-                get_string('points', 'local_trustgrade'),
                 get_string('result', 'local_trustgrade')
         ];
         $table->attributes['class'] = 'table table-striped table-bordered questions-detail-table';
@@ -358,17 +353,12 @@ class report_renderer extends \plugin_renderer_base {
             $user_answer = isset($answers[$index]) ? $answers[$index] : null;
 
             $student_answer_display = $this->format_student_answer($question, $user_answer);
-            $correct_answer_display = $this->format_correct_answer($question, $user_answer);
 
-            $blooms_level = $question->metadata->blooms_level ?? '';
+            $blooms_level = isset($question->metadata) && is_object($question->metadata) ? ($question->metadata->blooms_level ?? '') : '';
             $blooms_display = $this->format_blooms_level($blooms_level);
 
             // Determine if answer is correct
             $is_correct = $this->is_answer_correct($question, $user_answer);
-
-            // Calculate points
-            $question_points = isset($question->points) ? $question->points : 10;
-            $earned_points = $is_correct ? $question_points : 0;
 
             $result_icon = $is_correct
                     ? $this->output->pix_icon('i/valid', get_string('correct', 'local_trustgrade'), 'moodle',
@@ -413,7 +403,6 @@ class report_renderer extends \plugin_renderer_base {
             $row->cells[] = $question_cell;
 
             $row->cells[] = $student_answer_display;
-            $row->cells[] = $earned_points . '/' . $question_points;
             $row->cells[] = $result_icon;
 
             // Add row class based on correctness
@@ -555,6 +544,24 @@ class report_renderer extends \plugin_renderer_base {
             default:
                 return get_string('not_available', 'local_trustgrade');
         }
+    }
+
+    /**
+     * Count correct answers for a session from questions and answers arrays.
+     *
+     * @param array $questions Array of question objects (e.g. from questions_data)
+     * @param array $answers Array of answers keyed by question index (e.g. from answers_data)
+     * @return int Number of correct answers
+     */
+    protected function count_correct_answers($questions, $answers) {
+        $correct = 0;
+        foreach ($questions as $index => $question) {
+            $user_answer = isset($answers[$index]) ? $answers[$index] : null;
+            if ($this->is_answer_correct($question, $user_answer)) {
+                $correct++;
+            }
+        }
+        return $correct;
     }
 
     /**

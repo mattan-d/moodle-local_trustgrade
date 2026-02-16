@@ -362,46 +362,164 @@ class grading_manager {
     }
 
     /**
-     * Calculate assignment grade from quiz score
+     * Calculate assignment grade from quiz score.
+     * Grade is based on correct answers / total questions (not points).
      *
      * @param \stdClass $session Quiz session object
      * @return float|null Calculated grade or null if cannot calculate
      */
     private function calculate_grade_from_quiz_score($session) {
-        // Get quiz data
         $questions = (array) $session->questions_data;
-        $final_score = floatval($session->final_score);
+        $answers = (array) $session->answers_data;
 
-        if (empty($questions) || $final_score < 0) {
+        if (empty($questions)) {
             return null;
         }
 
-        // Calculate total possible points
-        $total_points = 0;
-        foreach ($questions as $question) {
-            if (is_object($question)) {
-                $total_points += isset($question->points) ? floatval($question->points) : 10;
-            } else if (is_array($question)) {
-                $total_points += isset($question['points']) ? floatval($question['points']) : 10;
-            } else {
-                // Default points if question structure is unexpected
-                $total_points += 10;
+        $total_questions = count($questions);
+        $correct_count = $this->count_session_correct_answers($questions, $answers);
+
+        return $this->grade_from_ratio($correct_count, $total_questions);
+    }
+
+    /**
+     * Get correct count and total questions for a session (for display/API).
+     *
+     * @param \stdClass $session Quiz session object
+     * @return array{correct: int, total: int}
+     */
+    public function get_session_score_ratio($session) {
+        $questions = (array) $session->questions_data;
+        $answers = (array) $session->answers_data;
+        $total = count($questions);
+        $correct = $this->count_session_correct_answers($questions, $answers);
+        return ['correct' => $correct, 'total' => $total];
+    }
+
+    /**
+     * Convert correct/total ratio to assignment grade.
+     *
+     * @param int $correct_count
+     * @param int $total_questions
+     * @return float|null
+     */
+    private function grade_from_ratio($correct_count, $total_questions) {
+        if ($total_questions <= 0) {
+            return null;
+        }
+        $percentage = $correct_count / $total_questions;
+        $assignment_grade = $percentage * $this->max_grade;
+        $assignment_grade = round($assignment_grade, 2);
+        return max(0, min($assignment_grade, $this->max_grade));
+    }
+
+    /**
+     * Count correct answers from questions and answers arrays (session data).
+     *
+     * @param array $questions Array of question objects
+     * @param array $answers Array of answers keyed by question index
+     * @return int Number of correct answers
+     */
+    private function count_session_correct_answers($questions, $answers) {
+        $correct = 0;
+        foreach ($questions as $index => $question) {
+            $q = is_array($question) ? (object) $question : $question;
+            $user_answer = isset($answers[$index]) ? $answers[$index] : null;
+            if ($this->is_session_answer_correct($q, $user_answer)) {
+                $correct++;
             }
         }
+        return $correct;
+    }
 
-        if ($total_points <= 0) {
-            return null;
+    /**
+     * Check if a single answer is correct (matches report_renderer logic for grading).
+     * Supports display order (shuffled options) from question or user_answer.
+     *
+     * @param \stdClass $question Question object
+     * @param mixed $user_answer User's answer (display index or object with index/selectedIndex/answer)
+     * @return bool
+     */
+    private function is_session_answer_correct($question, $user_answer) {
+        if ($user_answer === null || $user_answer === '') {
+            return false;
         }
+        $type = isset($question->type) ? $question->type : 'multiple_choice';
+        if ($type === 'multiple_choice') {
+            $raw_options = isset($question->options) ? $question->options : [];
+            if (is_object($raw_options)) {
+                $raw_options = (array) $raw_options;
+            }
+            $raw_options = array_values($raw_options);
+            $opt_count = count($raw_options);
+            if ($opt_count === 0) {
+                return false;
+            }
+            $order = $this->get_session_display_order($question, $user_answer, $opt_count);
+            $selected_display = is_object($user_answer) || is_array($user_answer)
+                ? ($user_answer['index'] ?? $user_answer['selectedIndex'] ?? $user_answer['answer'] ?? null)
+                : $user_answer;
+            if (!is_numeric($selected_display)) {
+                return false;
+            }
+            $selected_display = (int) $selected_display;
+            $base_index = isset($order[$selected_display]) ? (int) $order[$selected_display] : null;
+            if ($base_index === null || $base_index < 0 || $base_index >= $opt_count) {
+                return false;
+            }
+            $opt = is_array($raw_options[$base_index]) ? (object) $raw_options[$base_index] : $raw_options[$base_index];
+            return !empty($opt->is_correct) || !empty($opt->correct) || !empty($opt->isCorrect);
+        }
+        if ($type === 'true_false') {
+            $user_bool = $user_answer === true || $user_answer === 'true' || $user_answer === 1 || $user_answer === '1'
+                ? true : ($user_answer === false || $user_answer === 'false' || $user_answer === 0 || $user_answer === '0' ? false : null);
+            return $user_bool !== null && isset($question->correct_answer) && $user_bool === (bool) $question->correct_answer;
+        }
+        return false;
+    }
 
-        // Calculate percentage and convert to assignment grade scale
-        $percentage = $final_score / $total_points;
-        $assignment_grade = $percentage * $this->max_grade;
-
-        // Round to 2 decimal places and ensure within bounds
-        $assignment_grade = round($assignment_grade, 2);
-        $assignment_grade = max(0, min($assignment_grade, $this->max_grade));
-
-        return $assignment_grade;
+    /**
+     * Get display order for options (display index -> base index). Matches report_renderer get_display_order.
+     *
+     * @param \stdClass $question
+     * @param mixed $user_answer
+     * @param int $count
+     * @return array<int,int>
+     */
+    private function get_session_display_order($question, $user_answer, $count) {
+        $order = null;
+        if (is_object($user_answer) || is_array($user_answer)) {
+            $ua = is_array($user_answer) ? (object) $user_answer : $user_answer;
+            if (isset($ua->order) && is_array($ua->order)) {
+                $order = $ua->order;
+            } else if (isset($ua->options_order) && is_array($ua->options_order)) {
+                $order = $ua->options_order;
+            } else if (isset($ua->shuffled_order) && is_array($ua->shuffled_order)) {
+                $order = $ua->shuffled_order;
+            }
+        }
+        if ($order === null && is_object($question)) {
+            if (isset($question->order) && is_array($question->order)) {
+                $order = $question->order;
+            } else if (isset($question->options_order) && is_array($question->options_order)) {
+                $order = $question->options_order;
+            } else if (isset($question->shuffled_order) && is_array($question->shuffled_order)) {
+                $order = $question->shuffled_order;
+            }
+        }
+        if (!is_array($order) || empty($order)) {
+            $order = [];
+            for ($i = 0; $i < $count; $i++) {
+                $order[$i] = $i;
+            }
+        }
+        $order = array_values(array_map('intval', $order));
+        foreach ($order as $i => $v) {
+            if ($v < 0 || $v >= $count) {
+                $order[$i] = $i;
+            }
+        }
+        return $order;
     }
 
     /**

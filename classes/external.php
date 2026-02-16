@@ -845,30 +845,25 @@ class external extends \external_api {
 
          // Get all completed quiz sessions for this assignment using the same method as quiz_report
          $sessions = \local_trustgrade\quiz_session::get_completed_sessions_for_assignment($params['cmid']);
+         $grading_manager = new \local_trustgrade\grading_manager($params['cmid']);
 
          $grades = [];
          foreach ($sessions as $session) {
              // Only keep the latest session per user
              if (!isset($grades[$session->userid])) {
-                 // Calculate total points from questions (same as report_renderer)
-                 $questions = (array) $session->questions_data;
-                 $total_points = 0;
-                 foreach ($questions as $question) {
-                     $total_points += isset($question->points) ? $question->points : 10;
-                 }
-                 
-                 // final_score is the earned points
-                 $earned_points = $session->final_score;
-                 $percentage = $total_points > 0 ? round(($earned_points / $total_points) * 100) : 0;
-                 
-                 // Calculate duration
+                 // Score = correct answers / total questions
+                 $ratio = $grading_manager->get_session_score_ratio($session);
+                 $correct = $ratio['correct'];
+                 $total = $ratio['total'];
+                 $percentage = $total > 0 ? round(($correct / $total) * 100) : 0;
+
                  $completed_date = $session->timecompleted ?: $session->timemodified;
                  $duration = $completed_date - $session->timecreated;
-                 
+
                  $grades[$session->userid] = [
                      'userid' => (int)$session->userid,
-                     'earned_points' => (int)$earned_points,
-                     'total_points' => (int)$total_points,
+                     'earned_points' => (int)$correct,
+                     'total_points' => (int)$total,
                      'percentage' => (int)$percentage,
                      'duration' => (int)$duration,
                      'completed' => (int)$completed_date

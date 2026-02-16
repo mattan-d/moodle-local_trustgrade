@@ -132,7 +132,6 @@ class question_bank_renderer {
       $type = isset($question['type']) ? $question['type'] : '';
       $text = isset($question['text']) ? $question['text'] : '';
       $metadata = isset($question['metadata']) && is_array($question['metadata']) ? $question['metadata'] : [];
-      $points = isset($metadata['points']) ? intval($metadata['points']) : null;
       $blooms = isset($metadata['blooms_level']) ? $metadata['blooms_level'] : null;
       $is_mandatory = isset($question['is_mandatory']) ? intval($question['is_mandatory']) : 0;
       $db_id = isset($question['db_id']) ? intval($question['db_id']) : (isset($question['id']) ? intval($question['id']) : 0);
@@ -140,9 +139,6 @@ class question_bank_renderer {
       $html .= '<div class="question-content">';
 
       $metaBits = [];
-      if ($points !== null) {
-          $metaBits[] = get_string('points', 'local_trustgrade') . ': ' . $points;
-      }
       if (!empty($blooms)) {
           $bloomsLabel = get_string('blooms_level_label', 'local_trustgrade');
           $metaBits[] = $bloomsLabel . ': ' . self::get_blooms_level_string($blooms);
@@ -205,7 +201,6 @@ class question_bank_renderer {
       $type = isset($question['type']) ? $question['type'] : 'multiple_choice';
       $text = isset($question['text']) ? $question['text'] : '';
       $metadata = isset($question['metadata']) && is_array($question['metadata']) ? $question['metadata'] : [];
-      $points = isset($metadata['points']) ? intval($metadata['points']) : 10;
       $blooms = isset($metadata['blooms_level']) ? $metadata['blooms_level'] : '';
       $is_mandatory = !empty($question['is_mandatory']);
 
@@ -217,23 +212,13 @@ class question_bank_renderer {
       $html .= '  <textarea class="form-control question-text-input" id="question_text_' . $index . '" rows="3" placeholder="' . get_string('entertext', 'local_trustgrade') . '">' . htmlspecialchars($text) . '</textarea>';
       $html .= '</div>';
 
-      // Row: Type (hidden) | Points | Bloom's
+      // Hidden: type and points (points no longer shown; default 1 for save compatibility)
+      $html .= '<input type="hidden" class="question-type-input" id="question_type_' . $index . '" value="multiple_choice">';
+      $points = isset($metadata['points']) ? intval($metadata['points']) : 1;
+      $html .= '<input type="hidden" class="question-points-input" id="question_points_' . $index . '" value="' . $points . '">';
+
+      // Row: Bloom's
       $html .= '<div class="row g-3">';
-
-      $html .= '  <div class="col-12 col-md-4" style="display: none;">';
-      $html .= '    <div class="form-group">';
-      $html .= '      <input type="hidden" class="question-type-input" id="question_type_' . $index . '" value="multiple_choice">';
-      $html .= '    </div>';
-      $html .= '  </div>';
-
-      // Points
-      $html .= '  <div class="col-12 col-md-4">';
-      $html .= '    <div class="form-group">';
-      $html .= '      <label for="question_points_' . $index . '" class="form-label">' . get_string('points', 'local_trustgrade') . ':</label>';
-      $html .= '      <input type="number" class="form-control question-points-input" id="question_points_' . $index . '" value="' . $points . '" min="0" max="100" />';
-      $html .= '      <small class="form-text text-muted">' . get_string('points_help', 'local_trustgrade') . '</small>';
-      $html .= '    </div>';
-      $html .= '  </div>';
 
       // Bloom's Level
       $html .= '  <div class="col-12 col-md-4">';
