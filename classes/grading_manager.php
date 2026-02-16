@@ -383,6 +383,60 @@ class grading_manager {
     }
 
     /**
+     * Get plain-text answer and correctness for one question (for export).
+     *
+     * @param \stdClass $question Question object
+     * @param mixed $user_answer User's answer
+     * @return array{answer_text: string, is_correct: bool}
+     */
+    public function get_question_answer_export_info($question, $user_answer) {
+        $result = ['answer_text' => '', 'is_correct' => false];
+        if ($user_answer === null || $user_answer === '') {
+            return $result;
+        }
+        $type = isset($question->type) ? $question->type : 'multiple_choice';
+        if ($type === 'multiple_choice') {
+            $raw_options = isset($question->options) ? $question->options : [];
+            if (is_object($raw_options)) {
+                $raw_options = (array) $raw_options;
+            }
+            $raw_options = array_values($raw_options);
+            $opt_count = count($raw_options);
+            if ($opt_count === 0) {
+                return $result;
+            }
+            $order = $this->get_session_display_order($question, $user_answer, $opt_count);
+            $selected_display = is_object($user_answer) || is_array($user_answer)
+                ? ($user_answer['index'] ?? $user_answer['selectedIndex'] ?? $user_answer['answer'] ?? null)
+                : $user_answer;
+            if (!is_numeric($selected_display)) {
+                return $result;
+            }
+            $selected_display = (int) $selected_display;
+            $base_index = isset($order[$selected_display]) ? (int) $order[$selected_display] : null;
+            if ($base_index === null || $base_index < 0 || $base_index >= $opt_count) {
+                return $result;
+            }
+            $opt = is_array($raw_options[$base_index]) ? (object) $raw_options[$base_index] : $raw_options[$base_index];
+            $result['answer_text'] = isset($opt->text) ? (string) $opt->text : (isset($opt->label) ? (string) $opt->label : '');
+            $result['is_correct'] = !empty($opt->is_correct) || !empty($opt->correct) || !empty($opt->isCorrect);
+            return $result;
+        }
+        if ($type === 'true_false') {
+            $result['is_correct'] = $this->is_session_answer_correct($question, $user_answer);
+            if ($user_answer === true || $user_answer === 'true' || $user_answer === 1 || $user_answer === '1') {
+                $result['answer_text'] = get_string('true', 'local_trustgrade');
+            } else if ($user_answer === false || $user_answer === 'false' || $user_answer === 0 || $user_answer === '0') {
+                $result['answer_text'] = get_string('false', 'local_trustgrade');
+            }
+            return $result;
+        }
+        $result['is_correct'] = $this->is_session_answer_correct($question, $user_answer);
+        $result['answer_text'] = is_string($user_answer) ? $user_answer : (string) json_encode($user_answer);
+        return $result;
+    }
+
+    /**
      * Get correct count and total questions for a session (for display/API).
      *
      * @param \stdClass $session Quiz session object

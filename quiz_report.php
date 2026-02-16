@@ -104,7 +104,7 @@ if ($cmid) {
 
 // Render the report
 $renderer = $PAGE->get_renderer('local_trustgrade', 'report');
-echo $renderer->render_quiz_report($sessions, $cmid);
+echo $renderer->render_quiz_report($sessions, $cmid, $courseid);
 
 // Back navigation
 if ($cmid) {

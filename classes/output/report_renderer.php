@@ -40,7 +40,7 @@ class report_renderer extends \plugin_renderer_base {
      * @param int $cmid Course module ID for grading context.
      * @return string HTML output for the report.
      */
-    public function render_quiz_report($sessions, $cmid) {
+    public function render_quiz_report($sessions, $cmid, $courseid = 0) {
         global $PAGE;
 
         // Load grading JavaScript (CSS is loaded in quiz_report.php)
@@ -48,8 +48,8 @@ class report_renderer extends \plugin_renderer_base {
 
         $html = '';
 
-        // Add grading controls header
-        $html .= $this->render_grading_controls($sessions, $cmid);
+        // Add grading controls header (includes export button)
+        $html .= $this->render_grading_controls($sessions, $cmid, $courseid);
 
         // Render the report as a table
         $table = new \html_table();
@@ -149,9 +149,10 @@ class report_renderer extends \plugin_renderer_base {
      *
      * @param array $sessions Array of session objects
      * @param int $cmid Course module ID for grading context
+     * @param int $courseid Course ID (for export link when viewing by course)
      * @return string HTML for grading controls
      */
-    protected function render_grading_controls($sessions, $cmid) {
+    protected function render_grading_controls($sessions, $cmid, $courseid = 0) {
         $html = '';
 
         $html .= html_writer::start_div('grading-controls-container mb-4');
@@ -162,6 +163,12 @@ class report_renderer extends \plugin_renderer_base {
         // Left side - bulk actions
         $html .= html_writer::start_div('col-md-8');
         $html .= html_writer::start_div('btn-group', ['role' => 'group']);
+
+        // Export to Excel
+        $exportparams = $cmid ? ['cmid' => $cmid] : ($courseid ? ['courseid' => $courseid] : []);
+        $exporturl = new \moodle_url('/local/trustgrade/quiz_report_export.php', $exportparams);
+        $html .= html_writer::link($exporturl, '<i class="fa fa-file-excel-o"></i> ' . get_string('export_to_excel', 'local_trustgrade'),
+            ['class' => 'btn btn-outline-secondary', 'role' => 'button']);
 
         $html .= html_writer::tag('button',
                 '<i class="fa fa-save"></i> ' . get_string('save_all_pending', 'local_trustgrade'),
