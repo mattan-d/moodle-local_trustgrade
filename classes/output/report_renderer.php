@@ -403,7 +403,7 @@ class report_renderer extends \plugin_renderer_base {
             
             $question_cell = html_writer::div(
                     $question_header .
-                    html_writer::tag('div', format_text($this->get_question_text($question), FORMAT_HTML),
+                    html_writer::tag('div', s($this->get_question_text($question)),
                             ['class' => 'question-text']) .
                     $this->render_question_options($question, $user_answer),
                     'question-container'
@@ -448,7 +448,7 @@ class report_renderer extends \plugin_renderer_base {
                 $selectedBaseIndex = $this->display_to_base_index($selectedDisplayIndex, $order);
 
                 if ($selectedBaseIndex !== null && isset($options[$selectedBaseIndex])) {
-                    $text = $options[$selectedBaseIndex]->text;
+                    $text = s($options[$selectedBaseIndex]->text);
                     return html_writer::div(html_writer::tag('strong', ($selectedDisplayIndex + 1) . '. ') . $text,
                             'text-primary');
                 } else {
@@ -471,7 +471,7 @@ class report_renderer extends \plugin_renderer_base {
                 }
 
             case 'short_answer':
-                return html_writer::div(format_text($user_answer, FORMAT_PLAIN), 'border p-2 bg-light');
+                return html_writer::div(s(trim((string) $user_answer)), 'border p-2 bg-light');
 
             default:
                 return html_writer::span(get_string('unknown_question_type', 'local_trustgrade'), 'text-warning');
@@ -503,7 +503,7 @@ class report_renderer extends \plugin_renderer_base {
                         // Try to find its display index to compute a letter label.
                         $displayIndex = $this->base_to_display_index($baseIndex, $order);
                         $label = $displayIndex !== null ? chr(65 + $displayIndex) . '. ' : '';
-                        $correctItems[] = $label . $opt->text;
+                        $correctItems[] = $label . s($opt->text);
                     }
                 }
 
@@ -513,7 +513,7 @@ class report_renderer extends \plugin_renderer_base {
                         $baseIndex = (int) $question->correct_answer;
                         $displayIndex = $this->base_to_display_index($baseIndex, $order);
                         $label = $displayIndex !== null ? chr(65 + $displayIndex) . '. ' : '';
-                        return $label . $options[$baseIndex]->text;
+                        return $label . s($options[$baseIndex]->text);
                     }
                     return get_string('not_available', 'local_trustgrade');
                 }
@@ -650,7 +650,7 @@ class report_renderer extends \plugin_renderer_base {
 
             $html .= html_writer::div(
                     html_writer::tag('strong', ($displayIndex + 1) . '. ', ['class' => 'option-letter']) .
-                    html_writer::span($opt->text, $class),
+                    html_writer::span(s($opt->text), $class),
                     'option-item mb-1'
             );
         }
