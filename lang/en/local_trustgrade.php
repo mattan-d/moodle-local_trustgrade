@@ -339,6 +339,7 @@ $string['completed_on'] = 'Completed On';
 $string['time_taken'] = 'Time Taken';
 $string['student_answer'] = 'Student\'s Answer';
 $string['result'] = 'Result';
+$string['student_answer_and_result'] = 'Answer & result';
 $string['correct'] = 'Correct';
 $string['incorrect'] = 'Incorrect';
 $string['no_completed_quizzes'] = 'No students have completed the AI quiz for this assignment yet.';

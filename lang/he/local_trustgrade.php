@@ -348,6 +348,7 @@ $string['completed_on'] = 'הושלם ב‑';
 $string['time_taken'] = 'זמן שנדרש';
 $string['student_answer'] = 'תשובה הסטודנט';
 $string['result'] = 'תוצאה';
+$string['student_answer_and_result'] = 'תשובה ותוצאה';
 $string['correct'] = 'נכון';
 $string['incorrect'] = 'לא נכון';
 $string['no_completed_quizzes'] = 'לא ישנם סטודנטים שהשלימו את חידון AI למשימה זו עדיין.';

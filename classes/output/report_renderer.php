@@ -78,8 +78,10 @@ class report_renderer extends \plugin_renderer_base {
                 $row = new \html_table_row();
                 $row->attributes['data-userid'] = $userid;
 
-                // Student Name
-                $row->cells[] = fullname($session);
+                // Student Name (link to profile)
+                $courseid = $this->page->course->id ?? 0;
+                $profileurl = new \moodle_url('/user/view.php', ['id' => $userid, 'course' => $courseid]);
+                $row->cells[] = html_writer::link($profileurl, fullname($session));
 
                 // Quiz score: correct answers / total questions
                 $questions = (array) $session->questions_data;
@@ -340,8 +342,7 @@ class report_renderer extends \plugin_renderer_base {
         $table->head = [
                 '#',
                 get_string('question', 'local_trustgrade'),
-                get_string('student_answer', 'local_trustgrade'),
-                get_string('result', 'local_trustgrade')
+                get_string('student_answer_and_result', 'local_trustgrade')
         ];
         $table->attributes['class'] = 'table table-striped table-bordered questions-detail-table';
 
@@ -402,8 +403,14 @@ class report_renderer extends \plugin_renderer_base {
             );
             $row->cells[] = $question_cell;
 
-            $row->cells[] = $student_answer_display;
-            $row->cells[] = $result_icon;
+            // Combined cell: result icon + student answer
+            $answer_and_result = html_writer::div(
+                $result_icon . ' ' . html_writer::span(get_string($is_correct ? 'correct' : 'incorrect', 'local_trustgrade'),
+                    'font-weight-bold ' . ($is_correct ? 'text-success' : 'text-danger')),
+                'd-inline-flex align-items-center gap-2 mb-1'
+            );
+            $answer_and_result .= $student_answer_display;
+            $row->cells[] = html_writer::div($answer_and_result, 'answer-and-result-cell');
 
             // Add row class based on correctness
             $row->attributes['class'] = $is_correct ? 'table-success' : 'table-danger';
@@ -433,59 +440,34 @@ class report_renderer extends \plugin_renderer_base {
                 $selectedDisplayIndex = $this->get_selected_display_index($user_answer);
                 $selectedBaseIndex = $this->display_to_base_index($selectedDisplayIndex, $order);
 
-                $raw_answer_display = html_writer::div(
-                        html_writer::tag('small', get_string('raw_answer_value', 'local_trustgrade') . ': ') .
-                        html_writer::tag('code', var_export(($user_answer + 1), true)),
-                        'text-muted mb-1'
-                );
-
                 if ($selectedBaseIndex !== null && isset($options[$selectedBaseIndex])) {
-                    $label = chr(65 + max(0, (int) $selectedDisplayIndex));
                     $text = $options[$selectedBaseIndex]->text;
-                    return $raw_answer_display .
-                            html_writer::div(html_writer::tag('strong', ($selectedDisplayIndex + 1) . '. ') . $text,
-                                    'text-primary');
+                    return html_writer::div(html_writer::tag('strong', ($selectedDisplayIndex + 1) . '. ') . $text,
+                            'text-primary');
                 } else {
-                    $invalid_display = html_writer::span(
+                    return html_writer::span(
                             get_string('invalid_option_selected', 'local_trustgrade'),
                             'text-danger font-weight-bold'
                     );
-                    return $raw_answer_display . $invalid_display;
                 }
 
             case 'true_false':
-                // Legacy support if still present.
-                $raw_answer_display = html_writer::div(
-                        html_writer::tag('small', get_string('raw_answer_value', 'local_trustgrade') . ': ') .
-                        html_writer::tag('code', var_export($user_answer, true)),
-                        'text-muted mb-1'
-                );
-
                 if ($user_answer === true || $user_answer === 'true' || $user_answer === 1 || $user_answer === '1') {
-                    return $raw_answer_display . html_writer::div(get_string('true', 'local_trustgrade'), 'text-primary');
+                    return html_writer::div(get_string('true', 'local_trustgrade'), 'text-primary');
                 } else if ($user_answer === false || $user_answer === 'false' || $user_answer === 0 || $user_answer === '0') {
-                    return $raw_answer_display . html_writer::div(get_string('false', 'local_trustgrade'), 'text-primary');
+                    return html_writer::div(get_string('false', 'local_trustgrade'), 'text-primary');
                 } else {
-                    $invalid_display = html_writer::span(
+                    return html_writer::span(
                             get_string('invalid_boolean_value', 'local_trustgrade'),
                             'text-danger font-weight-bold'
                     );
-                    return $raw_answer_display . $invalid_display;
                 }
 
             case 'short_answer':
                 return html_writer::div(format_text($user_answer, FORMAT_PLAIN), 'border p-2 bg-light');
 
             default:
-                return html_writer::div(
-                        html_writer::tag('small', get_string('raw_answer_value', 'local_trustgrade') . ': ') .
-                        html_writer::tag('code', var_export($user_answer, true)) .
-                        html_writer::div(
-                                html_writer::span(get_string('unknown_question_type', 'local_trustgrade'), 'text-warning'),
-                                'mt-1'
-                        ),
-                        'text-muted'
-                );
+                return html_writer::span(get_string('unknown_question_type', 'local_trustgrade'), 'text-warning');
         }
     }
 

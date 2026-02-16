@@ -40,14 +40,6 @@
   justify-content: center;
 }
 
-.grade-status-icon::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: #6c757d;
-}
-
 .grade-status-icon.saved::before {
   background-color: #28a745;
 }
