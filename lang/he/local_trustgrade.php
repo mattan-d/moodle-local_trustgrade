@@ -372,6 +372,16 @@ $string['not_available'] = 'לא זמין';
 $string['manual_grading_required'] = 'נדרש ניקוד ידני';
 $string['integrity_violations_count'] = 'סך כל הפרות היושרה: {$a}';
 
+// Report: AI submission evaluation (metadata).
+$string['report_section_submission_evaluation'] = 'הערכת הגשה (AI)';
+$string['report_evaluation_text'] = 'הערכה';
+$string['report_suggested_grade'] = 'ציון מוצע';
+$string['report_strengths'] = 'חוזקות';
+$string['report_areas_for_improvement'] = 'נקודות לשיפור';
+$string['report_suggestions'] = 'הצעות';
+$string['report_bias_detected'] = 'זיהוי הטיה';
+$string['report_writing_level'] = 'הערכת רמת כתיבה';
+
 // Answer display strings.
 $string['raw_answer_value'] = 'תשובה גולמית';
 $string['invalid_option_selected'] = 'נבחרה אפשרות לא חוקית';

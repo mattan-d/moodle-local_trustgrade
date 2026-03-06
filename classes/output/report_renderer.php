@@ -331,9 +331,88 @@ class report_renderer extends \plugin_renderer_base {
         }
         $html .= html_writer::end_div();
 
+        // AI submission evaluation (metadata from generate_submission_questions)
+        $metadata = \local_trustgrade\async_task_manager::get_submission_metadata_for_report(
+            $session->cmid,
+            $session->submissionid,
+            $session->userid
+        );
+        if (!empty($metadata) && !empty($metadata['evaluation'])) {
+            $html .= $this->render_submission_evaluation_section($metadata);
+        }
+
         // Quiz details
         $html .= html_writer::tag('h5', get_string('quiz_details', 'local_trustgrade'));
         $html .= $this->render_questions_table($session);
+
+        return $html;
+    }
+
+    /**
+     * Renders the AI submission evaluation section (from result_data metadata).
+     *
+     * @param array $metadata Metadata from async task result_data (e.g. evaluation, suggested_grade, strengths).
+     * @return string HTML for the evaluation section.
+     */
+    protected function render_submission_evaluation_section(array $metadata) {
+        $html = html_writer::tag('h5', get_string('report_section_submission_evaluation', 'local_trustgrade'));
+        $html .= html_writer::start_div('submission-evaluation-metadata card border mb-3');
+        $html .= html_writer::start_div('card-body');
+
+        $evaluation = $metadata['evaluation'] ?? null;
+        if (!is_array($evaluation)) {
+            $evaluation = isset($metadata['evaluation']) ? (array) $metadata['evaluation'] : [];
+        }
+
+        if (!empty($evaluation['evaluation_text'])) {
+            $html .= html_writer::tag('h6', get_string('report_evaluation_text', 'local_trustgrade'), ['class' => 'mb-2']);
+            $html .= html_writer::div(s($evaluation['evaluation_text']), 'evaluation-text mb-3');
+        }
+
+        if (isset($evaluation['suggested_grade']) && $evaluation['suggested_grade'] !== '') {
+            $html .= html_writer::tag('h6', get_string('report_suggested_grade', 'local_trustgrade'), ['class' => 'mb-1']);
+            $html .= html_writer::div(s($evaluation['suggested_grade']), 'suggested-grade mb-3');
+        }
+
+        if (!empty($evaluation['bias_detected'])) {
+            $html .= html_writer::tag('h6', get_string('report_bias_detected', 'local_trustgrade'), ['class' => 'mb-1']);
+            $html .= html_writer::div(s($evaluation['bias_detected']), 'bias-detected mb-3');
+        }
+
+        if (!empty($evaluation['writing_level_assessment'])) {
+            $html .= html_writer::tag('h6', get_string('report_writing_level', 'local_trustgrade'), ['class' => 'mb-1']);
+            $html .= html_writer::div(s($evaluation['writing_level_assessment']), 'writing-level mb-3');
+        }
+
+        if (!empty($evaluation['strengths']) && is_array($evaluation['strengths'])) {
+            $html .= html_writer::tag('h6', get_string('report_strengths', 'local_trustgrade'), ['class' => 'mb-1']);
+            $html .= html_writer::start_tag('ul', ['class' => 'list-unstyled mb-3']);
+            foreach ($evaluation['strengths'] as $item) {
+                $html .= html_writer::tag('li', '• ' . s($item));
+            }
+            $html .= html_writer::end_tag('ul');
+        }
+
+        if (!empty($evaluation['areas_for_improvement']) && is_array($evaluation['areas_for_improvement'])) {
+            $html .= html_writer::tag('h6', get_string('report_areas_for_improvement', 'local_trustgrade'), ['class' => 'mb-1']);
+            $html .= html_writer::start_tag('ul', ['class' => 'list-unstyled mb-3']);
+            foreach ($evaluation['areas_for_improvement'] as $item) {
+                $html .= html_writer::tag('li', '• ' . s($item));
+            }
+            $html .= html_writer::end_tag('ul');
+        }
+
+        if (!empty($evaluation['suggestions']) && is_array($evaluation['suggestions'])) {
+            $html .= html_writer::tag('h6', get_string('report_suggestions', 'local_trustgrade'), ['class' => 'mb-1']);
+            $html .= html_writer::start_tag('ul', ['class' => 'list-unstyled mb-3']);
+            foreach ($evaluation['suggestions'] as $item) {
+                $html .= html_writer::tag('li', '• ' . s($item));
+            }
+            $html .= html_writer::end_tag('ul');
+        }
+
+        $html .= html_writer::end_div();
+        $html .= html_writer::end_div();
 
         return $html;
     }

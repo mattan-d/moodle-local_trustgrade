@@ -363,6 +363,16 @@ $string['not_available'] = 'Not Available';
 $string['manual_grading_required'] = 'Manual Grading Required';
 $string['integrity_violations_count'] = 'Total integrity violations: {$a}';
 
+// Report: AI submission evaluation (metadata).
+$string['report_section_submission_evaluation'] = 'Submission evaluation (AI)';
+$string['report_evaluation_text'] = 'Evaluation';
+$string['report_suggested_grade'] = 'Suggested grade';
+$string['report_strengths'] = 'Strengths';
+$string['report_areas_for_improvement'] = 'Areas for improvement';
+$string['report_suggestions'] = 'Suggestions';
+$string['report_bias_detected'] = 'Bias detected';
+$string['report_writing_level'] = 'Writing level assessment';
+
 // Answer display strings.
 $string['raw_answer_value'] = 'Raw Answer';
 $string['invalid_option_selected'] = 'Invalid option selected';

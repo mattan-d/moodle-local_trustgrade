@@ -381,6 +381,37 @@ class async_task_manager {
     }
 
     /**
+     * Get AI metadata from a completed async task (for quiz report display).
+     * Returns the metadata object from result_data (e.g. evaluation, suggested_grade, strengths, suggestions).
+     *
+     * @param int $cmid Course module ID
+     * @param int $submission_id Submission ID
+     * @param int $userid User ID
+     * @return array|null Metadata array or null if no completed task or no metadata
+     */
+    public static function get_submission_metadata_for_report($cmid, $submission_id, $userid) {
+        global $DB;
+
+        $task = $DB->get_record('local_trustgd_async_tasks', [
+                'cmid' => $cmid,
+                'submission_id' => $submission_id,
+                'userid' => $userid,
+                'status' => 'completed'
+        ], 'result_data', IGNORE_MULTIPLE);
+
+        if (!$task || empty($task->result_data)) {
+            return null;
+        }
+
+        $decoded = json_decode($task->result_data, true);
+        if (!is_array($decoded) || !isset($decoded['metadata'])) {
+            return null;
+        }
+
+        return is_array($decoded['metadata']) ? $decoded['metadata'] : (array) $decoded['metadata'];
+    }
+
+    /**
      * Check if there's a pending or processing task
      *
      * @param int $cmid Course module ID
