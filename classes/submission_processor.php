@@ -95,9 +95,13 @@ class submission_processor {
             $result = $gateway->generateSubmissionQuestions($submission_text, $instructions_text, $questions_count, $all_files, $metadata);
             
             if ($result['success']) {
+                $data = $result['data'] ?? [];
+                $questions = $data['questions'] ?? [];
+                $metadata = $data['metadata'] ?? null;
                 return [
                     'success' => true,
-                    'questions' => $result['data']['questions']
+                    'questions' => $questions,
+                    'metadata' => $metadata,
                 ];
             } else {
                 return ['error' => $result['error']];

@@ -215,9 +215,20 @@ class gateway_client {
           ];
       }
 
+      // Support both shapes: data wrapper (data.questions, data.metadata) or top-level (questions, metadata)
+      $data = $decoded['data'] ?? null;
+      if ($data === null || !is_array($data)) {
+          $data = [
+              'questions' => $decoded['questions'] ?? [],
+              'metadata' => $decoded['metadata'] ?? null,
+          ];
+      } elseif (!array_key_exists('metadata', $data) && isset($decoded['metadata'])) {
+          $data['metadata'] = $decoded['metadata'];
+      }
+
       return [
           'success' => true,
-          'data' => $decoded['data']
+          'data' => $data
       ];
   }
 
