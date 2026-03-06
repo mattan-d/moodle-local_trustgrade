@@ -75,7 +75,7 @@ define(['jquery', 'core/templates', 'core/str'], ($, Templates, Str) => {
                 $autoGenerateCheckbox.length > 0 &&
                 $autoGenerateCheckbox.is(':checked') &&
                 $trustgradeEnabled.length > 0 &&
-                $trustgradeEnabled.is(':checked')
+                $trustgradeEnabled.val() == '1'
             ) {
               // Set flag to indicate there's an active task
               localStorage.setItem('trustgrade_has_active_task', 'true');

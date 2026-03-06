@@ -55,10 +55,12 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
             ? ($current_settings['enabled'] ? 1 : 0)
             : get_config('local_trustgrade', 'default_enabled');
 
-        $mform->addElement('advcheckbox', 'trustgrade_enabled',
+        $yesno = [0 => get_string('no'), 1 => get_string('yes')];
+        $mform->addElement('select', 'trustgrade_enabled',
                 get_string('trustgrade_enabled', 'local_trustgrade'),
-                get_string('trustgrade_enabled_desc', 'local_trustgrade'));
+                $yesno);
         $mform->setDefault('trustgrade_enabled', $default_enabled);
+        $mform->addHelpButton('trustgrade_enabled', 'trustgrade_enabled', 'local_trustgrade');
 
         $default_require = ($cmid > 0) ? ($current_settings['require_quiz_completion'] ? 1 : 0) : 0;
         $mform->addElement('advcheckbox', 'trustgrade_require_quiz_completion',
@@ -66,7 +68,7 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
                 get_string('require_quiz_completion_desc', 'local_trustgrade'));
         $mform->setDefault('trustgrade_require_quiz_completion', $default_require);
         $mform->addHelpButton('trustgrade_require_quiz_completion', 'require_quiz_completion', 'local_trustgrade');
-        $mform->disabledIf('trustgrade_require_quiz_completion', 'trustgrade_enabled', 'notchecked');
+        $mform->disabledIf('trustgrade_require_quiz_completion', 'trustgrade_enabled', 'eq', 0);
         $mform->setAdvanced('trustgrade_require_quiz_completion');
 
         // Add quiz settings section FIRST
@@ -141,8 +143,8 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addElement('hidden', 'trustgrade_cmid', $cmid);
         $mform->setType('trustgrade_cmid', PARAM_INT);
 
-        $mform->disabledIf('trustgrade_instructor_questions', 'trustgrade_enabled');
-        $mform->disabledIf('trustgrade_buttons', 'trustgrade_enabled');
+        $mform->disabledIf('trustgrade_instructor_questions', 'trustgrade_enabled', 'eq', 0);
+        $mform->disabledIf('trustgrade_buttons', 'trustgrade_enabled', 'eq', 0);
 
         // Add JavaScript for AJAX functionality (check instructions only; question bank is on question_bank.php)
         $PAGE->requires->js_call_amd('local_trustgrade/trustgrade', 'init');
