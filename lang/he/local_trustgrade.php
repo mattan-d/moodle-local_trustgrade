@@ -43,6 +43,10 @@ $string['enable_course_specific_first'] = 'יש להפעיל תחילה "זמי�
 // Assignment settings.
 $string['trustgrade_enabled'] = 'הפעל את TrustGrade למשימה זו';
 $string['trustgrade_enabled_desc'] = 'הפעל את תוסף מדד איכות אקדמית (TrustGrade) עבור מטלה זו.';
+$string['require_quiz_completion'] = 'חייב את הסטודנט/ית להשלים את החידון';
+$string['require_quiz_completion_desc'] = 'כאשר מסומן, לא תתאפשר גישה לעמודים אחרים במערכת Moodle לפני השלמת החידון. חסימת הגישה חלה עד 24 שעות מהפעם הראשונה שהוחלה.';
+$string['require_quiz_completion_redirect'] = 'עליך להשלים את חידון TrustGrade עבור מטלה זו לפני גישה לעמודים אחרים.';
+$string['require_quiz_completion_help'] = 'כאשר מופעל, סטודנטים לא יוכלו לגשת לעמודים אחרים ב-Moodle עד השלמת חידון TrustGrade של המטלה. החסימה תקפה עד 24 שעות מהפעם הראשונה.';
 $string['trustgrade_tab'] = 'מדד איכות אקדמית (TrustGrade)';
 $string['trustgrade_description'] = 'השתמש ב‑AI Gateway לניתוח והמלצה לשיפור הנחיות המשימה שלך.';
 $string['save_assignment_first'] = 'אנא שמור את המשימה תחילה לפני יצירת שאלות';

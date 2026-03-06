@@ -311,10 +311,26 @@ class quiz_session {
             return [];
         }
     }
-    
+
+    /**
+     * Check whether a user has completed the TrustGrade quiz for the given assignment.
+     *
+     * @param int $cmid Course module ID (assign)
+     * @param int $userid User ID
+     * @return bool True if the user has at least one completed session for this cmid
+     */
+    public static function has_user_completed_quiz($cmid, $userid) {
+        global $DB;
+        return $DB->record_exists('local_trustgd_quiz_sessions', [
+            'cmid' => $cmid,
+            'userid' => $userid,
+            'attempt_completed' => 1
+        ]);
+    }
+
     /**
      * Get all completed quiz sessions for a specific course
-     * 
+     *
      * @param int $courseid Course ID
      * @return array Array of session records with user details and course module info
      */

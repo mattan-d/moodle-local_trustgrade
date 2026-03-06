@@ -50,6 +50,10 @@ $string['course_not_enabled'] = 'TrustGrade is not available for this course. Pl
 // Assignment settings.
 $string['trustgrade_enabled'] = 'Enable TrustGrade for this assignment';
 $string['trustgrade_enabled_desc'] = 'Enable TrustGrade AI features for this specific assignment. When disabled, students will not see AI quizzes or related functionality.';
+$string['require_quiz_completion'] = 'Require the student to complete the quiz';
+$string['require_quiz_completion_desc'] = 'When enabled, access to other Moodle pages will not be allowed until the student has completed the TrustGrade quiz. Blocking is applied for up to 24 hours from the first time access is restricted.';
+$string['require_quiz_completion_redirect'] = 'You must complete the TrustGrade quiz for this assignment before accessing other pages.';
+$string['require_quiz_completion_help'] = 'When enabled, students cannot access other Moodle pages until they complete this assignment\'s TrustGrade quiz. Blocking lasts up to 24 hours from when it first applies.';
 $string['trustgrade_tab'] = 'TrustGrade';
 $string['trustgrade_description'] = 'Use AI Gateway to analyze and get recommendations for improving your assignment instructions.';
 $string['save_assignment_first'] = 'Please save the assignment first before generating questions';

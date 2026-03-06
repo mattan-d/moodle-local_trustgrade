@@ -53,10 +53,14 @@ class quiz_settings {
                 'submission_questions' => (int)$record->submission_questions,
                 'randomize_answers' => (bool)$record->randomize_answers,
                 'time_per_question' => (int)$record->time_per_question,
-                'show_countdown' => (bool)$record->show_countdown
+                'show_countdown' => (bool)$record->show_countdown,
+                'require_quiz_completion' => !empty($record->require_quiz_completion)
             ];
         }
-        
+        if (!isset($settings['require_quiz_completion'])) {
+            $settings['require_quiz_completion'] = false;
+        }
+
         // The total number of questions is the sum of instructor and submission questions.
         $settings['total_quiz_questions'] = $settings['instructor_questions'] + $settings['submission_questions'];
         
@@ -91,8 +95,9 @@ class quiz_settings {
                 $existing->randomize_answers = $validated_settings['randomize_answers'] ? 1 : 0;
                 $existing->time_per_question = $validated_settings['time_per_question'];
                 $existing->show_countdown = $validated_settings['show_countdown'] ? 1 : 0;
+                $existing->require_quiz_completion = $validated_settings['require_quiz_completion'] ? 1 : 0;
                 $existing->timemodified = time();
-                
+
                 $DB->update_record('local_trustgd_quiz_settings', $existing);
             } else {
                 // Create new settings
@@ -105,6 +110,7 @@ class quiz_settings {
                 $record->randomize_answers = $validated_settings['randomize_answers'] ? 1 : 0;
                 $record->time_per_question = $validated_settings['time_per_question'];
                 $record->show_countdown = $validated_settings['show_countdown'] ? 1 : 0;
+                $record->require_quiz_completion = $validated_settings['require_quiz_completion'] ? 1 : 0;
                 $record->timecreated = time();
                 $record->timemodified = time();
                 
@@ -132,7 +138,8 @@ class quiz_settings {
             'submission_questions' => 5,
             'randomize_answers' => true, // Always enabled
             'time_per_question' => 25,
-            'show_countdown' => true // Always enabled
+            'show_countdown' => true, // Always enabled
+            'require_quiz_completion' => false
         ];
     }
     
@@ -165,7 +172,9 @@ class quiz_settings {
         
         // Show countdown (always enabled)
         $validated['show_countdown'] = true;
-        
+
+        $validated['require_quiz_completion'] = !empty($settings['require_quiz_completion']);
+
         return $validated;
     }
 }

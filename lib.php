@@ -60,6 +60,15 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
                 get_string('trustgrade_enabled_desc', 'local_trustgrade'));
         $mform->setDefault('trustgrade_enabled', $default_enabled);
 
+        $default_require = ($cmid > 0) ? ($current_settings['require_quiz_completion'] ? 1 : 0) : 0;
+        $mform->addElement('advcheckbox', 'trustgrade_require_quiz_completion',
+                get_string('require_quiz_completion', 'local_trustgrade'),
+                get_string('require_quiz_completion_desc', 'local_trustgrade'));
+        $mform->setDefault('trustgrade_require_quiz_completion', $default_require);
+        $mform->addHelpButton('trustgrade_require_quiz_completion', 'require_quiz_completion', 'local_trustgrade');
+        $mform->disabledIf('trustgrade_require_quiz_completion', 'trustgrade_enabled', 'notchecked');
+        $mform->setAdvanced('trustgrade_require_quiz_completion');
+
         // Add quiz settings section FIRST
         $mform->addElement('static', 'trustgrade_quiz_settings_title', '',
                 '<h4>' . get_string('quiz_settings_title', 'local_trustgrade') . '</h4>');
@@ -150,6 +159,9 @@ function local_trustgrade_before_standard_html_head() {
     if (!get_config('local_trustgrade', 'plugin_enabled')) {
         return;
     }
+
+    // Enforce "require quiz completion": block access to other pages until quiz is done (up to 24 hours).
+    \local_trustgrade\require_quiz_completion_handler::enforce_if_required();
 
     // Redirect to question bank after save (new or update) when TrustGrade is enabled.
     if (!empty($_SESSION['local_trustgrade_redirect_cmid'])) {
@@ -333,15 +345,15 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
         $cmid = $data->coursemodule;
 
         $settings = [
-                'enabled' => !empty($data->trustgrade_enabled), // Save activity-level enable/disable
+                'enabled' => !empty($data->trustgrade_enabled),
                 'questions_to_generate' => $data->trustgrade_instructor_questions,
                 'instructor_questions' => $data->trustgrade_instructor_questions,
-            'submission_questions' => $data->trustgrade_submission_questions,
-            'randomize_answers' => true, // Always enabled
-            'time_per_question' => $data->trustgrade_time_per_question,
-            'show_countdown' => true, // Always enabled
-            'auto_generate' => false, // No longer used; question bank is managed via question_bank.php
-        ];
+                'submission_questions' => $data->trustgrade_submission_questions,
+                'randomize_answers' => true,
+                'time_per_question' => $data->trustgrade_time_per_question,
+                'show_countdown' => true,
+                'require_quiz_completion' => !empty($data->trustgrade_require_quiz_completion),
+            ];
 
         \local_trustgrade\quiz_settings::save_settings($cmid, $settings);
 
