@@ -147,8 +147,9 @@ class external extends \external_api {
  /**
   * Collect intro attachments as an array of files for the Gateway payload.
   * Each entry: ['filename' => ..., 'mimetype' => ..., 'size' => ..., 'content' => base64-string]
+  * When both itemids are 0, pass $assignmentcmid to use saved assignment files (e.g. from question bank page).
   */
- public static function collect_intro_files(int $intro_itemid, int $intro_attachments_itemid): array {
+ public static function collect_intro_files(int $intro_itemid, int $intro_attachments_itemid, int $assignmentcmid = 0): array {
      global $USER;
      $filesOut = [];
 
@@ -188,8 +189,10 @@ class external extends \external_api {
      }
      
      if (empty($all)) {
-         // Try to get cmid from current context or URL parameters
-         $cmid = optional_param('cmid', 0, PARAM_INT);
+         $cmid = $assignmentcmid;
+         if ($cmid <= 0) {
+             $cmid = optional_param('cmid', 0, PARAM_INT);
+         }
          if ($cmid <= 0) {
              $cmid = optional_param('id', 0, PARAM_INT);
          }

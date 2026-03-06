@@ -123,28 +123,11 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addHelpButton('trustgrade_time_per_question', 'time_per_question', 'local_trustgrade');
         $mform->setAdvanced('trustgrade_time_per_question');
 
-        // Check Instructions button (placed after settings)
-        $buttonarray = array();
-        $buttonarray[] = $mform->createElement('button', 'check_instructions_btn',
-                get_string('check_instructions', 'local_trustgrade'),
-                array('id' => 'check-instructions-btn', 'class' => ''));
-        $mform->addGroup($buttonarray, 'trustgrade_buttons', ' ', ' ', false);
-        $mform->setAdvanced('trustgrade_buttons');
-
-        // Add recommendation display area (hidden by default)
-        $mform->addElement('static', 'trustgrade_recommendation', '',
-                '<div id="ai-loading" style="display: none;"><i class="fa fa-spinner fa-spin"></i> ' .
-                get_string('processing', 'local_trustgrade') . '</div>' .
-                '<div id="ai-recommendation-container" style="display: none;">' .
-                '<div id="ai-recommendation" class="alert alert-info"></div></div>');
-        $mform->setAdvanced('trustgrade_recommendation');
-
         // Add hidden field to store assignment ID for AJAX calls
         $mform->addElement('hidden', 'trustgrade_cmid', $cmid);
         $mform->setType('trustgrade_cmid', PARAM_INT);
 
         $mform->disabledIf('trustgrade_instructor_questions', 'trustgrade_enabled', 'eq', 0);
-        $mform->disabledIf('trustgrade_buttons', 'trustgrade_enabled', 'eq', 0);
 
         // Add JavaScript for AJAX functionality (check instructions only; question bank is on question_bank.php)
         $PAGE->requires->js_call_amd('local_trustgrade/trustgrade', 'init');

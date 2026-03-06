@@ -50,14 +50,22 @@
 }
 
 /* AI loading indicator */
-.local-trustgrade #ai-loading {
-  color: #666;
-  font-style: italic;
+.local-trustgrade #ai-loading,
+#trustgrade-instruction-review #ai-loading {
+  color: #383d41;
   margin-top: 10px;
+  margin-bottom: 0;
 }
 
-.local-trustgrade #ai-loading i {
-  margin-right: 5px;
+.local-trustgrade #ai-loading .trustgrade-loading-content,
+#trustgrade-instruction-review #ai-loading .trustgrade-loading-content {
+  display: inline-flex;
+  align-items: center;
+}
+
+.local-trustgrade #ai-loading i,
+#trustgrade-instruction-review #ai-loading i {
+  margin-right: 8px;
 }
 
 /* AI recommendation container */
@@ -688,47 +696,170 @@
   }
 }
 
-/* High contrast badge colors for AI recommendation table */
-/* Override Bootstrap badge colors for better visibility and accessibility */
-.local-trustgrade .badge.bg-primary.rounded-pill {
-  background-color: #0056b3 !important;
+/* ===== טבלת הערכת עמידה בקריטריונים פדגוגיים – צבעים נגישים (WCAG) ===== */
+/* Applies in .local-trustgrade and in #trustgrade-instruction-review (question bank) */
+
+/* Table container and base */
+.local-trustgrade .modern-criteria-table,
+#trustgrade-instruction-review .modern-criteria-table,
+#ai-recommendation .modern-criteria-table {
+  --tg-table-header-bg: #1e3a5f;
+  --tg-table-header-color: #ffffff;
+  --tg-table-body-color: #212529;
+  --tg-table-stripe-bg: #f0f4f8;
+  --tg-table-border: #c5d0dc;
+  --tg-suggestions-color: #374151;
+  color: var(--tg-table-body-color);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* Header – רקע כהה וטקסט לבן עם ניגודיות גבוהה (קריטריון, הושג, הצעות) */
+.local-trustgrade .modern-criteria-table thead,
+#trustgrade-instruction-review .modern-criteria-table thead,
+#ai-recommendation .modern-criteria-table thead {
+  background-color: #1e3a5f !important;
+  color: #ffffff !important;
+  border-bottom: 2px solid var(--tg-table-border);
+}
+
+.local-trustgrade .modern-criteria-table thead th,
+#trustgrade-instruction-review .modern-criteria-table thead th,
+#ai-recommendation .modern-criteria-table thead th {
+  background-color: #1e3a5f !important;
+  color: #ffffff !important;
+  font-weight: 600;
+  padding: 0.75rem 1rem;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Override alert parent so header text stays white */
+.alert .modern-criteria-table thead th,
+#ai-recommendation .modern-criteria-table thead th {
+  background-color: #1e3a5f !important;
+  color: #ffffff !important;
+}
+
+/* Explicit class so header is always visible (קריטריון, הושג, הצעות) */
+.tg-criteria-thead,
+.tg-criteria-thead th {
+  background-color: #1e3a5f !important;
+  color: #ffffff !important;
+}
+
+/* Body – טקסט כהה ופסים לקריאות */
+.local-trustgrade .modern-criteria-table tbody td,
+#trustgrade-instruction-review .modern-criteria-table tbody td,
+#ai-recommendation .modern-criteria-table tbody td {
+  color: var(--tg-table-body-color);
+  padding: 0.75rem 1rem;
+  border-color: var(--tg-table-border);
+  vertical-align: top;
+}
+
+.local-trustgrade .modern-criteria-table tbody tr:nth-of-type(even),
+#trustgrade-instruction-review .modern-criteria-table tbody tr:nth-of-type(even),
+#ai-recommendation .modern-criteria-table tbody tr:nth-of-type(even) {
+  background-color: var(--tg-table-stripe-bg);
+}
+
+.local-trustgrade .modern-criteria-table .criterion-cell,
+#trustgrade-instruction-review .modern-criteria-table .criterion-cell,
+#ai-recommendation .modern-criteria-table .criterion-cell {
+  color: var(--tg-table-body-color);
+  font-weight: 500;
+}
+
+/* תא ההמלצות – אפור כהה לניגודיות טובה */
+.local-trustgrade .modern-criteria-table .suggestions-cell,
+#trustgrade-instruction-review .modern-criteria-table .suggestions-cell,
+#ai-recommendation .modern-criteria-table .suggestions-cell {
+  color: var(--tg-suggestions-color) !important;
+}
+
+.local-trustgrade .modern-criteria-table .suggestions-cell div,
+#trustgrade-instruction-review .modern-criteria-table .suggestions-cell div,
+#ai-recommendation .modern-criteria-table .suggestions-cell div,
+.local-trustgrade .modern-criteria-table .suggestions-text,
+#ai-recommendation .modern-criteria-table .suggestions-text {
+  color: var(--tg-suggestions-color) !important;
+}
+
+/* Badges – צבעים עם ניגודיות WCAG (כן/לא/חלקי) */
+.local-trustgrade .modern-criteria-table .badge.bg-success,
+#trustgrade-instruction-review .modern-criteria-table .badge.bg-success,
+#ai-recommendation .badge.bg-success.rounded-pill,
+.local-trustgrade #ai-recommendation .badge.bg-success {
+  background-color: #0d6832 !important;
   color: #ffffff !important;
   font-weight: 600;
   padding: 6px 12px;
-  font-size: 13px;
+  font-size: 0.875rem;
+  min-width: 60px;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
-.local-trustgrade .badge.bg-success.rounded-pill {
-  background-color: #198754 !important;
+.local-trustgrade .modern-criteria-table .badge.bg-danger,
+#trustgrade-instruction-review .modern-criteria-table .badge.bg-danger,
+#ai-recommendation .badge.bg-danger.rounded-pill,
+.local-trustgrade #ai-recommendation .badge.bg-danger {
+  background-color: #a71d2a !important;
   color: #ffffff !important;
   font-weight: 600;
   padding: 6px 12px;
-  font-size: 13px;
+  font-size: 0.875rem;
+  min-width: 60px;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
-.local-trustgrade .badge.bg-danger.rounded-pill {
-  background-color: #dc3545 !important;
+.local-trustgrade .modern-criteria-table .badge.bg-warning,
+#trustgrade-instruction-review .modern-criteria-table .badge.bg-warning,
+#ai-recommendation .badge.bg-warning.rounded-pill,
+.local-trustgrade #ai-recommendation .badge.bg-warning {
+  background-color: #b45309 !important;
   color: #ffffff !important;
   font-weight: 600;
   padding: 6px 12px;
-  font-size: 13px;
+  font-size: 0.875rem;
+  min-width: 60px;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
-.local-trustgrade .badge.bg-warning.rounded-pill {
-  background-color: #fd7e14 !important;
-  color: #000000 !important;
+.local-trustgrade .modern-criteria-table .badge.bg-secondary,
+#trustgrade-instruction-review .modern-criteria-table .badge.bg-secondary,
+#ai-recommendation .badge.bg-secondary.rounded-pill,
+.local-trustgrade #ai-recommendation .badge.bg-secondary {
+  background-color: #4b5563 !important;
+  color: #ffffff !important;
   font-weight: 600;
   padding: 6px 12px;
-  font-size: 13px;
+  font-size: 0.875rem;
+  min-width: 60px;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
-/* Ensure badges in recommendation table have proper contrast */
-.local-trustgrade #ai-recommendation .badge {
+/* Fallback for any badge in recommendation area */
+.local-trustgrade #ai-recommendation .badge,
+#ai-recommendation .modern-criteria-table .badge {
   min-width: 60px;
   text-align: center;
 }
 
-/* Additional contrast for table badges */
-.local-trustgrade .modern-criteria-table .badge {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+/* Title above table */
+.local-trustgrade .tg-table-section h4,
+#trustgrade-instruction-review .tg-table-section h4,
+#ai-recommendation .tg-table-section h4 {
+  color: #1e3a5f;
+  font-weight: 600;
+}
+
+/* Empty state row */
+.local-trustgrade .modern-criteria-table td.text-muted,
+#trustgrade-instruction-review .modern-criteria-table td.text-muted,
+#ai-recommendation .modern-criteria-table td.text-muted {
+  color: var(--tg-suggestions-color) !important;
 }

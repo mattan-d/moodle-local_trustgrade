@@ -99,6 +99,12 @@ $string['no_instructions'] = 'No instructions found to analyze';
 $string['no_instructions_error'] = 'No instructions found to analyze';
 $string['no_instructions_or_files'] = 'Either instructions or at least one file must be provided for analysis';
 $string['no_instructions_questions_error'] = 'No instructions found to generate questions from';
+$string['assignment_instructions_and_files'] = 'Assignment instructions and files';
+$string['assignment_intro_preview'] = 'Instructions (from assignment settings)';
+$string['assignment_files_list'] = 'Files (from assignment settings)';
+$string['no_intro_or_files_in_assignment'] = 'No instructions or files in assignment settings yet. Add them in the assignment settings, then use the button below to get an AI recommendation.';
+$string['save_instructions'] = 'Save instructions';
+$string['edit_instructions_help'] = 'Edit the assignment description and activity instructions below. Save your changes, then use "Check instructions with AI" to get recommendations.';
 
 // Question generation.
 $string['generate_questions'] = 'Generate Question Bank with AI';
@@ -119,9 +125,9 @@ $string['questions_generation_error'] = 'Error occurred during automatic questio
 $string['questions_will_be_generated'] = 'Questions will be generated automatically for this assignment';
 
 // Question bank.
-$string['question_bank'] = 'Question Bank';
+$string['question_bank'] = 'Question bank and instruction check';
 $string['question_bank_description'] = 'Manage your AI-generated questions. You can view, edit, delete existing questions, or generate new ones.';
-$string['question_bank_title'] = 'Question Bank';
+$string['question_bank_title'] = 'Question bank and instruction check';
 $string['loading_question_bank'] = 'Loading question bank...';
 $string['no_questions_available'] = 'No questions are available for this assignment.';
 $string['no_questions_found'] = 'No questions found. Generate some questions to get started.';

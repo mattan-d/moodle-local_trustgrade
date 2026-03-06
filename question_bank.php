@@ -25,6 +25,7 @@
 require_once('../../config.php');
 require_once($CFG->dirroot . '/mod/assign/locallib.php');
 require_once($CFG->dirroot . '/local/trustgrade/classes/form/generate_from_files_form.php');
+require_once($CFG->dirroot . '/local/trustgrade/classes/form/edit_instructions_form.php');
 
 $cmid = required_param('cmid', PARAM_INT);
 
@@ -93,11 +94,90 @@ if ($data = $form->get_data()) {
     }
 }
 
+// Editable instructions form (intro + activity) and "Check instructions" section.
+$assigninstance = $assign->get_instance();
+$editform = new \local_trustgrade\form\edit_instructions_form(null, ['cmid' => $cmid, 'context' => $context]);
+$introeditordefault = [];
+$activityeditordefault = [];
+$introdraftid = file_get_submitted_draft_itemid('introeditor');
+if (!$introdraftid) {
+    $introdraftid = file_get_unused_draft_itemid();
+}
+$introtext = file_prepare_draft_area($introdraftid, $context->id, 'mod_assign', 'intro', 0, ['subdirs' => true], $assigninstance->intro ?? '');
+$introeditordefault = ['text' => $introtext, 'format' => $assigninstance->introformat ?? FORMAT_HTML, 'itemid' => $introdraftid];
+$activitydraftid = file_get_submitted_draft_itemid('activityeditor');
+if (!$activitydraftid) {
+    $activitydraftid = file_get_unused_draft_itemid();
+}
+if (!empty($assigninstance->activity)) {
+    $activitytext = file_prepare_draft_area($activitydraftid, $context->id, 'mod_assign', ASSIGN_ACTIVITYATTACHMENT_FILEAREA, 0, ['subdirs' => true], $assigninstance->activity);
+    $activityeditordefault = ['text' => $activitytext, 'format' => $assigninstance->activityformat ?? FORMAT_HTML, 'itemid' => $activitydraftid];
+} else {
+    $activityeditordefault = ['text' => '', 'format' => FORMAT_HTML, 'itemid' => $activitydraftid];
+}
+$editform->set_data([
+    'cmid' => $cmid,
+    'introeditor' => $introeditordefault,
+    'activityeditor' => $activityeditordefault,
+]);
+if ($editdata = $editform->get_data()) {
+    // Save intro to assign.
+    $newintro = $editdata->introeditor['text'];
+    if (isset($editdata->introeditor['itemid']) && $editdata->introeditor['itemid']) {
+        $newintro = file_save_draft_area_files($editdata->introeditor['itemid'], $context->id, 'mod_assign', 'intro', 0, ['subdirs' => true], $editdata->introeditor['text']);
+    }
+    $DB->set_field('assign', 'intro', $newintro, ['id' => $assigninstance->id]);
+    $DB->set_field('assign', 'introformat', $editdata->introeditor['format'], ['id' => $assigninstance->id]);
+    // Save activity to assign.
+    $newactivity = $editdata->activityeditor['text'] ?? '';
+    if (isset($editdata->activityeditor['itemid']) && $editdata->activityeditor['itemid']) {
+        $newactivity = file_save_draft_area_files($editdata->activityeditor['itemid'], $context->id, 'mod_assign', ASSIGN_ACTIVITYATTACHMENT_FILEAREA, 0, ['subdirs' => true], $editdata->activityeditor['text']);
+    }
+    $DB->set_field('assign', 'activity', $newactivity, ['id' => $assigninstance->id]);
+    $DB->set_field('assign', 'activityformat', $editdata->activityeditor['format'] ?? FORMAT_HTML, ['id' => $assigninstance->id]);
+    $assign->get_instance(true); // Reload instance.
+    \core\notification::success(get_string('changessaved', 'moodle'));
+    redirect(new moodle_url('/local/trustgrade/question_bank.php', ['cmid' => $cmid]));
+}
+// For "Check instructions" JS: use current saved values (form may have been edited but not submitted).
+$introplain = trim(strip_tags($assigninstance->intro ?? ''));
+$activityplain = !empty($assigninstance->activity) ? trim(strip_tags($assigninstance->activity)) : '';
+$instructionsforai = trim($introplain . "\n\n" . $activityplain);
+$fs = get_file_storage();
+$introfiles = $fs->get_area_files($context->id, 'mod_assign', 'intro', 0, 'sortorder, id', false) ?: [];
+$attachfiles = $fs->get_area_files($context->id, 'mod_assign', 'introattachment', 0, 'sortorder, id', false) ?: [];
+$assignmentfilelist = [];
+foreach (array_merge($introfiles, $attachfiles) as $f) {
+    if ($f->is_directory()) {
+        continue;
+    }
+    $assignmentfilelist[] = [
+        'name' => $f->get_filename(),
+        'url' => \moodle_url::make_pluginfile_url(
+            $f->get_contextid(),
+            $f->get_component(),
+            $f->get_filearea(),
+            $f->get_itemid(),
+            $f->get_filepath(),
+            $f->get_filename(),
+            true
+        )->out(false),
+    ];
+}
+$lastrecommendation = $DB->get_record_sql(
+    "SELECT recommendation FROM {local_trustgrade_logs} WHERE cmid = ? AND userid = ? ORDER BY timecreated DESC LIMIT 1",
+    [$cmid, $USER->id]
+);
+$lastrecommendationjson = $lastrecommendation && !empty($lastrecommendation->recommendation)
+    ? $lastrecommendation->recommendation
+    : '';
+
 // Add CSS and JavaScript
 $PAGE->requires->css('/local/trustgrade/styles.css');
 $PAGE->requires->js_call_amd('local_trustgrade/question_bank', 'init', [$cmid]);
 $PAGE->requires->js_call_amd('local_trustgrade/question_editor', 'init', [$cmid]);
 $PAGE->requires->js_call_amd('local_trustgrade/question_bank_status', 'init', [$cmid]);
+$PAGE->requires->js_call_amd('local_trustgrade/trustgrade', 'initQuestionBank', [$cmid, $instructionsforai, $lastrecommendationjson]);
 
 echo $OUTPUT->header();
 
@@ -105,6 +185,40 @@ echo $OUTPUT->heading(get_string('question_bank', 'local_trustgrade'));
 
 // Status of instructor question generation (adhoc).
 echo html_writer::div('', 'instructor-generation-status', ['id' => 'instructor-generation-status']);
+
+// Assignment instructions (editable) and files + "Check instructions with AI" at the top.
+echo html_writer::start_div('card mb-4', ['id' => 'trustgrade-instruction-review']);
+echo html_writer::div(get_string('assignment_instructions_and_files', 'local_trustgrade'), 'card-header');
+echo html_writer::start_div('card-body');
+echo html_writer::tag('p', get_string('edit_instructions_help', 'local_trustgrade'), ['class' => 'text-muted small mb-3']);
+$editform->display();
+if (!empty($assignmentfilelist)) {
+    echo html_writer::tag('h6', get_string('assignment_files_list', 'local_trustgrade'), ['class' => 'mb-2 mt-3']);
+    echo html_writer::start_tag('ul', ['class' => 'list-unstyled mb-3']);
+    foreach ($assignmentfilelist as $fl) {
+        echo html_writer::tag('li', html_writer::link($fl['url'], $fl['name'], ['target' => '_blank']));
+    }
+    echo html_writer::end_tag('ul');
+}
+echo html_writer::start_div('mb-3');
+echo html_writer::tag('button', get_string('check_instructions', 'local_trustgrade'), [
+    'type' => 'button',
+    'id' => 'check-instructions-btn',
+    'class' => 'btn btn-primary',
+]);
+echo html_writer::end_div();
+    echo html_writer::div(
+        '<span class="trustgrade-loading-content"><i class="fa fa-spinner fa-spin me-2" aria-hidden="true"></i>' .
+        get_string('processing', 'local_trustgrade') . '</span>',
+        'alert alert-secondary d-none trustgrade-loading-indicator',
+        ['id' => 'ai-loading', 'role' => 'status', 'aria-live' => 'polite']
+    );
+echo html_writer::start_div('', ['id' => 'ai-recommendation-container', 'style' => empty($lastrecommendationjson) ? 'display: none;' : '']);
+echo html_writer::tag('h6', get_string('ai_recommendation', 'local_trustgrade'), ['class' => 'mb-2']);
+echo html_writer::div('', 'alert alert-info', ['id' => 'ai-recommendation']);
+echo html_writer::end_div();
+echo html_writer::end_div();
+echo html_writer::end_div();
 
 // Help text for creating questions from files.
 echo html_writer::start_div('card mb-4');

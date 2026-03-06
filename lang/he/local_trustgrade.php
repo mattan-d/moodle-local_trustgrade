@@ -92,6 +92,12 @@ $string['no_instructions'] = 'לא נמצאו הנחיות לניתוח';
 $string['no_instructions_error'] = 'לא נמצאו הנחיות לניתוח';
 $string['no_instructions_or_files'] = 'נדרש או הנחיות או לפחות קובץ אחד לניתוח';
 $string['no_instructions_questions_error'] = 'לא נמצאו הנחיות ליצירת שאלות';
+$string['assignment_instructions_and_files'] = 'הנחיות המטלה והקבצים';
+$string['assignment_intro_preview'] = 'הנחיות (מהגדרות המטלה)';
+$string['assignment_files_list'] = 'קבצים (מהגדרות המטלה)';
+$string['no_intro_or_files_in_assignment'] = 'אין עדיין הנחיות או קבצים בהגדרות המטלה. הוסף אותם בהגדרות המטלה, ואז השתמש בכפתור למטה לקבלת המלצת AI.';
+$string['save_instructions'] = 'שמור הנחיות';
+$string['edit_instructions_help'] = 'ערוך את תיאור המטלה והנחיות הפעילות למטה. שמור את השינויים, ואז השתמש ב־"בדוק הנחיות המטלה בעזרת AI" לקבלת המלצות.';
 
 // Question generation.
 $string['generate_questions'] = 'צור מאגר שאלות עם AI';
@@ -112,9 +118,9 @@ $string['questions_generation_error'] = 'אירעה שגיאה במהלך יצי
 $string['questions_will_be_generated'] = 'שאלות ייווצרו אוטומטית למשימה זו';
 
 // Question bank.
-$string['question_bank'] = 'מאגר שאלות';
+$string['question_bank'] = 'מאגר שאלות ובדיקת הנחיות';
 $string['question_bank_description'] = 'נהל את השאלות שנוצרו על‑ידי AI. ניתן לצפות, לערוך, למחוק שאלות קיימות, או ליצור חדשות.';
-$string['question_bank_title'] = 'מאגר שאלות';
+$string['question_bank_title'] = 'מאגר שאלות ובדיקת הנחיות';
 $string['loading_question_bank'] = 'טוען מאגר שאלות…';
 $string['no_questions_available'] = 'אין שאלות זמינות עבור משימה זו.';
 $string['no_questions_found'] = 'לא נמצאו שאלות. צור כמה שאלות כדי להתחיל.';

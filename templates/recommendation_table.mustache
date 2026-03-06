@@ -35,7 +35,7 @@
 
     <div class="table-responsive shadow-sm rounded">
         <table class="table table-hover table-striped mb-0 modern-criteria-table">
-            <thead class="table-dark">
+            <thead class="table-dark tg-criteria-thead">
             <tr>
                 <th scope="col" class="fw-semibold">{{strings.criterion}}</th>
                 <th scope="col" class="fw-semibold text-center" style="width: 100px;">{{strings.met}}</th>
@@ -51,17 +51,17 @@
                     <td class="met-cell text-center">
                         {{#isMetYes}}
                             <span class="badge bg-success rounded-pill text-white">
-                            <i class="fa fa-check me-1"></i>{{Met}}
+                            <i class="fa fa-check me-1" aria-hidden="true"></i>{{Met}}
                         </span>
                         {{/isMetYes}}
                         {{#isMetNo}}
-                            <span class="badge bg-danger rounded-pill">
-                            <i class="fa fa-times me-1"></i>{{Met}}
+                            <span class="badge bg-danger rounded-pill text-white">
+                            <i class="fa fa-times me-1" aria-hidden="true"></i>{{Met}}
                         </span>
                         {{/isMetNo}}
                         {{#isMetPartial}}
-                            <span class="badge bg-warning rounded-pill">
-                            <i class="fa fa-minus me-1"></i>{{Met}}
+                            <span class="badge bg-warning rounded-pill text-white">
+                            <i class="fa fa-minus me-1" aria-hidden="true"></i>{{Met}}
                         </span>
                         {{/isMetPartial}}
                         {{^isMetYes}}{{^isMetNo}}{{^isMetPartial}}
@@ -69,8 +69,8 @@
                         {{/isMetPartial}}{{/isMetNo}}{{/isMetYes}}
                     </td>
                     <td class="suggestions-cell">
-                        {{! Use triple braces to allow HTML/markdown in suggestions }}
-                        <div class="text-muted small">{{{Suggestions}}}</div>
+                        {{! Use triple braces to allow HTML/markdown in suggestions. Styled for accessible contrast in CSS. }}
+                        <div class="suggestions-text small">{{{Suggestions}}}</div>
                     </td>
                 </tr>
             {{/rows}}

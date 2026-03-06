@@ -33,9 +33,31 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
   Templates,
 ) => {
   var trustgrade = {
+    questionBankCmid: 0,
+    questionBankIntro: "",
+    questionBankRecommendationJson: "",
+
     init: function () {
       this.bindEvents()
-      // Question bank is shown on question_bank.php only; no inline bank on assignment edit form.
+    },
+
+    initQuestionBank: function (cmid, introPlain, lastRecommendationJson) {
+      this.questionBankCmid = Number.parseInt(cmid, 10) || 0
+      this.questionBankIntro = typeof introPlain === "string" ? introPlain : ""
+      this.questionBankRecommendationJson = typeof lastRecommendationJson === "string" ? lastRecommendationJson : ""
+      this.bindEvents()
+      if (this.questionBankRecommendationJson) {
+        try {
+          var recObj = JSON.parse(this.questionBankRecommendationJson)
+          this.renderRecommendation(recObj).then((html) => {
+            $("#ai-recommendation").html(html)
+            $("#ai-recommendation-container").show()
+          })
+        } catch (e) {
+          $("#ai-recommendation").html(this.questionBankRecommendationJson.replace(/\n/g, "<br>"))
+          $("#ai-recommendation-container").show()
+        }
+      }
     },
 
     bindEvents: () => {
@@ -313,7 +335,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       html += `
         <div class="table-responsive shadow-sm rounded">
           <table class="table table-hover table-striped mb-0 modern-criteria-table">
-            <thead class="table-dark">
+            <thead class="table-dark tg-criteria-thead">
               <tr>
                 <th scope="col" class="fw-semibold">${trustgrade.escapeHtml(strings.criterion)}</th>
                 <th scope="col" class="fw-semibold text-center" style="width: 100px;">${trustgrade.escapeHtml(strings.met)}</th>
@@ -333,16 +355,16 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
           if (metValue === "yes" || metValue === "y" || metValue === "true") {
             metBadge = `<span class="badge bg-success rounded-pill text-white"><i class="fa fa-check me-1"></i>${m}</span>`
           } else if (metValue === "no" || metValue === "n" || metValue === "false") {
-            metBadge = `<span class="badge bg-danger rounded-pill"><i class="fa fa-times me-1"></i>${m}</span>`
+            metBadge = `<span class="badge bg-danger rounded-pill text-white"><i class="fa fa-times me-1" aria-hidden="true"></i>${m}</span>`
           } else if (metValue === "partial" || metValue === "partially" || metValue === "maybe") {
-            metBadge = `<span class="badge bg-warning rounded-pill"><i class="fa fa-minus me-1"></i>${m}</span>`
+            metBadge = `<span class="badge bg-warning rounded-pill text-white"><i class="fa fa-minus me-1" aria-hidden="true"></i>${m}</span>`
           }
 
           html += `
               <tr class="criteria-row">
                 <td class="criterion-cell"><div class="fw-medium text-dark">${c}</div></td>
                 <td class="met-cell text-center">${metBadge}</td>
-                <td class="suggestions-cell"><div class="text-muted small">${s}</div></td>
+                <td class="suggestions-cell"><div class="suggestions-text small">${s}</div></td>
               </tr>
           `
         })
@@ -404,7 +426,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
       // Allow empty instructions to proceed
 
       $("#check-instructions-btn").prop("disabled", true)
-      $("#ai-loading").show()
+      $("#ai-loading").removeClass("d-none").css("display", "block")
       $("#ai-recommendation-container").hide()
 
       var cmid = this.getCourseModuleId()
@@ -460,7 +482,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
         .fail(Notification.exception)
         .always(() => {
           $("#check-instructions-btn").prop("disabled", false)
-          $("#ai-loading").hide()
+          $("#ai-loading").addClass("d-none").css("display", "none")
         })
     },
 
@@ -594,7 +616,40 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
         })
       }),
 
+    getInstructionsFromQuestionBankEditors: () => {
+      var getEditorText = (name) => {
+        var $wrap = $("#id_" + name)
+        if (!$wrap.length) return ""
+        var $editable = $wrap.find("[contenteditable='true']")
+        if ($editable.length) {
+          var html = $editable.first().html()
+          if (html) {
+            var div = document.createElement("div")
+            div.innerHTML = html
+            return (div.textContent || div.innerText || "").trim()
+          }
+        }
+        var $ta = $('textarea[name="' + name + '[text]"]')
+        if ($ta.length) return ($ta.val() || "").trim()
+        if (typeof tinyMCE !== "undefined" && tinyMCE.get("id_" + name)) {
+          return (tinyMCE.get("id_" + name).getContent({ format: "text" }) || "").trim()
+        }
+        return ""
+      }
+      var intro = getEditorText("introeditor")
+      var activity = getEditorText("activityeditor")
+      return intro || activity ? intro + (intro && activity ? "\n\n" : "") + activity : null
+    },
+
     getInstructions: () => {
+      // On question bank page: prefer current editor content (so "Check instructions" uses unsaved edits).
+      if (trustgrade.questionBankCmid) {
+        var fromEditors = trustgrade.getInstructionsFromQuestionBankEditors()
+        if (fromEditors !== undefined && fromEditors !== null) {
+          return fromEditors
+        }
+        return trustgrade.questionBankIntro || ""
+      }
       var instructions = ""
 
       // Try Atto editor first (contenteditable div inside editor wrapper)
@@ -653,12 +708,15 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/modal_fact
     },
 
     getCourseModuleId: () => {
+      if (trustgrade.questionBankCmid) {
+        return trustgrade.questionBankCmid
+      }
       var urlParams = new URLSearchParams(window.location.search)
-      var cmid = urlParams.get("update")
+      var cmid = urlParams.get("cmid") || urlParams.get("update")
       if (!cmid) {
         cmid = $('input[name="coursemodule"]').val() || 0
       }
-      return Number.parseInt(cmid) || 0
+      return Number.parseInt(cmid, 10) || 0
     },
 
     getIntroEditorItemId: () => {
