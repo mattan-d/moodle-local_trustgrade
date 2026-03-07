@@ -48,7 +48,7 @@ $string['courses_selected_short'] = 'courses selected'; // Added short version f
 $string['course_not_enabled'] = 'TrustGrade is not available for this course. Please contact your administrator.';
 
 // Assignment settings.
-$string['trustgrade_enabled'] = 'Enable TrustGrade for this assignment';
+$string['trustgrade_enabled'] = 'Enable component';
 $string['trustgrade_enabled_desc'] = 'Enable TrustGrade AI features for this specific assignment. When disabled, students will not see AI quizzes or related functionality.';
 $string['require_quiz_completion'] = 'Require the student to complete the quiz';
 $string['require_quiz_completion_desc'] = 'When enabled, access to other Moodle pages will not be allowed until the student has completed the TrustGrade quiz. Blocking is applied for up to 24 hours from the first time access is restricted.';

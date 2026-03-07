@@ -41,7 +41,7 @@ $string['enabled_courses_desc'] = 'בחר את הקורסים שבהם TrustGrad
 $string['enable_course_specific_first'] = 'יש להפעיל תחילה "זמינות לפי קורס" כדי לבחור קורסים';
 
 // Assignment settings.
-$string['trustgrade_enabled'] = 'הפעל את TrustGrade למשימה זו';
+$string['trustgrade_enabled'] = 'הפעלת הרכיב';
 $string['trustgrade_enabled_desc'] = 'הפעל את תוסף מדד איכות אקדמית (TrustGrade) עבור מטלה זו.';
 $string['require_quiz_completion'] = 'חייב את הסטודנט/ית להשלים את החידון';
 $string['require_quiz_completion_desc'] = 'כאשר מסומן, לא תתאפשר גישה לעמודים אחרים במערכת Moodle לפני השלמת החידון. חסימת הגישה חלה עד 24 שעות מהפעם הראשונה שהוחלה.';

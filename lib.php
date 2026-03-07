@@ -62,6 +62,11 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->setDefault('trustgrade_enabled', $default_enabled);
         $mform->addHelpButton('trustgrade_enabled', 'trustgrade_enabled', 'local_trustgrade');
 
+        // Add quiz settings section (heading first, then "require quiz completion" under it)
+        $mform->addElement('static', 'trustgrade_quiz_settings_title', '',
+                '<h4>' . get_string('quiz_settings_title', 'local_trustgrade') . '</h4>');
+        $mform->setAdvanced('trustgrade_quiz_settings_title');
+
         $default_require = ($cmid > 0) ? ($current_settings['require_quiz_completion'] ? 1 : 0) : 0;
         $mform->addElement('advcheckbox', 'trustgrade_require_quiz_completion',
                 get_string('require_quiz_completion', 'local_trustgrade'),
@@ -70,11 +75,6 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->addHelpButton('trustgrade_require_quiz_completion', 'require_quiz_completion', 'local_trustgrade');
         $mform->disabledIf('trustgrade_require_quiz_completion', 'trustgrade_enabled', 'eq', 0);
         $mform->setAdvanced('trustgrade_require_quiz_completion');
-
-        // Add quiz settings section FIRST
-        $mform->addElement('static', 'trustgrade_quiz_settings_title', '',
-                '<h4>' . get_string('quiz_settings_title', 'local_trustgrade') . '</h4>');
-        $mform->setAdvanced('trustgrade_quiz_settings_title');
 
         // Questions to generate
         $generate_options = [];
