@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Ajax, Notification, Str) {
+define(['jquery', 'core/ajax', 'core/notification', 'core/str', 'core/config'], function($, Ajax, Notification, Str, Config) {
     
     return {
         init: function(cmid) {
@@ -31,22 +31,24 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             // Load required strings
             var strings = [
                 {key: 'pluginname', component: 'local_trustgrade'},
-                {key: 'time_taken', component: 'local_trustgrade'}
+                {key: 'time_taken', component: 'local_trustgrade'},
+                {key: 'view_student_report_ai', component: 'local_trustgrade'}
             ];
             
             Str.get_strings(strings).then(function(results) {
                 var pluginNameStr = results[0];
                 var timeTakenStr = results[1];
+                var viewStudentReportStr = results[2];
                 
                 // Wait for the table to load
                 $(document).ready(function() {
-                    addTrustGradeColumn(cmid, pluginNameStr, timeTakenStr);
+                    addTrustGradeColumn(cmid, pluginNameStr, timeTakenStr, viewStudentReportStr, Config.wwwroot);
                 });
             }).catch(Notification.exception);
         }
     };
     
-    function addTrustGradeColumn(cmid, pluginNameStr, timeTakenStr) {
+    function addTrustGradeColumn(cmid, pluginNameStr, timeTakenStr, viewStudentReportStr, wwwroot) {
         // Find the grading table
         var gradingTable = $('table.flexible.table.table-striped');
         
@@ -54,7 +56,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
             console.log('[TrustGrade] Grading table not found, retrying...');
             // Retry after a short delay
             setTimeout(function() {
-                addTrustGradeColumn(cmid, pluginNameStr, timeTakenStr);
+                addTrustGradeColumn(cmid, pluginNameStr, timeTakenStr, viewStudentReportStr, wwwroot);
             }, 500);
             return;
         }
@@ -71,10 +73,10 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
         }
         
         // Fetch quiz grades for all users in this assignment
-        fetchQuizGrades(cmid, gradingTable, timeTakenStr);
+        fetchQuizGrades(cmid, gradingTable, timeTakenStr, viewStudentReportStr, wwwroot);
     }
     
-    function fetchQuizGrades(cmid, gradingTable, timeTakenStr) {
+    function fetchQuizGrades(cmid, gradingTable, timeTakenStr, viewStudentReportStr, wwwroot) {
                 Ajax.call([{
                     methodname: 'local_trustgrade_get_quiz_grades_for_grading',
                     args: {
@@ -86,6 +88,7 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                     if (response.success) {
                         var grades = JSON.parse(response.grades);
                         console.log('[TrustGrade] Parsed grades:', grades);
+                        var reportUrlBase = wwwroot + '/local/trustgrade/quiz_report.php?cmid=' + encodeURIComponent(cmid);
                         
                         // Add grades to each row
                         var bodyRows = gradingTable.find('tbody tr');
@@ -126,6 +129,11 @@ define(['jquery', 'core/ajax', 'core/notification', 'core/str'], function($, Aja
                                     gradeHtml += timeTakenStr + ': ' + gradeData.duration + 's';
                                     gradeHtml += '</div>';
                                 }
+                                
+                                // Link to student report (quiz report with AI evaluation) – scrolls to this user's card
+                                gradeHtml += '<div class="mt-1">';
+                                gradeHtml += '<a href="' + reportUrlBase + '#collapse' + userId + '" class="small">' + viewStudentReportStr + '</a>';
+                                gradeHtml += '</div>';
                                 
                                 gradeHtml += '</div>';
                                 

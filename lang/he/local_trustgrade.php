@@ -421,6 +421,7 @@ $string['confirm_clear_all_grades'] = 'נקה את כל הציונים';
 $string['confirm_clear_all_grades_body'] = 'האם אתה בטוח שברצונך לנקות את כל הציונים? פעולה זו אינה ניתנת לביטול.';
 $string['no_quiz_attempt'] = 'אין חידון';
 $string['view_quiz_report'] = 'צפה בדוח החידון';
+$string['view_student_report_ai'] = 'דוח תלמיד (הערכת הגשה AI)';
 
 // Grade validation.
 $string['grade_not_numeric'] = 'הציון חייב להיות מספר';

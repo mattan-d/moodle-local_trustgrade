@@ -417,6 +417,7 @@ $string['auto_grade_by_quiz'] = 'Auto-grade by Quiz Score';
 $string['auto_grade_by_quiz_desc'] = 'Automatically set assignment grades based on quiz scores for all students';
 $string['no_quiz_attempt'] = 'No Quiz';
 $string['view_quiz_report'] = 'View quiz report';
+$string['view_student_report_ai'] = 'Student report (AI evaluation)';
 $string['auto_grade_button_text'] = 'Auto-grade by Quiz Score';
 $string['auto_grade_success'] = '{$a} students auto-graded based on quiz scores';
 $string['auto_grade_no_grades'] = 'No grades could be applied. Check that students have completed quizzes.';

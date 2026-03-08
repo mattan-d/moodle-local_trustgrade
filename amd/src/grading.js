@@ -47,6 +47,14 @@ define([
 
     // Load current grades
     loadCurrentGrades()
+
+    // If opened with #collapse{userid} (e.g. from grading table "Student report (AI evaluation)" link), expand that row
+    if (window.location.hash && /^#collapse\d+$/.test(window.location.hash)) {
+      var $target = $(window.location.hash)
+      if ($target.length && $target.hasClass('collapse')) {
+        $target.collapse('show')
+      }
+    }
   }
 
   /**
