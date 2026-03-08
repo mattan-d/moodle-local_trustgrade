@@ -44,6 +44,14 @@ class require_quiz_completion_handler {
     public static function get_pending_required_cmids($userid) {
         global $DB;
 
+        // Skip if column not yet present (e.g. before upgrade has run).
+        $dbman = $DB->get_manager();
+        $table = new \xmldb_table('local_trustgd_quiz_settings');
+        $field = new \xmldb_field('require_quiz_completion', \XMLDB_TYPE_INTEGER, '1', null, \XMLDB_NOTNULL, null, '0');
+        if (!$dbman->field_exists($table, $field)) {
+            return [];
+        }
+
         $sql = "SELECT qs.cmid
                   FROM {local_trustgd_quiz_settings} qs
                   JOIN {course_modules} cm ON cm.id = qs.cmid

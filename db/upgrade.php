@@ -145,17 +145,6 @@ function xmldb_local_trustgrade_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026021001, 'local', 'trustgrade');
     }
 
-    if ($oldversion < 2026021700) {
-        $table = new xmldb_table('local_trustgd_quiz_settings');
-        $field = new xmldb_field('require_quiz_completion', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, '0', 'show_countdown');
-
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        upgrade_plugin_savepoint(true, 2026021700, 'local', 'trustgrade');
-    }
-
     // Ensure require_quiz_completion exists (e.g. if upgrade 2026021700 was skipped or DB was from before that block).
     if ($oldversion < 2026030800) {
         $table = new xmldb_table('local_trustgd_quiz_settings');
