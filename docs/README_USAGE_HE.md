@@ -3,7 +3,7 @@
 מדריך זה מסביר כיצד להשתמש בתוסף TrustGrade ב-Moodle: הגדרת מטלות, יצירת שאלות, בדיקת הנחיות עם AI, חידונים לסטודנטים ודוחות.
 
 > **צילומי מסך:** התמונות ב־`docs/screenshots/` (01.png–18.png, ובהתחלה מהירה 23.png).  
-> **01** = גיליון ציונים עם עמודת TrustGrade | **23** (ו־21) = הוספת מטלה (הוסף פעילות או משאב). מיפוי מלא ב־`docs/screenshots/README.txt`.
+> **01** = הגדרות TrustGrade במטלה | **03** = חידון הסטודנט | **14** = גיליון ציונים עם עמודת TrustGrade | **23** (ו־21) = הוספת מטלה. מיפוי מלא ב־`docs/screenshots/README.txt`.
 
 ---
 
@@ -39,7 +39,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 1. **הוספת מטלה**  
    בקורס: **הוסף פעילות או משאב** → בחר **מטלה (Assignment)**.
 
-   ![הוספת מטלה – הוסף פעילות או משאב](screenshots/23.png)
+   ![תמונה 23: הוסף פעילות או משאב – בחירת מטלה (Assignment)](screenshots/23.png)
 
 2. **הפעלת TrustGrade במטלה**  
    בעריכת המטלה, בקטע **TrustGrade**:
@@ -58,7 +58,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 בעמוד עריכת המטלה (הגדרות) מופיע קטע **TrustGrade** (לעיתים מקופל).
 
-![הגדרות TrustGrade במטלה](screenshots/03.png)
+![תמונה 01: הגדרות TrustGrade במטלה](screenshots/01.png)
 
 ### הפעלת הרכיב
 
@@ -90,7 +90,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 נתיב: במטלה → **עוד** → **מאגר שאלות ובדיקת הנחיות**.
 
-![מאגר שאלות ובדיקת הנחיות](screenshots/04.png)
+![מאגר שאלות ובדיקת הנחיות](screenshots/07.png)
 
 ### מה מופיע בעמוד
 
@@ -202,7 +202,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 בעמוד **הגשות** של המטלה (View all submissions / action=grading) נוספת **עמודת TrustGrade**.
 
-![גיליון ציונים של המטלה עם עמודת TrustGrade](screenshots/01.png)
+![גיליון ציונים של המטלה עם עמודת TrustGrade](screenshots/14.png)
 
 בכל שורת סטודנט שסיים חידון מופיעים:
 
@@ -236,11 +236,15 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 **"Your quiz is ready! Your AI-generated quiz is ready! This quiz will help you reflect on your submission and reinforce your learning."**
 
+![תמונה 02: המסך לפני הכניסה לחידון (מבחינת הסטודנט)](screenshots/02.png)
+
 ### ביצוע החידון
 
 לחיצה על הכניסה לחידון פותחת את ממשק החידון:
 
-![חידון AI – שאלה מתוך החידון](screenshots/18.png)
+![תמונה 03: חידון AI של הסטודנט – שאלה מתוך החידון](screenshots/03.png)
+
+![תמונה 04: חידון הסטודנט – צילום מסך נוסף](screenshots/04.png)
 
 - **Question X of Y** – התקדמות.
 - **Time Remaining** – זמן לכל שאלה.
