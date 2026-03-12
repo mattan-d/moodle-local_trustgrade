@@ -2,7 +2,8 @@
 
 מדריך זה מסביר כיצד להשתמש בתוסף TrustGrade ב-Moodle: הגדרת מטלות, יצירת שאלות, בדיקת הנחיות עם AI, חידונים לסטודנטים ודוחות.
 
-> **צילומי מסך:** התמונות ממוקמות בתיקייה `docs/screenshots/` (01.png–18.png). מיפוי מפורט ב־`docs/screenshots/README.txt`.
+> **צילומי מסך:** התמונות ב־`docs/screenshots/` (01.png–18.png, ובהתחלה מהירה 23.png).  
+> **01** = גיליון ציונים עם עמודת TrustGrade | **23** (ו־21) = הוספת מטלה (הוסף פעילות או משאב). מיפוי מלא ב־`docs/screenshots/README.txt`.
 
 ---
 
@@ -38,7 +39,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 1. **הוספת מטלה**  
    בקורס: **הוסף פעילות או משאב** → בחר **מטלה (Assignment)**.
 
-   ![הוספת מטלה](screenshots/01.png)
+   ![הוספת מטלה – הוסף פעילות או משאב](screenshots/23.png)
 
 2. **הפעלת TrustGrade במטלה**  
    בעריכת המטלה, בקטע **TrustGrade**:
@@ -201,7 +202,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 בעמוד **הגשות** של המטלה (View all submissions / action=grading) נוספת **עמודת TrustGrade**.
 
-![עמוד ציונים עם עמודת TrustGrade](screenshots/14.png)
+![גיליון ציונים של המטלה עם עמודת TrustGrade](screenshots/01.png)
 
 בכל שורת סטודנט שסיים חידון מופיעים:
 
