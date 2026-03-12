@@ -164,7 +164,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 נתיב: במטלה → **עוד** → **TrustGrade Report** (או **דוח חידון**).
 
-**📷 צילום מסך (12):** דוח חידון – טבלה (סטודנט, ציון חידון, ציון סופי, פרטים), Export, Auto-grade, הצג פרטים.
+![דוח חידון](screenshots/12.png)
 
 ### טבלת הדוח
 
@@ -183,7 +183,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 לחיצה על **הצג פרטים** פותחת כרטיס עם:
 
-**📷 צילום מסך (13):** פרטי תלמיד – מידע מפגש, סיכום יושרה, פרטי חידון (שאלות ותשובות).
+![פרטי תלמיד בדוח](screenshots/13.png)
 
 - **מידע על המפגש** – תאריך השלמה, זמן שנדרש, ציון חידון.
 - **סיכום יושרה** – אירועי יציאה מהחלון (Window Blur).
@@ -201,7 +201,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 בעמוד **הגשות** של המטלה (View all submissions / action=grading) נוספת **עמודת TrustGrade**.
 
-**📷 צילום מסך (14):** עמוד ציונים – עמודת TrustGrade עם ציון חידון וקישור "דוח תלמיד (הערכת הגשה AI)".
+![עמוד ציונים עם עמודת TrustGrade](screenshots/14.png)
 
 בכל שורת סטודנט שסיים חידון מופיעים:
 
@@ -220,7 +220,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 בעמוד המטלה, בעת **הוספת הגשה** או **עריכת הגשה**, מופיע בלוק **AI-Enhanced Learning Experience**.
 
-**📷 צילום מסך (17):** עריכת הגשה – בלוק "AI-Enhanced Learning Experience", אזור הגשת קבצים.
+![עריכת הגשה – חוויית למידה מוגברת AI](screenshots/17.png)
 
 הטקסט מסביר שאחרי ההגשה המערכת תנתח את ההגשה ותיצור חידון אישי להעמקת ההבנה.
 
@@ -231,7 +231,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 כשהחידון מוכן, בעמוד המטלה או בעמוד הציון תופיע הודעה בסגול:
 
-**📷 צילום מסך (15):** הודעת "Your quiz is ready! Your AI-generated quiz is ready!" (תיבה סגולה).
+![החידון מוכן](screenshots/15.png)
 
 **"Your quiz is ready! Your AI-generated quiz is ready! This quiz will help you reflect on your submission and reinforce your learning."**
 
@@ -239,7 +239,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 לחיצה על הכניסה לחידון פותחת את ממשק החידון:
 
-**📷 צילום מסך (18):** חידון AI – Question 4 of 7, BASED ON YOUR SUBMISSION, אפשרויות בחירה, Next Question.
+![חידון AI – שאלה מתוך החידון](screenshots/18.png)
 
 - **Question X of Y** – התקדמות.
 - **Time Remaining** – זמן לכל שאלה.
@@ -285,9 +285,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 ## צילומי מסך
 
-המדריך מתייחס ל־18 צילומי מסך (01.png–18.png).  
-**אם הקבצים חסרים:** העתק צילומי מסך מתאימים לתיקייה `docs/screenshots/`, וקרא להם לפי המספרים 01.png, 02.png וכו'.  
-מיפוי מפורט (איזה צילום מתאים לכל מספר) נמצא בקובץ `docs/screenshots/README.txt`.
+צילומי המסך ממוקמים בתיקייה `docs/screenshots/` (01.png–18.png). מיפוי מפורט של כל צילום נמצא בקובץ `docs/screenshots/README.txt`. נוספו גם קבצים 19–23 לצילומים נוספים (תפריט "עוד", דוח חידון, הערכת הגשה AI וכו').
 
 ---
 
