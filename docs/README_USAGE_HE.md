@@ -111,7 +111,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 בתחתית מופיעים **הערכה** כללית ו-**המטלה המשופרת** (טקסט מוצע להנחיות משופרות).
 
-![הערכה והמטלה המשופרת](screenshots/06.png)
+![הערכה והמטלה המשופרת](screenshots/15.png)
 
 ניתן לערוך את ההנחיות בעמוד לפי ההמלצות ולשמור.
 
@@ -232,7 +232,7 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 כשהחידון מוכן, בעמוד המטלה או בעמוד הציון תופיע הודעה בסגול:
 
-![החידון מוכן](screenshots/15.png)
+![תמונה 06: ההודעה שהחידון של התלמיד מוכן וניתן לגשת אליו](screenshots/06.png)
 
 **"Your quiz is ready! Your AI-generated quiz is ready! This quiz will help you reflect on your submission and reinforce your learning."**
 
