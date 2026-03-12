@@ -71,7 +71,11 @@
   margin-bottom: 24px;
 }
 
-.local-trustgrade-quiz .form-check {
+.local-trustgrade-quiz .question-options .form-check {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
   margin-bottom: 10px;
   padding: 14px 16px;
   border-radius: 8px;
@@ -79,25 +83,39 @@
   transition: background-color 0.15s, border-color 0.15s;
 }
 
-.local-trustgrade-quiz .form-check:last-child {
+.local-trustgrade-quiz .question-options .form-check:last-child {
   margin-bottom: 0;
 }
 
-.local-trustgrade-quiz .form-check:hover {
+.local-trustgrade-quiz .question-options .form-check:hover {
   background-color: #f8fafc;
   border-color: #cbd5e1;
 }
 
-.local-trustgrade-quiz .form-check-input {
+.local-trustgrade-quiz .question-options .form-check-input {
   position: unset;
-  margin-right: 12px;
+  margin: 0;
+  flex-shrink: 0;
+  margin-top: 0.2em;
 }
 
-.local-trustgrade-quiz .form-check-label {
+.local-trustgrade-quiz .question-options .form-check-label {
+  flex: 1;
   font-size: 1rem;
   cursor: pointer;
   line-height: 1.45;
   color: #334155;
+  text-align: start;
+  min-width: 0;
+}
+
+/* RTL: radio on the right, label text aligned right so option reads naturally */
+[dir="rtl"] .local-trustgrade-quiz .question-options .form-check {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .local-trustgrade-quiz .question-options .form-check-label {
+  text-align: right;
 }
 
 /* Navigation inside question card – right below options */
