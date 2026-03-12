@@ -509,6 +509,7 @@ This plugin is licensed under the GNU General Public License v3.0 or later.
 - **Originality Website:** https://centricapp.co
 - **Support Email:** support@originality.com
 - **Documentation:** See this README file
+- **מדריך שימוש למרצים ולתלמידים (עברית):** [docs/README_USAGE_HE.md](docs/README_USAGE_HE.md) – הסבר מפורט עם צילומי מסך
 
 ---
 
