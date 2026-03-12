@@ -143,13 +143,13 @@ TrustGrade הוא תוסף ל-Moodle שמאפשר:
 
 לאחר ההרצה יופיעו הודעות כמו "Question generation has started" ו-"Generating questions... Please wait."
 
-**📷 צילום מסך (11):** הודעת "Generating questions... Please wait" בעמוד מאגר שאלות.
+![התחלת יצירת שאלות](screenshots/11.png)
 
 ### ניהול השאלות שנוצרו
 
 במאגר השאלות (או בעמוד ניהול השאלות) תופיע רשימת שאלות עם:
 
-**📷 צילום מסך (09):** ניהול שאלות AI – כרטיסי Question 1, Question 2 עם Bloom's Level, אפשרויות והסברים.
+![ניהול שאלות AI](screenshots/09.png)
 
 - **שאלה** – טקסט השאלה, רמת Bloom (Remember, Understand וכו').
 - **סימון חובה** – "Mark as Mandatory".
