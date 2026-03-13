@@ -108,10 +108,9 @@
   text-align: start;
   min-width: 0;
 }
-
-/* RTL: radio on the right, label text aligned right so option reads naturally */
+/* RTL: keep radio close to the text, but align text to the right */
 [dir="rtl"] .local-trustgrade-quiz .question-options .form-check {
-  flex-direction: row-reverse;
+  flex-direction: row;
 }
 
 [dir="rtl"] .local-trustgrade-quiz .question-options .form-check-label {
