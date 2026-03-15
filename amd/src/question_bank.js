@@ -140,29 +140,24 @@ define(["jquery", "core/str", "core/ajax", "core/notification"], ($, Str, Ajax, 
             const $mandatoryControls = $questionItem.find(".mandatory-controls")
 
             if (response.is_mandatory) {
-              // Show badge and "Remove" button
+              // Show "Remove mandatory" button only (no badge)
               $mandatoryControls.html(
-                '<span class="badge bg-danger mandatory-badge">' +
-                  this.strings.mandatory_question +
-                  "</span>" +
-                  '<button type="button" class="btn btn-sm btn-outline-secondary toggle-mandatory-btn" data-mandatory="1" data-question-id="' +
+                '<button type="button" class="btn btn-secondary btn-sm toggle-mandatory-btn" data-mandatory="1" data-question-id="' +
                   questionId +
                   '" title="' +
                   this.strings.remove_mandatory +
                   '">' +
-                  '<i class="fa fa-times-circle" aria-hidden="true"></i> ' +
                   this.strings.remove_mandatory +
                   "</button>",
               )
             } else {
               // Show "Make mandatory" button only
               $mandatoryControls.html(
-                '<button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" data-question-id="' +
+                '<button type="button" class="btn btn-primary btn-sm toggle-mandatory-btn" data-mandatory="0" data-question-id="' +
                   questionId +
                   '" title="' +
                   this.strings.make_mandatory +
                   '">' +
-                  '<i class="fa fa-star" aria-hidden="true"></i> ' +
                   this.strings.make_mandatory +
                   "</button>",
               )

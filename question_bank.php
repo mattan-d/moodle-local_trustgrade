@@ -208,7 +208,7 @@ if (!empty($assignmentfilelist)) {
     }
     echo html_writer::end_tag('ul');
 }
-echo html_writer::start_div('mb-3');
+echo html_writer::start_div('singlebutton mb-3');
 echo html_writer::tag('button', get_string('check_instructions', 'local_trustgrade'), [
     'type' => 'button',
     'id' => 'check-instructions-btn',
@@ -254,7 +254,7 @@ $questions = \local_trustgrade\question_generator::get_questions($cmid);
     </div>
 
     <div class="question-bank-content">
-        <?php echo \local_trustgrade\question_bank_renderer::render_editable_questions($questions, $cmid); ?>
+        <?php echo \local_trustgrade\question_bank_renderer::render_editable_questions($questions, $cmid, $OUTPUT); ?>
     </div>
 </div>
 

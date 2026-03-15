@@ -25,9 +25,10 @@ class question_bank_renderer {
    *
    * @param array $questions Array of questions
    * @param int $cmid Course module ID
+   * @param \renderer_base|null $output Moodle output renderer (for single_button); optional
    * @return string HTML for editable questions
    */
-  public static function render_editable_questions($questions, $cmid) {
+  public static function render_editable_questions($questions, $cmid, $output = null) {
       $html = '';
 
       $html .= '<div id="question-bank-container" class="question-bank-container">';
@@ -47,7 +48,7 @@ class question_bank_renderer {
           $html .= '</tbody>';
       } else {
           foreach ($questions as $index => $question) {
-              $html .= self::render_single_editable_question_row($question, $index, $cmid);
+              $html .= self::render_single_editable_question_row($question, $index, $cmid, $output);
           }
       }
 
@@ -65,9 +66,10 @@ class question_bank_renderer {
    * @param array $question Question data
    * @param int $index Question index
    * @param int $cmid Course module ID
+   * @param \renderer_base|null $output Moodle output renderer (for single_button)
    * @return string HTML for tbody with two tr
    */
-  private static function render_single_editable_question_row($question, $index, $cmid) {
+  private static function render_single_editable_question_row($question, $index, $cmid, $output = null) {
       $html = '';
       $qid = isset($question['id']) ? intval($question['id']) : 0;
       $metadata = isset($question['metadata']) && is_array($question['metadata']) ? $question['metadata'] : [];
@@ -85,23 +87,34 @@ class question_bank_renderer {
       $html .= '<td class="col-mandatory">';
       $html .= '<div class="d-flex align-items-center gap-2 mandatory-controls" data-question-dbid="' . $db_id . '">';
       if ($is_mandatory) {
-          $html .= '<span class="badge bg-danger mandatory-badge">' . get_string('mandatory_question', 'local_trustgrade') . '</span>';
-          $html .= '<button type="button" class="btn btn-sm btn-outline-secondary toggle-mandatory-btn" data-mandatory="1" data-question-id="' . $db_id . '" title="' . get_string('remove_mandatory', 'local_trustgrade') . '">';
-          $html .= '<i class="fa fa-times-circle" aria-hidden="true"></i> ' . get_string('remove_mandatory', 'local_trustgrade');
+          $html .= '<button type="button" class="btn btn-secondary btn-sm toggle-mandatory-btn" data-mandatory="1" data-question-id="' . $db_id . '" title="' . get_string('remove_mandatory', 'local_trustgrade') . '">';
+          $html .= get_string('remove_mandatory', 'local_trustgrade');
           $html .= '</button>';
       } else {
-          $html .= '<button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" data-question-id="' . $db_id . '" title="' . get_string('make_mandatory', 'local_trustgrade') . '">';
-          $html .= '<i class="fa fa-star" aria-hidden="true"></i> ' . get_string('make_mandatory', 'local_trustgrade');
+          $html .= '<button type="button" class="btn btn-primary btn-sm toggle-mandatory-btn" data-mandatory="0" data-question-id="' . $db_id . '" title="' . get_string('make_mandatory', 'local_trustgrade') . '">';
+          $html .= get_string('make_mandatory', 'local_trustgrade');
           $html .= '</button>';
       }
       $html .= '</div></td>';
       $html .= '<td class="col-actions">';
       $html .= '<div class="question-controls d-flex gap-2">';
       $editurl = new \moodle_url('/local/trustgrade/question_edit.php', ['cmid' => $cmid, 'id' => $qid]);
-      $html .= \html_writer::link($editurl, '<i class="fa fa-edit" aria-hidden="true"></i> ' . get_string('edit', 'local_trustgrade'), ['class' => 'btn btn-sm btn-outline-secondary']);
-      $html .= '<button type="button" class="btn btn-sm btn-outline-danger delete-question-btn">';
-      $html .= '<i class="fa fa-trash" aria-hidden="true"></i> ' . get_string('delete', 'local_trustgrade');
-      $html .= '</button>';
+      $editlabel = get_string('edit', 'local_trustgrade');
+      $deletelabel = get_string('delete', 'local_trustgrade');
+      if ($output instanceof \renderer_base) {
+          $editicon = new \pix_icon('i/edit', $editlabel, 'moodle', ['class' => 'icon']);
+          $html .= $output->action_icon($editurl, $editicon, null, ['title' => $editlabel]);
+          $deleteurl = new \moodle_url('#');
+          $deleteicon = new \pix_icon('i/delete', $deletelabel, 'moodle', ['class' => 'icon']);
+          $html .= $output->action_icon($deleteurl, $deleteicon, null, [
+              'title' => $deletelabel,
+              'class' => 'delete-question-btn text-danger',
+              'data-question-id' => (int) $qid,
+          ]);
+      } else {
+          $html .= \html_writer::link($editurl, $editlabel, ['class' => 'btn btn-secondary btn-sm', 'title' => $editlabel]);
+          $html .= '<button type="button" class="btn btn-danger btn-sm delete-question-btn" title="' . s($deletelabel) . '" data-question-id="' . (int) $qid . '">' . s($deletelabel) . '</button>';
+      }
       $html .= '</div></td>';
       $html .= '</tr>';
       $html .= '</tbody>';
@@ -176,9 +189,8 @@ class question_bank_renderer {
 
           $html .= '<div class="d-flex align-items-center gap-2 mb-2 mandatory-controls" data-question-dbid="' . $db_id . '">';
           if ($is_mandatory) {
-              $html .= '<span class="badge bg-danger mandatory-badge">' . get_string('mandatory_question', 'local_trustgrade') . '</span>';
-              $html .= '<button type="button" class="btn btn-sm btn-outline-secondary toggle-mandatory-btn" data-mandatory="1" data-question-id="' . $db_id . '" title="' . get_string('remove_mandatory', 'local_trustgrade') . '">';
-              $html .= '<i class="fa fa-times-circle" aria-hidden="true"></i> ' . get_string('remove_mandatory', 'local_trustgrade');
+              $html .= '<button type="button" class="btn btn-secondary btn-sm toggle-mandatory-btn" data-mandatory="1" data-question-id="' . $db_id . '" title="' . get_string('remove_mandatory', 'local_trustgrade') . '">';
+              $html .= get_string('remove_mandatory', 'local_trustgrade');
               $html .= '</button>';
           } else {
               $html .= '<button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" data-question-id="' . $db_id . '" title="' . get_string('make_mandatory', 'local_trustgrade') . '">';
