@@ -46,15 +46,12 @@ define(['jquery', 'core/templates', 'core/str'], ($, Templates, Str) => {
         if ($forms.length > 0) {
           $forms.on('submit', (e) => {
             if (this.questionsToGenerate > 0) {
-              // Set flag to indicate there's an active task
-              // This will trigger the task_indicator to start polling
+              // Set flag to indicate there's an active task (task_indicator will poll)
               localStorage.setItem('trustgrade_has_active_task', 'true');
               console.log('[TrustGrade] Assignment submitted, active task flag set');
-              
-              this.showProcessingMessage('submission');
+              // Popup "Processing Your Submission" disabled – user sees normal redirect/confirmation flow
             }
             // Allow form to submit normally
-            // The processing message will be shown while the page processes
           });
         }
       });
