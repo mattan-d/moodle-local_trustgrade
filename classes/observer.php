@@ -311,17 +311,25 @@ class observer {
                 return;
             }
 
+            // Get assignment data (needed for submissiondrafts check)
+            $assignment = $DB->get_record('assign', ['id' => $submission->assignment]);
+            if (!$assignment) {
+                debugging('TrustGrade observer: Assignment record not found for ID ' . $submission->assignment, DEBUG_DEVELOPER);
+                return;
+            }
+
+            // When "Require students to click the submit button" (submissiondrafts) is enabled,
+            // create the quiz only after they click "Continue" on the confirmation page (assessable_submitted),
+            // not from submission_updated (which may fire with draft or in wrong order).
+            if (!empty($assignment->submissiondrafts)) {
+                debugging('TrustGrade observer: submissiondrafts enabled – skipping submission_updated (quiz created only after confirmation page)', DEBUG_DEVELOPER);
+                return;
+            }
+
             // Only process submitted submissions (not drafts)
             if ($event->other['submissionstatus'] !== 'submitted') {
                 debugging('TrustGrade observer: Submission status is "' . $event->other['submissionstatus'] . 
                     '", skipping processing (only "submitted" status is processed)', DEBUG_DEVELOPER);
-                return;
-            }
-
-            // Get assignment data
-            $assignment = $DB->get_record('assign', ['id' => $submission->assignment]);
-            if (!$assignment) {
-                debugging('TrustGrade observer: Assignment record not found for ID ' . $submission->assignment, DEBUG_DEVELOPER);
                 return;
             }
 
