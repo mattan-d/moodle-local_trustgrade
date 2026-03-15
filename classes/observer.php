@@ -44,7 +44,7 @@ class observer {
         
         $processed_data = $cache->get($key);
         
-        if ($processed_data && (time() - $processed_data['timestamp']) < 60) {
+        if ($processed_data && (time() - $processed_data['timestamp']) < 2) {
             debugging('TrustGrade observer: Duplicate ' . $event_name . ' event detected for submission ID ' . 
                 $submission_id . ', skipping processing (already processed ' . 
                 (time() - $processed_data['timestamp']) . ' seconds ago by ' . 
