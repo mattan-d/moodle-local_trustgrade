@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_trustgrade';
-$plugin->version = 2026031500;
+$plugin->version = 2026031600;
 $plugin->requires = 2022112800; // Moodle 4.1
 $plugin->maturity = MATURITY_STABLE;
 $plugin->release = '3.4';
