@@ -183,6 +183,14 @@ echo $OUTPUT->header();
 
 echo $OUTPUT->heading(get_string('question_bank', 'local_trustgrade'));
 
+// Notice: information on this page is not exposed to students.
+echo html_writer::div(
+    html_writer::tag('i', '', ['class' => 'fa fa-info-circle me-2', 'aria-hidden' => 'true']) .
+    get_string('question_bank_disclosure_notice', 'local_trustgrade'),
+    'alert alert-info',
+    ['role' => 'note', 'id' => 'question-bank-disclosure-notice']
+);
+
 // Status of instructor question generation (adhoc).
 echo html_writer::div('', 'instructor-generation-status', ['id' => 'instructor-generation-status']);
 
@@ -246,15 +254,7 @@ $questions = \local_trustgrade\question_generator::get_questions($cmid);
     </div>
 
     <div class="question-bank-content">
-        <?php if (empty($questions)): ?>
-            <div class="alert alert-info">
-                <i class="fa fa-info-circle"></i> <?php echo get_string('no_questions_found', 'local_trustgrade'); ?>
-            </div>
-        <?php else: ?>
-            <?php
-            echo \local_trustgrade\question_bank_renderer::render_editable_questions($questions, $cmid);
-            ?>
-        <?php endif; ?>
+        <?php echo \local_trustgrade\question_bank_renderer::render_editable_questions($questions, $cmid); ?>
     </div>
 </div>
 

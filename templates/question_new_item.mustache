@@ -12,48 +12,53 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+    along with Moodle.  If not, see http://www.gnu.org/copyleft/gpl.html.
 }}
 {{!
     @template local_trustgrade/question_new_item
 
-    New question item template.
+    New question item as table rows (tbody).
 
     Context variables required for this template:
     * index - Question index
     * cmid - Course module ID
     * questionNumber - Display number for question
+    * editFormHtml - Rendered edit form HTML
 }}
-<div class="editable-question-item card mb-4" data-question-index="{{index}}" data-cmid="{{cmid}}" data-question-id="0">
-    <div class="card-header d-flex align-items-center justify-content-between">
-        <h5 class="mb-0">{{#str}}question, local_trustgrade{{/str}} {{questionNumber}}</h5>
-        <div class="question-controls d-flex gap-2">
-            <button type="button" class="btn btn-sm btn-outline-secondary edit-question-btn">
-                <i class="fa fa-edit" aria-hidden="true"></i> {{#str}}edit, core{{/str}}
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-danger delete-question-btn">
-                <i class="fa fa-trash" aria-hidden="true"></i> {{#str}}delete, core{{/str}}
-            </button>
-        </div>
-    </div>
-
-    <div class="card-body">
-        <div class="question-display-mode">
+<tbody class="editable-question-item" data-question-index="{{index}}" data-cmid="{{cmid}}" data-question-id="0">
+    <tr class="question-display-mode">
+        <td class="col-no">{{questionNumber}}</td>
+        <td class="col-question">
             <div class="question-content">
-                <p class="mb-1"><strong>{{#str}}type, local_trustgrade{{/str}}:</strong> {{#str}}multiple_choice, local_trustgrade{{/str}}</p>
-                <p class="text-muted mb-2">{{#str}}points, local_trustgrade{{/str}}: 10</p>
-                <p><strong>{{#str}}question, local_trustgrade{{/str}}:</strong> <em>{{#str}}click_edit_add_question, local_trustgrade{{/str}}</em></p>
-                <div class="mt-3">
-                    <p class="mb-2"><strong>{{#str}}options, local_trustgrade{{/str}}:</strong></p>
-                    <ul class="mb-0">
-                        <li class="mb-1"><em>{{#str}}click_edit_add_options, local_trustgrade{{/str}}</em></li>
-                    </ul>
+                <p class="mb-1"><strong>{{#str}}question, local_trustgrade{{/str}}:</strong> <em>{{#str}}click_edit_add_question, local_trustgrade{{/str}}</em></p>
+                <div class="mt-2">
+                    <p class="mb-1"><strong>{{#str}}options, local_trustgrade{{/str}}:</strong></p>
+                    <ul class="mb-0"><li class="mb-1"><em>{{#str}}click_edit_add_options, local_trustgrade{{/str}}</em></li></ul>
                 </div>
             </div>
-        </div>
-
-        <div class="question-edit-mode" style="display: none;">
+        </td>
+        <td class="col-blooms">–</td>
+        <td class="col-mandatory">
+            <div class="d-flex align-items-center gap-2 mandatory-controls" data-question-dbid="0">
+                <button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" data-question-id="0" title="{{#str}}make_mandatory, local_trustgrade{{/str}}">
+                    <i class="fa fa-star" aria-hidden="true"></i> {{#str}}make_mandatory, local_trustgrade{{/str}}
+                </button>
+            </div>
+        </td>
+        <td class="col-actions">
+            <div class="question-controls d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary edit-question-btn">
+                    <i class="fa fa-edit" aria-hidden="true"></i> {{#str}}edit, local_trustgrade{{/str}}
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger delete-question-btn">
+                    <i class="fa fa-trash" aria-hidden="true"></i> {{#str}}delete, local_trustgrade{{/str}}
+                </button>
+            </div>
+        </td>
+    </tr>
+    <tr class="question-edit-mode" style="display: none;">
+        <td colspan="5" class="p-4 bg-light">
             {{{editFormHtml}}}
-        </div>
-    </div>
-</div>
+        </td>
+    </tr>
+</tbody>

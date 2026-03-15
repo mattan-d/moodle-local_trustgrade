@@ -196,6 +196,34 @@
   margin-bottom: 20px;
 }
 
+/* Question bank table view */
+.trustgrade-questions-table .editable-question-item {
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin-bottom: 0;
+}
+
+.trustgrade-questions-table .col-no {
+  width: 3rem;
+  vertical-align: top;
+}
+
+.trustgrade-questions-table .col-question {
+  min-width: 12rem;
+}
+
+.trustgrade-questions-table .col-blooms,
+.trustgrade-questions-table .col-mandatory {
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.trustgrade-questions-table .col-actions {
+  width: 12rem;
+  vertical-align: top;
+}
+
 .local-trustgrade .question-header {
   display: flex;
   justify-content: space-between;

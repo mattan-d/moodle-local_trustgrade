@@ -43,10 +43,7 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
     bindEvents: () => {
       $(document).off("click.questioneditor").off("change.questioneditor")
 
-      $(document).on("click.questioneditor", "#add-new-question-btn", (e) => {
-        e.preventDefault()
-        QuestionEditor.addNewQuestion()
-      })
+      // Add new question: now a link to question_edit.php?cmid=X (no JS add)
 
       $(document).on("click.questioneditor", ".edit-question-btn", function (e) {
         e.preventDefault()
@@ -435,8 +432,9 @@ define(["jquery", "core/ajax", "core/notification", "core/str", "core/templates"
           return Templates.render("local_trustgrade/question_new_item", context)
         })
         .then((html) => {
-          // Insert before the add button section
-          $(".add-question-section").before(html)
+          // Insert new question as tbody into the table
+          $(".trustgrade-questions-table").append(html)
+          $(".trustgrade-questions-table .trustgrade-empty-questions-row").remove()
 
           const newQuestionItem = $(`.editable-question-item[data-question-index="${newIndex}"]`)
           newQuestionItem.find(".question-type-input").closest(".col-12.col-md-4").hide()

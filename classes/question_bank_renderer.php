@@ -31,16 +31,27 @@ class question_bank_renderer {
       $html = '';
 
       $html .= '<div id="question-bank-container" class="question-bank-container">';
+      $html .= '<div class="table-responsive">';
+      $html .= '<table class="table table-bordered table-hover generaltable trustgrade-questions-table">';
+      $html .= '<thead><tr>';
+      $html .= '<th class="col-no">#</th>';
+      $html .= '<th class="col-question">' . get_string('question', 'local_trustgrade') . '</th>';
+      $html .= '<th class="col-blooms">' . get_string('blooms_level_label', 'local_trustgrade') . '</th>';
+      $html .= '<th class="col-mandatory">' . get_string('mandatory_question', 'local_trustgrade') . '</th>';
+      $html .= '<th class="col-actions">' . get_string('actions', 'local_trustgrade') . '</th>';
+      $html .= '</tr></thead>';
 
-      foreach ($questions as $index => $question) {
-          $html .= self::render_single_editable_question($question, $index, $cmid);
+      if (empty($questions)) {
+          $html .= '<tbody class="trustgrade-empty-questions-row">';
+          $html .= '<tr><td colspan="5" class="text-center text-muted py-4">' . get_string('no_questions_found', 'local_trustgrade') . '</td></tr>';
+          $html .= '</tbody>';
+      } else {
+          foreach ($questions as $index => $question) {
+              $html .= self::render_single_editable_question_row($question, $index, $cmid);
+          }
       }
 
-      // Add new question button
-      $html .= '<div class="add-question-section mt-3">';
-      $html .= '<button type="button" id="add-new-question-btn" class="btn btn-outline-primary">';
-      $html .= '<i class="fa fa-plus" aria-hidden="true"></i> ' . get_string('add_new_question', 'local_trustgrade');
-      $html .= '</button>';
+      $html .= '</table>';
       $html .= '</div>';
 
       $html .= '</div>';
@@ -49,49 +60,63 @@ class question_bank_renderer {
   }
 
   /**
-   * Render a single editable question
+   * Render a single editable question as table rows (display row + edit row).
    *
    * @param array $question Question data
    * @param int $index Question index
    * @param int $cmid Course module ID
-   * @return string HTML for single question
+   * @return string HTML for tbody with two tr
    */
-  private static function render_single_editable_question($question, $index, $cmid) {
+  private static function render_single_editable_question_row($question, $index, $cmid) {
       $html = '';
-
       $qid = isset($question['id']) ? intval($question['id']) : 0;
-      $html .= '<div class="editable-question-item card mb-4" data-question-index="' . $index . '" data-cmid="' . $cmid . '" data-question-id="' . $qid . '">';
+      $metadata = isset($question['metadata']) && is_array($question['metadata']) ? $question['metadata'] : [];
+      $blooms = isset($metadata['blooms_level']) ? $metadata['blooms_level'] : null;
+      $is_mandatory = isset($question['is_mandatory']) ? intval($question['is_mandatory']) : 0;
+      $db_id = isset($question['db_id']) ? intval($question['db_id']) : (isset($question['id']) ? intval($question['id']) : 0);
 
-      // Header
-      $html .= '<div class="card-header d-flex align-items-center justify-content-between">';
-      $html .= '<h5 class="mb-0">' . get_string('question', 'local_trustgrade') . ' ' . ($index + 1) . '</h5>';
+      $html .= '<tbody class="editable-question-item" data-question-index="' . $index . '" data-cmid="' . $cmid . '" data-question-id="' . $qid . '">';
+
+      // Display row
+      $html .= '<tr class="question-display-mode">';
+      $html .= '<td class="col-no">' . ($index + 1) . '</td>';
+      $html .= '<td class="col-question">' . self::render_question_display($question, true) . '</td>';
+      $html .= '<td class="col-blooms">' . ($blooms ? self::get_blooms_level_string($blooms) : '–') . '</td>';
+      $html .= '<td class="col-mandatory">';
+      $html .= '<div class="d-flex align-items-center gap-2 mandatory-controls" data-question-dbid="' . $db_id . '">';
+      if ($is_mandatory) {
+          $html .= '<span class="badge bg-danger mandatory-badge">' . get_string('mandatory_question', 'local_trustgrade') . '</span>';
+          $html .= '<button type="button" class="btn btn-sm btn-outline-secondary toggle-mandatory-btn" data-mandatory="1" data-question-id="' . $db_id . '" title="' . get_string('remove_mandatory', 'local_trustgrade') . '">';
+          $html .= '<i class="fa fa-times-circle" aria-hidden="true"></i> ' . get_string('remove_mandatory', 'local_trustgrade');
+          $html .= '</button>';
+      } else {
+          $html .= '<button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" data-question-id="' . $db_id . '" title="' . get_string('make_mandatory', 'local_trustgrade') . '">';
+          $html .= '<i class="fa fa-star" aria-hidden="true"></i> ' . get_string('make_mandatory', 'local_trustgrade');
+          $html .= '</button>';
+      }
+      $html .= '</div></td>';
+      $html .= '<td class="col-actions">';
       $html .= '<div class="question-controls d-flex gap-2">';
-      $html .= '<button type="button" class="btn btn-sm btn-outline-secondary edit-question-btn">';
-      $html .= '<i class="fa fa-edit" aria-hidden="true"></i> ' . get_string('edit', 'local_trustgrade');
-      $html .= '</button>';
+      $editurl = new \moodle_url('/local/trustgrade/question_edit.php', ['cmid' => $cmid, 'id' => $qid]);
+      $html .= \html_writer::link($editurl, '<i class="fa fa-edit" aria-hidden="true"></i> ' . get_string('edit', 'local_trustgrade'), ['class' => 'btn btn-sm btn-outline-secondary']);
       $html .= '<button type="button" class="btn btn-sm btn-outline-danger delete-question-btn">';
       $html .= '<i class="fa fa-trash" aria-hidden="true"></i> ' . get_string('delete', 'local_trustgrade');
       $html .= '</button>';
-      $html .= '</div>';
-      $html .= '</div>';
-
-      // Body
-      $html .= '<div class="card-body">';
-
-      // Question display mode
-      $html .= '<div class="question-display-mode">';
-      $html .= self::render_question_display($question);
-      $html .= '</div>';
-
-      // Question edit mode (hidden by default)
-      $html .= '<div class="question-edit-mode" style="display: none;">';
-      $html .= self::render_question_edit_form($question, $index);
-      $html .= '</div>';
-
-      $html .= '</div>'; // card-body
-      $html .= '</div>'; // card
+      $html .= '</div></td>';
+      $html .= '</tr>';
+      $html .= '</tbody>';
 
       return $html;
+  }
+
+  /**
+   * Render question for view-only display (full text + options). For use on the edit page.
+   *
+   * @param array $question Question data
+   * @return string HTML
+   */
+  public static function render_question_view_content($question) {
+      return self::render_question_display($question, false);
   }
 
   /**
@@ -121,12 +146,13 @@ class question_bank_renderer {
   }
 
   /**
-   * Render question in display mode using new JSON pattern
+   * Render question in display mode using new JSON pattern.
    *
    * @param array $question Question data
+   * @param bool $fortable When true, omit Blooms and Mandatory (for table columns)
    * @return string HTML for question display
    */
-  private static function render_question_display($question) {
+  private static function render_question_display($question, $fortable = false) {
       $html = '';
 
       $type = isset($question['type']) ? $question['type'] : '';
@@ -138,31 +164,33 @@ class question_bank_renderer {
 
       $html .= '<div class="question-content">';
 
-      $metaBits = [];
-      if (!empty($blooms)) {
-          $bloomsLabel = get_string('blooms_level_label', 'local_trustgrade');
-          $metaBits[] = $bloomsLabel . ': ' . self::get_blooms_level_string($blooms);
-      }
-      if (!empty($metaBits)) {
-          $html .= '<p class="text-muted mb-2">' . implode(' | ', $metaBits) . '</p>';
+      if (!$fortable) {
+          $metaBits = [];
+          if (!empty($blooms)) {
+              $bloomsLabel = get_string('blooms_level_label', 'local_trustgrade');
+              $metaBits[] = $bloomsLabel . ': ' . self::get_blooms_level_string($blooms);
+          }
+          if (!empty($metaBits)) {
+              $html .= '<p class="text-muted mb-2">' . implode(' | ', $metaBits) . '</p>';
+          }
+
+          $html .= '<div class="d-flex align-items-center gap-2 mb-2 mandatory-controls" data-question-dbid="' . $db_id . '">';
+          if ($is_mandatory) {
+              $html .= '<span class="badge bg-danger mandatory-badge">' . get_string('mandatory_question', 'local_trustgrade') . '</span>';
+              $html .= '<button type="button" class="btn btn-sm btn-outline-secondary toggle-mandatory-btn" data-mandatory="1" data-question-id="' . $db_id . '" title="' . get_string('remove_mandatory', 'local_trustgrade') . '">';
+              $html .= '<i class="fa fa-times-circle" aria-hidden="true"></i> ' . get_string('remove_mandatory', 'local_trustgrade');
+              $html .= '</button>';
+          } else {
+              $html .= '<button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" data-question-id="' . $db_id . '" title="' . get_string('make_mandatory', 'local_trustgrade') . '">';
+              $html .= '<i class="fa fa-star" aria-hidden="true"></i> ' . get_string('make_mandatory', 'local_trustgrade');
+              $html .= '</button>';
+          }
+          $html .= '</div>';
       }
 
-      $html .= '<div class="d-flex align-items-center gap-2 mb-2 mandatory-controls" data-question-dbid="' . $db_id . '">';
-      if ($is_mandatory) {
-          $html .= '<span class="badge bg-danger mandatory-badge">' . get_string('mandatory_question', 'local_trustgrade') . '</span>';
-          $html .= '<button type="button" class="btn btn-sm btn-outline-secondary toggle-mandatory-btn" data-mandatory="1" data-question-id="' . $db_id . '" title="' . get_string('remove_mandatory', 'local_trustgrade') . '">';
-          $html .= '<i class="fa fa-times-circle" aria-hidden="true"></i> ' . get_string('remove_mandatory', 'local_trustgrade');
-          $html .= '</button>';
-      } else {
-          $html .= '<button type="button" class="btn btn-sm btn-outline-primary toggle-mandatory-btn" data-mandatory="0" data-question-id="' . $db_id . '" title="' . get_string('make_mandatory', 'local_trustgrade') . '">';
-          $html .= '<i class="fa fa-star" aria-hidden="true"></i> ' . get_string('make_mandatory', 'local_trustgrade');
-          $html .= '</button>';
-      }
-      $html .= '</div>';
+      $html .= '<p class="mb-1">' . htmlspecialchars($text) . '</p>';
 
-      $html .= '<p><strong>' . get_string('question', 'local_trustgrade') . ':</strong> ' . htmlspecialchars($text) . '</p>';
-
-      if (isset($question['options']) && is_array($question['options'])) {
+      if (!$fortable && isset($question['options']) && is_array($question['options'])) {
           $html .= '<div class="mt-3">';
           $html .= '<p class="mb-2"><strong>' . get_string('options', 'local_trustgrade') . ':</strong></p>';
           $html .= '<ul class="mb-0">';
@@ -287,6 +315,76 @@ class question_bank_renderer {
 
       $html .= '</div>'; // question-edit-form
 
+      return $html;
+  }
+
+  /**
+   * Render question edit form as a full HTML form for the standalone edit page (POST with name attributes).
+   *
+   * @param array $question Question data
+   * @param \moodle_url $actionurl Form action URL
+   * @param int $cmid Course module ID
+   * @return string HTML form
+   */
+  public static function render_question_edit_form_for_page($question, $actionurl, $cmid) {
+      $type = isset($question['type']) ? $question['type'] : 'multiple_choice';
+      $text = isset($question['text']) ? $question['text'] : '';
+      $metadata = isset($question['metadata']) && is_array($question['metadata']) ? $question['metadata'] : [];
+      $blooms = isset($metadata['blooms_level']) ? $metadata['blooms_level'] : '';
+      $is_mandatory = !empty($question['is_mandatory']);
+      $options = isset($question['options']) && is_array($question['options']) ? $question['options'] : [];
+      for ($i = count($options); $i < 4; $i++) {
+          $options[] = ['text' => '', 'is_correct' => ($i === 0), 'explanation' => ''];
+      }
+
+      $html = '<form method="post" action="' . $actionurl->out(false) . '" class="question-edit-form-page">';
+      $html .= '<div class="form-group mb-3">';
+      $html .= '<label for="qtext" class="form-label">' . get_string('question', 'local_trustgrade') . ' ' . get_string('text', 'local_trustgrade') . ':</label>';
+      $html .= '<textarea class="form-control" name="qtext" id="qtext" rows="3" required="required">' . s($text) . '</textarea>';
+      $html .= '</div>';
+
+      $html .= '<div class="row g-3 mb-3">';
+      $html .= '<div class="col-12 col-md-4">';
+      $html .= '<label for="blooms" class="form-label">' . get_string('blooms_level_label', 'local_trustgrade') . ':</label>';
+      $html .= '<select class="form-control" name="blooms" id="blooms">';
+      $levels = [
+          '' => '-',
+          'Remembering' => get_string('blooms_remembering', 'local_trustgrade'),
+          'Understanding' => get_string('blooms_understanding', 'local_trustgrade'),
+          'Applying' => get_string('blooms_applying', 'local_trustgrade'),
+          'Analyzing' => get_string('blooms_analyzing', 'local_trustgrade'),
+          'Evaluating' => get_string('blooms_evaluating', 'local_trustgrade')
+      ];
+      foreach ($levels as $val => $label) {
+          $sel = ($blooms === $val) ? ' selected="selected"' : '';
+          $html .= '<option value="' . s($val) . '"' . $sel . '>' . s($label) . '</option>';
+      }
+      $html .= '</select></div>';
+      $html .= '<div class="col-12 col-md-4">';
+      $html .= '<label class="form-label d-block">&nbsp;</label>';
+      $html .= '<div class="form-check"><input class="form-check-input" type="checkbox" name="mandatory" id="mandatory" value="1"' . ($is_mandatory ? ' checked="checked"' : '') . '>';
+      $html .= '<label class="form-check-label" for="mandatory">' . get_string('mandatory_question', 'local_trustgrade') . '</label></div>';
+      $html .= '</div></div>';
+
+      $html .= '<div class="question-options-section mt-4">';
+      $html .= '<h6 class="mb-2">' . get_string('options', 'local_trustgrade') . '</h6>';
+      $html .= '<div class="row text-muted small fw-semibold mb-1"><div class="col-md-1">' . get_string('correct', 'local_trustgrade') . '</div><div class="col-md-5">' . get_string('optiontext', 'local_trustgrade') . '</div><div class="col-md-6">' . get_string('explanation', 'local_trustgrade') . '</div></div>';
+      foreach ($options as $i => $opt) {
+          $optText = isset($opt['text']) ? $opt['text'] : '';
+          $isCorrect = !empty($opt['is_correct']);
+          $explanation = isset($opt['explanation']) ? $opt['explanation'] : '';
+          $html .= '<div class="row align-items-start gy-2 gx-3 mb-2">';
+          $html .= '<div class="col-md-1 pt-2"><input type="radio" class="form-check-input" name="correct_index" value="' . $i . '"' . ($isCorrect ? ' checked="checked"' : '') . ' aria-label="' . get_string('correct', 'local_trustgrade') . '"></div>';
+          $html .= '<div class="col-md-5"><input type="text" class="form-control" name="option_text[' . $i . ']" value="' . s($optText) . '" placeholder="' . s(get_string('option_placeholder', 'local_trustgrade', chr(65 + $i))) . '"></div>';
+          $html .= '<div class="col-md-6"><textarea class="form-control" name="option_explanation[' . $i . ']" rows="2" placeholder="' . s(get_string('explanation', 'local_trustgrade')) . '">' . s($explanation) . '</textarea></div>';
+          $html .= '</div>';
+      }
+      $html .= '</div>';
+
+      $html .= '<div class="mt-4 d-flex gap-2">';
+      $html .= '<button type="submit" class="btn btn-primary">' . get_string('savechanges') . '</button>';
+      $html .= '<a href="' . new \moodle_url('/local/trustgrade/question_bank.php', ['cmid' => $cmid]) . '" class="btn btn-secondary">' . get_string('cancel') . '</a>';
+      $html .= '</div></form>';
       return $html;
   }
 

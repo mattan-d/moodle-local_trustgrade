@@ -128,11 +128,15 @@ $string['questions_will_be_generated'] = 'Questions will be generated automatica
 // Question bank.
 $string['question_bank'] = 'Question bank and instruction check';
 $string['question_bank_description'] = 'Manage your AI-generated questions. You can view, edit, delete existing questions, or generate new ones.';
+$string['question_bank_disclosure_notice'] = 'The information on this page (instructions, AI recommendations, question bank) is for instructors only and is not visible to students.';
 $string['question_bank_title'] = 'Question bank and instruction check';
 $string['loading_question_bank'] = 'Loading question bank...';
 $string['no_questions_available'] = 'No questions are available for this assignment.';
 $string['no_questions_found'] = 'No questions found. Generate some questions to get started.';
 $string['add_new_question'] = 'Add New Question';
+$string['edit_question_page'] = 'View and edit question';
+$string['back_to_question_bank'] = 'Back to question bank';
+$string['view_question'] = 'View question';
 
 // Generate questions from files (question bank page).
 $string['generate_from_files'] = 'Create questions from files';

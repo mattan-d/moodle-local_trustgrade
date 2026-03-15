@@ -131,8 +131,31 @@ class question_editor {
   }
   
   /**
+   * Update a single question by its database record id.
+   *
+   * @param int $questionid Record id in local_trustgrade_questions
+   * @param int $cmid Course module ID (must match the record)
+   * @param array $question_data Decoded question data
+   * @return array Success/error response
+   */
+  public static function update_question_by_id($questionid, $cmid, $question_data) {
+      global $DB;
+
+      $record = $DB->get_record('local_trustgrade_questions', ['id' => $questionid, 'cmid' => $cmid], '*', MUST_EXIST);
+      $validation = self::validate_question_data($question_data);
+      if (!$validation['valid']) {
+          return ['success' => false, 'error' => $validation['error']];
+      }
+      $record->question_data = json_encode($question_data);
+      $record->is_mandatory = isset($question_data['is_mandatory']) ? (int) $question_data['is_mandatory'] : 0;
+      $record->timemodified = time();
+      $DB->update_record('local_trustgrade_questions', $record);
+      return ['success' => true, 'message' => get_string('question_saved_successfully', 'local_trustgrade')];
+  }
+
+  /**
    * Validate question data
-   * 
+   *
    * @param array $question_data Question data to validate
    * @return array Validation result
    */

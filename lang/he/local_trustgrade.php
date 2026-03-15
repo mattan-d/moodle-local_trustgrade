@@ -121,11 +121,15 @@ $string['questions_will_be_generated'] = 'שאלות ייווצרו אוטומט
 // Question bank.
 $string['question_bank'] = 'מאגר שאלות ובדיקת הנחיות';
 $string['question_bank_description'] = 'נהל את השאלות שנוצרו על‑ידי AI. ניתן לצפות, לערוך, למחוק שאלות קיימות, או ליצור חדשות.';
+$string['question_bank_disclosure_notice'] = 'המידע בעמוד זה (הנחיות, המלצות AI, מאגר השאלות) מיועד למרצים בלבד ואינו נחשף לסטודנטים.';
 $string['question_bank_title'] = 'מאגר שאלות ובדיקת הנחיות';
 $string['loading_question_bank'] = 'טוען מאגר שאלות…';
 $string['no_questions_available'] = 'אין שאלות זמינות עבור משימה זו.';
 $string['no_questions_found'] = 'לא נמצאו שאלות. צור כמה שאלות כדי להתחיל.';
 $string['add_new_question'] = 'הוסף שאלה חדשה';
+$string['edit_question_page'] = 'צפייה ועריכת שאלה';
+$string['back_to_question_bank'] = 'חזרה למאגר השאלות';
+$string['view_question'] = 'צפייה בשאלה';
 
 // Generate questions from files (question bank page).
 $string['generate_from_files'] = 'צור שאלות מקבצים';
