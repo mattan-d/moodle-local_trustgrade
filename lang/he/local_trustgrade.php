@@ -43,11 +43,11 @@ $string['enable_course_specific_first'] = 'יש להפעיל תחילה "זמי�
 // Assignment settings.
 $string['trustgrade_enabled'] = 'הפעלת הרכיב';
 $string['trustgrade_enabled_desc'] = 'הפעל את תוסף מדד איכות אקדמית (TrustGrade) עבור מטלה זו.';
-$string['trustgrade_enabled_help'] = 'הפעלת TrustGrade למטלה זו מוסיפה חידוני הבנה שנוצרו ב-AI ותכונות נלוות. כשההגדרה כבויה, סטודנטים לא יראו את החידון או כל תכונת TrustGrade במטלה זו.';
-$string['require_quiz_completion'] = 'חייב את הסטודנט/ית להשלים את החידון';
-$string['require_quiz_completion_desc'] = 'כאשר מסומן, לא תתאפשר גישה לעמודים אחרים במערכת Moodle לפני השלמת החידון. חסימת הגישה חלה עד 24 שעות מהפעם הראשונה שהוחלה.';
-$string['require_quiz_completion_redirect'] = 'עליך להשלים את חידון TrustGrade עבור מטלה זו לפני גישה לעמודים אחרים.';
-$string['require_quiz_completion_help'] = 'כאשר מופעל, סטודנטים לא יוכלו לגשת לעמודים אחרים ב-Moodle עד השלמת חידון TrustGrade של המטלה. החסימה תקפה עד 24 שעות מהפעם הראשונה.';
+$string['trustgrade_enabled_help'] = 'הפעלת TrustGrade למטלה זו מוסיפה שאלוני בקיאות שנוצרו ב-AI ותכונות נלוות. כשההגדרה כבויה, סטודנטים לא יראו את השאלון בקיאות או כל תכונת TrustGrade במטלה זו.';
+$string['require_quiz_completion'] = 'חייב את הסטודנט/ית להשלים את השאלון בקיאות';
+$string['require_quiz_completion_desc'] = 'כאשר מסומן, לא תתאפשר גישה לעמודים אחרים במערכת Moodle לפני השלמת השאלון בקיאות. חסימת הגישה חלה עד 24 שעות מהפעם הראשונה שהוחלה.';
+$string['require_quiz_completion_redirect'] = 'עליך להשלים את שאלון בקיאות TrustGrade עבור מטלה זו לפני גישה לעמודים אחרים.';
+$string['require_quiz_completion_help'] = 'כאשר מופעל, סטודנטים לא יוכלו לגשת לעמודים אחרים ב-Moodle עד השלמת שאלון בקיאות TrustGrade של המטלה. החסימה תקפה עד 24 שעות מהפעם הראשונה.';
 $string['trustgrade_tab'] = 'מדד איכות אקדמית (TrustGrade)';
 $string['trustgrade_description'] = 'השתמש ב‑AI Gateway לניתוח והמלצה לשיפור הנחיות המשימה שלך.';
 $string['save_assignment_first'] = 'אנא שמור את המשימה תחילה לפני יצירת שאלות';
@@ -138,8 +138,8 @@ $string['generate_questions_from_files'] = 'צור שאלות';
 $string['generation_status_preparing'] = 'מייצר שאלות… אנא המתן.';
 $string['generation_started'] = 'יצירת השאלות החלה. הסטטוס יתעדכן למטה.';
 
-$string['generate_from_files_help'] = '<h3>יצירת שאלות לחידון באמצעות העלאת קבצים</h3>
-<p>ניתן ליצור שאלות לחידון באופן אוטומטי על-ידי העלאת קבצים למערכת. המערכת תנתח את תוכן הקבצים ותיצור שאלות בהתאם לחומר המופיע בהם.</p>
+$string['generate_from_files_help'] = '<h3>יצירת שאלות לשאלון בקיאות באמצעות העלאת קבצים</h3>
+<p>ניתן ליצור שאלות לשאלון בקיאות באופן אוטומטי על-ידי העלאת קבצים למערכת. המערכת תנתח את תוכן הקבצים ותיצור שאלות בהתאם לחומר המופיע בהם.</p>
 <h4>כיצד זה עובד?</h4>
 <p><strong>העלאת קבצים</strong><br>ניתן להעלות קבצים באמצעות גרירה ושחרור מהמחשב האישי אל אזור העלאת הקבצים.<br>מספר קבצים מרבי: עד 20 קבצים.<br>נפח קובץ מרבי: ללא הגבלה.</p>
 <p><strong>בחירת כמות שאלות</strong><br>יש להגדיר את מספר השאלות שברצונכם ליצור (לדוגמה: 5 שאלות).</p>
@@ -185,7 +185,7 @@ $string['blooms_analyzing'] = 'ניתוח';
 $string['blooms_evaluating'] = 'הערכה';
 
 $string['mandatory_question'] = 'שאלת חובה';
-$string['mandatory_question_help'] = 'שאלה זו תמיד תופיע בחידונים לסטודנטים';
+$string['mandatory_question_help'] = 'שאלה זו תמיד תופיע בשאלונות בקיאות לסטודנטים';
 $string['make_mandatory'] = 'סמן כחובה';
 $string['remove_mandatory'] = 'הסר חובת מענה';
 $string['question_marked_mandatory'] = 'השאלה סומנה כחובה';
@@ -215,7 +215,7 @@ $string['error_deleting_question'] = 'שגיאה במחיקת השאלה';
 $string['debug_mode'] = 'מצב דיבוג & מטמון';
 $string['debug_mode_desc'] = 'הפעל מצב דיבוג כדי לשמור תגובות של ה‑Gateway במטמון ולהימנע מקריאות API חוזרות. כאשר מופעל, בקשות זהות יחזרו מתגובה שמורה במקום לקרוא שוב ל‑Gateway. זה משפר ביצועים ומפחית שימוש ב‑API במהלך פיתוח ובדיקה.';
 $string['cleanup_debug_cache'] = 'נקה מטמון דיבוג של TrustGrade';
-$string['cleanup_quiz_sessions'] = 'נקה מפגשי חידונים של TrustGrade';
+$string['cleanup_quiz_sessions'] = 'נקה מפגשי שאלונות בקיאות של TrustGrade';
 
 // Cache management.
 $string['cache_management'] = 'ניהול מטמון';
@@ -241,9 +241,9 @@ $string['cache_clear_error'] = 'שגיאה בניקוי המטמון: {$a}';
 $string['invalid_action'] = 'ביקשת פעולה לא חוקית במטמון.';
 
 // Quiz settings.
-$string['quiz_settings_title'] = 'הגדרות חידון';
+$string['quiz_settings_title'] = 'הגדרות שאלון בקיאות';
 $string['questions_to_generate'] = 'מספר השאלות ליצירה';
-$string['questions_to_generate_help'] = 'מספר כולל של שאלות לכלול בחידון';
+$string['questions_to_generate_help'] = 'מספר כולל של שאלות לכלול בשאלון בקיאות';
 $string['question_distribution'] = 'הגדרת תמהיל השאלות (כמה מבנק השאלות וכמה על בסיס ההגשה)';
 $string['instructor_questions'] = 'שאלות ממאגר המרצה';
 $string['instructor_questions_help'] = 'מספר שאלות לבחור ממאגר שאלות המרצה';
@@ -258,102 +258,102 @@ $string['time_per_question_help'] = 'הזמן המרבי המותר לכל שא�
 $string['disclosure_settings'] = 'הגדרות גילוי לסטודנט';
 $string['disclosure_settings_desc'] = 'הגדר כיצד התלמידים יקבלו מידע על תכונות בינה מלאכותית במשימות.';
 $string['show_disclosure'] = 'הצג הודעת גילוי AI';
-$string['show_disclosure_desc'] = 'הצג הודעת גילוי לסטודנטים לפני שליחת המשימה, שמודיעה על תכונת חידון מבוססת AI.';
+$string['show_disclosure_desc'] = 'הצג הודעת גילוי לסטודנטים לפני שליחת המשימה, שמודיעה על תכונת שאלון בקיאות מבוססת AI.';
 $string['custom_disclosure_message'] = 'הודעה גילוי מותאמת';
-$string['custom_disclosure_message_desc'] = 'הודעה מותאמת להצגה במקום ההודעה המוגדרת. תמיכה ב-HTML. ניתן להשתמש במשתנים: {questions_count} (כמות השאלות בחידון), {time_per_question} (זמן לכל שאלה בשניות). השאר ריקה לשימוש בהודעת ברירת מחדל.';
+$string['custom_disclosure_message_desc'] = 'הודעה מותאמת להצגה במקום ההודעה המוגדרת. תמיכה ב-HTML. ניתן להשתמש במשתנים: {questions_count} (כמות השאלות בשאלון בקיאות), {time_per_question} (זמן לכל שאלה בשניות). השאר ריקה לשימוש בהודעת ברירת מחדל.';
 
 // AI disclosure messages.
 $string['ai_disclosure_title'] = 'חוויה לימודית משולבת AI';
-$string['ai_disclosure_message'] = 'לאחר הגשת העבודה, מערכת הבינה מלאכותית תנתח את עבודתך בזמן אמת ותיצור עבורך חידון מותאם אישית שיעזור לך לבדוק ולחזק את שליטך בחומר הנלמד.';
+$string['ai_disclosure_message'] = 'לאחר הגשת העבודה, מערכת הבינה מלאכותית תנתח את עבודתך בזמן אמת ותיצור עבורך שאלון בקיאות מותאם אישית שיעזור לך לבדוק ולחזק את שליטך בחומר הנלמד.';
 $string['ai_disclosure_details_toggle'] = 'למידע נוסף על אופן הפעולה';
 $string['ai_disclosure_detail_analysis'] = 'המטלה שהגשת תנותח על ידי בינה מלאכותית כדי להעריך את שליטך בחומר הנלמד';
 $string['ai_disclosure_detail_questions'] = 'ה‑AI ייצור {$a} שאלות מותאמות אישית על‑פי ההגשה שלך.';
-$string['ai_disclosure_detail_quiz'] = 'תשתתף בחידון של {$a} שאלות שמשלב שאלות של המרצה וגם שאלות מותאמות אישית.';
-$string['ai_disclosure_detail_timer'] = 'לכל שאלה בחידון יש הגבלת זמן של {$a} שניות לעידוד חשיבה מהירה.';
+$string['ai_disclosure_detail_quiz'] = 'תשתתף בשאלון בקיאות של {$a} שאלות שמשלב שאלות של המרצה וגם שאלות מותאמות אישית.';
+$string['ai_disclosure_detail_timer'] = 'לכל שאלה בשאלון בקיאות יש הגבלת זמן של {$a} שניות לעידוד חשיבה מהירה.';
 $string['ai_disclosure_detail_privacy'] = 'נתוני ההגשה שלך מעובדים בצורה מאובטחת ונמצאים בשימוש למטרות חינוכיות בלבד.';
 
 // Quiz interface.
-$string['ai_quiz_title'] = 'חידון שנוצר על‑ידי AI';
-$string['ai_quiz_report'] = 'דוח חידון AI';
+$string['ai_quiz_title'] = 'שאלון בקיאות שנוצר על‑ידי AI';
+$string['ai_quiz_report'] = 'דוח שאלון בקיאות AI';
 $string['trustgrade_report'] = 'דוח TrustGrade';
-$string['quiz_ready_message'] = 'חידון AI שלך מוכן! חידון זה יעזור לך להרהר בהגשתך ולהעמיק את הלמידה.';
-$string['quiz_ready_subject'] = 'חידון ה-AI שלך מוכן';
-$string['quiz_ready_message_html'] = 'חידון ה-AI שלך מוכן! לחץ <a href="{$a->quizurl}">כאן</a> כדי לגשת לחידון.';
-$string['quiz_generation_failed_subject'] = 'יצירת החידון נכשלה';
-$string['quiz_generation_failed_message'] = 'לא הצלחנו ליצור את החידון שלך. אנא פנה למרצה שלך.';
-$string['take_quiz'] = 'גש לחידון';
+$string['quiz_ready_message'] = 'שאלון בקיאות AI שלך מוכן! שאלון בקיאות זה יעזור לך להרהר בהגשתך ולהעמיק את הלמידה.';
+$string['quiz_ready_subject'] = 'שאלון בקיאות ה-AI שלך מוכן';
+$string['quiz_ready_message_html'] = 'שאלון בקיאות ה-AI שלך מוכן! לחץ <a href="{$a->quizurl}">כאן</a> כדי לגשת לשאלון בקיאות.';
+$string['quiz_generation_failed_subject'] = 'יצירת השאלון בקיאות נכשלה';
+$string['quiz_generation_failed_message'] = 'לא הצלחנו ליצור את השאלון בקיאות שלך. אנא פנה למרצה שלך.';
+$string['take_quiz'] = 'גש לשאלון בקיאות';
 $string['next'] = 'הבא';
 $string['next_question'] = 'שאלה הבאה';
-$string['finish_quiz'] = 'סיים חידון';
+$string['finish_quiz'] = 'סיים שאלון בקיאות';
 $string['submit_final_answers'] = 'שלח תשובות סופיות';
 $string['seconds'] = 'שניות';
 $string['text'] = 'טקסט';
 $string['entertext'] = 'הכנס טקסט';
 $string['enter_answer_placeholder'] = 'הכנס את תשובתך כאן…';
 $string['quiz_preparing'] = 'החי��ון שלך נמצא בהכנה...';
-$string['quiz_preparing_message'] = 'נוצר חידון עבור {$a}';
-$string['quiz_ready'] = 'החידון שלך מוכן. לחץ/י כאן להתחלה!';
-$string['quiz_failed'] = 'יצירת החידון נכשלה';
-$string['quiz_failed_message'] = 'נתקלנו בבעיה ביצירת החידון שלך עבור {$a}';
+$string['quiz_preparing_message'] = 'נוצר שאלון בקיאות עבור {$a}';
+$string['quiz_ready'] = 'השאלון בקיאות שלך מוכן. לחץ/י כאן להתחלה!';
+$string['quiz_failed'] = 'יצירת השאלון בקיאות נכשלה';
+$string['quiz_failed_message'] = 'נתקלנו בבעיה ביצירת השאלון בקיאות שלך עבור {$a}';
 $string['invalid_file_type_error'] = 'לא ניתן לעבד את ההגשה שלך: נתמכים רק קבצי טקסט (PDF, DOC, DOCX, TXT) וקבצי תמונה (JPEG, PNG, GIF). אנא שלח מחדש את העבודה שלך בפורמט קובץ מתאים.';
 	
 // Quiz progress and navigation.
 $string['progress_auto_saved'] = 'ההתקדמות נשמרת אוטומטית. רענון הדף יחזור מהשאלה הזו.';
 $string['provide_answer_warning'] = 'אנא ספק תשובה לפני המשך. זכור: לא תוכל לחזור לשאלה זו מאוחר יותר.';
-$string['quiz_started_notice'] = 'חידון התחיל. זכור: לא תוכל לחזור לשאלות קודמות או להתחיל מחדש.';
-$string['failed_start_session'] = 'נכשל התחלת מפגש החידון';
-$string['quiz_progress_saved'] = 'ההתקדמות בחידון נשמרה אוטומטית. החידון ישוב למקום שבו הפסקת כשתחזור.';
+$string['quiz_started_notice'] = 'שאלון בקיאות התחיל. זכור: לא תוכל לחזור לשאלות קודמות או להתחיל מחדש.';
+$string['failed_start_session'] = 'נכשל התחלת מפגש השאלון בקיאות';
+$string['quiz_progress_saved'] = 'ההתקדמות בשאלון בקיאות נשמרה אוטומטית. השאלון בקיאות ישוב למקום שבו הפסקת כשתחזור.';
 $string['quiz_progress_complete'] = '{$a}% הושלם';
 $string['question_x_of_y'] = 'שאלה {$a->current} מתוך {$a->total}';
 $string['time_remaining'] = 'זמן שנותר: {$a}';
 
 // Quiz completion.
-$string['quiz_completed_header'] = 'חידון הושלם';
+$string['quiz_completed_header'] = 'שאלון בקיאות הושלם';
 $string['quiz_completed_message'] = 'ההערכה הרשמית שלך הוגשה בהצלחה ולא ניתן לחזור עליה.';
 $string['your_answer'] = 'התשובה שלך: {$a}';
 $string['correct_answer_was'] = 'התשובה הנכונה היתה: {$a}';
 $string['final_grade_notice'] = 'זוהי הציון הסופי שלך עבור הערכה זו.';
 $string['final_score'] = 'תוצאה סופית: {$a->score}/{$a->total} ({$a->percentage}%)';
-$string['failed_save_results'] = 'נכשל שמירת תוצאות החידון: {$a}';
+$string['failed_save_results'] = 'נכשל שמירת תוצאות השאלון בקיאות: {$a}';
 $string['failed_save_contact_instructor'] = 'נכשל שמירת התוצאות הסופיות. צור קשר עם המרצה שלך.';
 
 // Quiz integrity.
 $string['integrity_report_header'] = 'דוח יושרה';
 $string['integrity_recorded'] = 'מידע זה נרשם לעיון.';
 $string['integrity_violation_header'] = 'הפרת יושרה בהערכה';
-$string['quiz_flagged'] = 'ניסיון החידון שלך סומן לפעילות חשודה.';
+$string['quiz_flagged'] = 'ניסיון השאלון בקיאות שלך סומן לפעילות חשודה.';
 $string['incident_logged'] = 'האירוע נרשם וייבדק על‑ידי המרצה שלך.';
 $string['progress_saved_cannot_continue'] = 'ההתקדמות הנוכחית נשמרה, אך אינך יכול להמשיך בהערכה.';
-$string['dev_tools_blocked'] = 'גישה לכלי מפתח אינה מותרת במהלך החידון.';
-$string['window_switching_warning'] = 'אזהרה: החלפת חלונות/כרטיסיות {$a->count} פעמים. מקסימום מותר: {$a->max}. החלפה מופרזת עשויה להוביל להפסקת החידון.';
-$string['window_focus_lost'] = 'אובדן פוקוס חלון {$a} פעם(ות) במהלך החידון.';
-$string['exceeded_window_switches'] = 'חצית את המקסימום המותר להחלפת חלונות ({$a}). החידון הופסק.';
+$string['dev_tools_blocked'] = 'גישה לכלי מפתח אינה מותרת במהלך השאלון בקיאות.';
+$string['window_switching_warning'] = 'אזהרה: החלפת חלונות/כרטיסיות {$a->count} פעמים. מקסימום מותר: {$a->max}. החלפה מופרזת עשויה להוביל להפסקת השאלון בקיאות.';
+$string['window_focus_lost'] = 'אובדן פוקוס חלון {$a} פעם(ות) במהלך השאלון בקיאות.';
+$string['exceeded_window_switches'] = 'חצית את המקסימום המותר להחלפת חלונות ({$a}). השאלון בקיאות הופסק.';
 
 // Quiz instructions.
-$string['understand_start_quiz'] = 'אני מבין – התחל חידון';
+$string['understand_start_quiz'] = 'אני מבין – התחל שאלון בקיאות';
 $string['important_formal_assessment'] = 'חשוב: הערכה רשמית';
 $string['read_carefully'] = 'אנא קרא היטב לפני ההתחלה:';
-$string['one_attempt_only'] = 'ניסיון אחד בלבד: יש לך רק ניסיון אחד להשלים חידון זה.';
+$string['one_attempt_only'] = 'ניסיון אחד בלבד: יש לך רק ניסיון אחד להשלים שאלון בקיאות זה.';
 $string['no_going_back'] = 'אין חזרה: לאחר מעבר לשאלה הבאה, לא ניתן לחזור לשאלות קודמות.';
-$string['no_restarts'] = 'אין התחלה מחדש: רענון הדף לא יתחיל מחדש את החידון – הוא ישוב מאיפה שהיה.';
-$string['time_limits'] = 'הגבלות זמן: לכל שאלה יש מגבלת זמן מחמירה. החידון יעבור אוטומטית כשהזמן יפוג.';
+$string['no_restarts'] = 'אין התחלה מחדש: רענון הדף לא יתחיל מחדש את השאלון בקיאות – הוא ישוב מאיפה שהיה.';
+$string['time_limits'] = 'הגבלות זמן: לכל שאלה יש מגבלת זמן מחמירה. השאלון בקיאות יעבור אוטומטית כשהזמן יפוג.';
 $string['no_cheating'] = 'אין לרמות: זהו מבחן רשמי. כל ניסיון לרמות או להתערב בפעילות המבחן יזוהה.';
 $string['stay_focused'] = 'השאר מרוכז: החלפות חלונות או כרטיסיות מרובות עשויות להיחשב כהתנהגות חשודה.';
-$string['cannot_restart_notice'] = 'לאחר לחיצה על "התחל חידון", לא תוכל להתחיל מחדש או לקחת את ההערכה שוב.';
+$string['cannot_restart_notice'] = 'לאחר לחיצה על "התחל שאלון בקיאות", לא תוכל להתחיל מחדש או לקחת את ההערכה שוב.';
 
 // Quiz report.
-$string['quiz_report'] = 'דוח חידון';
-$string['quiz_report_assignment_desc'] = 'דוח חידון AI עבור משימה זו';
-$string['quiz_report_course_desc'] = 'דוח חידון AI עבור כל המשימות בקורס זה';
-$string['quiz_report_all_desc'] = 'דוח חידון AI עבור כל המשימות בכל הקורסים';
+$string['quiz_report'] = 'דוח שאלון בקיאות';
+$string['quiz_report_assignment_desc'] = 'דוח שאלון בקיאות AI עבור משימה זו';
+$string['quiz_report_course_desc'] = 'דוח שאלון בקיאות AI עבור כל המשימות בקורס זה';
+$string['quiz_report_all_desc'] = 'דוח שאלון בקיאות AI עבור כל המשימות בכל הקורסים';
 $string['back_to_assignment'] = 'חזרה למשימה';
 $string['back_to_course'] = 'חזרה לקורס';
-$string['quiz_score'] = 'ציון חידון';
+$string['quiz_score'] = 'ציון שאלון בקיאות';
 $string['details'] = 'פרטים';
 $string['view_details'] = 'הצג פרטים';
 
 // Quiz details.
-$string['quiz_details'] = 'פרטי חידון';
+$string['quiz_details'] = 'פרטי שאלון בקיאות';
 $string['session_info'] = 'מידע על המפגש';
 $string['completed_on'] = 'הושלם ב‑';
 $string['time_taken'] = 'זמן שנדרש';
@@ -363,7 +363,7 @@ $string['student_answer_and_result'] = 'תשובה ותוצאה';
 $string['export_to_excel'] = 'ייצוא לאקסל';
 $string['correct'] = 'נכון';
 $string['incorrect'] = 'לא נכון';
-$string['no_completed_quizzes'] = 'לא ישנם סטודנטים שהשלימו את חידון AI למשימה זו עדיין.';
+$string['no_completed_quizzes'] = 'לא ישנם סטודנטים שהשלימו את שאלון בקיאות AI למשימה זו עדיין.';
 $string['integrity_summary'] = 'סיכום יושרה';
 $string['window_blur_events'] = 'אירועי Blur של חלונות';
 $string['no_answer'] = 'אין תשובה';
@@ -420,8 +420,8 @@ $string['grades_cleared_success'] = 'כל הציונים נמחקו בהצלחה
 $string['grade_clear_error'] = 'שגיאה במחיקת הציונים: {$a}';
 $string['confirm_clear_all_grades'] = 'נקה את כל הציונים';
 $string['confirm_clear_all_grades_body'] = 'האם אתה בטוח שברצונך לנקות את כל הציונים? פעולה זו אינה ניתנת לביטול.';
-$string['no_quiz_attempt'] = 'אין חידון';
-$string['view_quiz_report'] = 'צפה בדוח החידון';
+$string['no_quiz_attempt'] = 'אין שאלון בקיאות';
+$string['view_quiz_report'] = 'צפה בדוח השאלון בקיאות';
 $string['view_student_report_ai'] = 'דוח תלמיד (הערכת הגשה AI)';
 
 // Grade validation.
@@ -430,13 +430,13 @@ $string['grade_cannot_be_negative'] = 'הציון לא יכול להיות של�
 $string['grade_exceeds_maximum'] = 'הציון לא יכול לעלות על המקסימום ({$a})';
 
 // Auto‑grading.
-$string['auto_grade_by_quiz'] = 'ניקוד אוטומטי על‑פי ציון החידון';
-$string['auto_grade_by_quiz_desc'] = 'הגדר אוטומטית את ציוני המשימה על‑פי ציון החידון לכל הסטודנטים';
-$string['auto_grade_button_text'] = 'ניקוד אוטומטי על‑פי ציון החידון';
-$string['auto_grade_success'] = '{$a} סטודנטים ניקודו אוטומטי על‑פי ציון החידון';
-$string['auto_grade_no_grades'] = 'לא ניתן להחיל ציונים. בדוק שסטודנטים השלימו חידונים.';
+$string['auto_grade_by_quiz'] = 'ניקוד אוטומטי על‑פי ציון השאלון בקיאות';
+$string['auto_grade_by_quiz_desc'] = 'הגדר אוטומטית את ציוני המשימה על‑פי ציון השאלון בקיאות לכל הסטודנטים';
+$string['auto_grade_button_text'] = 'ניקוד אוטומטי על‑פי ציון השאלון בקיאות';
+$string['auto_grade_success'] = '{$a} סטודנטים ניקודו אוטומטי על‑פי ציון השאלון בקיאות';
+$string['auto_grade_no_grades'] = 'לא ניתן להחיל ציונים. בדוק שסטודנטים השלימו שאלונות בקיאות.';
 $string['auto_grade_error'] = 'שגיאה בניקוד אוטומטי של סטודנטים';
-$string['auto_grade_confirmation'] = 'זה יקבע אוטומטית ציונים על‑פי ציון החידון לכל הסטודנטים. ציונים קיימים יוחלפו. להמשיך?';
+$string['auto_grade_confirmation'] = 'זה יקבע אוטומטית ציונים על‑פי ציון השאלון בקיאות לכל הסטודנטים. ציונים קיימים יוחלפו. להמשיך?';
 $string['auto_grading_progress'] = 'ניקוד אוטומטי…';
 $string['error_parsing_grades'] = 'שגיאה בפענוח JSON של ציונים';
 
@@ -493,23 +493,23 @@ $string['privacy:metadata:local_trustgrade_debug:raw_response'] = 'תגובה ג
 $string['privacy:metadata:local_trustgrade_debug:parsed_response'] = 'נתוני התגובה מ‑API לאחר פיענוח.';
 $string['privacy:metadata:local_trustgrade_debug:timecreated'] = 'הזמן בו בוצעה הבקשה.';
 
-$string['privacy:metadata:local_trustgd_quiz_sessions'] = 'שומר מצב מפגש חידון כולל תשובות סטודנט ומידע על ניטור יושרה.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:cmid'] = 'מספר מודול הקורס עבור החידון.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:submissionid'] = 'מספר ההגשה הקשור למפגש החידון.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:userid'] = 'מספר הסטודנט שממלא את החידון.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:questions_data'] = 'השאלות שהוצגו בחידון.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:settings_data'] = 'הגדרות החידון שהוחלו במפגש זה.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:current_question'] = 'מספר השאלה הנוכחית בחידון.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:answers_data'] = 'תשובות הסטודנט לשאלות החידון.';
+$string['privacy:metadata:local_trustgd_quiz_sessions'] = 'שומר מצב מפגש שאלון בקיאות כולל תשובות סטודנט ומידע על ניטור יושרה.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:cmid'] = 'מספר מודול הקורס עבור השאלון בקיאות.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:submissionid'] = 'מספר ההגשה הקשור למפגש השאלון בקיאות.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:userid'] = 'מספר הסטודנט שממלא את השאלון בקיאות.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:questions_data'] = 'השאלות שהוצגו בשאלון בקיאות.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:settings_data'] = 'הגדרות השאלון בקיאות שהוחלו במפגש זה.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:current_question'] = 'מספר השאלה הנוכחית בשאלון בקיאות.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:answers_data'] = 'תשובות הסטודנט לשאלות השאלון בקיאות.';
 $string['privacy:metadata:local_trustgd_quiz_sessions:time_remaining'] = 'הזמן שנותר לשאלה הנוכחית.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:window_blur_count'] = 'מספר הפעמים שהסטודנט החליף חלונות/כרטיסיות במהלך החידון.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:attempt_started'] = 'האם ניסיון החידון התחיל.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:attempt_completed'] = 'האם ניסיון החידון הוש������ם.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:integrity_violations'] = 'הפרות יושרה שנרשמו במהלך החידון.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:final_score'] = 'הציון הסופי שהושג בחידון.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:timecreated'] = 'הזמן בו נוצר מפגש החידון.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:timemodified'] = 'הזמן בו שונה מפגש החידון לאחרונה.';
-$string['privacy:metadata:local_trustgd_quiz_sessions:timecompleted'] = 'הזמן בו הושלם החידון.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:window_blur_count'] = 'מספר הפעמים שהסטודנט החליף חלונות/כרטיסיות במהלך השאלון בקיאות.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:attempt_started'] = 'האם ניסיון השאלון בקיאות התחיל.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:attempt_completed'] = 'האם ניסיון השאלון בקיאות הושלם.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:integrity_violations'] = 'הפרות יושרה שנרשמו במהלך השאלון בקיאות.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:final_score'] = 'הציון הסופי שהושג בשאלון בקיאות.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:timecreated'] = 'הזמן בו נוצר מפגש השאלון בקיאות.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:timemodified'] = 'הזמן בו שונה מפגש השאלון בקיאות לאחרונה.';
+$string['privacy:metadata:local_trustgd_quiz_sessions:timecompleted'] = 'הזמן בו הושלם השאלון בקיאות.';
 
 $string['privacy:metadata:ai_gateway'] = 'נתונים אישיים נשלחים לשירות AI Gateway חיצוני לעיבוד הנחיות משימה ויצירת שאלות אישיות.';
 $string['privacy:metadata:ai_gateway:userid'] = 'מספר המשתמש עשוי להיכלל במטא‑נתונים למעקב.';
@@ -620,12 +620,12 @@ $string['defaultcoursestudent'] = 'סטודנט';
 $string['mins_secs'] = '{$a->minutes}ד {$a->seconds}ש';
 $string['secs_only'] = '{$a}ש';
 
-$string['cachedef_quiz_redirect'] = 'שומר כתובות URL להפניה לחידון לניהול מפגש זמני';
-$string['cachedef_quiz_redirect_by_user'] = 'שומר הפניה לחידון לפי משתמש כשהחידון מוכן (למשל לאחר יצירה אסינכרונית)';
+$string['cachedef_quiz_redirect'] = 'שומר כתובות URL להפניה לשאלון בקיאות לניהול מפגש זמני';
+$string['cachedef_quiz_redirect_by_user'] = 'שומר הפניה לשאלון בקיאות לפי משתמש כשהשאלון בקיאות מוכן (למשל לאחר יצירה אסינכרונית)';
 $string['nopermission'] = 'אין לך הרשאה לגשת לדף זה';
 
 // Async task indicator strings
-$string['quiz_preparing'] = 'החידון שלך בהכנה';
-$string['quiz_preparing_message'] = 'אנחנו יוצרים שאלות מותאמות אישית עבור {$a}. תקבל הודעה כשהחידון יהיה מוכן.';
-$string['quiz_ready_click_to_start'] = 'החידון מוכן - לחץ להתחלה';
-$string['quiz_ready_assignment'] = 'החידון שלך עבור {$a} מוכן!';
+$string['quiz_preparing'] = 'השאלון בקיאות שלך בהכנה';
+$string['quiz_preparing_message'] = 'אנחנו יוצרים שאלות מותאמות אישית עבור {$a}. תקבל הודעה כשהשאלון בקיאות יהיה מוכן.';
+$string['quiz_ready_click_to_start'] = 'השאלון בקיאות מוכן - לחץ להתחלה';
+$string['quiz_ready_assignment'] = 'השאלון בקיאות שלך עבור {$a} מוכן!';
