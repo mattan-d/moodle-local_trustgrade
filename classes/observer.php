@@ -94,11 +94,15 @@ class observer {
     }
 
     /**
-     * Handle assessable submitted event
+     * Handle assessable submitted event.
+     * This fires when the student clicks "Submit assignment" and then "Continue" on the confirmation page
+     * (or when submission is submitted for grading). Creates the quiz generation task.
      *
      * @param \mod_assign\event\assessable_submitted $event
      */
     public static function assessable_submitted(\mod_assign\event\assessable_submitted $event) {
+        global $DB;
+
         $eventdata = $event->get_data();
         $submission_id = $eventdata['objectid'];
         debugging('TrustGrade observer: assessable_submitted event triggered for submission ID ' . $submission_id, DEBUG_DEVELOPER);
@@ -107,7 +111,19 @@ class observer {
             return;
         }
 
-        self::process_submission_submitted($event->get_assign(), $submission_id, $eventdata['userid']);
+        try {
+            $assign = $event->get_assign();
+            // Use submission owner (relateduserid when teacher submits for student, else userid).
+            $userid = !empty($eventdata['relateduserid']) ? $eventdata['relateduserid'] : $eventdata['userid'];
+            if (empty($userid)) {
+                $sub = $DB->get_record('assign_submission', ['id' => $submission_id], 'userid');
+                $userid = $sub ? $sub->userid : $eventdata['userid'];
+            }
+            self::process_submission_submitted($assign, $submission_id, $userid);
+        } catch (\Throwable $e) {
+            debugging('TrustGrade observer: assessable_submitted failed - ' . $e->getMessage(), DEBUG_DEVELOPER);
+            error_log('TrustGrade assessable_submitted error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+        }
     }
 
     /**
@@ -288,13 +304,6 @@ class observer {
                 return; // TrustGrade is disabled for this activity, skip processing
             }
 
-            // Get assignment data (needed for submissiondrafts check)
-            $assignment = $DB->get_record('assign', ['id' => $cm->instance]);
-            if (!$assignment) {
-                debugging('TrustGrade observer: Assignment record not found for CM instance ' . $cm->instance, DEBUG_DEVELOPER);
-                return;
-            }
-
             // Get submission data
             $submission = $DB->get_record('assign_submission', ['id' => $submission_id]);
             if (!$submission) {
@@ -302,15 +311,17 @@ class observer {
                 return;
             }
 
-            $status = $event->other['submissionstatus'];
-            $submissiondrafts = !empty($assignment->submissiondrafts);
-            // When submissiondrafts is enabled, process both draft and submitted; otherwise only submitted.
-            $accept_draft = $submissiondrafts && $status === 'draft';
-            $accept_submitted = $status === 'submitted';
-            if (!$accept_draft && !$accept_submitted) {
-                debugging('TrustGrade observer: Submission status is "' . $status . '"' .
-                    ($submissiondrafts ? ', submissiondrafts on' : '') .
-                    ', skipping processing', DEBUG_DEVELOPER);
+            // Only process submitted submissions (not drafts)
+            if ($event->other['submissionstatus'] !== 'submitted') {
+                debugging('TrustGrade observer: Submission status is "' . $event->other['submissionstatus'] . 
+                    '", skipping processing (only "submitted" status is processed)', DEBUG_DEVELOPER);
+                return;
+            }
+
+            // Get assignment data
+            $assignment = $DB->get_record('assign', ['id' => $submission->assignment]);
+            if (!$assignment) {
+                debugging('TrustGrade observer: Assignment record not found for ID ' . $submission->assignment, DEBUG_DEVELOPER);
                 return;
             }
 
