@@ -24,16 +24,17 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// Use mod/assign:submit so students who can submit the assignment can receive quiz-ready and quiz-failed notifications.
 $messageproviders = [
     'quizready' => [
-        'capability' => 'local/trustgrade:takeaiquiz',
+        'capability' => 'mod/assign:submit',
         'defaults' => [
             'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
             'email' => MESSAGE_PERMITTED,
         ],
     ],
     'quizfailed' => [
-        'capability' => 'local/trustgrade:takeaiquiz',
+        'capability' => 'mod/assign:submit',
         'defaults' => [
             'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
             'email' => MESSAGE_PERMITTED,
