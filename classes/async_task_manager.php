@@ -189,6 +189,10 @@ class async_task_manager {
                         $task->userid
                 );
 
+                // Set redirect so user is sent to quiz on next assignment view (works when
+                // "Require students to click the submit button" is enabled).
+                redirect_handler::set_redirect_flag($task->cmid, $task->submission_id, $task->userid);
+
                 $task->status = 'completed';
                 $task->result_data = json_encode($result);
                 $task->error_message = null; // Clear any previous error

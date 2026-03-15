@@ -43,6 +43,7 @@ $string['enable_course_specific_first'] = 'יש להפעיל תחילה "זמי�
 // Assignment settings.
 $string['trustgrade_enabled'] = 'הפעלת הרכיב';
 $string['trustgrade_enabled_desc'] = 'הפעל את תוסף מדד איכות אקדמית (TrustGrade) עבור מטלה זו.';
+$string['trustgrade_enabled_help'] = 'הפעלת TrustGrade למטלה זו מוסיפה חידוני הבנה שנוצרו ב-AI ותכונות נלוות. כשההגדרה כבויה, סטודנטים לא יראו את החידון או כל תכונת TrustGrade במטלה זו.';
 $string['require_quiz_completion'] = 'חייב את הסטודנט/ית להשלים את החידון';
 $string['require_quiz_completion_desc'] = 'כאשר מסומן, לא תתאפשר גישה לעמודים אחרים במערכת Moodle לפני השלמת החידון. חסימת הגישה חלה עד 24 שעות מהפעם הראשונה שהוחלה.';
 $string['require_quiz_completion_redirect'] = 'עליך להשלים את חידון TrustGrade עבור מטלה זו לפני גישה לעמודים אחרים.';
@@ -620,6 +621,7 @@ $string['mins_secs'] = '{$a->minutes}ד {$a->seconds}ש';
 $string['secs_only'] = '{$a}ש';
 
 $string['cachedef_quiz_redirect'] = 'שומר כתובות URL להפניה לחידון לניהול מפגש זמני';
+$string['cachedef_quiz_redirect_by_user'] = 'שומר הפניה לחידון לפי משתמש כשהחידון מוכן (למשל לאחר יצירה אסינכרונית)';
 $string['nopermission'] = 'אין לך הרשאה לגשת לדף זה';
 
 // Async task indicator strings

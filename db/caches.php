@@ -25,13 +25,21 @@
 defined('MOODLE_INTERNAL') || die();
 
 $definitions = [
-    // Session cache for quiz redirect flags
+    // Session cache for quiz redirect flags (legacy key by cmid only, used when redirect is set during same session).
     'quiz_redirect' => [
         'mode' => cache_store::MODE_SESSION,
         'simplekeys' => true,
         'simpledata' => false,
         'staticacceleration' => true,
         'staticaccelerationsize' => 10,
+    ],
+    // Application cache for quiz redirect by user (set when async task completes so redirect works on next page load).
+    'quiz_redirect_by_user' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'simpledata' => false,
+        'staticacceleration' => true,
+        'staticaccelerationsize' => 50,
     ],
         'pending_generation' => [
         'mode' => cache_store::MODE_SESSION,

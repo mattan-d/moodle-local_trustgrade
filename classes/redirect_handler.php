@@ -32,43 +32,86 @@ defined('MOODLE_INTERNAL') || die();
 class redirect_handler {
     
     /**
+     * Cache key for redirect by user (used when async task sets redirect for next page load).
+     *
+     * @param int $userid User ID
+     * @param int $cmid Course module ID
+     * @return string Cache key
+     */
+    private static function redirect_cache_key($userid, $cmid) {
+        return (int) $userid . '_' . (int) $cmid;
+    }
+
+    /**
+     * Set redirect flag so the user is sent to the quiz on next assignment view.
+     * Call this when quiz questions are ready (e.g. after async task completes).
+     * Works even when "Require students to click the submit button" is enabled.
+     *
+     * @param int $cmid Course module ID
+     * @param int $submissionid Submission ID
+     * @param int $userid User ID (owner of the submission)
+     */
+    public static function set_redirect_flag($cmid, $submissionid, $userid) {
+        $cache = \cache::make('local_trustgrade', 'quiz_redirect_by_user');
+        $key = self::redirect_cache_key($userid, $cmid);
+        $cache->set($key, [
+            'submission_id' => (int) $submissionid,
+            'timestamp' => time(),
+        ]);
+    }
+
+    /**
      * Check if user should be redirected to quiz and handle redirect
      * 
      * @param int $cmid Course module ID
      * @return bool True if redirect was handled
      */
     public static function check_and_handle_redirect($cmid) {
-        $cache = \cache::make('local_trustgrade', 'quiz_redirect');
-        
-        $redirect_data = $cache->get($cmid);
-        
+        global $USER;
+
+        // Prefer per-user redirect (set when async task completes; works with "submit button required").
+        $cache_by_user = \cache::make('local_trustgrade', 'quiz_redirect_by_user');
+        $key_by_user = self::redirect_cache_key($USER->id, $cmid);
+        $redirect_data = $cache_by_user->get($key_by_user);
+
+        if ($redirect_data === false) {
+            // Fallback: session cache (set during same request/session).
+            $cache = \cache::make('local_trustgrade', 'quiz_redirect');
+            $redirect_data = $cache->get($cmid);
+        }
+
         if ($redirect_data === false) {
             return false;
         }
-        
+
         // Check if redirect is still valid (within 5 minutes)
         if (time() - $redirect_data['timestamp'] > 300) {
+            $cache_by_user->delete($key_by_user);
+            $cache = \cache::make('local_trustgrade', 'quiz_redirect');
             $cache->delete($cmid);
             return false;
         }
-        
+
         $submission_id = $redirect_data['submission_id'];
-        
+
         // Check if there are questions available
         $questions = submission_processor::get_all_questions_for_student($cmid, $submission_id);
-        
+
         if (empty($questions)) {
-            // No questions available, clear redirect flag
+            $cache_by_user->delete($key_by_user);
+            $cache = \cache::make('local_trustgrade', 'quiz_redirect');
             $cache->delete($cmid);
             return false;
         }
-        
+
         // Clear the redirect flag
+        $cache_by_user->delete($key_by_user);
+        $cache = \cache::make('local_trustgrade', 'quiz_redirect');
         $cache->delete($cmid);
-        
+
         // Perform immediate redirect to quiz
         self::redirect_to_quiz($cmid, $submission_id);
-        
+
         return true;
     }
     

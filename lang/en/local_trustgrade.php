@@ -50,6 +50,7 @@ $string['course_not_enabled'] = 'TrustGrade is not available for this course. Pl
 // Assignment settings.
 $string['trustgrade_enabled'] = 'Enable component';
 $string['trustgrade_enabled_desc'] = 'Enable TrustGrade AI features for this specific assignment. When disabled, students will not see AI quizzes or related functionality.';
+$string['trustgrade_enabled_help'] = 'Enable TrustGrade for this assignment to add AI-generated comprehension quizzes and related features. When disabled, students will not see the quiz or any TrustGrade functionality for this assignment.';
 $string['require_quiz_completion'] = 'Require the student to complete the quiz';
 $string['require_quiz_completion_desc'] = 'When enabled, access to other Moodle pages will not be allowed until the student has completed the TrustGrade quiz. Blocking is applied for up to 24 hours from the first time access is restricted.';
 $string['require_quiz_completion_redirect'] = 'You must complete the TrustGrade quiz for this assignment before accessing other pages.';
@@ -600,6 +601,7 @@ $string['mins_secs'] = '{$a->minutes}m {$a->seconds}s';
 $string['secs_only'] = '{$a}s';
 
 $string['cachedef_quiz_redirect'] = 'Stores quiz redirect URLs for temporary session management';
+$string['cachedef_quiz_redirect_by_user'] = 'Stores quiz redirect per user when quiz becomes ready (e.g. after async generation)';
 $string['nopermission'] = 'You do not have permission to access this page';
 
 ?>

@@ -38,6 +38,10 @@ $observers = [
         'callback' => '\local_trustgrade\observer::assessable_submitted',
     ],
     [
+        'eventname' => '\mod_assign\event\submission_status_updated',
+        'callback' => '\local_trustgrade\observer::submission_status_updated',
+    ],
+    [
         'eventname' => '\core\event\course_module_created',
         'callback' => '\local_trustgrade\observer::course_module_created',
     ],
