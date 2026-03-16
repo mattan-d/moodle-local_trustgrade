@@ -65,7 +65,7 @@ screenshot.png "#region-main" ".btn-primary"
 
   await page.screenshot({
     path: output,
-    fullPage: true
+    //fullPage: true
   });
 
   await browser.close();
