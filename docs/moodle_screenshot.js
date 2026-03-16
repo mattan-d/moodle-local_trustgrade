@@ -8,8 +8,8 @@ Usage:
 node moodle_screenshot.js <moodle_url> <page_url> <output.png> [selectors...]
 
 Example:
-node moodle_screenshot.js https://moodle.site \
-https://moodle.site/course/view.php?id=5 \
+node moodle_screenshot.js https://dev.moodle \
+https://dev.moodle/course/view.php?id=5 \
 screenshot.png "#region-main" ".btn-primary"
 `);
     process.exit(1);
