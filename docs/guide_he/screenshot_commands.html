@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>פקודות צילומי מסך – TrustGrade</title>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: 0 auto; padding: 1rem; background: #f5f5f5; }
+    pre { background: #2d2d2d; color: #f8f8f2; padding: 1rem; border-radius: 6px; overflow: auto; font-size: 0.85rem; }
+    code { font-family: 'Consolas', monospace; }
+    h1 { border-bottom: 2px solid #0d6efd; padding-bottom: 0.5rem; }
+    h2 { margin-top: 1.5rem; color: #0d6efd; }
+    .cmd { margin: 0.5rem 0; }
+    .note { background: #e7f3ff; border-right: 4px solid #0d6efd; padding: 0.75rem; margin: 1rem 0; }
+  </style>
+</head>
+<body>
+  <h1>פקודות ליצירת צילומי מסך למדריך TrustGrade</h1>
+  <p>מותאם ל־<strong>Moodle 4.5</strong> עם תבנית <strong>Boost</strong> (Bootstrap 5).</p>
+  <p>כל פקודה מופעלת מתוך תיקיית <code>docs</code>:</p>
+  <pre>cd /path/to/local/trustgrade/docs</pre>
+  <p>פורמט:</p>
+  <pre>node moodle_screenshot.js &lt;בסיס_כתובת&gt; &lt;כתובת_דף&gt; &lt;קובץ_פלט.png&gt; [בורר1] [בורר2] ...</pre>
+  <p>בוררים (selectors) – אלמנטים שלוחצים עליהם לפני צילום המסך (לפי הסדר).</p>
+
+  <div class="note">
+    <strong>קורס:</strong> <code>https://dev.moodle/course/view.php?id=63</code><br>
+    <strong>מטלה:</strong> <code>https://dev.moodle/mod/assign/view.php?id=356</code><br>
+    <strong>קורס במצב עריכה (Boost):</strong> <code>course/view.php?id=63&edit=1</code>
+  </div>
+
+  <h2>רשימת פקודות לפי איור</h2>
+
+  <div class="cmd">
+    <strong>00 – הגדרות TrustGrade במערכת</strong>
+    <pre>node moodle_screenshot.js https://dev.moodle "https://dev.moodle/admin/settings.php?section=local_trustgrade" guide_he/screenshots/00-admin-trustgrade.png "#region-main"</pre>
+  </div>
+
+  <div class="cmd">
+    <strong>01 – עמוד הקורס</strong>
+    <pre>node moodle_screenshot.js https://dev.moodle "https://dev.moodle/course/view.php?id=63" guide_he/screenshots/01-course-view.png "#region-main"</pre>
+  </div>
+
+  <div class="cmd">
+    <strong>02 – הוספת פעילות (Boost: דף קורס עם edit=1, לחיצה על קישור "הוסף פעילות או משאב")</strong>
+    <pre>node moodle_screenshot.js https://dev.moodle "https://dev.moodle/course/view.php?id=63&edit=1" guide_he/screenshots/02-add-activity.png "#region-main" "a[href*='modedit.php']"</pre>
+    <p>ב־Moodle 4 נפתח בורר הפעילויות (מודל); אפשר להוסיף בורר לבחירת מטלה אם רוצים צילום של החלון.</p>
+  </div>
+
+  <div class="cmd">
+    <strong>03 – טופס עריכת מטלה (Boost: תפריט פעולה → "הגדרות")</strong>
+    <pre>node moodle_screenshot.js https://dev.moodle "https://dev.moodle/mod/assign/view.php?id=356" guide_he/screenshots/03-edit-assignment.png "#region-main" "button[data-bs-toggle='dropdown']" "a[href*='editsettings']"</pre>
+    <p>בגרסאות Boost ישנות (Bootstrap 4) אולי נדרש <code>button[data-toggle='dropdown']</code>.</p>
+  </div>
+
+  <div class="cmd">
+    <strong>04 – לשונית TrustGrade בהגדרות המטלה</strong>
+    <pre>node moodle_screenshot.js https://dev.moodle "https://dev.moodle/mod/assign/view.php?id=356&action=editsettings" guide_he/screenshots/04-trustgrade-tab.png "#region-main" "a[href='#local_trustgrade']"</pre>
+  </div>
+
+  <div class="cmd">
+    <strong>05 – תפריט המטלה (Boost: פתיחת dropdown תפריט הפעולות)</strong>
+    <pre>node moodle_screenshot.js https://dev.moodle "https://dev.moodle/mod/assign/view.php?id=356" guide_he/screenshots/05-assign-menu-question-bank.png "#region-main" "button[data-bs-toggle='dropdown']"</pre>
+  </div>
+
+  <div class="cmd">
+    <strong>06 – עמוד מאגר השאלות</strong>
+    <pre>node moodle_screenshot.js https://dev.moodle "https://dev.moodle/local/trustgrade/question_bank.php?cmid=356" guide_he/screenshots/06-question-bank-page.png "#region-main"</pre>
+  </div>
+
+  <div class="cmd">
+    <strong>07 – בדיקת הנחיות עם AI (כרטיס ההנחיות + כפתור)</strong>
+    <pre>node moodle_screenshot.js https://dev.moodle "https://dev.moodle/local/trustgrade/question_bank.php?cmid=356" guide_he/screenshots/07-check-instructions-ai.png "#trustgrade-instruction-review" "#check-instructions-btn"</pre>
+  </div>
+
+  <div class="cmd">
+    <strong>08 – יצירת שאלות מהקבצים</strong>
+    <pre>node moodle_screenshot.js https://dev.moodle "https://dev.moodle/local/trustgrade/question_bank.php?cmid=356" guide_he/screenshots/08-generate-from-files.png "#region-main"</pre>
+  </div>
+
+  <div class="cmd">
+    <strong>09 – עמוד הגשת סטודנט + גילוי</strong>
+    <pre>node moodle_screenshot.js https://dev.moodle "https://dev.moodle/mod/assign/view.php?id=356&action=editsubmission" guide_he/screenshots/09-student-submit-disclosure.png "#region-main"</pre>
+  </div>
+
+  <div class="cmd">
+    <strong>10 – ממשק שאלון הבקיאות</strong>
+    <p>דורש <code>submissionid</code> תקף. להחליף XXX ב-ID הגשה קיימת:</p>
+    <pre>node moodle_screenshot.js https://dev.moodle "https://dev.moodle/local/trustgrade/quiz_interface.php?cmid=356&submissionid=XXX" guide_he/screenshots/10-quiz-interface.png "#region-main"</pre>
+  </div>
+
+  <div class="cmd">
+    <strong>11 – דוח TrustGrade</strong>
+    <pre>node moodle_screenshot.js https://dev.moodle "https://dev.moodle/local/trustgrade/quiz_report.php?cmid=356" guide_he/screenshots/11-trustgrade-report.png "#region-main"</pre>
+  </div>
+
+  <p><a href="index.html">← חזרה למדריך</a></p>
+</body>
+</html>

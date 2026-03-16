@@ -7,10 +7,12 @@ const { chromium } = require('playwright');
 Usage:
 node moodle_screenshot.js <moodle_url> <page_url> <output.png> [selectors...]
 
+Selectors: CSS (e.g. "#region-main") or text (e.g. text=מטלה or text=Add an activity or resource).
+
 Example:
-node moodle_screenshot.js https://dev.moodle \
-https://dev.moodle/course/view.php?id=5 \
-screenshot.png "#region-main" ".btn-primary"
+node moodle_screenshot.js https://dev.moodle \\
+  https://dev.moodle/course/view.php?id=5 \\
+  screenshot.png "text=הוסף פעילות או משאב" "text=מטלה"
 `);
     process.exit(1);
   }
@@ -48,16 +50,21 @@ screenshot.png "#region-main" ".btn-primary"
 
   await page.waitForLoadState('networkidle');
 
-  // לחיצה על selectors אם נשלחו
+  // לחיצה על selectors אם נשלחו (כל בורר אופציונלי – אם לא נמצא, מדלגים וממשיכים)
+  // בורר לפי טקסט: "text=מטלה" או "text=Add an activity or resource" – לוחץ על אלמנט שמכיל את הטקסט
   for (const selector of selectors) {
-
     console.log("Clicking:", selector);
-
-    await page.waitForSelector(selector, { timeout: 5000 });
-
-    await page.click(selector);
-
-    await page.waitForTimeout(1000);
+    try {
+      const isTextSelector = /^text=/i.test(selector.trim());
+      const element = isTextSelector
+        ? page.getByText(selector.replace(/^text=/i, '').trim(), { exact: false }).first()
+        : page.locator(selector).first();
+      await element.waitFor({ state: 'visible', timeout: 15000 });
+      await element.click({ force: true });
+      await page.waitForTimeout(1500);
+    } catch (err) {
+      console.warn("Warning: selector not found or not clickable, skipping:", selector, err.message);
+    }
   }
 
   // צילום מסך
