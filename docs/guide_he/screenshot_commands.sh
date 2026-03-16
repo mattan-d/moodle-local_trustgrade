@@ -27,8 +27,7 @@ node moodle_screenshot.js "$BASE" "$COURSE" "$OUT/01-course-view.png" "#region-m
 # 2 – הוספת פעילות – בחירת מטלה (text=הפעלת עריכה → .always-visible button[data-action=open-chooser] → text=מטלה)
 S2_EDIT='text=הפעלת עריכה'
 S2_CHOOSER='.always-visible button[data-action="open-chooser"]'
-S2_MATALA='text=מטלה'
-node moodle_screenshot.js "$BASE" "$COURSE" "$OUT/02-add-activity.png" "$S2_EDIT" "$S2_CHOOSER" "$S2_MATALA"
+node moodle_screenshot.js "$BASE" "$COURSE" "$OUT/02-add-activity.png" "$S2_EDIT" "$S2_CHOOSER"
 
 # 3 – טופס עריכת מטלה (Boost: תפריט פעולה – Bootstrap 5)
 node moodle_screenshot.js "$BASE" "$ASSIGN" "$OUT/03-edit-assignment.png" "#region-main" 'button[data-bs-toggle="dropdown"]' 'a[href*="editsettings"]'
