@@ -7,12 +7,12 @@ const { chromium } = require('playwright');
 Usage:
 node moodle_screenshot.js <moodle_url> <page_url> <output.png> [selectors...]
 
-Selectors: CSS (e.g. "#region-main") or text (e.g. text=מטלה or text=Add an activity or resource).
+Selectors: CSS | text=TEXT | role=ROLE,name=NAME (e.g. role=link,name=הפעל עריכה).
 
-Example:
+Example (Classic theme, step 2):
 node moodle_screenshot.js https://dev.moodle \\
   https://dev.moodle/course/view.php?id=5 \\
-  screenshot.png "text=הוסף פעילות או משאב" "text=מטלה"
+  screenshot.png "role=link,name=הפעל עריכה" "[data-action='open-chooser']" "text=מטלה"
 `);
     process.exit(1);
   }
@@ -51,16 +51,29 @@ node moodle_screenshot.js https://dev.moodle \\
   await page.waitForLoadState('networkidle');
 
   // לחיצה על selectors אם נשלחו (כל בורר אופציונלי – אם לא נמצא, מדלגים וממשיכים)
-  // בורר לפי טקסט: "text=מטלה" או "text=Add an activity or resource" – לוחץ על אלמנט שמכיל את הטקסט
+  // תבנית Classic 4.5: role=link,name=הפעל עריכה | text=מטלה | CSS
   for (const selector of selectors) {
     console.log("Clicking:", selector);
     try {
-      const isTextSelector = /^text=/i.test(selector.trim());
-      const element = isTextSelector
-        ? page.getByText(selector.replace(/^text=/i, '').trim(), { exact: false }).first()
-        : page.locator(selector).first();
+      const s = selector.trim();
+      let element;
+      if (/^text=/i.test(s)) {
+        const text = s.replace(/^text=/i, '').trim();
+        element = page.getByText(text, { exact: false }).first();
+      } else if (/^role=/i.test(s)) {
+        const match = s.match(/^role=(\w+),name=(.+)$/i);
+        if (!match) throw new Error('role selector format: role=ROLE,name=NAME');
+        const role = match[1].toLowerCase();
+        const name = match[2].trim();
+        // name as string = substring match; מתאים ל-Classic "הפעל עריכה" / "Turn editing on"
+        element = page.getByRole(role, { name: name }).first();
+      } else {
+        element = page.locator(selector).first();
+      }
       await element.waitFor({ state: 'visible', timeout: 15000 });
       await element.click({ force: true });
+      // אם הלחיצה גרמה לניווט (למשל "הפעל עריכה") – מחכים לטעינת הדף
+      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
       await page.waitForTimeout(1500);
     } catch (err) {
       console.warn("Warning: selector not found or not clickable, skipping:", selector, err.message);

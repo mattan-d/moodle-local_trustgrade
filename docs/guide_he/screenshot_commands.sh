@@ -1,6 +1,6 @@
 #!/bin/bash
 # יצירת צילומי מסך למדריך TrustGrade (עברית)
-# מותאם ל-Moodle 4.5 עם תבנית Boost (Bootstrap 5).
+# מותאם ל-Moodle 4.5 תבנית Classic (אלמנטים: role=link, data-action=open-chooser, text).
 # הרצה: מתוך שורש הפרויקט – ./guide_he/screenshot_commands.sh
 #        או מתוך docs – bash guide_he/screenshot_commands.sh
 # דרוש: node, playwright (npm install מתוך docs אם צריך)
@@ -12,8 +12,7 @@ cd "$DOCS_DIR"
 
 BASE="https://dev.moodle"
 COURSE="$BASE/course/view.php?id=63"
-# Moodle 4.x Boost: עריכת קורס מופעלת עם edit=1
-COURSE_EDIT="$BASE/course/view.php?id=63&edit=1"
+# Moodle 4.x Boost: אין להשתמש ב-edit=1 ב-URL (דורש sesskey) – יש ללחוץ על "הפעל עריכה" בדף
 ASSIGN="$BASE/mod/assign/view.php?id=356"
 OUT="guide_he/screenshots"
 
@@ -25,18 +24,21 @@ node moodle_screenshot.js "$BASE" "$BASE/admin/settings.php?section=local_trustg
 # 1 – עמוד הקורס (לפני הוספת מטלה)
 node moodle_screenshot.js "$BASE" "$COURSE" "$OUT/01-course-view.png" "#region-main"
 
-# 2 – הוספת פעילות – בחירת מטלה (עריכה עם edit=1, פתיחת בורר לפי טקסט, לחיצה על "מטלה")
-# בממשק באנגלית: "text=Add an activity or resource" "text=Assignment"
-node moodle_screenshot.js "$BASE" "$COURSE_EDIT" "$OUT/02-add-activity.png" "text=הוסף פעילות או משאב" "text=מטלה"
+# 2 – הוספת פעילות – בחירת מטלה (תבנית Classic 4.5: הפעל עריכה → בורר → מטלה)
+# באנגלית: role=link,name=Turn editing on + [data-action=open-chooser] + text=Assignment
+S2_EDIT='role=link,name=הפעל עריכה'
+S2_CHOOSER='[data-action="open-chooser"]'
+S2_MATALA='text=מטלה'
+node moodle_screenshot.js "$BASE" "$COURSE" "$OUT/02-add-activity.png" "$S2_EDIT" "$S2_CHOOSER" "$S2_MATALA"
 
-# 3 – טופס עריכת מטלה (Boost: תפריט פעולה – Bootstrap 5 data-bs-toggle; בגרסאות ישנות אולי data-toggle)
-node moodle_screenshot.js "$BASE" "$ASSIGN" "$OUT/03-edit-assignment.png" "#region-main" "button[data-bs-toggle='dropdown']" "a[href*='editsettings']"
+# 3 – טופס עריכת מטלה (Boost: תפריט פעולה – Bootstrap 5)
+node moodle_screenshot.js "$BASE" "$ASSIGN" "$OUT/03-edit-assignment.png" "#region-main" 'button[data-bs-toggle="dropdown"]' 'a[href*="editsettings"]'
 
 # 4 – לשונית TrustGrade בהגדרות המטלה (קישור למקטע #local_trustgrade בטופס)
-node moodle_screenshot.js "$BASE" "$BASE/mod/assign/view.php?id=356&action=editsettings" "$OUT/04-trustgrade-tab.png" "#region-main" "a[href='#local_trustgrade']"
+node moodle_screenshot.js "$BASE" "$BASE/mod/assign/view.php?id=356&action=editsettings" "$OUT/04-trustgrade-tab.png" "#region-main" 'a[href="#local_trustgrade"]'
 
 # 5 – תפריט המטלה – פתיחת תפריט הפעולות (Boost: dropdown)
-node moodle_screenshot.js "$BASE" "$ASSIGN" "$OUT/05-assign-menu-question-bank.png" "#region-main" "button[data-bs-toggle='dropdown']"
+node moodle_screenshot.js "$BASE" "$ASSIGN" "$OUT/05-assign-menu-question-bank.png" "#region-main" 'button[data-bs-toggle="dropdown"]'
 
 # 6 – עמוד מאגר השאלות (TrustGrade: #question-bank-container או אזור ראשי)
 node moodle_screenshot.js "$BASE" "$BASE/local/trustgrade/question_bank.php?cmid=356" "$OUT/06-question-bank-page.png" "#region-main"
