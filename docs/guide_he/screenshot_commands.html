@@ -42,9 +42,9 @@
   </div>
 
   <div class="cmd">
-    <strong>02 – הוספת פעילות (Boost: דף קורס עם edit=1, לחיצה על קישור "הוסף פעילות או משאב")</strong>
-    <pre>node moodle_screenshot.js https://dev.moodle "https://dev.moodle/course/view.php?id=63&edit=1" guide_he/screenshots/02-add-activity.png "#region-main" "a[href*='modedit.php']"</pre>
-    <p>ב־Moodle 4 נפתח בורר הפעילויות (מודל); אפשר להוסיף בורר לבחירת מטלה אם רוצים צילום של החלון.</p>
+    <strong>02 – הוספת פעילות – בחירת מטלה</strong>
+    <pre>node moodle_screenshot.js https://dev.moodle https://dev.moodle/course/view.php?id=63 guide_he/screenshots/02-add-activity.png "text=הפעלת עריכה" ".always-visible button[data-action='open-chooser']" "text=מטלה"</pre>
+    <p>שלוש לחיצות: הפעלת עריכה → כפתור בורר (תמיד גלוי) → מטלה.</p>
   </div>
 
   <div class="cmd">

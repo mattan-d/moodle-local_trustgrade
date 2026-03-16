@@ -1,6 +1,6 @@
 #!/bin/bash
 # יצירת צילומי מסך למדריך TrustGrade (עברית)
-# מותאם ל-Moodle 4.5 תבנית Classic (אלמנטים: role=link, data-action=open-chooser, text).
+# מותאם ל-Moodle 4.5 (למשל: text=הפעלת עריכה, .always-visible button[data-action=open-chooser], text=מטלה).
 # הרצה: מתוך שורש הפרויקט – ./guide_he/screenshot_commands.sh
 #        או מתוך docs – bash guide_he/screenshot_commands.sh
 # דרוש: node, playwright (npm install מתוך docs אם צריך)
@@ -24,10 +24,9 @@ node moodle_screenshot.js "$BASE" "$BASE/admin/settings.php?section=local_trustg
 # 1 – עמוד הקורס (לפני הוספת מטלה)
 node moodle_screenshot.js "$BASE" "$COURSE" "$OUT/01-course-view.png" "#region-main"
 
-# 2 – הוספת פעילות – בחירת מטלה (תבנית Classic 4.5: הפעל עריכה → בורר → מטלה)
-# באנגלית: role=link,name=Turn editing on + [data-action=open-chooser] + text=Assignment
-S2_EDIT='role=link,name=הפעל עריכה'
-S2_CHOOSER='[data-action="open-chooser"]'
+# 2 – הוספת פעילות – בחירת מטלה (text=הפעלת עריכה → .always-visible button[data-action=open-chooser] → text=מטלה)
+S2_EDIT='text=הפעלת עריכה'
+S2_CHOOSER='.always-visible button[data-action="open-chooser"]'
 S2_MATALA='text=מטלה'
 node moodle_screenshot.js "$BASE" "$COURSE" "$OUT/02-add-activity.png" "$S2_EDIT" "$S2_CHOOSER" "$S2_MATALA"
 
