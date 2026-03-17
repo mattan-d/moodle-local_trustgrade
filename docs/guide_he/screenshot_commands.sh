@@ -11,7 +11,7 @@ DOCS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$DOCS_DIR"
 
 BASE="https://dev.moodle"
-COURSE="$BASE/course/view.php?id=63"
+COURSE="$BASE/course/view.php?id=65"
 # Moodle 4.x Boost: אין להשתמש ב-edit=1 ב-URL (דורש sesskey) – יש ללחוץ על "הפעל עריכה" בדף
 ASSIGN="$BASE/mod/assign/view.php?id=356"
 OUT="guide_he/screenshots"
