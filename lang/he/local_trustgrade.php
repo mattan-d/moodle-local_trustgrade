@@ -629,7 +629,7 @@ $string['cachedef_quiz_redirect_by_user'] = 'שומר הפניה לשאלון ב
 $string['nopermission'] = 'אין לך הרשאה לגשת לדף זה';
 
 // Async task indicator strings
-$string['quiz_preparing'] = 'השאלון בקיאות שלך בהכנה';
+$string['quiz_preparing'] = 'שאלון בקיאות שלך בהכנה';
 $string['quiz_preparing_message'] = 'אנחנו יוצרים שאלות מותאמות אישית עבור {$a}. תקבל הודעה כשהשאלון בקיאות יהיה מוכן.';
 $string['quiz_ready_click_to_start'] = 'השאלון בקיאות מוכן - לחץ להתחלה';
 $string['quiz_ready_assignment'] = 'השאלון בקיאות שלך עבור {$a} מוכן!';
