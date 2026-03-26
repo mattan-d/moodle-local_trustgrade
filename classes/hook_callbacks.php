@@ -38,8 +38,7 @@ class hook_callbacks {
             return;
         }
 
-        // Enforce "require quiz completion" before any output starts.
-        require_quiz_completion_handler::enforce_if_required();
+        // Feature disabled: do not enforce "require quiz completion".
 
         // Redirect to question bank after assignment save.
         if (!empty($_SESSION['local_trustgrade_redirect_cmid'])) {
