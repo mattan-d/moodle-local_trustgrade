@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Plugin version and other meta-data are defined here.
+ * Hook listener callbacks.
  *
  * @package    local_trustgrade
  * @copyright  2025 CentricApp LTD <support@centricapp.co.il>
@@ -24,8 +24,13 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'local_trustgrade';
-$plugin->version = 2026032400;
-$plugin->requires = 2022112800; // Moodle 4.1
-$plugin->maturity = MATURITY_STABLE;
-$plugin->release = '3.5';
+$callbacks = [
+    [
+        'hook' => \core\hook\output\before_http_headers::class,
+        'callback' => \local_trustgrade\hook_callbacks::class . '::before_http_headers',
+    ],
+    [
+        'hook' => \core\hook\output\before_standard_head_html_generation::class,
+        'callback' => \local_trustgrade\hook_callbacks::class . '::before_standard_head_html_generation',
+    ],
+];

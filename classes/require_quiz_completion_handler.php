@@ -127,7 +127,7 @@ class require_quiz_completion_handler {
 
     /**
      * Enforce block: if user has a pending required quiz and is not on an allowed page, redirect after 24h from first block.
-     * Call from before_standard_html_head.
+     * Call from before_http_headers hook.
      */
     public static function enforce_if_required() {
         global $USER, $SESSION;
