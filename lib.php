@@ -62,19 +62,10 @@ function local_trustgrade_coursemodule_standard_elements($formwrapper, $mform) {
         $mform->setDefault('trustgrade_enabled', $default_enabled);
         $mform->addHelpButton('trustgrade_enabled', 'trustgrade_enabled', 'local_trustgrade');
 
-        // Add quiz settings section (heading first, then "require quiz completion" under it)
+        // Add quiz settings section
         $mform->addElement('static', 'trustgrade_quiz_settings_title', '',
                 '<h4>' . get_string('quiz_settings_title', 'local_trustgrade') . '</h4>');
         $mform->setAdvanced('trustgrade_quiz_settings_title');
-
-        $default_require = ($cmid > 0) ? ($current_settings['require_quiz_completion'] ? 1 : 0) : 0;
-        $mform->addElement('advcheckbox', 'trustgrade_require_quiz_completion',
-                get_string('require_quiz_completion', 'local_trustgrade'),
-                get_string('require_quiz_completion_desc', 'local_trustgrade'));
-        $mform->setDefault('trustgrade_require_quiz_completion', $default_require);
-        $mform->addHelpButton('trustgrade_require_quiz_completion', 'require_quiz_completion', 'local_trustgrade');
-        $mform->disabledIf('trustgrade_require_quiz_completion', 'trustgrade_enabled', 'eq', 0);
-        $mform->setAdvanced('trustgrade_require_quiz_completion');
 
         // Questions to generate
         $generate_options = [];
@@ -202,7 +193,7 @@ function local_trustgrade_coursemodule_edit_post_actions($data, $course) {
                 'randomize_answers' => true,
                 'time_per_question' => $data->trustgrade_time_per_question,
                 'show_countdown' => true,
-                'require_quiz_completion' => !empty($data->trustgrade_require_quiz_completion),
+                'require_quiz_completion' => false,
             ];
 
         \local_trustgrade\quiz_settings::save_settings($cmid, $settings);

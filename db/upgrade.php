@@ -157,5 +157,15 @@ function xmldb_local_trustgrade_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026030800, 'local', 'trustgrade');
     }
 
+    // Disable require_quiz_completion everywhere (feature removed).
+    if ($oldversion < 2026051900) {
+        $table = new xmldb_table('local_trustgd_quiz_settings');
+        $field = new xmldb_field('require_quiz_completion');
+        if ($dbman->table_exists($table) && $dbman->field_exists($table, $field)) {
+            $DB->set_field('local_trustgd_quiz_settings', 'require_quiz_completion', 0);
+        }
+        upgrade_plugin_savepoint(true, 2026051900, 'local', 'trustgrade');
+    }
+
     return true;
 }
